@@ -1,6 +1,6 @@
 ---
 title: "Hiệu năng API: cache, phân trang, lọc và sắp xếp, cân bằng tải"
-description: Cách flash-sale giữ trang tìm kiếm nhanh khi đông người dùng (cache có khóa chống stampede, phân trang bằng cursor, nhiều pod sau load balancer) và hai lỗi lọc dữ liệu mình tìm ra khi đọc lại code.
+description: Cách flash-sale giữ trang tìm kiếm nhanh khi đông người dùng (cache có khóa chống stampede, phân trang bằng cursor, nhiều pod sau load balancer) và một lỗi lọc dữ liệu mình tìm ra khi đọc lại code.
 date: 2026-11-18
 tags: [api, performance]
 type: learn
@@ -109,11 +109,11 @@ Tìm kiếm trên Elasticsearch dùng cùng ý tưởng với `search_after`: cu
 
 Cái giá của cursor: không nhảy được tới "trang 37", và cursor gắn với *một* thứ tự sắp xếp cụ thể. Với danh sách cuộn vô hạn như sàn thương mại điện tử, đó là cái giá đáng trả.
 
-## Filtering và Sorting: hai lỗi mình tìm ra
+## Filtering và Sorting: một lỗi thật, một lần mình đọc nhầm
 
-[[filtering-sorting|Lọc và sắp xếp]] nghe đơn giản: thêm vài query param. Đọc lại code, mình tìm ra hai lỗi thật trong flash-sale, đều thuộc loại "không báo lỗi gì, chỉ trả sai kết quả".
+[[filtering-sorting|Lọc và sắp xếp]] nghe đơn giản: thêm vài query param. Đọc lại code, mình tìm ra một lỗi thật thuộc loại "không báo lỗi gì, chỉ trả sai kết quả", và suýt công bố thêm một lỗi không có thật.
 
-### Lỗi 1: `Boolean("false")` là `true`
+### Lỗi thật: `Boolean("false")` là `true`
 
 DTO tìm kiếm khai báo:
 
@@ -124,24 +124,32 @@ DTO tìm kiếm khai báo:
 isFlashSale?: boolean;
 ```
 
-Query string thì luôn là string. `?isFlashSale=false` → `Boolean("false")` → `true` (chuỗi không rỗng nào cũng là `true`). Kết quả: người dùng muốn *bỏ* sản phẩm flash sale lại nhận về *chỉ* sản phẩm flash sale, và `@IsBoolean()` vẫn vui vẻ cho qua vì giá trị đã là boolean. Cách sửa là chuyển đổi tường minh:
+Query string thì luôn là string. `?isFlashSale=false` → `Boolean("false")` → `true` (chuỗi không rỗng nào cũng là `true`). Kết quả: người dùng muốn *bỏ* sản phẩm flash sale lại nhận về *chỉ* sản phẩm flash sale, và `@IsBoolean()` vẫn vui vẻ cho qua vì giá trị đã là boolean. Giao diện web hiện chỉ gửi `isFlashSale=true` hoặc không gửi gì nên người dùng chưa gặp, nhưng bất kỳ client nào khác (app mobile, đối tác, chính mình khi test bằng Postman) gửi `false` đều nhận kết quả ngược. Cách sửa là chuyển đổi tường minh:
 
 ```ts
-@Transform(({ value }) => value === 'true' || value === true)
+// common/decorators/to-boolean.decorator.ts (rút gọn)
+export const ToBoolean = () =>
+  Transform(({ value }) => {
+    if (value === 'true' || value === '1' || value === true) return true
+    if (value === 'false' || value === '0' || value === false) return false
+    return value // giá trị lạ để @IsBoolean() từ chối với 400
+  })
 ```
 
-### Lỗi 2: tham số được nhận nhưng bị bỏ qua
+Mình đã sửa lỗi này trong flash-sale (áp cho cả bốn field boolean trong ba DTO), kèm test cho `true`, `1`, `false`, `0` và giá trị lạ.
 
-`ListProductsDto` của API danh sách sản phẩm nhận `categoryId`, `shopId`, `isFlashSale`, `minPrice`, `maxPrice` và `sort` (`recent`, `popular`, `price_asc`, `price_desc`). Nhưng service chỉ truyền `categoryId` xuống repository; mọi tham số còn lại được validate xong rồi bị bỏ. Client gửi `?sort=price_asc` vẫn nhận `200`, danh sách vẫn sắp theo mới nhất.
+### Đính chính: lỗi "tham số bị bỏ qua" không có thật
 
-Lỗi này nguy hiểm vì nó *trông như* đang chạy. Và nó không sửa được chỉ bằng một dòng: cursor hiện mã hóa `(createdAt, id)`, nên muốn sắp theo giá thì cursor phải mã hóa `(minPrice, id)`. Thứ tự sắp xếp và cursor phải đi cùng nhau. Trong lúc chưa làm, API nên trả `400` cho tham số chưa hỗ trợ thay vì lặng lẽ bỏ qua.
+Bản đầu của bài này viết rằng API danh sách sản phẩm nhận `sort`, `shopId`, `isFlashSale`, `minPrice`, `maxPrice` nhưng bỏ qua tất cả trừ `categoryId`. Khi bắt tay vào sửa, mình mới thấy mình đã đọc nhầm hàm: `ProductService.findAllCursor` đúng là chỉ dùng `categoryId`, nhưng đó là code cũ, chỉ còn test gọi tới. Controller thật đọc từ `ProductViewRepository`, một bảng read model đã denormalize sẵn `minPrice`, `isFlashSale`, `avgRating`, và áp dụng đủ mọi bộ lọc lẫn bốn kiểu sort, mỗi kiểu có index riêng.
+
+Bài học vẫn đáng giữ, chỉ là theo hướng khác: **code chết mà vẫn có test là cái bẫy cho người đọc**, kể cả chính tác giả vài tháng sau. Muốn biết một endpoint làm gì, hãy đi từ controller xuống, đừng tìm theo tên hàm.
 
 ### Những gì nên làm, theo tài liệu và phần làm đúng trong flash-sale
 
 - **Whitelist trường sort**: search dùng enum `relevance | sold | price_asc | price_desc | newest | rating`, mỗi giá trị ánh xạ sang một mảng sort cố định. Không bao giờ ghép thẳng tên cột từ query vào câu truy vấn.
 - **Luôn có khóa phụ** để thứ tự xác định: `[{ minPrice: 'asc' }, { productId: 'asc' }]`.
 - **Giới hạn đầu vào**: `q` tối đa 100 ký tự và khớp một regex chỉ cho chữ, số và vài dấu câu; `minPrice ≥ 0`.
-- **Lọc theo cây danh mục**: chọn "Điện tử" thì lấy cả các danh mục con, nhờ closure table trả về toàn bộ id con cháu trong một truy vấn.
+- **Denormalize thứ cần lọc**: listing đọc từ bảng `product_view` có sẵn `min_price`, `is_flash_sale`, `avg_rating` cùng index cho từng kiểu sort; search lọc danh mục theo mảng `categoryPath` lưu sẵn trong document thay vì JOIN cây danh mục lúc truy vấn.
 - **Index theo đúng bộ lọc hay dùng**: lọc trên cột không có index thì mọi thứ khác đều vô nghĩa.
 
 ## Load Balancing: nhiều pod, một địa chỉ
@@ -215,7 +223,7 @@ Sắp theo `createdAt` mà không có `id` đi kèm: các bản ghi trùng thờ
 
 ### Nhận tham số mà không dùng
 
-Như lỗi 2 ở trên. Validate xong mà bỏ qua còn tệ hơn không nhận: client tin rằng mình đang lọc.
+Validate xong mà bỏ qua còn tệ hơn không nhận: client tin rằng mình đang lọc. Flash-sale không mắc lỗi này (xem phần đính chính ở trên), nhưng một hàm cũ trong repo thì có, và nó suýt khiến mình kết luận sai.
 
 ### Sticky session để "chữa" trạng thái trong bộ nhớ
 

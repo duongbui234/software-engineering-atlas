@@ -196,16 +196,16 @@ plugins:
       priority: 5
       condition: not-index
   - source: "@quartz-community/comments"
-    # Bật sau khi repo có GitHub Discussions và đã lấy repoId/categoryId từ giscus.app
+    # Bật sau khi cài GitHub App giscus cho repo: https://github.com/apps/giscus
     enabled: false
     options:
       provider: giscus
       options:
         {
           repo: duongbui234/software-engineering-atlas,
-          repoId: TODO:your-repo-id,
+          repoId: R_kgDOVyFr2g,
           category: Announcements,
-          categoryId: TODO:your-category-id,
+          categoryId: DIC_kwDOVyFr2s4DLXAo,
           mapping: url,
           strict: true,
           reactionsEnabled: true,

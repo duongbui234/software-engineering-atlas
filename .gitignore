@@ -28,3 +28,6 @@ quartz/cli/tui/dist/
 .claude/skills/slides/
 .claude/skills/ui-styling/
 .claude/skills/ui-ux-pro-max/
+
+# Lockfile plugin ghi đường dẫn tuyệt đối của máy local; CI dùng --from-config
+quartz.lock.json

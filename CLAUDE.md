@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Software Engineering Atlas**: a public Vietnamese learning journal ("sổ tay học kỹ thuật phần mềm"), one topic per day, deployed to GitHub Pages at `duongbui234.github.io/software-engineering-atlas`. Built on **Quartz v5** (Node ≥ 22). Concepts are written as linked notes so the Quartz graph view becomes a "map" of what has been learned. Mechanisms and code flows are visualized with **archify** diagrams embedded in posts.
 
-**Current state:** Quartz 5.1 is scaffolded (blog template). Atlas fonts, colors and the `vi-VN` locale are set in `quartz.config.yaml`; layout and components are still stock Quartz. `prototype/` holds the approved static mockups (home, post, series hub), and `design-system/software-engineering-atlas/MASTER.md` is the design source of truth. Next steps are, in order: port the prototype into Quartz components/styles → create the `/learn` and `/publish` project skills.
+**Current state:** Quartz 5.1 runs with the Atlas theme (`plugins/atlas/`). Fonts, colors and the `vi-VN` locale are set in `quartz.config.yaml`. `prototype/` holds the approved static mockups (home, post, series hub), and `design-system/software-engineering-atlas/MASTER.md` is the design source of truth. The next step is to create the `/learn` and `/publish` project skills.
 
 ## Quartz setup
 
 - `main` is built on top of upstream Quartz history (`upstream` remote → `jackyzha0/quartz`, branch `v5`). Update with `npx quartz update`. To keep merges clean, avoid editing upstream files (`quartz/`, `docs/`, upstream `.github/` files) unless necessary. Site-specific changes belong in `quartz.config.yaml`, `content/`, our own components and styles, and `.github/workflows/deploy.yml`.
 - Upstream workflows are guarded by `github.repository == 'jackyzha0/quartz'` and do not run here. Our CI is `.github/workflows/deploy.yml`: it builds on PRs and builds and deploys on push to `main`. In the repo settings, set Pages → Source to **GitHub Actions**.
-- `@quartz-community/*` plugins are npm packages installed by `npm ci`. There is no `quartz.lock.json`. `npx quartz plugin install` only matters for Git or local plugins.
+- `@quartz-community/*` plugins are npm packages installed by `npm ci`. The only non-npm plugin is the local `./plugins/atlas` (see below).
 - Drafts are handled by Quartz core: `draft: true` pages are not emitted. `cname` is disabled because the site runs under the `/software-engineering-atlas` subpath.
 - Comments (giscus) and analytics (GoatCounter) are configured but off. Comments need GitHub Discussions plus `repoId`/`categoryId` from giscus.app. Analytics needs a GoatCounter `websiteId`.
 - npm 11 blocks the install scripts of `esbuild` and `@parcel/watcher`. The build works anyway, so don't approve them unless something breaks.
@@ -47,24 +47,41 @@ google-chrome --headless=new --hide-scrollbars --virtual-time-budget=6000 --wind
 
 ```
 content/
-  index.md                          home: knowledge map + latest posts
-  posts/YYYY-MM-DD-<slug>/index.md  dated posts (+ diagrams/*.json|*.html, code/ for examples longer than ~60 lines)
-  concepts/<term>.md                short atomic definitions, wikilinked from posts → builds the graph
-  series/<series>/index.md          hub page (metro map, progress); parts are 01-…, 02-…
-  projects/<name>/                  walkthroughs of the owner's own code
-backlog.md                          topics to learn (not published)
+  index.md                      home; `headline` frontmatter is the big h1, body is the intro
+  posts/YYYY-MM-DD-<slug>.md    dated posts (a file, not a folder: folder index.md becomes a folder listing page)
+  concepts/<term>.md            short atomic definitions, wikilinked from posts → map towns + graph
+  series/<id>.md                series hub: frontmatter drives the metro map and the home-page route
+  diagrams/<post-slug>/*.json|*.html   archify source + rendered viewer
+  code/<post-slug>/*.ts         runnable examples (never name a file like its folder)
+  projects/<name>/              walkthroughs of the owner's own code
+backlog.md                      topics to learn (not published)
 ```
 
-Frontmatter: `title`, `date`, `description` (one sentence for home/RSS/SEO), `tags`, `draft`, `type` (`learn` | `code` | `note`), `level` (`beginner` | `intermediate` | `advanced`), optional `sources`, and `series` + `part` for series posts.
+Post frontmatter: `title`, `date`, `description` (one sentence for home/RSS/SEO and the standfirst), `tags`, `draft`, `type` (`learn` | `code` | `note`), `level` (`beginner` | `intermediate` | `advanced`), optional `sources`, and `series` + `part` for series posts. Concept notes may set `region` (the map region). Otherwise the region is inferred from the series hub listing that concept, then from the first tag.
 
-**Coordinate codes** identify posts: `<SERIES>-<NN>` (e.g. `API-04`), `NOTE-<NNN>`, `PRJ-<NN>`.
+Series hub frontmatter: `series` (id that posts reference), `code` (coordinate prefix, e.g. `API`), `region`, `description`, and `stations: [{ name, concepts: [...] }]`. A station counts as visited when a post with `series: <id>, part: N` exists. The latest such post is "bạn đang ở đây". The solid red line covers only stations visited contiguously from station 1.
+
+**Coordinate codes** are computed as `<hub code>-<NN part>` for series posts. Otherwise the code comes from the frontmatter `code` field (`NOTE-<NNN>`, `PRJ-<NN>`).
 
 **Series:** group related concepts into ~6–8 thematic parts (4–6 concepts each), not one giant post and not one post per tiny concept. Each concept also gets its own `concepts/` note linking back to its part. Only create concept notes for parts that have actually been written.
+
+**Drafts:** `draft: true` pages are not emitted. To preview drafts locally, temporarily add `drafts: { publish: true }` under `configuration` in `quartz.config.yaml`, and never commit that change.
+
+## Atlas theme (`plugins/atlas/`)
+
+A local Quartz plugin written as plain ESM in `dist/`. There is no build step: `dist/` is the source and is committed.
+- `frames.js`: the `atlas` page frame (neatline sheet, masthead, `margin | body | rail` grid) **and all theme CSS**. It renders the theme components directly, because Quartz places only one layout component per plugin. Every page type uses `template: atlas` in `quartz.config.yaml`.
+- `components.js`: brand, home headline and scale bar, home map + current line + gazetteer, post margin, standfirst, series mini-line, series hub. Also `ARCHIFY_SCRIPT`, which syncs iframe theme and the "open full screen" link.
+- `map.js`: the data-driven knowledge map SVG. There is a wide variant and a narrow mobile variant centred on "bạn đang ở đây".
+- `shared.js`: slug/date/series helpers.
+- `index.js`: default export is an **emitter** that copies `content/diagrams/**` and `content/code/**` verbatim. Quartz's asset emitter strips `.html` and renames `x/x.ts` to `x/index.ts`, so both dirs are listed in `ignorePatterns`.
+- Stock Quartz components still in use: search and darkmode (masthead), article-title (`not-index`), TOC, graph and backlinks (rail), footer. Explorer, recent-notes, breadcrumbs, content-meta, note-properties and reader-mode are disabled.
+- The plugin is registered with `npx quartz plugin add ./plugins/atlas`. `quartz.lock.json` stores an absolute path, so it is gitignored and CI runs `npx quartz plugin install --from-config`.
 
 ## Writing conventions
 
 - Write in Vietnamese and keep technical terms in English. The voice is first person "mình", a learner retelling what they figured out ("mình từng nghĩ X, hóa ra Y").
-- `learn` posts follow this skeleton: **Đọc nhanh** (TL;DR, 3–5 bullets) → Vấn đề → Cơ chế (archify diagram) → Ví dụ chạy được → Hiểu lầm và bẫy → Câu hỏi tự kiểm tra (answers in `<details>`) → Tham khảo.
+- `learn` posts follow this skeleton: **Đọc nhanh** (`> [!tldr] Đọc nhanh` callout, 3–5 bullets) → Vấn đề → Cơ chế (archify diagram) → Ví dụ chạy được → Hiểu lầm và bẫy → Câu hỏi tự kiểm tra (collapsed `> [!question]- …` callouts) → Tham khảo. `content/posts/2026-11-18-idempotency.md` is the reference example.
 - **Run every code example before publishing.** Default to TypeScript. Anything that cannot run standalone gets the comment `// minh họa, không chạy trực tiếp`.
 - `sources` is optional. When the post came from web research, add a "Tham khảo" section anyway. Rewrite in your own understanding; never copy text or reproduce the structure of a paid or paywalled source. Example: the "33 API concepts" list from newsletter.systemdesign.one is behind a paywall, so the API series uses a self-compiled concept list.
 - When writing about the owner's private projects, publish only diagrams and trimmed or renamed snippets: no company or customer names, internal endpoints, or secrets. Ask before publishing.
@@ -76,11 +93,17 @@ Frontmatter: `title`, `date`, `description` (one sentence for home/RSS/SEO), `ta
 
 ## archify embedding contract
 
-- Keep `<name>.json` (source) and `<name>.html` (rendered) side by side; commit both.
-- Embed with `<iframe data-archify="diagrams/x.html">`. JS sets `src` to `…?embed=1&theme=<light|dark>` and resets it when the site theme changes. The viewer reads both URL params.
-- Wrap the iframe in `.figure-map`, set `--ar` to the diagram's aspect ratio, and always include a caption plus an "open full screen" link.
+- Keep the archify source and the rendered viewer side by side as `content/diagrams/<post-slug>/<name>.json` and `<name>.html`, and commit both. Set `meta.output` to the `.html` path. Render with `finalize`.
+- Embed with raw HTML in the post, using paths relative to the post (`../diagrams/...`):
+  ```html
+  <figure class="figure-map" style="--ar: 1 / 1">
+  <div class="frame"><iframe data-archify="../diagrams/<slug>/<name>.html" title="…" loading="lazy"></iframe></div>
+  <figcaption><span><b>Hình 1.</b> …</span><a href="../diagrams/<slug>/<name>.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+  </figure>
+  ```
+  `ARCHIFY_SCRIPT` sets `src` to `…?embed=1&theme=<light|dark>` and follows `themechange`. It also rewrites the caption link, because Quartz strips `.html` from it. In embed mode, archify keeps its toolbar (theme, export, fullscreen), so give `--ar` enough height for it.
 - **Size budget:** each rendered HTML file is about 820 KB, and GitHub Pages limits a site to about 1 GB. Use at most one interactive archify diagram per post and Mermaid for secondary diagrams. Revisit (move to R2 or Git LFS) once the site passes about 600 MB.
-- archify has no Vietnamese viewer catalog, so omit `meta.locale` (viewer chrome stays English) and keep all authored strings in Vietnamese. Generated receipts (`*.finalize.json`, `*.browser-check.json`, `*.delivery.json`) are build evidence, not content.
+- archify has no Vietnamese viewer catalog, so omit `meta.locale` (viewer chrome stays English) and keep all authored strings in Vietnamese. Generated receipts (`*.finalize.json`, `*.browser-check.json`, `*.delivery.json`) are gitignored and skipped by the emitter.
 
 ## Design
 

@@ -12,6 +12,9 @@ configuration:
     - private
     - templates
     - .obsidian
+    # copy nguyên vẹn bởi plugin atlas (giữ đuôi .html cho iframe archify)
+    - diagrams
+    - code
   theme:
     fontOrigin: googleFonts
     cdnCaching: true
@@ -78,7 +81,8 @@ plugins:
     order: 50
     layout:
       position: right
-      priority: 30
+      priority: 10
+
   - source: "@quartz-community/description"
     enabled: true
     order: 70
@@ -135,7 +139,7 @@ plugins:
   - source: "@quartz-community/tag-page"
     enabled: true
   - source: "@quartz-community/explorer"
-    enabled: true
+    enabled: false
     layout:
       position: left
       priority: 50
@@ -143,27 +147,29 @@ plugins:
     enabled: true
     layout:
       position: right
-      priority: 10
+      priority: 20
+
   - source: "@quartz-community/search"
     enabled: true
     layout:
-      position: left
+      position: header
       priority: 20
-      group: toolbar
-      groupOptions:
-        grow: true
+
   - source: "@quartz-community/backlinks"
     enabled: true
     layout:
       position: right
-      priority: 50
+      priority: 30
+
   - source: "@quartz-community/article-title"
     enabled: true
     layout:
       position: beforeBody
       priority: 10
+      condition: not-index
+
   - source: "@quartz-community/content-meta"
-    enabled: true
+    enabled: false
     layout:
       position: beforeBody
       priority: 20
@@ -173,24 +179,24 @@ plugins:
       position: beforeBody
       priority: 30
   - source: "@quartz-community/page-title"
-    enabled: true
+    enabled: false
     layout:
       position: left
       priority: 10
   - source: "@quartz-community/darkmode"
     enabled: true
     layout:
-      position: left
+      position: header
       priority: 30
-      group: toolbar
+
   - source: "@quartz-community/reader-mode"
-    enabled: true
+    enabled: false
     layout:
       position: left
       priority: 35
       group: toolbar
   - source: "@quartz-community/breadcrumbs"
-    enabled: true
+    enabled: false
     layout:
       position: beforeBody
       priority: 5
@@ -227,7 +233,7 @@ plugins:
       position: footer
       priority: 50
   - source: "@quartz-community/recent-notes"
-    enabled: true
+    enabled: false
     options:
       title: Bài mới
       limit: 5
@@ -237,7 +243,7 @@ plugins:
       position: left
       priority: 25
   - source: "@quartz-community/spacer"
-    enabled: true
+    enabled: false
     options: {}
     order: 25
     layout:
@@ -249,7 +255,7 @@ plugins:
     options: {}
     order: 50
   - source: "@quartz-community/note-properties"
-    enabled: true
+    enabled: false
     options:
       includeAll: false
       includedProperties:
@@ -263,6 +269,11 @@ plugins:
       position: beforeBody
       priority: 15
       display: all
+  # Theme Atlas (plugin cục bộ): frame "atlas" vẽ masthead, bản đồ, metro, cột lề
+  - source: ./plugins/atlas
+    enabled: true
+    options: {}
+    order: 50
 layout:
   groups:
     toolbar:
@@ -271,17 +282,21 @@ layout:
       gap: 0.5rem
   byPageType:
     "404":
+      template: atlas
       positions:
         beforeBody: []
         left: []
         right: []
-    content: {}
+    content:
+      template: atlas
     folder:
+      template: atlas
       exclude:
         - reader-mode
       positions:
         right: []
     tag:
+      template: atlas
       exclude:
         - reader-mode
       positions:

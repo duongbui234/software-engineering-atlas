@@ -1,0 +1,26 @@
+{
+  "name": "atlas",
+  "version": "0.1.0",
+  "description": "Cartographic Atlas theme for Software Engineering Atlas: a page frame that renders the masthead, knowledge map, series metro and post margin",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./components": "./dist/components.js",
+    "./frames": "./dist/frames.js",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "quartz": {
+    "name": "atlas",
+    "displayName": "Atlas theme",
+    "category": "emitter",
+    "quartzVersion": ">=5.0.0",
+    "defaultEnabled": true,
+    "frames": {
+      "AtlasFrame": {
+        "displayName": "Atlas neatline frame"
+      }
+    }
+  }
+}

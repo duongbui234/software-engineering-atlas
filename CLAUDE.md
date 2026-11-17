@@ -86,10 +86,12 @@ A local Quartz plugin written as plain ESM in `dist/`. There is no build step: `
 - `sources` is optional. When the post came from web research, add a "Tham khảo" section anyway. Rewrite in your own understanding; never copy text or reproduce the structure of a paid or paywalled source. Example: the "33 API concepts" list from newsletter.systemdesign.one is behind a paywall, so the API series uses a self-compiled concept list.
 - When writing about the owner's private projects, publish only diagrams and trimmed or renamed snippets: no company or customer names, internal endpoints, or secrets. Ask before publishing.
 
-## Workflow (planned skills)
+## Workflow
 
-- `/learn <topic>`: research the topic, then teach it interactively in chat (intuition → mechanism → runnable example). With no topic, suggest the next one from `backlog.md`, preferring topics that connect to existing concepts.
-- `/publish`: turn that learning session into a post shaped by the questions the owner actually asked. Generate the archify diagram, create any missing concept notes, run `quartz build`, then open a PR on branch `post/<slug>`. A post is published only after the owner reviews and merges it.
+Two user-invoked skills: `.claude/skills/learn/` and `.claude/skills/publish/`. The **learning log** `.learn/<slug>.md` (gitignored) hands off between them.
+- `/learn [topic] [--repo path]`: teaches the topic in chat and logs the sources, the owner's verbatim questions and misconceptions, the examples it ran, the diagram idea and the concepts touched. With no topic, it suggests candidates from `backlog.md` and the next hub stations.
+- `/publish [slug]`: writes the post from the log, plus code, the archify diagram and concept notes. It builds and previews the site, then opens a PR from `post/<slug>`. **Merging the PR publishes the post.** The skill never merges.
+- `backlog.md` (repo root, not published) holds topics to learn later.
 
 ## archify embedding contract
 

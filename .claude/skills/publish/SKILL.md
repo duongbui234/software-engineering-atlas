@@ -1,0 +1,99 @@
+---
+name: publish
+description: Biến nhật ký học (.learn/<slug>.md) thành bài blog kèm sơ đồ archify, ghi chú khái niệm và code đã chạy, rồi mở PR để duyệt.
+disable-model-invocation: true
+argument-hint: "[slug]"
+---
+
+# /publish
+
+Turn a **learning log** into a post on a `post/<slug>` branch and open a PR. Merging the PR publishes the post, so the PR must be review-ready: built, previewed, every example re-run. This skill never merges.
+
+The rules for content live in `CLAUDE.md` and are not repeated here. Apply them in full:
+- **Content model:** paths, frontmatter, series hubs, coordinate codes.
+- **Writing conventions:** voice, the `learn` skeleton, sources, private code.
+- **archify embedding contract:** file layout, embed snippet, size budget.
+
+`content/posts/2026-11-18-idempotency.md` is the reference post. Match its shape and tone.
+
+## 1. Load the log
+
+Use `.learn/<slug>.md`. With no argument, use the most recently modified log. If no log exists but this conversation holds the lesson, write the log first from the conversation (see `/learn` step 2), then continue.
+
+Done when you know the topic, type, series and part (if any), sources, the owner's questions and misconceptions, the examples that ran, the diagram idea, and the concepts touched.
+
+## 2. Place the post
+
+- **Date:** today.
+- **Path:** `content/posts/<YYYY-MM-DD>-<slug>.md`.
+- **Series:** if the topic belongs to a hub in `content/series/`, set `series` and `part` to that station's number.
+  - If the station does not exist yet, propose the hub change to the owner before editing the hub.
+  - A brand-new series gets a new hub. Propose its stations to the owner first.
+- **Non-series posts:** pick the next free `NOTE-<NNN>` or `PRJ-<NN>` code by scanning existing frontmatter.
+- **`level`:** from how deep the lesson went.
+
+Create the branch from an up-to-date `main`:
+
+```bash
+git switch main && git pull --ff-only && git switch -c post/<slug>
+```
+
+## 3. Write the post
+
+Shape the post from the log, not from a generic outline:
+- The "Vấn đề" section opens from the owner's starting point.
+- "Hiểu lầm và bẫy" uses the logged misconceptions first.
+- The self-check questions reuse the logged check questions.
+- The owner's verbatim questions decide what the body explains at length.
+
+`description` is one sentence that names the problem the post solves; it shows under the title, on the home page and in RSS. Wikilink each concept on first mention (`[[idempotency]]`). Set `draft: false`: the PR is the review gate.
+
+## 4. Code
+
+Copy each logged example into `content/code/<slug>/`, using a file name different from the folder name. **Re-run it from there.** Paste the real output into the post.
+
+- A shortened snippet in the post must still match the file.
+- Anything that cannot run standalone carries `// minh họa, không chạy trực tiếp`.
+
+## 5. Diagram
+
+Invoke the `archify` skill with the logged diagram idea. Write the candidate to `content/diagrams/<slug>/<name>.json`, with `meta.output` set to the sibling `.html`, and run `finalize` until it passes.
+
+Embed it with the snippet from the archify contract. Set `--ar` so the whole diagram plus the archify toolbar fits (`1 / 1` is a safe start for sequence diagrams). Write a caption sentence that states what the diagram proves.
+
+Use at most one archify diagram per post. Any secondary flow becomes a Mermaid block.
+
+## 6. Concept notes
+
+For every concept touched, create or update `content/concepts/<term>.md`. Each note has:
+- frontmatter `title`, `description`, `tags`, `type: note`, and `region` (the hub's region for series topics);
+- a short body: a 2–4 sentence definition in the owner's voice, plus a wikilink back to this post.
+
+For an existing note, add the backlink and sharpen the definition. Keep what is already there.
+
+## 7. Verify
+
+Every check below must pass:
+
+1. `CI=true npx quartz build` finishes with no error. CI mode fails on broken plugins.
+2. Preview with `npx quartz build --serve`. Screenshot the post at 1440px and 390px, in both light and dark, plus the home page (see Commands in `CLAUDE.md`). Look at each screenshot and confirm:
+   - the post appears in "Bài mới" with the right coordinate code;
+   - the margin and standfirst render;
+   - the series mini-line marks this station;
+   - the archify iframe loads in the right theme and is not cut off;
+   - the code block matches the file;
+   - concept notes link both ways.
+3. `public/diagrams/<slug>/` and `public/code/<slug>/` contain the files with their real names and extensions.
+
+Fix and repeat until every check passes. A failure you can't resolve goes into the PR body, marked as an open issue.
+
+## 8. Open the PR
+
+Commit with a message naming the post and its coordinate code, push the branch, and open a PR with `gh pr create`. The PR body lists:
+- the post title, code and one-line summary;
+- new or updated concept notes;
+- the diagram, the examples and their run commands;
+- any hub change;
+- a review checklist for the owner: accuracy, voice, nothing private leaked.
+
+Done when the PR is open and its CI build is green (`gh pr checks --watch`). Give the owner the PR link and the local preview command. Then move the log to `.learn/published/<slug>.md`.

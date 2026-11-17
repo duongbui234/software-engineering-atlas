@@ -31,3 +31,6 @@ quartz/cli/tui/dist/
 
 # Lockfile plugin ghi đường dẫn tuyệt đối của máy local; CI dùng --from-config
 quartz.lock.json
+
+# Nhật ký học của /learn (riêng tư, /publish đọc để viết bài)
+.learn/

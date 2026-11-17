@@ -12,3 +12,19 @@ replit.nix
 .quartz/
 quartz/cli/tui/dist/
 .turbo/
+
+# archify delivery receipts (build evidence, not content)
+*.finalize.json
+*.finalize-summary.json
+*.browser-check.json
+*.delivery.json
+
+# UI/UX skills cài cục bộ (không công khai). Skill riêng của dự án (/learn, /publish) vẫn commit trong .claude/skills/
+.agents/
+.claude/skills/banner-design/
+.claude/skills/brand/
+.claude/skills/design/
+.claude/skills/design-system/
+.claude/skills/slides/
+.claude/skills/ui-styling/
+.claude/skills/ui-ux-pro-max/

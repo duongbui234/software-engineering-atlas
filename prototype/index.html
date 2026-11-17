@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software Engineering Atlas</title>
+<meta name="description" content="Sổ tay học kỹ thuật phần mềm, mỗi ngày một chủ đề, vẽ thành bản đồ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/atlas.css">
+<script src="assets/atlas.js"></script>
+<style>
+  .intro { display: grid; gap: var(--s5); grid-template-columns: minmax(0, 1fr); padding: var(--s6) 0 var(--s4); }
+  .intro h1 { max-width: 18ch; margin: 0; }
+  .intro p { margin: 0; max-width: 36rem; color: var(--ink-2); font-size: 1.125rem; }
+  .intro-meta { display: flex; flex-wrap: wrap; gap: var(--s5) var(--s7); align-items: end; }
+
+  /* Bản đồ kiến thức */
+  .atlas-map { margin: var(--s5) 0 var(--s4); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  .atlas-map svg { display: block; width: 100%; height: auto; }
+  .atlas-map .contour { fill: none; stroke: var(--contour); stroke-width: 1; opacity: .55; }
+  .atlas-map .contour.major { stroke-width: 1.4; opacity: .85; }
+  .atlas-map .region { font: italic 500 17px var(--f-display); fill: var(--contour); letter-spacing: .08em; paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; }
+  .atlas-map .town-label, .atlas-map .here-label { paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
+  .atlas-map .town { fill: var(--paper); stroke: var(--ink); stroke-width: 1.4; }
+  .atlas-map .town.done { fill: var(--ink); }
+  .atlas-map .town-label { font: 400 12.5px var(--f-body); fill: var(--ink); }
+  .atlas-map .town-label.future { fill: var(--ink-2); }
+  .atlas-map .link { stroke: var(--ink-2); stroke-width: .8; stroke-dasharray: 2 3; fill: none; }
+  .atlas-map .route { fill: none; stroke: var(--survey); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .atlas-map .route.ahead { stroke-dasharray: 1 7; stroke-width: 2.5; }
+  .atlas-map .here { fill: var(--survey); }
+  .atlas-map .here-ring { fill: none; stroke: var(--survey); stroke-width: 1.5; transform-origin: center; transform-box: fill-box; animation: ping 2.4s var(--ease) infinite; }
+  .atlas-map .here-label { font: 600 12px var(--f-body); fill: var(--survey); }
+  .atlas-map a:focus-visible .town { stroke: var(--survey); stroke-width: 3; }
+  @keyframes ping { from { transform: scale(1); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
+  .map-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s3) var(--s5); font-size: .875rem; color: var(--ink-2); }
+
+  /* Đang đi tuyến nào */
+  .current {
+    display: grid; grid-template-columns: auto 1fr auto; gap: var(--s2) var(--s4); align-items: center;
+    margin: var(--s6) 0; padding: var(--s4) 0; border-top: 3px solid var(--survey); border-bottom: 1px solid var(--grid);
+  }
+  .current .pin { width: .85rem; height: .85rem; border-radius: 50%; background: var(--survey); box-shadow: 0 0 0 4px color-mix(in srgb, var(--survey) 20%, transparent); }
+  .current h2 { font-size: 1.25rem; margin: 0; }
+  .current p { margin: .1rem 0 0; color: var(--ink-2); font-size: .9375rem; }
+  .current a.go { font-weight: 500; white-space: nowrap; }
+
+  /* Gazetteer: danh mục bài */
+  .gazetteer h2 { margin-top: var(--s6); }
+  .gz { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  .gz li { border-bottom: 1px solid var(--grid); }
+  .gz a.row {
+    display: grid; grid-template-columns: 6.5rem 1.2rem minmax(0, 1fr) auto; gap: var(--s1) var(--s3);
+    align-items: baseline; padding: var(--s4) var(--s2); color: inherit; text-decoration: none;
+    transition: background-color .15s var(--ease);
+  }
+  .gz a.row:hover { background: color-mix(in srgb, var(--water) 6%, transparent); }
+  .gz a.row:hover .t { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em; }
+  .gz .t { font: 600 1.1875rem/1.3 var(--f-display); color: var(--ink); }
+  .gz .d { grid-column: 3; color: var(--ink-2); font-size: .9375rem; margin-top: .15rem; }
+  .gz .date { font: 400 .8125rem/1 var(--f-mono); color: var(--ink-2); white-space: nowrap; }
+  .gz .sym { transform: translateY(-.05rem); }
+
+  @media (max-width: 40rem) {
+    .current { grid-template-columns: auto 1fr; }
+    .current a.go { grid-column: 2; }
+    .gz a.row { grid-template-columns: 1.2rem minmax(0, 1fr); padding-inline: 0; }
+    .gz .coord { grid-column: 2; grid-row: 1; }
+    .gz .sym { grid-row: 2; }
+    .gz .t { grid-column: 2; grid-row: 2; }
+    .gz .d { grid-column: 2; }
+    .gz .date { grid-column: 2; }
+    .atlas-map svg { height: 19rem; }
+    .atlas-map .town-label, .atlas-map .here-label { font-size: 17px; }
+    .atlas-map .region { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Bỏ qua, tới nội dung</a>
+<div class="sheet">
+  <span class="corner tl">Tờ số 1, cập nhật 18.11.2026</span>
+  <span class="corner br">Vẽ bằng Quartz + archify</span>
+  <div class="sheet-inner">
+    <header class="masthead">
+      <a class="brand" href="index.html">Software Engineering Atlas<small>Sổ tay học kỹ thuật phần mềm</small></a>
+      <nav class="tools" aria-label="Công cụ">
+        <a href="series.html">Lộ trình</a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          Tìm
+        </a>
+        <button type="button" data-theme-toggle aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+          <span>Bản đồ đêm</span>
+        </button>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="intro">
+        <h1>Mỗi ngày đi thêm một đoạn trên bản đồ kỹ thuật phần mềm.</h1>
+        <div class="intro-meta">
+          <p>Mình học một chủ đề, chạy thử ví dụ, vẽ lại cơ chế thành sơ đồ rồi ghi vào đây. Mỗi khái niệm là một địa danh, nối với nhau thành bản đồ.</p>
+          <div class="scalebar" aria-label="Thước tỉ lệ: đã viết 12 bài">
+            <span>Đã đi 12 bài</span>
+            <span class="bar" aria-hidden="true" style="--at: 60%"><i></i><i></i><i></i><i></i><b></b></span>
+            <span class="ticks" aria-hidden="true"><span>0</span><span>10</span><span>20</span></span>
+          </div>
+        </div>
+      </section>
+
+      <figure class="atlas-map" aria-labelledby="map-cap">
+        <svg viewBox="0 0 960 400" preserveAspectRatio="xMinYMid slice" role="img" aria-labelledby="map-title map-desc">
+          <title id="map-title">Bản đồ kiến thức</title>
+          <desc id="map-desc">Ba vùng kiến thức: API, Cơ sở dữ liệu, Hệ phân tán. Tuyến API Concepts đã đi qua 3 trong 6 ga, hiện đang ở ga Độ tin cậy.</desc>
+          <!-- vùng API -->
+          <g>
+            <path class="contour major" d="M40 210 C40 110 150 50 300 50 C460 50 560 110 560 200 C560 300 450 360 300 360 C150 360 40 310 40 210Z"/>
+            <path class="contour" d="M80 210 C80 130 170 85 300 85 C430 85 520 130 520 205 C520 280 430 325 300 325 C170 325 80 290 80 210Z"/>
+            <path class="contour" d="M130 212 C130 160 200 125 300 125 C400 125 470 160 470 208 C470 260 400 290 300 290 C200 290 130 262 130 212Z"/>
+            <text class="region" x="70" y="78">Vùng API</text>
+          </g>
+          <!-- vùng CSDL -->
+          <g>
+            <path class="contour major" d="M600 60 C700 30 880 50 910 120 C935 180 860 210 760 205 C660 200 580 150 600 60Z"/>
+            <path class="contour" d="M640 85 C720 65 850 80 870 125 C885 165 830 180 760 176 C690 172 630 140 640 85Z"/>
+            <text class="region" x="690" y="98">Cơ sở dữ liệu</text>
+          </g>
+          <!-- vùng phân tán -->
+          <g>
+            <path class="contour major" d="M610 260 C680 230 880 240 915 300 C940 350 860 385 750 380 C650 375 580 320 610 260Z"/>
+            <path class="contour" d="M650 280 C720 262 850 270 875 308 C890 340 830 360 755 356 C690 352 635 320 650 280Z"/>
+            <text class="region" x="690" y="262">Hệ phân tán</text>
+          </g>
+
+          <!-- đường liên hệ giữa khái niệm (wikilink) -->
+          <path class="link" d="M415 250 C520 280 640 300 720 310"/>
+          <path class="link" d="M300 130 C450 120 620 120 740 128"/>
+          <path class="link" d="M760 150 C770 200 770 250 760 300"/>
+
+          <!-- tuyến series API Concepts -->
+          <path class="route" d="M110 250 L185 175 L270 210 L340 145"/>
+          <path class="route ahead" d="M340 145 L415 250 L490 190"/>
+
+          <!-- ga / địa danh -->
+          <a href="#"><circle class="town done" cx="110" cy="250" r="7"/><text class="town-label" x="70" y="276">Nền tảng</text></a>
+          <a href="#"><circle class="town done" cx="185" cy="175" r="7"/><text class="town-label" x="150" y="160">Kiểu API</text></a>
+          <a href="#"><circle class="town done" cx="270" cy="210" r="7"/><text class="town-label" x="232" y="238">Bảo mật</text></a>
+          <a href="post.html">
+            <circle class="here-ring" cx="340" cy="145" r="9"/>
+            <circle class="here" cx="340" cy="145" r="7"/>
+            <text class="here-label" x="356" y="132">Độ tin cậy</text>
+            <text class="here-label" x="356" y="148" style="font-weight:400">bạn đang ở đây</text>
+          </a>
+          <circle class="town" cx="415" cy="250" r="6"/><text class="town-label future" x="398" y="278">Hiệu năng</text>
+          <circle class="town" cx="490" cy="190" r="6"/><text class="town-label future" x="470" y="175">Vận hành</text>
+
+          <a href="#"><rect class="town done" x="733" y="121" width="13" height="13"/><text class="town-label" x="754" y="132">Index B-tree</text></a>
+          <a href="#"><rect class="town done" x="753" y="143" width="13" height="13"/><text class="town-label" x="774" y="160">Transaction</text></a>
+          <a href="#"><circle class="town done" cx="720" cy="310" r="7"/><text class="town-label" x="640" y="336">Consistent hashing</text></a>
+          <a href="#"><circle class="town done" cx="760" cy="300" r="7"/><text class="town-label" x="772" y="296">Rate limiter</text></a>
+        </svg>
+        <figcaption id="map-cap" class="map-foot">
+          <ul class="legend">
+            <li><span class="sym learn" aria-hidden="true"></span>Bài học</li>
+            <li><span class="sym code" aria-hidden="true"></span>Đọc code dự án</li>
+            <li><span class="sym note" aria-hidden="true"></span>Ghi chú ngắn</li>
+          </ul>
+          <a href="#">Mở bản đồ đầy đủ (graph)</a>
+        </figcaption>
+      </figure>
+
+      <section class="current" aria-labelledby="cur-h">
+        <span class="pin" aria-hidden="true"></span>
+        <div>
+          <h2 id="cur-h">Đang đi tuyến API Concepts</h2>
+          <p>Đã qua 3 ga, đang ở ga 4 trên 6: idempotency, retry, timeout và rate limit.</p>
+        </div>
+        <a class="go" href="series.html">Xem lộ trình</a>
+      </section>
+
+      <section class="gazetteer" aria-labelledby="gz-h">
+        <h2 id="gz-h">Bài mới</h2>
+        <ul class="gz">
+          <li><a class="row" href="post.html">
+            <span class="coord">API-04</span><span class="sym learn" role="img" aria-label="Bài học"></span>
+            <span class="t">Idempotency: vì sao bấm "Thanh toán" hai lần không bị trừ tiền hai lần</span>
+            <span class="date">18.11</span>
+            <span class="d">Idempotency-Key, retry an toàn và ba cái bẫy khi tự cài đặt.</span>
+          </a></li>
+          <li><a class="row" href="#">
+            <span class="coord">API-03</span><span class="sym learn" role="img" aria-label="Bài học"></span>
+            <span class="t">AuthN, AuthZ, OAuth2 và JWT: ai được vào, được làm gì</span>
+            <span class="date">17.11</span>
+            <span class="d">Bốn khái niệm hay bị trộn lẫn, tách ra bằng một luồng đăng nhập thật.</span>
+          </a></li>
+          <li><a class="row" href="#">
+            <span class="coord">API-02</span><span class="sym learn" role="img" aria-label="Bài học"></span>
+            <span class="t">REST, GraphQL, gRPC, WebSocket, Webhook: chọn kiểu API theo câu hỏi nào</span>
+            <span class="date">16.11</span>
+            <span class="d">Năm kiểu giao tiếp, mỗi kiểu trả lời một nhu cầu khác nhau.</span>
+          </a></li>
+          <li><a class="row" href="#">
+            <span class="coord">NOTE-007</span><span class="sym note" role="img" aria-label="Ghi chú ngắn"></span>
+            <span class="t">409 Conflict hay 422 Unprocessable: trả mã nào khi trùng dữ liệu</span>
+            <span class="date">15.11</span>
+            <span class="d">Hai mã hay bị dùng lẫn, phân biệt bằng một câu hỏi.</span>
+          </a></li>
+          <li><a class="row" href="#">
+            <span class="coord">PRJ-01</span><span class="sym code" role="img" aria-label="Đọc code dự án"></span>
+            <span class="t">Luồng checkout trong dự án thương mại điện tử của mình</span>
+            <span class="date">14.11</span>
+            <span class="d">Từ giỏ hàng tới webhook của cổng thanh toán, vẽ lại từng bước.</span>
+          </a></li>
+          <li><a class="row" href="#">
+            <span class="coord">API-01</span><span class="sym learn" role="img" aria-label="Bài học"></span>
+            <span class="t">Endpoint, HTTP method, status code và header: bốn viên gạch đầu tiên</span>
+            <span class="date">13.11</span>
+            <span class="d">Những thứ mọi API đều có, và những hiểu lầm hay gặp về chúng.</span>
+          </a></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

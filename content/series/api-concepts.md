@@ -4,7 +4,7 @@ description: 33 khái niệm API mà kỹ sư phần mềm cần nắm khi xây 
 series: api
 code: API
 region: Vùng API
-draft: true
+draft: false
 stations:
   - name: Nền tảng
     concepts: [Endpoint, Request-Response, HTTP Methods, Headers, JSON, Status Codes, Error Handling]

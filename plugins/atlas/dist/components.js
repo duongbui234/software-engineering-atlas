@@ -104,7 +104,7 @@ export const AtlasHome = (opts = {}) => {
     const slug = fileData.slug
     const posts = allFiles
       .filter((f) => isPost(f) && isListed(f))
-      .sort((a, b) => (pageDate(b) || 0) - (pageDate(a) || 0))
+      .sort((a, b) => (pageDate(b) || 0) - (pageDate(a) || 0) || (Number(fm(b).part) || 0) - (Number(fm(a).part) || 0))
     const current = hubs(allFiles)
       .map((hub) => ({ hub, state: lineState(allFiles, hub) }))
       .filter((x) => x.state.latest)

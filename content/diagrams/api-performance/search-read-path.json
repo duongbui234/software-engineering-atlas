@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đường đọc của API tìm kiếm",
+    "output": "content/diagrams/api-performance/search-read-path.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "browser", "type": "frontend", "label": "Trình duyệt", "sublabel": "trang tìm kiếm" },
+    { "id": "ingress", "type": "cloud", "label": "Ingress NGINX", "sublabel": "TLS, round robin" },
+    { "id": "pod", "type": "backend", "label": "Pod API", "sublabel": "1 trong 3–20 pod" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "cache 60s + lock" },
+    { "id": "es", "type": "database", "label": "Elasticsearch", "sublabel": "search_after" }
+  ],
+  "segments": [
+    { "from": 150, "to": 495, "label": "Lần đầu: cache trống" },
+    { "from": 510, "to": 735, "label": "Lần sau: trúng cache" }
+  ],
+  "messages": [
+    { "id": "q1", "from": "browser", "to": "ingress", "y": 170, "label": "GET /search?q=tai nghe", "variant": "emphasis" },
+    { "id": "lb1", "from": "ingress", "to": "pod", "y": 200, "label": "chọn pod đang ready", "note": "Readiness probe /health/ready" },
+    { "id": "get1", "from": "pod", "to": "redis", "y": 255, "label": "GET search:result:<hash>" },
+    { "id": "miss", "from": "redis", "to": "pod", "y": 285, "label": "miss", "variant": "return" },
+    { "id": "lock", "from": "pod", "to": "redis", "y": 315, "label": "SET lock NX EX 5", "variant": "security" },
+    { "id": "search", "from": "pod", "to": "es", "y": 345, "label": "query + sort + search_after", "variant": "emphasis" },
+    { "id": "hits", "from": "es", "to": "pod", "y": 375, "label": "20 hit", "variant": "return" },
+    { "id": "set", "from": "pod", "to": "redis", "y": 405, "label": "SET kết quả EX 60" },
+    { "id": "r1", "from": "pod", "to": "ingress", "y": 435, "label": "200 { items, nextCursor }", "variant": "return" },
+    { "id": "r1b", "from": "ingress", "to": "browser", "y": 465, "label": "200", "variant": "return" },
+    { "id": "q2", "from": "browser", "to": "ingress", "y": 530, "label": "cùng query, người khác", "variant": "emphasis" },
+    { "id": "lb2", "from": "ingress", "to": "pod", "y": 560, "label": "pod khác cũng được", "note": "Pod stateless, cache dùng chung" },
+    { "id": "get2", "from": "pod", "to": "redis", "y": 615, "label": "GET search:result:<hash>" },
+    { "id": "hit", "from": "redis", "to": "pod", "y": 645, "label": "hit", "variant": "return" },
+    { "id": "r2", "from": "pod", "to": "ingress", "y": 675, "label": "200, không chạm ES", "variant": "return" },
+    { "id": "r2b", "from": "ingress", "to": "browser", "y": 705, "label": "200", "variant": "return" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Nhanh nhờ", "items": ["Cache-aside 60 giây trong Redis", "Khóa ngắn hạn chống cache stampede", "Cursor search_after, không dùng offset"] },
+    { "dot": "cyan", "title": "Cân bằng tải", "items": ["Ingress chia request cho các pod", "Pod không giữ trạng thái riêng", "HPA thêm pod khi CPU vượt 70%"] }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Vòng đời request POST /api/v1/checkout",
+    "output": "content/diagrams/api-foundations/request-lifecycle.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "browser", "type": "frontend", "label": "Trình duyệt", "sublabel": "axios" },
+    { "id": "mw", "type": "backend", "label": "Middleware", "sublabel": "CorrelationId" },
+    { "id": "guard", "type": "security", "label": "Guards", "sublabel": "JWT, quyền, rate" },
+    { "id": "pipe", "type": "backend", "label": "ValidationPipe", "sublabel": "whitelist" },
+    { "id": "ctrl", "type": "backend", "label": "Controller", "sublabel": "checkout + service" },
+    { "id": "icpt", "type": "backend", "label": "Interceptor", "sublabel": "bọc vỏ JSON" },
+    { "id": "filter", "type": "backend", "label": "Exception filter", "sublabel": "@Catch() mọi lỗi" }
+  ],
+  "segments": [
+    { "from": 150, "to": 420, "label": "Đặt hàng thành công" },
+    { "from": 440, "to": 700, "label": "Sản phẩm hết hàng" }
+  ],
+  "messages": [
+    { "id": "req1", "from": "browser", "to": "mw", "y": 170, "label": "POST /checkout", "variant": "emphasis", "note": "Authorization, Idempotency-Key, body JSON" },
+    { "id": "mw1", "from": "mw", "to": "guard", "y": 225, "label": "next()", "note": "Gắn X-Correlation-ID vào AsyncLocalStorage" },
+    { "id": "g1", "from": "guard", "to": "pipe", "y": 280, "label": "token hợp lệ, có quyền", "variant": "security" },
+    { "id": "p1", "from": "pipe", "to": "ctrl", "y": 315, "label": "body đã validate" },
+    { "id": "c1", "from": "ctrl", "to": "icpt", "y": 350, "label": "return { groupId, total }" },
+    { "id": "ok", "from": "icpt", "to": "browser", "y": 385, "label": "201 { success, data, msg }", "variant": "return" },
+    { "id": "req2", "from": "browser", "to": "mw", "y": 460, "label": "POST /checkout", "variant": "emphasis" },
+    { "id": "mw2", "from": "mw", "to": "guard", "y": 495, "label": "next()" },
+    { "id": "g2", "from": "guard", "to": "pipe", "y": 530, "label": "qua guard", "variant": "security" },
+    { "id": "p2", "from": "pipe", "to": "ctrl", "y": 565, "label": "qua validate" },
+    { "id": "c2", "from": "ctrl", "to": "filter", "y": 600, "label": "throw 409 { code, message }", "variant": "dashed", "note": "Giữ kho thất bại: hết hàng" },
+    { "id": "err", "from": "filter", "to": "browser", "y": 660, "label": "409 { success: false, msg }", "variant": "return", "note": "code bị bỏ rơi, frontend chỉ hiện câu mặc định" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Thứ tự cố định", "items": ["Middleware → guard → pipe → handler → interceptor", "Guard chặn trước khi tốn công validate body", "Ném lỗi ở đâu cũng rơi vào exception filter"] },
+    { "dot": "rose", "title": "Lỗi tìm ra", "items": ["Exception mang code FLASH_SALE_OUT_OF_STOCK", "Filter chỉ giữ message, trả field msg", "Frontend đọc message và code nên không thấy gì"] }
+  ]
+}

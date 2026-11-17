@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Software Engineering Atlas**: a public Vietnamese learning journal ("sổ tay học kỹ thuật phần mềm"), one topic per day, deployed to GitHub Pages at `duongbui234.github.io/software-engineering-atlas`. Built on **Quartz v5** (Node ≥ 22). Concepts are written as linked notes so the Quartz graph view becomes a "map" of what has been learned. Mechanisms and code flows are visualized with **archify** diagrams embedded in posts.
 
-**Current state:** Quartz 5.1 runs with the Atlas theme (`plugins/atlas/`). Fonts, colors and the `vi-VN` locale are set in `quartz.config.yaml`. `prototype/` holds the approved static mockups (home, post, series hub), and `design-system/software-engineering-atlas/MASTER.md` is the design source of truth. The next step is to create the `/learn` and `/publish` project skills.
+**Current state:** Quartz 5.1 runs with the Atlas theme (`plugins/atlas/`). Fonts, colors and the `vi-VN` locale are set in `quartz.config.yaml`. `prototype/` holds the approved static mockups (home, post, series hub), and `design-system/software-engineering-atlas/MASTER.md` is the design source of truth. The `/learn` and `/publish` skills exist. The API Concepts series (`content/series/api-concepts.md`) is complete: six station posts `content/posts/2026-11-18-api-*.md`, one per station, with 33 concept notes. Most examples come from the owner's private `~/code/flash-sale` project (NestJS), published only as trimmed snippets.
 
 ## Quartz setup
 
@@ -72,7 +72,7 @@ Series hub frontmatter: `series` (id that posts reference), `code` (coordinate p
 A local Quartz plugin written as plain ESM in `dist/`. There is no build step: `dist/` is the source and is committed.
 - `frames.js`: the `atlas` page frame (neatline sheet, masthead, `margin | body | rail` grid) **and all theme CSS**. It renders the theme components directly, because Quartz places only one layout component per plugin. Every page type uses `template: atlas` in `quartz.config.yaml`.
 - `components.js`: brand, home headline and scale bar, home map + current line + gazetteer, post margin, standfirst, series mini-line, series hub. Also `ARCHIFY_SCRIPT`, which syncs iframe theme and the "open full screen" link.
-- `map.js`: the data-driven knowledge map SVG. There is a wide variant and a narrow mobile variant centred on "bạn đang ở đây".
+- `map.js`: the data-driven knowledge map SVG. There is a wide variant and a narrow mobile variant centred on "bạn đang ở đây". Concepts listed in a hub station render as small unlabeled "villages" around that station (name in an SVG `<title>`), so a series with dozens of concepts stays readable; other concepts get labeled towns on the outer ring.
 - `shared.js`: slug/date/series helpers.
 - `index.js`: default export is an **emitter** that copies `content/diagrams/**` and `content/code/**` verbatim. Quartz's asset emitter strips `.html` and renames `x/x.ts` to `x/index.ts`, so both dirs are listed in `ignorePatterns`.
 - Stock Quartz components still in use: search and darkmode (masthead), article-title (`not-index`), TOC, graph and backlinks (rail), footer. Explorer, recent-notes, breadcrumbs, content-meta, note-properties and reader-mode are disabled.
@@ -83,7 +83,7 @@ A local Quartz plugin written as plain ESM in `dist/`. There is no build step: `
 - Write in Vietnamese and keep technical terms in English. The voice is first person "mình", a learner retelling what they figured out ("mình từng nghĩ X, hóa ra Y").
 - `learn` posts follow this skeleton: **Đọc nhanh** (`> [!tldr] Đọc nhanh` callout, 3–5 bullets) → Vấn đề → Cơ chế (archify diagram) → Ví dụ chạy được → Hiểu lầm và bẫy → Câu hỏi tự kiểm tra (collapsed `> [!question]- …` callouts) → Tham khảo. `content/posts/2026-11-18-idempotency.md` is the reference example.
 - **Run every code example before publishing.** Default to TypeScript. Anything that cannot run standalone gets the comment `// minh họa, không chạy trực tiếp`.
-- `sources` is optional. When the post came from web research, add a "Tham khảo" section anyway. Rewrite in your own understanding; never copy text or reproduce the structure of a paid or paywalled source. Example: the "33 API concepts" list from newsletter.systemdesign.one is behind a paywall, so the API series uses a self-compiled concept list.
+- `sources` is optional. When the post came from web research, add a "Tham khảo" section anyway. Rewrite in your own understanding; never copy text or reproduce the structure of a paid or paywalled source. Example: the API series takes only the *list* of 33 concept names from newsletter.systemdesign.one (credited on the hub); every explanation, example and diagram is self-written.
 - When writing about the owner's private projects, publish only diagrams and trimmed or renamed snippets: no company or customer names, internal endpoints, or secrets. Ask before publishing.
 
 ## Workflow

@@ -3,7 +3,7 @@
   "diagram_type": "sequence",
   "meta": {
     "title": "Retry an toàn với Idempotency-Key",
-    "output": "content/diagrams/idempotency/retry.html",
+    "output": "content/diagrams/api-reliability/retry.html",
     "quality_profile": "showcase"
   },
   "participants": [

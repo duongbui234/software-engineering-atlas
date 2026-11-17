@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Bản thiết kế tách IAM khỏi flash-sale (chưa triển khai)",
+    "output": "content/diagrams/api-architecture/iam-extraction.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Trình duyệt",
+      "sublabel": "một origin duy nhất",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "ingress",
+      "type": "cloud",
+      "label": "Ingress NGINX",
+      "sublabel": "TLS, rate limit, trong K8s",
+      "pos": [
+        40,
+        195
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "main",
+      "type": "backend",
+      "label": "Main",
+      "sublabel": "REST edge, /auth facade",
+      "tag": "verify JWT bằng public key",
+      "pos": [
+        250,
+        190
+      ],
+      "size": [
+        170,
+        74
+      ]
+    },
+    {
+      "id": "iam",
+      "type": "security",
+      "label": "iam-service",
+      "sublabel": "ký JWT bằng private key",
+      "pos": [
+        510,
+        190
+      ],
+      "size": [
+        170,
+        74
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis dùng chung",
+      "sublabel": "blocklist:sid",
+      "pos": [
+        390,
+        40
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "maindb",
+      "type": "database",
+      "label": "Main DB",
+      "sublabel": "product, order, payment",
+      "pos": [
+        250,
+        365
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "iamdb",
+      "type": "database",
+      "label": "iam_db",
+      "sublabel": "users, permissions",
+      "pos": [
+        510,
+        365
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "https",
+      "from": "browser",
+      "to": "ingress",
+      "label": "HTTPS",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "http",
+      "from": "ingress",
+      "to": "main",
+      "label": "HTTP"
+    },
+    {
+      "id": "grpc",
+      "from": "main",
+      "to": "iam",
+      "label": "gRPC",
+      "variant": "emphasis"
+    },
+    {
+      "id": "main-sql",
+      "from": "main",
+      "to": "maindb",
+      "label": "SQL"
+    },
+    {
+      "id": "iam-sql",
+      "from": "iam",
+      "to": "iamdb",
+      "label": "SQL"
+    },
+    {
+      "id": "read-bl",
+      "from": "main",
+      "to": "redis",
+      "label": "đọc",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "write-bl",
+      "from": "iam",
+      "to": "redis",
+      "label": "ghi",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "right"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Đường nóng không qua IAM",
+      "items": [
+        "Mỗi request: kiểm chữ ký JWT tại Main",
+        "Thu hồi: tra blocklist trong Redis dùng chung",
+        "IAM chết vẫn mua hàng được, chỉ không đăng nhập mới"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "gRPC giữa Main và IAM",
+      "items": [
+        "Login, Refresh, Logout",
+        "GetUsersByIds thay cho JOIN users",
+        "SetUserRole khi duyệt seller (chưa nguyên tử)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Cái giá",
+      "items": [
+        "Khóa ngoại thành soft FK",
+        "Mất JOIN, phải gọi gộp để tránh N+1",
+        "Gateway riêng để dành cho phase sau"
+      ]
+    }
+  ]
+}

@@ -171,6 +171,8 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
 .atlas-map .region { font: italic 500 17px var(--headerFont); fill: var(--contour); letter-spacing: .08em; stroke-width: 6px; }
 .atlas-map .town { fill: var(--paper); stroke: var(--ink); stroke-width: 1.4; }
 .atlas-map .town.done { fill: var(--ink); }
+.atlas-map .village { fill: var(--ink-2); stroke: var(--paper); stroke-width: 1; }
+.atlas-map a:hover .village, .atlas-map a:focus-visible .village { fill: var(--water); stroke: var(--water); stroke-width: 3; }
 .atlas-map .town-label { font: 400 12.5px var(--bodyFont); fill: var(--ink); stroke-width: 4px; }
 .atlas-map .town-label.future { fill: var(--ink-2); }
 .atlas-map .link { stroke: var(--ink-2); stroke-width: .8; stroke-dasharray: 2 3; fill: none; }

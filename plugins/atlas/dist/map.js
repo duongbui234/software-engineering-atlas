@@ -102,10 +102,11 @@ export function KnowledgeMap({ slug, allFiles }) {
 
     // Tuyến series trong vùng
     const reserved = []
+    let pts = []
     if (region.state && region.state.stations.length) {
       const st = region.state.stations
       const n = st.length
-      const pts = st.map((s, i) => {
+      pts = st.map((s, i) => {
         const t = n === 1 ? 0.5 : i / (n - 1)
         return [slot.cx - slot.rx * 0.7 + t * slot.rx * 1.4, slot.cy + ZIGZAG[i % ZIGZAG.length] * slot.ry]
       })
@@ -147,8 +148,45 @@ export function KnowledgeMap({ slug, allFiles }) {
       )
     }
 
-    // Địa danh: ghi chú khái niệm, đặt trên vòng ngoài tuyến
-    const cs = region.concepts
+    // Khái niệm thuộc một ga: "làng" nhỏ tụ quanh ga đó, phía không có nhãn ga.
+    // Tên hiện khi rê chuột (title) để bản đồ không ngập chữ khi tuyến có hàng chục khái niệm.
+    const stationOf = new Map()
+    if (region.state) {
+      region.state.stations.forEach((s, si) =>
+        s.concepts.forEach((name) => stationOf.set(String(name).toLowerCase(), si)),
+      )
+    }
+    const villages = new Map()
+    for (const c of region.concepts) {
+      const si = stationOf.get(String(fm(c).title || "").toLowerCase())
+      if (si === undefined || !pts[si]) continue
+      if (!villages.has(si)) villages.set(si, [])
+      villages.get(si).push(c)
+    }
+    for (const [si, list] of villages) {
+      const [sx, sy] = pts[si]
+      const station = region.state.stations[si]
+      // nhãn ga nằm dưới (ZIGZAG > 0) thì làng ở trên và ngược lại; ga "đang ở đây" có nhãn bên phải nên làng ở bên trái
+      const [a0, a1] =
+        station.state === "now" ? [100, 260] : ZIGZAG[si % ZIGZAG.length] > 0 ? [200, 340] : [20, 160]
+      list.forEach((c, i) => {
+        const t = list.length === 1 ? 0.5 : i / (list.length - 1)
+        const a = ((a0 + t * (a1 - a0)) * Math.PI) / 180
+        const r = 21 + (i % 2) * 7
+        const x = sx + r * Math.cos(a)
+        const y = sy + r * Math.sin(a)
+        townPos.set(c.slug, [x, y])
+        layers.towns.push(
+          h("a", { href: rel(slug, c.slug), class: "internal", "aria-label": fm(c).title }, [
+            h("title", null, fm(c).title),
+            h("circle", { class: "village", cx: x, cy: y, r: 3.2 }),
+          ]),
+        )
+      })
+    }
+
+    // Địa danh còn lại: ghi chú khái niệm không thuộc ga nào, đặt trên vòng ngoài
+    const cs = region.concepts.filter((c) => stationOf.get(String(fm(c).title || "").toLowerCase()) === undefined || !pts.length)
     cs.forEach((c, i) => {
       const golden = 2.399963
       const a = -Math.PI / 2 + i * golden + seed
@@ -172,7 +210,8 @@ export function KnowledgeMap({ slug, allFiles }) {
         ]),
       )
     })
-    if (cs.length) descParts.push(`${region.name}: ${cs.map((c) => fm(c).title).join(", ")}.`)
+    if (region.concepts.length)
+      descParts.push(`${region.name}: ${region.concepts.map((c) => fm(c).title).join(", ")}.`)
   })
 
   // Liên kết giữa các khái niệm (wikilink)

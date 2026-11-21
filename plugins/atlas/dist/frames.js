@@ -183,6 +183,7 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
 .atlas-map a:hover .village, .atlas-map a:focus-visible .village { fill: var(--water); stroke: var(--water); stroke-width: 3; }
 .atlas-map .town-label { font: 400 12.5px var(--bodyFont); fill: var(--ink); stroke-width: 4px; }
 .atlas-map .town-label.future { fill: var(--ink-2); }
+.atlas-map .leader { stroke: var(--ink-2); stroke-width: .7; fill: none; }
 .atlas-map .link { stroke: var(--ink-2); stroke-width: .8; stroke-dasharray: 2 3; fill: none; }
 .atlas-map .route { fill: none; stroke: var(--survey); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .atlas-map .route.ahead { stroke-dasharray: 1 7; stroke-width: 2.5; }

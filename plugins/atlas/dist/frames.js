@@ -318,8 +318,12 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
   .post-margin { position: static; grid-template-columns: repeat(3, auto); justify-content: start; gap: .5rem 1.25rem; border-block: 1px solid var(--grid); padding: .75rem 0; }
   .post-margin .big { font-size: 1.125rem; }
   .series-line .name { display: none; }
-  .series-line .now .name { display: block; position: absolute; top: 1.4rem; white-space: nowrap; }
+  .series-line .now .name { display: block; position: absolute; top: 1.4rem; white-space: nowrap; left: 50%; transform: translateX(-50%); }
+  /* ga sát hai đầu tuyến: neo tên vào mép để không tràn ra ngoài màn hình */
+  .series-line li:nth-child(-n+3).now .name { left: 0; transform: none; text-align: left; }
+  .series-line li:nth-last-child(-n+3).now .name { left: auto; right: 0; transform: none; text-align: right; }
   .series-line { margin-bottom: 1.5rem; }
+  .series-line .line-cap { margin-top: 1.75rem; } /* chừa chỗ cho tên ga hiện tại (absolute) */
   .atlas-map .map-wide { display: none; }
   .atlas-map .map-narrow { display: block; }
   .atlas-map .town-label, .atlas-map .here-label { font-size: 17px; }

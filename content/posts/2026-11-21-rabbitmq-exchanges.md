@@ -149,12 +149,13 @@ Ví dụ binding `{ "x-match": "all", "region": "vn", "tier": "vip" }` chỉ nh�
 
 | | Direct | Fanout | Topic | Headers |
 |---|---|---|---|---|
-| Nhìn vào | routing key | không nhìn gì | routing key | headers của tin |
-| Cách khớp | trùng khớp hoàn toàn | ai bind cũng nhận | theo mẫu `*` / `#` | `x-match: all` hoặc `any` |
-| Lọc được | một tập khóa cố định | không lọc | theo cấp, theo nhóm | theo nhiều thuộc tính không thứ tự |
-| Exchange có sẵn | `amq.direct`, `""` | `amq.fanout` | `amq.topic` | `amq.headers`, `amq.match` |
-| Hợp với | lệnh, việc cần làm (`send-email`), mức log | phát loa: làm mới cache, thông báo cho mọi bản sao | sự kiện nghiệp vụ (`order.placed`) | lọc theo tổ hợp thuộc tính, hiếm |
+| Nhìn vào | routing key | không nhìn gì | routing key | headers |
+| Cách khớp | trùng hoàn toàn | ai bind cũng nhận | theo mẫu `*` `#` | khớp tất cả (all) hoặc một (any) |
+| Lọc được | vài khóa cố định | không lọc | theo cấp, theo nhóm | nhiều thuộc tính không thứ tự |
+| Hợp với | lệnh, mức log | phát loa cho mọi bên | sự kiện nghiệp vụ | tổ hợp thuộc tính, hiếm dùng |
 | Bưu điện | đọc đúng mã bưu chính | loa phường | đọc địa chỉ theo cấp | đọc tờ ghi chú kẹp kèm |
+
+Mỗi kiểu có sẵn một exchange dựng sẵn trên mọi broker: `amq.direct` (cùng với default exchange `""`), `amq.fanout`, `amq.topic`, `amq.headers` (và `amq.match`). Ví dụ "lệnh" cho direct là các khóa như `send-email`, `resize-image`; "sự kiện" cho topic là các khóa như `order.placed`, `payment.paid`. Phát loa của fanout là những việc như làm mới cache hay báo cho mọi bản sao của một dịch vụ.
 
 Topic là kiểu "bao" các kiểu kia: binding không có `*` hay `#` thì topic hành xử như direct, binding `#` thì như fanout. Đổi lại, nó phải so mẫu nên làm việc nhiều hơn direct một chút; với đa số hệ thống, đó không phải chỗ nghẽn.
 

@@ -51,6 +51,8 @@ Then write the three opening blocks from `CLAUDE.md` for a reader who has never 
 - **Từ điển nhanh**: every tool or term the post uses without explaining. Scan the finished draft for one more pass; a term you missed is a term a newcomer stops at.
 - **Hình dung trước**: pick one everyday analogy that covers *every* concept of the post, write the `Đời thường | Khái niệm` table and a Mermaid diagram. Done when each concept in the post's tldr has a row.
 
+Write every Mermaid block by the Mermaid rules in `CLAUDE.md` (tall not wide, stacked subgraphs, no label starting with `#` or `1.`, wrapped sequence messages).
+
 In the body, lead with the plain role and put the class name second.
 
 `description` is one sentence that names the problem the post solves; it shows under the title, on the home page and in RSS. Wikilink each concept on first mention (`[[idempotency]]`). Set `draft: false`: the PR is the review gate.
@@ -85,15 +87,16 @@ For an existing note, add the backlink and sharpen the definition. Keep what is 
 Every check below must pass:
 
 1. `CI=true npx quartz build` finishes with no error. CI mode fails on broken plugins.
-2. Preview with `npx quartz build --serve`. Screenshot the post at 1440px and 390px, in both light and dark, plus the home page (see Commands in `CLAUDE.md`). Look at each screenshot and confirm:
+2. The **render check** passes on that build: `npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs`. It opens every page at 390px and 1440px and fails on horizontal page scroll, a broken Mermaid block, an "Unsupported markdown" label, or a diagram shrunk below 75%. CI runs the same check, so a red local run means a red PR. Each failure names the page and, for overflow, the element that starts it. Fix the post (or the theme) and rerun until it prints `✓`.
+3. Preview with `npx quartz build --serve`. Screenshot the post at 1440px and 390px, in both light and dark, plus the home page (see Commands in `CLAUDE.md`). Look at each screenshot and confirm:
    - the post appears in "Bài mới" with the right coordinate code;
    - the margin and standfirst render;
    - the series mini-line marks this station;
    - the archify iframe loads in the right theme and is not cut off;
-   - every Mermaid block renders as a diagram (no "Syntax error"), and its text is legible at 1440px;
+   - every Mermaid block reads well: the render check proves it renders and is not shrunk, the screenshot proves the layout makes sense;
    - the code block matches the file;
    - concept notes link both ways.
-3. `public/diagrams/<slug>/` and `public/code/<slug>/` contain the files with their real names and extensions.
+4. `public/diagrams/<slug>/` and `public/code/<slug>/` contain the files with their real names and extensions.
 
 Fix and repeat until every check passes. A failure you can't resolve goes into the PR body, marked as an open issue.
 

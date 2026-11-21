@@ -7,7 +7,7 @@ argument-hint: "<chủ đề> [--repo <đường dẫn dự án>]"
 
 # /deep-dive
 
-An **end-to-end run**: you research one topic exhaustively, write it up for the Atlas, and ship it to `main` yourself. The owner is not in the loop: no calibration questions, no review. The gates are mechanical instead (examples run, build passes, screenshots look right, privacy scan clean, CI green), and a failed gate stops the run before merge.
+An **end-to-end run**: you research one topic exhaustively, write it up for the Atlas, and ship it to `main` yourself. The owner is not in the loop: no calibration questions, no review. The gates are mechanical instead (examples run, build passes, render check passes, screenshots look right, privacy scan clean, CI green), and a failed gate stops the run before merge.
 
 Content rules live in `CLAUDE.md` (content model, writing conventions, archify contract). Apply them in full.
 
@@ -55,7 +55,7 @@ Done when every concept in the inventory is explained in a post and has a `conte
 
 ## 5. Verify
 
-Run `/publish` step 7 for every post. Then run the **privacy scan** over the diff (`git diff main --stat` and the full text): no company or customer names, internal hosts or endpoints, keys, tokens, emails, or absolute home paths.
+Run `/publish` step 7 for every post; its render check (`node scripts/check-render.mjs`) covers the whole site in one run, so run it once after the last post is written. Then run the **privacy scan** over the diff (`git diff main --stat` and the full text): no company or customer names, internal hosts or endpoints, keys, tokens, emails, or absolute home paths.
 
 Every check must pass. Fix and repeat. A check you cannot make pass is a **stop**: go to step 7.
 

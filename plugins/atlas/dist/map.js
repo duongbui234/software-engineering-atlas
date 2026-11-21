@@ -32,46 +32,27 @@ function contour(slot, k, seed) {
   return closedPath(pts)
 }
 
-function slotsFor(count) {
-  if (count <= 1) return [{ cx: 480, cy: 205, rx: 410, ry: 165 }]
-  const slots = [{ cx: 300, cy: 205, rx: 262, ry: 160 }]
-  const k = Math.min(count - 1, 3)
-  const band = 360 / k
-  for (let i = 0; i < k; i++) {
-    slots.push({ cx: 770, cy: 22 + band * (i + 0.5), rx: 165, ry: Math.min(80, band / 2 - 12) })
-  }
-  return slots
+// Bản đồ trang chủ là "bản đồ chi tiết" của đúng một tuyến: tuyến vừa đi gần nhất.
+// Các tuyến khác nằm ở mục lục mảnh bản đồ (sheetIndex) bên dưới, nên số bài, số tuyến
+// tăng bao nhiêu thì khung này vẫn chỉ chứa một tuyến.
+const SLOT = { cx: 480, cy: 205, rx: 410, ry: 165 }
+
+/** Các tuyến (hub) kèm trạng thái, tuyến vừa đi gần nhất đứng đầu. */
+export function linesByRecency(allFiles) {
+  return hubs(allFiles)
+    .map((hub) => {
+      const state = lineState(allFiles, hub)
+      return { hub, state, lastDate: state.latest ? (pageDate(state.latest) || new Date(0)).getTime() : 0 }
+    })
+    .sort((a, b) => b.lastDate - a.lastDate || b.state.visited - a.state.visited)
 }
 
-function collectRegions(allFiles) {
-  const regions = new Map()
-  const get = (name) => {
-    if (!regions.has(name)) regions.set(name, { name, concepts: [], hub: undefined, lastDate: 0 })
-    return regions.get(name)
-  }
-  const conceptToRegion = new Map()
-  for (const hub of hubs(allFiles)) {
-    const r = get(fm(hub).region || fm(hub).title)
-    r.hub = hub
-    const state = lineState(allFiles, hub)
-    r.state = state
-    r.lastDate = state.latest ? (pageDate(state.latest) || new Date(0)).getTime() : 0
-    for (const st of state.stations) for (const c of st.concepts) conceptToRegion.set(String(c).toLowerCase(), r.name)
-  }
-  for (const f of allFiles) {
-    if (!isConcept(f) || !isListed(f)) continue
-    const m = fm(f)
-    const title = String(m.title || "").toLowerCase()
-    const name =
-      m.region ||
-      conceptToRegion.get(title) ||
-      (Array.isArray(m.tags) && m.tags[0] ? `Vùng ${m.tags[0]}` : "Vùng khác")
-    get(name).concepts.push(f)
-  }
-  return [...regions.values()]
-    .filter((r) => r.hub || r.concepts.length)
-    .sort((a, b) => b.lastDate - a.lastDate || b.concepts.length - a.concepts.length)
-    .slice(0, 4)
+function currentRegion(allFiles) {
+  const line = linesByRecency(allFiles).find((l) => l.state.stations.length)
+  if (!line) return null
+  const names = new Set(line.state.stations.flatMap((st) => st.concepts.map((c) => String(c).toLowerCase())))
+  const concepts = allFiles.filter((f) => isConcept(f) && isListed(f) && names.has(String(fm(f).title || "").toLowerCase()))
+  return { name: fm(line.hub).region || fm(line.hub).title, hub: line.hub, state: line.state, concepts }
 }
 
 const ZIGZAG = [0.32, -0.18, 0.12, -0.34, 0.26, -0.08, 0.3, -0.24]
@@ -154,8 +135,7 @@ function placeStationLabels(stations, pts, fs, bounds, obstacles) {
 
 /** Dựng các lớp của bản đồ với cỡ chữ `fs` trong vùng nhìn `view` (bản rộng và bản hẹp có cỡ chữ khác nhau). */
 function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
-  const layers = { contours: [], links: [], routes: [], towns: [], labels: [] }
-  const townPos = new Map()
+  const layers = { contours: [], routes: [], towns: [], labels: [] }
   const descParts = []
   const bounds = { x1: view.x + 4, x2: view.x + view.w - 4, y1: 4, y2: H - 4 }
 
@@ -167,7 +147,6 @@ function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
       [0.8, "contour"],
       [0.6, "contour"],
     ]) {
-      if (ri > 0 && k === 0.6) continue
       layers.contours.push(h("path", { class: cls, d: contour(slot, k, seed) }))
     }
     const rx = slot.cx - slot.rx * 0.72
@@ -176,14 +155,12 @@ function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
     const regionBox = boxOf("start", rx, ry, region.name.length * 17 * 0.62, 17)
 
     // Tuyến series trong vùng
-    const reserved = []
     let pts = []
     const labelBoxes = []
     if (region.state && region.state.stations.length) {
       const st = region.state.stations
       const n = st.length
       pts = stationPoints(slot, n)
-      reserved.push(...pts)
       const visitedIdx = region.state.reached - 1
       const line = (from, to, cls) =>
         to > from &&
@@ -260,7 +237,6 @@ function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
             y = sy + r * Math.sin(a)
             if (!hitsLabel(x, y)) break
           }
-          townPos.set(c.slug, [x, y])
           layers.towns.push(
             h("a", { href: rel(slug, c.slug), class: "internal", "aria-label": fm(c).title }, [
               h("title", null, fm(c).title),
@@ -271,55 +247,12 @@ function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
       }
     }
 
-    // Địa danh còn lại: ghi chú khái niệm không thuộc ga nào, đặt trên vòng ngoài
-    const stationOf = region.stationOf || new Map()
-    const cs = region.concepts.filter((c) => stationOf.get(String(fm(c).title || "").toLowerCase()) === undefined || !pts.length)
-    cs.forEach((c, i) => {
-      const golden = 2.399963
-      const a = -Math.PI / 2 + i * golden + seed
-      const r = region.state ? 0.86 : 0.25 + 0.6 * Math.sqrt((i + 0.5) / cs.length)
-      let x = slot.cx + slot.rx * 0.82 * r * Math.cos(a)
-      let y = slot.cy + slot.ry * 0.8 * r * Math.sin(a)
-      // tránh đè lên ga
-      for (const [px, py] of reserved) {
-        if (Math.hypot(px - x, py - y) < 26) y += y < py ? -18 : 18
-      }
-      townPos.set(c.slug, [x, y])
-      const right = x > slot.cx + slot.rx * 0.45
-      layers.towns.push(
-        h("a", { href: rel(slug, c.slug), class: "internal" }, [
-          h("circle", { class: "town done", cx: x, cy: y, r: 6 }),
-          h(
-            "text",
-            { class: "town-label", x: right ? x - 10 : x + 10, y: y + 4, "text-anchor": right ? "end" : "start" },
-            fm(c).title,
-          ),
-        ]),
-      )
-    })
     if (region.concepts.length)
       descParts.push(`${region.name}: ${region.concepts.map((c) => fm(c).title).join(", ")}.`)
   })
 
-  // Liên kết giữa các khái niệm (wikilink)
-  const seen = new Set()
-  for (const [from, [x1, y1]] of townPos) {
-    const f = allFiles.find((x) => x.slug === from)
-    for (const link of (f && f.links) || []) {
-      const to = [...townPos.keys()].find((s) => s === link || s.endsWith(`/${String(link).split("/").pop()}`))
-      if (!to || to === from) continue
-      const key = [from, to].sort().join("|")
-      if (seen.has(key)) continue
-      seen.add(key)
-      const [x2, y2] = townPos.get(to)
-      const mx = (x1 + x2) / 2
-      const my = (y1 + y2) / 2 - 30
-      layers.links.push(h("path", { class: "link", d: `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}` }))
-    }
-  }
-
   return {
-    children: [...layers.contours, ...layers.labels, ...layers.links, ...layers.routes, ...layers.towns],
+    children: [...layers.contours, ...layers.labels, ...layers.routes, ...layers.towns],
     desc: descParts.join(" "),
   }
 }
@@ -332,9 +265,10 @@ function stationPoints(slot, n) {
 }
 
 export function KnowledgeMap({ slug, allFiles }) {
-  const regions = collectRegions(allFiles)
-  if (regions.length === 0) return null
-  const slots = slotsFor(regions.length)
+  const region = currentRegion(allFiles)
+  if (!region) return null
+  const regions = [region]
+  const slots = [SLOT]
 
   // Bản hẹp (điện thoại) căn quanh "bạn đang ở đây" của vùng mới nhất (vùng đầu tiên),
   // lệch sang phải để thấy các ga đã đi phía sau.
@@ -357,4 +291,87 @@ export function KnowledgeMap({ slug, allFiles }) {
   }
   // cỡ chữ khớp CSS: 12.5px ở bản rộng, 17px ở bản hẹp
   return [svg("map-wide", { x: 0, w: W }, 12.5, "atlas-map-w"), svg("map-narrow", { x: narrowX, w: narrowW }, 17, "atlas-map-n")]
+}
+
+// --- Mục lục mảnh bản đồ ------------------------------------------------------
+// Mỗi tuyến là một "mảnh" (sheet) như trong một cuốn atlas thật: mã, tên vùng, tên tuyến,
+// một đường tiến độ thu nhỏ. Ghi chú khái niệm không thuộc tuyến nào gom theo vùng thành
+// "mảnh lẻ". Hiện SHEETS_SHOWN mảnh mới nhất, còn lại gập trong <details>.
+const SHEETS_SHOWN = 6
+const LOOSE_SHOWN = 5
+
+function miniLine(state) {
+  const n = state.stations.length
+  return h("span", { class: "ml", style: `--n:${n};--reached:${n > 1 ? Math.max(state.reached - 1, 0) / (n - 1) : 0}`, "aria-hidden": "true" }, [
+    h("span", { class: "ml-done" }),
+    ...state.stations.map((s) => h("i", { class: s.state })),
+  ])
+}
+
+export function sheetIndex({ slug, allFiles, fmtDay }) {
+  const lines = linesByRecency(allFiles)
+  const inLine = new Set(lines.flatMap((l) => l.state.stations.flatMap((st) => st.concepts.map((c) => String(c).toLowerCase()))))
+  const loose = new Map()
+  for (const f of allFiles) {
+    if (!isConcept(f) || !isListed(f)) continue
+    if (inLine.has(String(fm(f).title || "").toLowerCase())) continue
+    const m = fm(f)
+    const name = m.region || (Array.isArray(m.tags) && m.tags[0] ? `Vùng ${m.tags[0]}` : "Vùng khác")
+    if (!loose.has(name)) loose.set(name, [])
+    loose.get(name).push(f)
+  }
+
+  const sheets = [
+    ...lines.map(({ hub, state, lastDate }) => {
+      const m = fm(hub)
+      const here = state.stations.find((s) => s.state === "now")
+      const done = state.visited === state.stations.length
+      return {
+        lastDate,
+        node: h("li", { class: "sheet" }, [
+          h("a", { class: "internal sheet-link", href: rel(slug, hub.slug) }, [
+            h("span", { class: "sheet-head" }, [h("span", { class: "sheet-code" }, state.code), h("span", { class: "sheet-region" }, m.region || "")]),
+            h("span", { class: "sheet-t" }, String(m.title || "").replace(/^Tuyến\s+/i, "")),
+            miniLine(state),
+            h("span", { class: "sheet-meta" }, [
+              `${state.visited}/${state.stations.length} ga`,
+              done ? " · đã đi hết" : here ? ` · đang ở ga ${here.n}` : "",
+              lastDate ? ` · ${fmtDay(new Date(lastDate))}` : "",
+            ]),
+          ]),
+        ]),
+      }
+    }),
+    ...[...loose].map(([name, list]) => {
+      list.sort((a, b) => (pageDate(b) || 0) - (pageDate(a) || 0))
+      const lastDate = list.length ? (pageDate(list[0]) || new Date(0)).getTime() : 0
+      return {
+        lastDate: lastDate - 1, // mảnh lẻ xếp sau tuyến cùng ngày
+        node: h("li", { class: "sheet loose" }, [
+          h("span", { class: "sheet-head" }, [h("span", { class: "sheet-code" }, "LẺ"), h("span", { class: "sheet-region" }, name)]),
+          h("span", { class: "sheet-t" }, `${list.length} địa danh rời`),
+          h(
+            "span",
+            { class: "sheet-towns" },
+            list.slice(0, LOOSE_SHOWN).flatMap((c, i) => [i ? " · " : "", h("a", { class: "internal", href: rel(slug, c.slug) }, fm(c).title)]),
+          ),
+          list.length > LOOSE_SHOWN && h("span", { class: "sheet-meta" }, `và ${list.length - LOOSE_SHOWN} địa danh khác`),
+        ]),
+      }
+    }),
+  ].sort((a, b) => b.lastDate - a.lastDate)
+
+  if (!sheets.length) return null
+  const shown = sheets.slice(0, SHEETS_SHOWN).map((s) => s.node)
+  const rest = sheets.slice(SHEETS_SHOWN).map((s) => s.node)
+  return h("section", { class: "sheets", "aria-labelledby": "sh-h" }, [
+    h("h2", { id: "sh-h" }, "Mục lục bản đồ"),
+    h("p", { class: "sheets-lede" }, `${lines.length} tuyến, mỗi tuyến một mảnh. Bản đồ phía trên là mảnh vừa đi.`),
+    h("ol", { class: "sheet-grid" }, shown),
+    rest.length > 0 &&
+      h("details", { class: "sheets-more" }, [
+        h("summary", null, `Xem tất cả ${sheets.length} mảnh`),
+        h("ol", { class: "sheet-grid" }, rest),
+      ]),
+  ])
 }

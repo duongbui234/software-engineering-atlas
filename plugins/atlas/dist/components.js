@@ -22,7 +22,7 @@ import {
   TYPE_LABEL,
   LEVEL_LABEL,
 } from "./shared.js"
-import { KnowledgeMap } from "./map.js"
+import { KnowledgeMap, sheetIndex } from "./map.js"
 
 const sym = (type, label) =>
   h("span", {
@@ -227,6 +227,7 @@ export const AtlasHome = (opts = {}) => {
             h("a", { class: "go internal", href: rel(slug, current.hub.slug) }, "Xem lộ trình"),
           ])
         })(),
+      sheetIndex({ slug, allFiles, fmtDay }),
       h("section", { class: "gazetteer", "aria-labelledby": "gz-h" }, [
         h("h2", { id: "gz-h" }, "Bài mới"),
         posts.length === 0
@@ -249,6 +250,11 @@ export const AtlasHome = (opts = {}) => {
                 )
               }),
             ),
+        posts.length > limit &&
+          h("p", { class: "gz-all" }, [
+            h("a", { class: "internal", href: rel(slug, "posts/") }, `Xem tất cả ${posts.length} bài`),
+            ` · đang hiện ${limit} bài mới nhất`,
+          ]),
       ]),
     ])
   }

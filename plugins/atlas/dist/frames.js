@@ -205,6 +205,32 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
 .current p { margin: .1rem 0 0; color: var(--ink-2); font-size: .9375rem; }
 .current .go { white-space: nowrap; }
 
+/* ── Mục lục bản đồ: mỗi tuyến một mảnh ──────────────────── */
+.sheets h2 { font-size: 1.625rem; margin: 2rem 0 .25rem; }
+.sheets-lede { margin: 0 0 .75rem; color: var(--ink-2); font-size: .9375rem; }
+.sheet-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); border-top: 1px solid var(--ink); border-left: 1px solid var(--grid); }
+.sheet { margin: 0; border-right: 1px solid var(--grid); border-bottom: 1px solid var(--grid); min-width: 0; }
+.page[data-frame="atlas"] a.internal.sheet-link, .sheet.loose { display: grid; font-weight: 400; border-radius: 0; background: none; text-decoration: none; gap: .35rem; padding: .85rem 1rem 1rem; color: inherit; text-decoration: none; height: 100%; box-sizing: border-box; }
+.page[data-frame="atlas"] a.internal.sheet-link:hover { color: inherit; background: color-mix(in srgb, var(--water) 6%, transparent); }
+.sheet-link:hover .sheet-t { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em; }
+.sheet-head { display: flex; justify-content: space-between; gap: .5rem; align-items: baseline; }
+.sheet-code { font: 500 .75rem/1 var(--codeFont); color: var(--ink-2); letter-spacing: .04em; }
+.sheet-region { font: italic 500 .875rem/1.2 var(--headerFont); color: var(--contour); letter-spacing: .06em; text-align: right; }
+.sheet-t { font: 600 1.1875rem/1.25 var(--headerFont); color: var(--ink); }
+.sheet-meta { font: 400 .8125rem/1.3 var(--codeFont); color: var(--ink-2); }
+.sheet-towns { font-size: .9375rem; line-height: 1.5; overflow-wrap: anywhere; }
+.ml { position: relative; display: flex; justify-content: space-between; align-items: center; height: .9rem; margin: .2rem 0; }
+.ml::before { content: ""; position: absolute; left: .25rem; right: .25rem; top: 50%; border-top: 2px dotted var(--ink-2); }
+.ml .ml-done { position: absolute; left: .25rem; top: calc(50% - 1.5px); height: 3px; width: calc((100% - .5rem) * var(--reached)); background: var(--survey); }
+.ml i { position: relative; width: .5rem; height: .5rem; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--ink-2); box-sizing: border-box; }
+.ml i.done { background: var(--ink); border-color: var(--ink); }
+.ml i.now { background: var(--survey); border-color: var(--survey); width: .65rem; height: .65rem; }
+.sheets-more { margin-top: .75rem; }
+.sheets-more summary { cursor: pointer; font-weight: 600; color: var(--water); padding: .25rem 0; }
+.sheets-more[open] summary { margin-bottom: .75rem; }
+.gz-all { margin: 1rem 0 0; color: var(--ink-2); font-size: .9375rem; }
+.gz-all a { font-weight: 600; }
+
 .gazetteer h2 { font-size: 1.625rem; margin: 2rem 0 .75rem; }
 .gz { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
 .gz li { border-bottom: 1px solid var(--grid); margin: 0; }

@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Không mất, không trùng: outbox phía gửi, sổ đã xử lý phía nhận",
+    "output": "content/diagrams/rabbitmq-delivery-guarantees/outbox-inbox.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Quầy đặt hàng",
+      "sublabel": "API hủy đơn"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Sổ sách",
+      "sublabel": "Postgres: đơn, outbox, đã xử lý"
+    },
+    {
+      "id": "relay",
+      "type": "backend",
+      "label": "Người đưa thư",
+      "sublabel": "outbox relay, mỗi giây"
+    },
+    {
+      "id": "broker",
+      "type": "messagebus",
+      "label": "Bưu điện",
+      "sublabel": "exchange orders.events"
+    },
+    {
+      "id": "consumer",
+      "type": "backend",
+      "label": "Nhân viên kho",
+      "sublabel": "consumer hoàn kho"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 232,
+      "label": "Ghi cùng lúc"
+    },
+    {
+      "from": 247,
+      "to": 427,
+      "label": "Gửi từ outbox"
+    },
+    {
+      "from": 442,
+      "to": 632,
+      "label": "Nhận và chống trùng"
+    }
+  ],
+  "messages": [
+    {
+      "id": "tx",
+      "from": "api",
+      "to": "db",
+      "y": 165,
+      "label": "hủy đơn và ghi phiếu gửi",
+      "variant": "emphasis",
+      "note": "1 transaction: UPDATE order + INSERT outbox"
+    },
+    {
+      "id": "commit",
+      "from": "db",
+      "to": "api",
+      "y": 222,
+      "label": "commit cả hai hoặc không gì",
+      "variant": "return"
+    },
+    {
+      "id": "poll",
+      "from": "relay",
+      "to": "db",
+      "y": 262,
+      "label": "lấy phiếu chưa gửi",
+      "variant": "default",
+      "note": "FOR UPDATE SKIP LOCKED"
+    },
+    {
+      "id": "publish",
+      "from": "relay",
+      "to": "broker",
+      "y": 312,
+      "label": "gửi sự kiện, chờ biên nhận",
+      "variant": "emphasis",
+      "note": "persistent, message_id = evt-7"
+    },
+    {
+      "id": "confirm",
+      "from": "broker",
+      "to": "relay",
+      "y": 362,
+      "label": "biên nhận",
+      "variant": "return"
+    },
+    {
+      "id": "mark",
+      "from": "relay",
+      "to": "db",
+      "y": 397,
+      "label": "đánh dấu phiếu đã gửi",
+      "variant": "dashed",
+      "note": "chết trước bước này: lần sau gửi lại evt-7"
+    },
+    {
+      "id": "deliver",
+      "from": "broker",
+      "to": "consumer",
+      "y": 457,
+      "label": "giao order.cancelled",
+      "variant": "default",
+      "note": "có thể tới 2 lần"
+    },
+    {
+      "id": "dedup",
+      "from": "consumer",
+      "to": "db",
+      "y": 507,
+      "label": "chưa xử lý evt-7 thì hoàn kho",
+      "variant": "emphasis",
+      "note": "1 transaction: INSERT processed ON CONFLICT DO NOTHING + cộng kho"
+    },
+    {
+      "id": "result",
+      "from": "db",
+      "to": "consumer",
+      "y": 562,
+      "label": "lần đầu: đã làm; lần sau: bỏ qua",
+      "variant": "return"
+    },
+    {
+      "id": "ack",
+      "from": "consumer",
+      "to": "broker",
+      "y": 602,
+      "label": "ký nhận",
+      "variant": "return",
+      "note": "ack"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "db",
+      "from": 165,
+      "to": 222,
+      "type": "database"
+    },
+    {
+      "participant": "relay",
+      "from": 262,
+      "to": 402,
+      "type": "backend"
+    },
+    {
+      "participant": "broker",
+      "from": 312,
+      "to": 362,
+      "type": "messagebus"
+    },
+    {
+      "participant": "consumer",
+      "from": 457,
+      "to": 602,
+      "type": "backend"
+    },
+    {
+      "participant": "db",
+      "from": 507,
+      "to": 562,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Phía gửi: không mất",
+      "items": [
+        "Đơn và phiếu gửi nằm chung một transaction",
+        "Relay gửi lại tới khi có biên nhận",
+        "Cái giá: có thể gửi trùng"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Phía nhận: không làm hai lần",
+      "items": [
+        "Ghi mã sự kiện vào sổ cùng transaction với việc chính",
+        "Gặp lại mã cũ thì bỏ qua rồi vẫn ack",
+        "Mỗi consumer giữ sổ riêng của mình"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Bẫy",
+      "items": [
+        "Ghi sổ ở transaction khác: lỗi giữa chừng là mất hoặc trùng",
+        "Chống trùng bằng cờ redelivered: không đủ"
+      ]
+    }
+  ]
+}

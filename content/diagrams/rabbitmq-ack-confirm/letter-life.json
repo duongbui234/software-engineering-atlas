@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đời một lá thư: biên nhận, giao, chết giữa chừng, giao lại",
+    "output": "content/diagrams/rabbitmq-ack-confirm/letter-life.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "producer",
+      "type": "backend",
+      "label": "Người gửi",
+      "sublabel": "producer, confirm channel"
+    },
+    {
+      "id": "broker",
+      "type": "messagebus",
+      "label": "Hộc thư",
+      "sublabel": "RabbitMQ: queue durable"
+    },
+    {
+      "id": "disk",
+      "type": "database",
+      "label": "Kho lưu",
+      "sublabel": "đĩa của broker"
+    },
+    {
+      "id": "worker-a",
+      "type": "backend",
+      "label": "Nhân viên A",
+      "sublabel": "consumer, prefetch 1"
+    },
+    {
+      "id": "worker-b",
+      "type": "backend",
+      "label": "Nhân viên B",
+      "sublabel": "consumer, prefetch 1"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 255,
+      "label": "Gửi và nhận biên nhận"
+    },
+    {
+      "from": 270,
+      "to": 360,
+      "label": "A nhận rồi chết"
+    },
+    {
+      "from": 380,
+      "to": 510,
+      "label": "Giao lại cho B"
+    }
+  ],
+  "messages": [
+    {
+      "id": "publish",
+      "from": "producer",
+      "to": "broker",
+      "y": 165,
+      "label": "gửi thư bền, xin biên nhận",
+      "variant": "emphasis",
+      "note": "publish persistent=true"
+    },
+    {
+      "id": "persist",
+      "from": "broker",
+      "to": "disk",
+      "y": 200,
+      "label": "ghi thư xuống đĩa",
+      "variant": "default"
+    },
+    {
+      "id": "confirm",
+      "from": "broker",
+      "to": "producer",
+      "y": 240,
+      "label": "biên nhận: tôi đã giữ thư",
+      "variant": "return",
+      "note": "basic.ack của publisher confirm"
+    },
+    {
+      "id": "deliver-a",
+      "from": "broker",
+      "to": "worker-a",
+      "y": 285,
+      "label": "giao thư #1",
+      "variant": "default",
+      "note": "redelivered=false, A hết chỗ (prefetch 1)"
+    },
+    {
+      "id": "crash",
+      "from": "worker-a",
+      "to": "broker",
+      "y": 345,
+      "label": "A chết trước khi ký nhận",
+      "variant": "dashed",
+      "note": "channel đóng, thư chưa ack"
+    },
+    {
+      "id": "deliver-b",
+      "from": "broker",
+      "to": "worker-b",
+      "y": 400,
+      "label": "giao lại thư #1",
+      "variant": "emphasis",
+      "note": "redelivered=true"
+    },
+    {
+      "id": "ack",
+      "from": "worker-b",
+      "to": "broker",
+      "y": 445,
+      "label": "ký nhận: xử lý xong",
+      "variant": "return",
+      "note": "basic.ack"
+    },
+    {
+      "id": "delete",
+      "from": "broker",
+      "to": "disk",
+      "y": 490,
+      "label": "xóa thư khỏi hộc",
+      "variant": "default"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "broker",
+      "from": 165,
+      "to": 245,
+      "type": "messagebus"
+    },
+    {
+      "participant": "disk",
+      "from": 195,
+      "to": 215,
+      "type": "database"
+    },
+    {
+      "participant": "worker-a",
+      "from": 285,
+      "to": 345,
+      "type": "backend"
+    },
+    {
+      "participant": "worker-b",
+      "from": 400,
+      "to": 445,
+      "type": "backend"
+    },
+    {
+      "participant": "broker",
+      "from": 445,
+      "to": 495,
+      "type": "messagebus"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Hai chiều xác nhận",
+      "items": [
+        "Publisher confirm: broker nói với người gửi 'tôi đã giữ thư'",
+        "Consumer ack: người nhận nói với broker 'tôi đã xử lý xong'",
+        "Chỉ sau ack thì broker mới xóa thư"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Nếu dùng auto-ack",
+      "items": [
+        "Thư bị coi là xong ngay khi vừa giao cho A",
+        "A chết là thư mất, B không bao giờ thấy",
+        "Prefetch không còn tác dụng, A có thể bị ngập"
+      ]
+    }
+  ]
+}

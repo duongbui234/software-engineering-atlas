@@ -1,0 +1,13 @@
+# Cụm RabbitMQ 3 node để thử quorum queue khi node chết.
+# Chạy: docker compose up -d   (chờ ~30 giây cho cụm hình thành)
+# Dọn: docker compose down
+x-node: &node
+  image: rabbitmq:4-management
+  environment:
+    RABBITMQ_ERLANG_COOKIE: atlas-demo-cookie   # mọi node (và CLI) phải dùng chung cookie
+  volumes:
+    - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+services:
+  rmq1: { <<: *node, hostname: rmq1, ports: ["5674:5672"] }
+  rmq2: { <<: *node, hostname: rmq2, ports: ["5675:5672"] }
+  rmq3: { <<: *node, hostname: rmq3, ports: ["5676:5672"] }

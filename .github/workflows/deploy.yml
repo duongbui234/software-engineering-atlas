@@ -35,6 +35,11 @@ jobs:
       - run: npm ci # plugin @quartz-community/* là npm package, cài ở bước này
       - run: npx quartz plugin install --from-config # liên kết plugin cục bộ ./plugins/atlas (lockfile chứa đường dẫn tuyệt đối nên không commit)
       - run: npx quartz build
+      - name: Kiểm tra hiển thị (cuộn ngang, Mermaid) ở 390px và 1440px
+        # Chrome có sẵn trên runner ubuntu; playwright-core cài --no-save để không đụng package.json của Quartz
+        run: |
+          npm install --no-save playwright-core@1.49.1
+          node scripts/check-render.mjs
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3

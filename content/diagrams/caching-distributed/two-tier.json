@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Cache feature flag hai tầng trên nhiều pod",
+    "output": "content/diagrams/caching-distributed/two-tier.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "lb", "type": "cloud", "label": "Cửa vào", "sublabel": "load balancer", "pos": [40, 240], "size": [150, 64] },
+    { "id": "pod1", "type": "backend", "label": "Pod 1", "sublabel": "L1: Map trong RAM + tập 'không có'", "pos": [280, 100], "size": [210, 64] },
+    { "id": "pod2", "type": "backend", "label": "Pod 2", "sublabel": "L1: Map trong RAM + tập 'không có'", "pos": [280, 380], "size": [210, 64] },
+    { "id": "redis", "type": "database", "label": "Bộ nhớ tạm dùng chung", "sublabel": "L2 Redis: hash flags + kênh báo hủy", "pos": [600, 240], "size": [220, 64] },
+    { "id": "pg", "type": "database", "label": "Kho gốc", "sublabel": "PostgreSQL: bảng feature_flags", "pos": [920, 240], "size": [200, 64] },
+    { "id": "admin", "type": "frontend", "label": "Trang quản trị", "sublabel": "admin bật tắt cờ", "pos": [920, 60], "size": [200, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Mỗi pod giữ bản riêng, không tự đồng bộ", "wraps": ["pod1", "pod2"] }
+  ],
+  "connections": [
+    { "id": "in1", "from": "lb", "to": "pod1", "fromSide": "top", "toSide": "left" },
+    { "id": "in2", "from": "lb", "to": "pod2", "fromSide": "bottom", "toSide": "left" },
+    { "id": "r1", "from": "pod1", "to": "redis", "label": "đọc L2, nghe kênh báo hủy", "fromSide": "right", "toSide": "top" },
+    { "id": "r2", "from": "pod2", "to": "redis", "label": "đọc L2, nghe kênh báo hủy", "fromSide": "right", "toSide": "bottom" },
+    { "id": "db", "from": "redis", "to": "pg", "label": "L2 trượt: đọc gốc", "variant": "emphasis" },
+    { "id": "write", "from": "admin", "to": "pg", "label": "ghi cờ, rồi xóa L2", "variant": "security" },
+    { "id": "bcast", "from": "admin", "to": "redis", "label": "publish: bỏ L1 cờ X", "variant": "dashed", "fromSide": "left", "toSide": "top" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Đường đọc",
+      "items": [
+        "L1 trong RAM: vài chục nano giây, không qua mạng",
+        "L2 Redis: dùng chung cho mọi pod",
+        "Cuối cùng mới tới PostgreSQL"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chỗ hở",
+      "items": [
+        "Pub/Sub không lưu tin: pod mất kết nối là lỡ",
+        "L1 không có TTL thì sai tới khi pod khởi động lại",
+        "Vá: TTL cho L1, xóa sạch L1 khi nối lại"
+      ]
+    }
+  ]
+}

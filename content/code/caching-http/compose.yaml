@@ -1,0 +1,13 @@
+# CDN thu nhỏ: nginx proxy_cache (cổng 8088) đứng trước origin Node.
+# Chạy: docker compose -p atlas-http up -d && node client.ts
+# Dọn: docker compose -p atlas-http down
+services:
+  origin:
+    image: node:24-alpine
+    command: node /app/origin.ts
+    volumes: ["./origin.ts:/app/origin.ts:ro"]
+  edge:
+    image: nginx:1.27-alpine
+    ports: ["8088:80"]
+    volumes: ["./nginx.conf:/etc/nginx/nginx.conf:ro"]
+    depends_on: [origin]

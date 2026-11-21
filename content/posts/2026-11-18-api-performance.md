@@ -16,7 +16,7 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[caching|Cache]] nhanh nhất là request không bao giờ tới server; cache khó nhất là biết khi nào bỏ nó đi. Khi cache trống, 100 request đồng thời có thể thành 100 truy vấn DB (*stampede*); một khóa ngắn hạn biến nó thành 1.
+> - [[concepts/caching|Cache]] nhanh nhất là request không bao giờ tới server; cache khó nhất là biết khi nào bỏ nó đi. Khi cache trống, 100 request đồng thời có thể thành 100 truy vấn DB (*stampede*); một khóa ngắn hạn biến nó thành 1.
 > - [[pagination|Phân trang]] bằng `OFFSET` chậm dần và lặp hoặc sót bản ghi khi dữ liệu thay đổi; phân trang bằng **cursor** (keyset) ổn định và nhanh đều.
 > - [[filtering-sorting|Lọc và sắp xếp]]: query string luôn là *string*, `Boolean("false")` là `true`; sort phải theo whitelist và luôn có trường phụ để thứ tự xác định.
 > - [[load-balancing|Load balancing]] chia request cho nhiều pod; chỉ làm được khi pod *stateless*, và thuật toán chia quan trọng khi request nặng nhẹ khác nhau.
@@ -40,7 +40,7 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Nhân viên quầy dán tờ giấy "giá vàng hôm nay" lên bàn, thay vì gọi điện hỏi ngân hàng mỗi khi có khách hỏi. Hết ngày thì gỡ ra viết lại | [[caching\|Caching]] (tờ giấy là cache, "hết ngày" là TTL) |
+| Nhân viên quầy dán tờ giấy "giá vàng hôm nay" lên bàn, thay vì gọi điện hỏi ngân hàng mỗi khi có khách hỏi. Hết ngày thì gỡ ra viết lại | [[concepts/caching\|Caching]] (tờ giấy là cache, "hết ngày" là TTL) |
 | Đọc sách theo kiểu "đọc tiếp từ trang 41", nhưng ai đó vừa chèn 5 trang mới vào đầu sách | [[pagination\|Phân trang offset]]: trang 41 bây giờ là nội dung khác, bạn đọc lặp hoặc bỏ sót |
 | Kẹp **bookmark** vào đúng dòng đang đọc dở | [[pagination\|Phân trang cursor]]: chèn bao nhiêu trang vào đầu sách cũng không lạc chỗ |
 | Bảo nhân viên kho "lấy giúp tai nghe, giá thấp tới cao", chọn từ danh sách có sẵn | [[filtering-sorting\|Lọc và sắp xếp]] |
@@ -71,7 +71,7 @@ Trong một đợt flash sale, số lần *xem* sản phẩm và *tìm kiếm* l
 
 ## Caching: nhớ lại câu trả lời
 
-[[caching|Cache]] đổi *độ tươi* của dữ liệu lấy *tốc độ*. Có nhiều tầng, càng gần người dùng càng rẻ:
+[[concepts/caching|Cache]] đổi *độ tươi* của dữ liệu lấy *tốc độ*. Có nhiều tầng, càng gần người dùng càng rẻ:
 
 | Tầng | Ví dụ | Ai điều khiển |
 |---|---|---|

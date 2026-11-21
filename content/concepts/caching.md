@@ -1,11 +1,11 @@
 ---
 title: Caching
-description: "Lưu lại kết quả để dùng lại, đổi độ tươi lấy tốc độ."
-tags: [api, performance]
+description: "Lưu lại một bản sao nhỏ, nhanh của dữ liệu để dùng lại, đổi độ tươi lấy tốc độ."
+tags: [caching, api, performance]
 type: note
-region: Vùng API
+region: Vùng Cache
 ---
 
-**Cache** có nhiều tầng: trình duyệt và CDN (điều khiển bằng `Cache-Control`, `ETag`), ứng dụng (Redis, mẫu cache-aside), cơ sở dữ liệu. Phần khó là invalidation: dữ liệu cũ bao lâu thì chấp nhận được và ai xóa cache khi dữ liệu đổi. Khi key hot hết hạn, cần khóa ngắn hạn để chống cache stampede.
+**Cache** là bản sao nhỏ và nhanh của dữ liệu nằm ở chỗ chậm hơn. Nó có ở nhiều tầng: trình duyệt và CDN (điều khiển bằng `Cache-Control`, `ETag`), trong RAM của ứng dụng, Redis dùng chung, và ngay trong cơ sở dữ liệu. Cache hiệu quả nhờ locality: người dùng đọc lặp lại một nhóm nhỏ dữ liệu. Cái giá là dữ liệu có thể cũ; phần khó là invalidation, chống stampede khi key hot hết hạn, và giữ cache an toàn.
 
-Đọc thêm trong bài [[2026-11-18-api-performance|Hiệu năng API]].
+Cả [[series/caching|tuyến Caching]] bắt đầu từ bài [[2026-11-22-caching-why|Vì sao cần cache]]. Cache xuất hiện lần đầu ở bài [[2026-11-18-api-performance|Hiệu năng API]].

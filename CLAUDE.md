@@ -94,9 +94,10 @@ A local Quartz plugin written as plain ESM in `dist/`. There is no build step: `
 
 ## Workflow
 
-Two user-invoked skills: `.claude/skills/learn/` and `.claude/skills/publish/`. The **learning log** `.learn/<slug>.md` (gitignored) hands off between them.
+Three user-invoked skills: `.claude/skills/learn/`, `.claude/skills/publish/` and `.claude/skills/deep-dive/`. The **learning log** `.learn/<slug>.md` (gitignored) hands off between them.
 - `/learn [topic] [--repo path]`: teaches the topic in chat and logs the sources, the owner's verbatim questions and misconceptions, the examples it ran, the diagram idea and the concepts touched. With no topic, it suggests candidates from `backlog.md` and the next hub stations.
 - `/publish [slug]`: writes the post from the log, plus code, the archify diagram and concept notes. It builds and previews the site, then opens a PR from `post/<slug>`. **Merging the PR publishes the post.** The skill never merges.
+- `/deep-dive <topic> [--repo path]`: the hands-off path. It researches the topic exhaustively, writes one post or a whole new series (reusing `/publish` steps 3–7), opens a PR, waits for green CI, **merges it itself** (squash) and deletes the branch, then checks the deploy. Any failed gate stops it before merge and leaves the PR open.
 - `backlog.md` (repo root, not published) holds topics to learn later.
 
 ## archify embedding contract

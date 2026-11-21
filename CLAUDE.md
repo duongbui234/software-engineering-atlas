@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Quartz setup
 
-- `main` is built on top of upstream Quartz history (`upstream` remote → `jackyzha0/quartz`, branch `v5`). Update with `npx quartz update`. To keep merges clean, avoid editing upstream files (`quartz/`, `docs/`, upstream `.github/` files) unless necessary. Site-specific changes belong in `quartz.config.yaml`, `content/`, our own components and styles, and `.github/workflows/deploy.yml`.
+- `main` is built on top of upstream Quartz history (`upstream` remote → `jackyzha0/quartz`, branch `v5`). Update with `npx quartz upgrade` (`update` is an alias) on a branch, then `npx quartz plugin doctor --fix` (moves plugins absorbed into core, e.g. `quartz-fonts` → `configuration.fonts`) and `npx quartz plugin install --from-config`, then build before merging into `main`. To keep merges clean, avoid editing upstream files (`quartz/`, `docs/`, upstream `.github/` files) unless necessary. Site-specific changes belong in `quartz.config.yaml`, `content/`, our own components and styles, and `.github/workflows/deploy.yml`.
 - Upstream workflows are guarded by `github.repository == 'jackyzha0/quartz'` and do not run here. Our CI is `.github/workflows/deploy.yml`: it builds on PRs and builds and deploys on push to `main`. In the repo settings, set Pages → Source to **GitHub Actions**.
 - `@quartz-community/*` plugins are npm packages installed by `npm ci`. The only non-npm plugin is the local `./plugins/atlas` (see below).
 - Drafts are handled by Quartz core: `draft: true` pages are not emitted. `cname` is disabled because the site runs under the `/software-engineering-atlas` subpath.

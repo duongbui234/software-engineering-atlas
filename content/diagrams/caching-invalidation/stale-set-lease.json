@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Race stale set, và lease từ chối giá trị cũ",
+    "output": "content/diagrams/caching-invalidation/stale-set-lease.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "reader", "type": "backend", "label": "Người đọc", "sublabel": "request xem giá, bị chậm" },
+    { "id": "cache", "type": "database", "label": "Bộ nhớ tạm", "sublabel": "Redis: price:42, lease:price:42" },
+    { "id": "db", "type": "database", "label": "Kho dữ liệu", "sublabel": "PostgreSQL: nguồn sự thật" },
+    { "id": "writer", "type": "backend", "label": "Người ghi", "sublabel": "người bán đổi giá" }
+  ],
+  "segments": [
+    { "from": 150, "to": 330, "label": "Trượt, xin vé, đọc giá cũ" },
+    { "from": 355, "to": 500, "label": "Ghi DB, xóa cache và vé" },
+    { "from": 525, "to": 680, "label": "Ghi muộn bị từ chối" }
+  ],
+  "messages": [
+    { "id": "get", "from": "reader", "to": "cache", "y": 170, "label": "có giá sản phẩm 42 không?", "variant": "default", "note": "GET price:42 → trống" },
+    { "id": "lease", "from": "reader", "to": "cache", "y": 225, "label": "xin vé được phép ghi", "variant": "emphasis", "note": "SET lease:price:42 <token> PX 10000" },
+    { "id": "read", "from": "reader", "to": "db", "y": 280, "label": "đọc giá: 100", "variant": "default" },
+    { "id": "upd", "from": "writer", "to": "db", "y": 380, "label": "đổi giá thành 200, commit", "variant": "emphasis", "note": "UPDATE ... version = 2" },
+    { "id": "del", "from": "writer", "to": "cache", "y": 440, "label": "xóa giá cũ và hủy vé", "variant": "security", "note": "DEL price:42 lease:price:42" },
+    { "id": "set", "from": "reader", "to": "cache", "y": 555, "label": "tỉnh lại: ghi giá 100 kèm vé", "variant": "dashed", "note": "EVAL set-if-lease <token> 100" },
+    { "id": "reject", "from": "cache", "to": "reader", "y": 615, "label": "vé đã bị hủy: từ chối", "variant": "return", "note": "trả 0, cache vẫn trống" }
+  ],
+  "activations": [
+    { "participant": "reader", "from": 170, "to": 615, "type": "backend" },
+    { "participant": "writer", "from": 380, "to": 440, "type": "backend" },
+    { "participant": "cache", "from": 555, "to": 615, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Không có vé thì sao",
+      "items": [
+        "Lần xóa của người ghi xảy ra trước lần ghi muộn",
+        "Cache giữ giá 100 trong khi DB là 200",
+        "Sai cho tới khi hết TTL, ví dụ 60 giây"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Hai cách đóng khe hở",
+      "items": [
+        "Lease: chỉ người giữ vé còn hiệu lực mới được ghi",
+        "Version: chỉ nhận giá trị mới hơn cái đang nằm trong cache",
+        "Kiểm tra và ghi chạy nguyên tử trong một Lua script"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Key hot hết hạn: chỉ một request được đi hỏi nguồn",
+    "output": "content/diagrams/caching-under-load/stampede.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "a", "type": "backend", "label": "Request A", "sublabel": "pod 1, tới đầu tiên" },
+    { "id": "b", "type": "backend", "label": "Request B", "sublabel": "pod 2, tới sau 5 ms" },
+    { "id": "cache", "type": "database", "label": "Bộ nhớ tạm", "sublabel": "Redis: search:<hash>, lock:search:<hash>" },
+    { "id": "src", "type": "database", "label": "Nguồn chậm", "sublabel": "Elasticsearch / DB: 300 ms" }
+  ],
+  "segments": [
+    { "from": 150, "to": 300, "label": "Cùng trượt, chỉ A giành được khóa" },
+    { "from": 325, "to": 480, "label": "A đi hỏi nguồn, B chờ" },
+    { "from": 505, "to": 650, "label": "B đọc lại cache" }
+  ],
+  "messages": [
+    { "id": "a-get", "from": "a", "to": "cache", "y": 170, "label": "có kết quả chưa? trống", "variant": "default", "note": "GET search:<hash>" },
+    { "id": "a-lock", "from": "a", "to": "cache", "y": 225, "label": "giành khóa: chỉ mình tôi đi hỏi", "variant": "emphasis", "note": "SET lock NX EX 5 <token>" },
+    { "id": "b-lock", "from": "b", "to": "cache", "y": 280, "label": "giành khóa: thua", "variant": "dashed", "note": "đã có người giữ" },
+    { "id": "a-src", "from": "a", "to": "src", "y": 345, "label": "truy vấn thật, một lần", "variant": "emphasis" },
+    { "id": "a-set", "from": "a", "to": "cache", "y": 405, "label": "ghi kết quả, nhả khóa của mình", "variant": "default", "note": "SET EX 60, Lua: so token rồi DEL" },
+    { "id": "b-wait", "from": "b", "to": "cache", "y": 460, "label": "chờ 250 ms rồi xem lại", "variant": "dashed", "note": "tối đa 3 lần, quá thì tự đi hỏi" },
+    { "id": "b-hit", "from": "cache", "to": "b", "y": 525, "label": "đã có: trả kết quả của A", "variant": "return" },
+    { "id": "a-done", "from": "cache", "to": "a", "y": 585, "label": "khóa đã nhả", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "a", "from": 170, "to": 405, "type": "backend" },
+    { "participant": "src", "from": 345, "to": 395, "type": "database" },
+    { "participant": "b", "from": 280, "to": 525, "type": "backend" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Không gom request",
+      "items": [
+        "Mọi request trong lúc chờ nguồn đều trượt",
+        "500 request thành 500 truy vấn giống nhau",
+        "Nguồn chậm đi, cửa sổ trượt càng dài"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Khóa phải an toàn",
+      "items": [
+        "Có hạn: người giữ chết thì khóa tự mất",
+        "Token riêng: không xóa nhầm khóa của người khác",
+        "Chờ có giới hạn: không treo request"
+      ]
+    }
+  ]
+}

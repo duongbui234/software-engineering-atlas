@@ -5255,37 +5255,38 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
         </g>
 
-        <g data-edge-from="api" data-edge-to="redis" data-edge-label="SET session:{sid}, hash(r1)" data-edge-key="1" data-edge-id="save">
+        <g data-edge-from="api" data-edge-to="redis" data-edge-label="ghi phiên + hash phiếu r1" data-edge-key="1" data-edge-id="save">
           <path data-composition-edge-from="api" data-composition-edge-to="redis" data-composition-edge-id="save" data-composition-points="370.83333333333337,200;571.1666666666667,200" d="M 370.83333333333337 200 L 571.1666666666667 200" class="a-default" data-animate="edge" style="--step:1" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="375.9000000000001" y="180" width="190.2" height="18" rx="3" class="c-mask"/>
-          <text x="471.0000000000001" y="190" class="t-muted" font-size="11" text-anchor="middle">SET session:{sid}, hash(r1)</text>
+          <rect x="382.50000000000006" y="180" width="177" height="18" rx="3" class="c-mask"/>
+          <text x="471.00000000000006" y="190" class="t-muted" font-size="11" text-anchor="middle">ghi phiên + hash phiếu r1</text>
         </g>
+        <text data-detail="context" x="382.83333333333337" y="218" class="t-muted" font-size="7">SET session:{sid} và refresh_token:{sid}</text>
         </g>
 
-        <g data-edge-from="api" data-edge-to="browser" data-edge-label="access 15 phút + cookie r1" data-edge-key="2" data-edge-id="tokens">
+        <g data-edge-from="api" data-edge-to="browser" data-edge-label="thẻ 15 phút + phiếu r1 (cookie)" data-edge-key="2" data-edge-id="tokens">
           <path data-composition-edge-from="api" data-composition-edge-to="browser" data-composition-edge-id="tokens" data-composition-points="356.83333333333337,230;156.5,230" d="M 356.83333333333337 230 L 156.5 230" class="a-default" data-animate="edge" style="--step:2" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="164.86666666666667" y="210" width="183.6" height="18" rx="3" class="c-mask"/>
-          <text x="256.6666666666667" y="220" class="t-muted" font-size="11" text-anchor="middle">access 15 phút + cookie r1</text>
+          <rect x="148.36666666666667" y="210" width="216.6" height="18" rx="3" class="c-mask"/>
+          <text x="256.6666666666667" y="220" class="t-muted" font-size="11" text-anchor="middle">thẻ 15 phút + phiếu r1 (cookie)</text>
         </g>
         </g>
 
-        <g data-edge-from="browser" data-edge-to="api" data-edge-label="Bearer access" data-edge-key="3" data-edge-id="call">
+        <g data-edge-from="browser" data-edge-to="api" data-edge-label="gọi API, kèm thẻ" data-edge-key="3" data-edge-id="call">
           <path data-composition-edge-from="browser" data-composition-edge-to="api" data-composition-edge-id="call" data-composition-points="156.5,285;356.83333333333337,285" d="M 156.5 285 L 356.83333333333337 285" class="a-default" data-animate="edge" style="--step:3" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="207.76666666666668" y="265" width="97.8" height="18" rx="3" class="c-mask"/>
-          <text x="256.6666666666667" y="275" class="t-muted" font-size="11" text-anchor="middle">Bearer access</text>
+          <rect x="197.86666666666667" y="265" width="117.6" height="18" rx="3" class="c-mask"/>
+          <text x="256.6666666666667" y="275" class="t-muted" font-size="11" text-anchor="middle">gọi API, kèm thẻ</text>
         </g>
         </g>
 
-        <g data-edge-from="api" data-edge-to="redis" data-edge-label="GET session:{sid}" data-edge-key="4" data-edge-id="check">
+        <g data-edge-from="api" data-edge-to="redis" data-edge-label="phiên còn hiệu lực?" data-edge-key="4" data-edge-id="check">
           <path data-composition-edge-from="api" data-composition-edge-to="redis" data-composition-edge-id="check" data-composition-points="370.83333333333337,315;571.1666666666667,315" d="M 370.83333333333337 315 L 571.1666666666667 315" class="a-security" data-animate="edge" style="--step:4" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
         <g data-detail="context">
-          <rect x="408.9000000000001" y="295" width="124.19999999999999" height="18" rx="3" class="c-mask"/>
-          <text x="471.0000000000001" y="305" class="t-edge-security" font-size="11" text-anchor="middle">GET session:{sid}</text>
+          <rect x="402.30000000000007" y="295" width="137.39999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="471.00000000000006" y="305" class="t-edge-security" font-size="11" text-anchor="middle">phiên còn hiệu lực?</text>
         </g>
-        <text data-detail="context" x="382.83333333333337" y="333" class="t-muted" font-size="7">Kiểm chữ ký rồi tra allowlist</text>
+        <text data-detail="context" x="382.83333333333337" y="333" class="t-muted" font-size="7">Kiểm chữ ký JWT rồi GET session:{sid}</text>
         </g>
 
         <g data-edge-from="api" data-edge-to="browser" data-edge-label="200" data-edge-key="5" data-edge-id="ok">
@@ -5296,45 +5297,47 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
         </g>
 
-        <g data-edge-from="browser" data-edge-to="api" data-edge-label="POST /auth/refresh (r1)" data-edge-key="6" data-edge-id="ref">
+        <g data-edge-from="browser" data-edge-to="api" data-edge-label="đổi phiếu r1 lấy thẻ mới" data-edge-key="6" data-edge-id="ref">
           <path data-composition-edge-from="browser" data-composition-edge-to="api" data-composition-edge-id="ref" data-composition-points="156.5,420;356.83333333333337,420" d="M 156.5 420 L 356.83333333333337 420" class="a-default" data-animate="edge" style="--step:6" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="174.7666666666667" y="400" width="163.79999999999998" height="18" rx="3" class="c-mask"/>
-          <text x="256.6666666666667" y="410" class="t-muted" font-size="11" text-anchor="middle">POST /auth/refresh (r1)</text>
+          <rect x="171.4666666666667" y="400" width="170.39999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="256.6666666666667" y="410" class="t-muted" font-size="11" text-anchor="middle">đổi phiếu r1 lấy thẻ mới</text>
         </g>
+        <text data-detail="context" x="168.5" y="438" class="t-muted" font-size="7">POST /auth/refresh</text>
         </g>
 
-        <g data-edge-from="api" data-edge-to="redis" data-edge-label="GETDEL refresh_token:{sid}" data-edge-key="7" data-edge-id="getdel">
+        <g data-edge-from="api" data-edge-to="redis" data-edge-label="lấy và xóa phiếu cũ" data-edge-key="7" data-edge-id="getdel">
           <path data-composition-edge-from="api" data-composition-edge-to="redis" data-composition-edge-id="getdel" data-composition-points="370.83333333333337,450;571.1666666666667,450" d="M 370.83333333333337 450 L 571.1666666666667 450" class="a-security" data-animate="edge" style="--step:7" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
         <g data-detail="context">
-          <rect x="379.20000000000005" y="430" width="183.6" height="18" rx="3" class="c-mask"/>
-          <text x="471.00000000000006" y="440" class="t-edge-security" font-size="11" text-anchor="middle">GETDEL refresh_token:{sid}</text>
+          <rect x="402.30000000000007" y="430" width="137.39999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="471.00000000000006" y="440" class="t-edge-security" font-size="11" text-anchor="middle">lấy và xóa phiếu cũ</text>
         </g>
+        <text data-detail="context" x="382.83333333333337" y="468" class="t-muted" font-size="7"><tspan x="382.83333333333337" dy="0">GETDEL refresh_token:{sid}: đọc rồi xóa</tspan><tspan x="382.83333333333337" dy="11">trong một lệnh</tspan></text>
         </g>
 
-        <g data-edge-from="api" data-edge-to="browser" data-edge-label="access mới + cookie r2" data-edge-key="8" data-edge-id="r2">
+        <g data-edge-from="api" data-edge-to="browser" data-edge-label="thẻ mới + phiếu r2" data-edge-key="8" data-edge-id="r2">
           <path data-composition-edge-from="api" data-composition-edge-to="browser" data-composition-edge-id="r2" data-composition-points="356.83333333333337,480;156.5,480" d="M 356.83333333333337 480 L 156.5 480" class="a-default" data-animate="edge" style="--step:8" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="178.0666666666667" y="460" width="157.2" height="18" rx="3" class="c-mask"/>
-          <text x="256.6666666666667" y="470" class="t-muted" font-size="11" text-anchor="middle">access mới + cookie r2</text>
+          <rect x="191.26666666666668" y="460" width="130.8" height="18" rx="3" class="c-mask"/>
+          <text x="256.6666666666667" y="470" class="t-muted" font-size="11" text-anchor="middle">thẻ mới + phiếu r2</text>
         </g>
         </g>
 
-        <g data-edge-from="attacker" data-edge-to="api" data-edge-label="POST /auth/refresh (r1 cũ)" data-edge-key="9" data-edge-id="steal">
+        <g data-edge-from="attacker" data-edge-to="api" data-edge-label="đổi phiếu r1 đã dùng" data-edge-key="9" data-edge-id="steal">
           <path data-composition-edge-from="attacker" data-composition-edge-to="api" data-composition-edge-id="steal" data-composition-points="785.5,530;370.83333333333337,530" d="M 785.5 530 L 370.83333333333337 530" class="a-dashed" data-animate="edge" style="--step:9" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
         <g data-detail="context">
-          <rect x="486.36666666666673" y="510" width="183.6" height="18" rx="3" class="c-mask"/>
-          <text x="578.1666666666667" y="520" class="t-edge-dashed" font-size="11" text-anchor="middle">POST /auth/refresh (r1 cũ)</text>
+          <rect x="506.16666666666674" y="510" width="144" height="18" rx="3" class="c-mask"/>
+          <text x="578.1666666666667" y="520" class="t-edge-dashed" font-size="11" text-anchor="middle">đổi phiếu r1 đã dùng</text>
         </g>
         </g>
 
-        <g data-edge-from="api" data-edge-to="redis" data-edge-label="hash không khớp: DEL session" data-edge-key="10" data-edge-id="mismatch">
+        <g data-edge-from="api" data-edge-to="redis" data-edge-label="không khớp: xóa cả phiên" data-edge-key="10" data-edge-id="mismatch">
           <path data-composition-edge-from="api" data-composition-edge-to="redis" data-composition-edge-id="mismatch" data-composition-points="370.83333333333337,560;571.1666666666667,560" d="M 370.83333333333337 560 L 571.1666666666667 560" class="a-security" data-animate="edge" style="--step:10" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
         <g data-detail="context">
-          <rect x="372.6000000000001" y="540" width="196.79999999999998" height="18" rx="3" class="c-mask"/>
-          <text x="471.00000000000006" y="550" class="t-edge-security" font-size="11" text-anchor="middle">hash không khớp: DEL session</text>
+          <rect x="385.80000000000007" y="540" width="170.39999999999998" height="18" rx="3" class="c-mask"/>
+          <text x="471.00000000000006" y="550" class="t-edge-security" font-size="11" text-anchor="middle">không khớp: xóa cả phiên</text>
         </g>
-        <text data-detail="context" x="382.83333333333337" y="578" class="t-muted" font-size="7">Reuse: thu hồi cả phiên</text>
+        <text data-detail="context" x="382.83333333333337" y="578" class="t-muted" font-size="7"><tspan x="382.83333333333337" dy="0">Phiếu đã dùng = có người thứ hai; DEL</tspan><tspan x="382.83333333333337" dy="11">session:{sid}</tspan></text>
         </g>
 
         <g data-edge-from="api" data-edge-to="attacker" data-edge-label="401" data-edge-key="11" data-edge-id="deny">
@@ -5345,11 +5348,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
         </g>
 
-        <g data-edge-from="browser" data-edge-to="api" data-edge-label="refresh bằng r2" data-edge-key="12" data-edge-id="late">
+        <g data-edge-from="browser" data-edge-to="api" data-edge-label="đổi phiếu r2" data-edge-key="12" data-edge-id="late">
           <path data-composition-edge-from="browser" data-composition-edge-to="api" data-composition-edge-id="late" data-composition-points="156.5,650;356.83333333333337,650" d="M 156.5 650 L 356.83333333333337 650" class="a-default" data-animate="edge" style="--step:12" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="201.16666666666669" y="630" width="111" height="18" rx="3" class="c-mask"/>
-          <text x="256.6666666666667" y="640" class="t-muted" font-size="11" text-anchor="middle">refresh bằng r2</text>
+          <rect x="211.0666666666667" y="630" width="91.19999999999999" height="18" rx="3" class="c-mask"/>
+          <text x="256.6666666666667" y="640" class="t-muted" font-size="11" text-anchor="middle">đổi phiếu r2</text>
         </g>
         </g>
 
@@ -5394,31 +5397,31 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <text data-detail="context" x="149.5" y="122" class="t-muted" font-size="7" text-anchor="middle">người dùng thật</text>
         </g>
 
-        <g id="node-api" data-node-id="api" data-node-label="Auth API" tabindex="0" role="button" aria-label="Focus Auth API, JwtAuthGuard + /auth, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="JwtAuthGuard + /auth" data-node-context="Sequence participant">
-          <title>Auth API · JwtAuthGuard + /auth · Sequence participant</title>
+        <g id="node-api" data-node-id="api" data-node-label="Server đăng nhập" tabindex="0" role="button" aria-label="Focus Server đăng nhập, JwtAuthGuard + /auth, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="JwtAuthGuard + /auth" data-node-context="Sequence participant">
+          <title>Server đăng nhập · JwtAuthGuard + /auth · Sequence participant</title>
           <rect x="276.33333333333337" y="72" width="175" height="60" rx="6" class="c-mask"/>
           <rect x="276.33333333333337" y="72" width="175" height="60" rx="6" class="c-backend" data-animate="node" style="--step:1" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(282.33333333333337 78) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="363.83333333333337" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Auth API</text>
+          <text data-node-label="" data-detail-anchor="" x="363.83333333333337" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Server đăng nhập</text>
           <text data-detail="context" x="363.83333333333337" y="122" class="t-muted" font-size="7" text-anchor="middle">JwtAuthGuard + /auth</text>
         </g>
 
-        <g id="node-redis" data-node-id="redis" data-node-label="Redis" tabindex="0" role="button" aria-label="Focus Redis, session, refresh_token, Sequence participant" aria-pressed="false" data-node-kind="database" data-node-sublabel="session, refresh_token" data-node-context="Sequence participant">
-          <title>Redis · session, refresh_token · Sequence participant</title>
+        <g id="node-redis" data-node-id="redis" data-node-label="Sổ phiên" tabindex="0" role="button" aria-label="Focus Sổ phiên, Redis: session, refresh_token, Sequence participant" aria-pressed="false" data-node-kind="database" data-node-sublabel="Redis: session, refresh_token" data-node-context="Sequence participant">
+          <title>Sổ phiên · Redis: session, refresh_token · Sequence participant</title>
           <rect x="490.66666666666674" y="72" width="175" height="60" rx="6" class="c-mask"/>
           <rect x="490.66666666666674" y="72" width="175" height="60" rx="6" class="c-database" data-animate="node" style="--step:2" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(496.66666666666674 78) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="578.1666666666667" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Redis</text>
-          <text data-detail="context" x="578.1666666666667" y="122" class="t-muted" font-size="7" text-anchor="middle">session, refresh_token</text>
+          <text data-node-label="" data-detail-anchor="" x="578.1666666666667" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Sổ phiên</text>
+          <text data-detail="context" x="578.1666666666667" y="122" class="t-muted" font-size="7" text-anchor="middle">Redis: session, refresh_token</text>
         </g>
 
-        <g id="node-attacker" data-node-id="attacker" data-node-label="Kẻ gian" tabindex="0" role="button" aria-label="Focus Kẻ gian, giữ r1 bị lộ, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="giữ r1 bị lộ" data-node-context="Sequence participant">
-          <title>Kẻ gian · giữ r1 bị lộ · Sequence participant</title>
+        <g id="node-attacker" data-node-id="attacker" data-node-label="Kẻ gian" tabindex="0" role="button" aria-label="Focus Kẻ gian, trộm được phiếu r1, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="trộm được phiếu r1" data-node-context="Sequence participant">
+          <title>Kẻ gian · trộm được phiếu r1 · Sequence participant</title>
           <rect x="705" y="72" width="175" height="60" rx="6" class="c-mask"/>
           <rect x="705" y="72" width="175" height="60" rx="6" class="c-external" data-animate="node" style="--step:3" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(711 78) scale(0.6875)">
@@ -5426,7 +5429,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="792.5" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Kẻ gian</text>
-          <text data-detail="context" x="792.5" y="122" class="t-muted" font-size="7" text-anchor="middle">giữ r1 bị lộ</text>
+          <text data-detail="context" x="792.5" y="122" class="t-muted" font-size="7" text-anchor="middle">trộm được phiếu r1</text>
         </g>
 
         <!-- Legend -->
@@ -5637,8 +5640,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </div>
         <ul>
           <li>Refresh token chỉ dùng được một lần</li>
-          <li>Redis chỉ lưu hash, so bằng timingSafeEqual</li>
-          <li>Thu hồi phiên có hiệu lực ngay ở guard</li>
+          <li>Chỉ lưu hash của phiếu, so sánh chống đo thời gian</li>
+          <li>Xóa phiên là thẻ hết tác dụng ngay</li>
         </ul>
       </div>
 
@@ -5648,7 +5651,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <h3>Cái giá</h3>
         </div>
         <ul>
-          <li>Mỗi request thêm một lệnh GET tới Redis</li>
+          <li>Mỗi request thêm một lần tra Redis</li>
           <li>Người dùng thật cũng phải đăng nhập lại</li>
         </ul>
       </div>

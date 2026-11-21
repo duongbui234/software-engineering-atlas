@@ -11,7 +11,7 @@
       "id": "browser",
       "type": "frontend",
       "label": "Trình duyệt",
-      "sublabel": "một origin duy nhất",
+      "sublabel": "chỉ thấy một địa chỉ",
       "pos": [
         40,
         40
@@ -24,8 +24,8 @@
     {
       "id": "ingress",
       "type": "cloud",
-      "label": "Ingress NGINX",
-      "sublabel": "TLS, rate limit, trong K8s",
+      "label": "Cửa vào cụm",
+      "sublabel": "Ingress NGINX: TLS, rate",
       "pos": [
         40,
         195
@@ -38,9 +38,9 @@
     {
       "id": "main",
       "type": "backend",
-      "label": "Main",
-      "sublabel": "REST edge, /auth facade",
-      "tag": "verify JWT bằng public key",
+      "label": "Ứng dụng chính",
+      "sublabel": "Main: REST, nhận /auth",
+      "tag": "tự kiểm thẻ bằng khóa công khai",
       "pos": [
         250,
         190
@@ -53,8 +53,8 @@
     {
       "id": "iam",
       "type": "security",
-      "label": "iam-service",
-      "sublabel": "ký JWT bằng private key",
+      "label": "Dịch vụ đăng nhập",
+      "sublabel": "iam-service: ký thẻ",
       "pos": [
         510,
         190
@@ -67,8 +67,8 @@
     {
       "id": "redis",
       "type": "database",
-      "label": "Redis dùng chung",
-      "sublabel": "blocklist:sid",
+      "label": "Danh sách thẻ bị chặn",
+      "sublabel": "Redis: blocklist:sid",
       "pos": [
         390,
         40
@@ -81,8 +81,8 @@
     {
       "id": "maindb",
       "type": "database",
-      "label": "Main DB",
-      "sublabel": "product, order, payment",
+      "label": "DB bán hàng",
+      "sublabel": "sản phẩm, đơn, thanh toán",
       "pos": [
         250,
         365
@@ -95,8 +95,8 @@
     {
       "id": "iamdb",
       "type": "database",
-      "label": "iam_db",
-      "sublabel": "users, permissions",
+      "label": "DB người dùng",
+      "sublabel": "iam_db: users, quyền",
       "pos": [
         510,
         365
@@ -146,7 +146,7 @@
       "id": "read-bl",
       "from": "main",
       "to": "redis",
-      "label": "đọc",
+      "label": "tra",
       "variant": "security",
       "fromSide": "top",
       "toSide": "left"
@@ -166,8 +166,8 @@
       "dot": "emerald",
       "title": "Đường nóng không qua IAM",
       "items": [
-        "Mỗi request: kiểm chữ ký JWT tại Main",
-        "Thu hồi: tra blocklist trong Redis dùng chung",
+        "Mỗi request: Main tự kiểm chữ ký của thẻ",
+        "Thu hồi: tra danh sách chặn trong Redis dùng chung",
         "IAM chết vẫn mua hàng được, chỉ không đăng nhập mới"
       ]
     },
@@ -175,16 +175,16 @@
       "dot": "violet",
       "title": "gRPC giữa Main và IAM",
       "items": [
-        "Login, Refresh, Logout",
-        "GetUsersByIds thay cho JOIN users",
-        "SetUserRole khi duyệt seller (chưa nguyên tử)"
+        "Đăng nhập, đổi thẻ, đăng xuất",
+        "Lấy nhiều user một lần (GetUsersByIds) thay JOIN",
+        "Đổi role khi duyệt seller (SetUserRole, chưa nguyên tử)"
       ]
     },
     {
       "dot": "rose",
       "title": "Cái giá",
       "items": [
-        "Khóa ngoại thành soft FK",
+        "DB không còn tự kiểm user tồn tại (soft FK)",
         "Mất JOIN, phải gọi gộp để tránh N+1",
         "Gateway riêng để dành cho phase sau"
       ]

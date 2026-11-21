@@ -122,7 +122,7 @@ Cột cuối chỉ để ai muốn đối chiếu với code. Đọc bài không
 
 <figure class="figure-map" style="--ar: 1 / 1">
 <div class="frame"><iframe data-archify="../diagrams/api-foundations/request-lifecycle.html" title="Sơ đồ tuần tự: vòng đời request POST /checkout trong NestJS" loading="lazy"></iframe></div>
-<figcaption><span><b>Hình 1.</b> Một request checkout đi qua middleware, guard, pipe, handler rồi interceptor; khi hết hàng, lỗi rẽ sang exception filter.</span><a href="../diagrams/api-foundations/request-lifecycle.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+<figcaption><span><b>Hình 1.</b> Một request checkout đi qua lễ tân, bảo vệ, kiểm tra body, xử lý rồi đóng gói kết quả; khi hết hàng, lỗi rẽ sang trạm báo lỗi. Dòng chữ nhỏ trong mỗi ô là tên lớp tương ứng trong NestJS.</span><a href="../diagrams/api-foundations/request-lifecycle.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
 </figure>
 
 Điểm mình mới hiểu ra: thứ tự này quyết định cả *bảo mật* lẫn *hiệu năng*. Guard chạy trước pipe, giống như bảo vệ đứng trước thu ngân. Một request không có token bị trả `401` ngay ở cửa, server không tốn công đọc và kiểm tra body. Rate limit (giới hạn số lần gọi) cũng nằm ở guard, nên request spam bị chặn trước khi chạm vào database.

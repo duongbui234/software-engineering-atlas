@@ -7,35 +7,185 @@
     "quality_profile": "showcase"
   },
   "participants": [
-    { "id": "browser", "type": "frontend", "label": "Trình duyệt", "sublabel": "người dùng thật" },
-    { "id": "api", "type": "backend", "label": "Auth API", "sublabel": "JwtAuthGuard + /auth" },
-    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "session, refresh_token" },
-    { "id": "attacker", "type": "external", "label": "Kẻ gian", "sublabel": "giữ r1 bị lộ" }
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Trình duyệt",
+      "sublabel": "người dùng thật"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Server đăng nhập",
+      "sublabel": "JwtAuthGuard + /auth"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Sổ phiên",
+      "sublabel": "Redis: session, refresh_token"
+    },
+    {
+      "id": "attacker",
+      "type": "external",
+      "label": "Kẻ gian",
+      "sublabel": "trộm được phiếu r1"
+    }
   ],
   "segments": [
-    { "from": 150, "to": 255, "label": "Đăng nhập" },
-    { "from": 265, "to": 390, "label": "Gọi API" },
-    { "from": 400, "to": 500, "label": "Refresh" },
-    { "from": 510, "to": 720, "label": "Reuse" }
+    {
+      "from": 150,
+      "to": 255,
+      "label": "Đăng nhập"
+    },
+    {
+      "from": 265,
+      "to": 390,
+      "label": "Gọi API"
+    },
+    {
+      "from": 400,
+      "to": 500,
+      "label": "Refresh"
+    },
+    {
+      "from": 510,
+      "to": 720,
+      "label": "Reuse"
+    }
   ],
   "messages": [
-    { "id": "login", "from": "browser", "to": "api", "y": 170, "label": "POST /auth/login", "variant": "emphasis" },
-    { "id": "save", "from": "api", "to": "redis", "y": 200, "label": "SET session:{sid}, hash(r1)" },
-    { "id": "tokens", "from": "api", "to": "browser", "y": 230, "label": "access 15 phút + cookie r1", "variant": "return" },
-    { "id": "call", "from": "browser", "to": "api", "y": 285, "label": "Bearer access" },
-    { "id": "check", "from": "api", "to": "redis", "y": 315, "label": "GET session:{sid}", "variant": "security", "note": "Kiểm chữ ký rồi tra allowlist" },
-    { "id": "ok", "from": "api", "to": "browser", "y": 370, "label": "200", "variant": "return" },
-    { "id": "ref", "from": "browser", "to": "api", "y": 420, "label": "POST /auth/refresh (r1)" },
-    { "id": "getdel", "from": "api", "to": "redis", "y": 450, "label": "GETDEL refresh_token:{sid}", "variant": "security" },
-    { "id": "r2", "from": "api", "to": "browser", "y": 480, "label": "access mới + cookie r2", "variant": "return" },
-    { "id": "steal", "from": "attacker", "to": "api", "y": 530, "label": "POST /auth/refresh (r1 cũ)", "variant": "dashed" },
-    { "id": "mismatch", "from": "api", "to": "redis", "y": 560, "label": "hash không khớp: DEL session", "variant": "security", "note": "Reuse: thu hồi cả phiên" },
-    { "id": "deny", "from": "api", "to": "attacker", "y": 615, "label": "401", "variant": "return" },
-    { "id": "late", "from": "browser", "to": "api", "y": 650, "label": "refresh bằng r2" },
-    { "id": "relogin", "from": "api", "to": "browser", "y": 685, "label": "401: đăng nhập lại", "variant": "return" }
+    {
+      "id": "login",
+      "from": "browser",
+      "to": "api",
+      "y": 170,
+      "label": "POST /auth/login",
+      "variant": "emphasis"
+    },
+    {
+      "id": "save",
+      "from": "api",
+      "to": "redis",
+      "y": 200,
+      "label": "ghi phiên + hash phiếu r1",
+      "note": "SET session:{sid} và refresh_token:{sid}"
+    },
+    {
+      "id": "tokens",
+      "from": "api",
+      "to": "browser",
+      "y": 230,
+      "label": "thẻ 15 phút + phiếu r1 (cookie)",
+      "variant": "return"
+    },
+    {
+      "id": "call",
+      "from": "browser",
+      "to": "api",
+      "y": 285,
+      "label": "gọi API, kèm thẻ"
+    },
+    {
+      "id": "check",
+      "from": "api",
+      "to": "redis",
+      "y": 315,
+      "label": "phiên còn hiệu lực?",
+      "variant": "security",
+      "note": "Kiểm chữ ký JWT rồi GET session:{sid}"
+    },
+    {
+      "id": "ok",
+      "from": "api",
+      "to": "browser",
+      "y": 370,
+      "label": "200",
+      "variant": "return"
+    },
+    {
+      "id": "ref",
+      "from": "browser",
+      "to": "api",
+      "y": 420,
+      "label": "đổi phiếu r1 lấy thẻ mới",
+      "note": "POST /auth/refresh"
+    },
+    {
+      "id": "getdel",
+      "from": "api",
+      "to": "redis",
+      "y": 450,
+      "label": "lấy và xóa phiếu cũ",
+      "variant": "security",
+      "note": "GETDEL refresh_token:{sid}: đọc rồi xóa trong một lệnh"
+    },
+    {
+      "id": "r2",
+      "from": "api",
+      "to": "browser",
+      "y": 480,
+      "label": "thẻ mới + phiếu r2",
+      "variant": "return"
+    },
+    {
+      "id": "steal",
+      "from": "attacker",
+      "to": "api",
+      "y": 530,
+      "label": "đổi phiếu r1 đã dùng",
+      "variant": "dashed"
+    },
+    {
+      "id": "mismatch",
+      "from": "api",
+      "to": "redis",
+      "y": 560,
+      "label": "không khớp: xóa cả phiên",
+      "variant": "security",
+      "note": "Phiếu đã dùng = có người thứ hai; DEL session:{sid}"
+    },
+    {
+      "id": "deny",
+      "from": "api",
+      "to": "attacker",
+      "y": 615,
+      "label": "401",
+      "variant": "return"
+    },
+    {
+      "id": "late",
+      "from": "browser",
+      "to": "api",
+      "y": 650,
+      "label": "đổi phiếu r2"
+    },
+    {
+      "id": "relogin",
+      "from": "api",
+      "to": "browser",
+      "y": 685,
+      "label": "401: đăng nhập lại",
+      "variant": "return"
+    }
   ],
   "cards": [
-    { "dot": "emerald", "title": "Vì sao an toàn hơn", "items": ["Refresh token chỉ dùng được một lần", "Redis chỉ lưu hash, so bằng timingSafeEqual", "Thu hồi phiên có hiệu lực ngay ở guard"] },
-    { "dot": "rose", "title": "Cái giá", "items": ["Mỗi request thêm một lệnh GET tới Redis", "Người dùng thật cũng phải đăng nhập lại"] }
+    {
+      "dot": "emerald",
+      "title": "Vì sao an toàn hơn",
+      "items": [
+        "Refresh token chỉ dùng được một lần",
+        "Chỉ lưu hash của phiếu, so sánh chống đo thời gian",
+        "Xóa phiên là thẻ hết tác dụng ngay"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Cái giá",
+      "items": [
+        "Mỗi request thêm một lần tra Redis",
+        "Người dùng thật cũng phải đăng nhập lại"
+      ]
+    }
   ]
 }

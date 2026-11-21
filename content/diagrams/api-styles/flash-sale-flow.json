@@ -7,32 +7,169 @@
     "quality_profile": "showcase"
   },
   "participants": [
-    { "id": "browser", "type": "frontend", "label": "Trình duyệt", "sublabel": "người mua" },
-    { "id": "api", "type": "backend", "label": "API flash-sale", "sublabel": "REST + Socket.IO" },
-    { "id": "worker", "type": "messagebus", "label": "Queue worker", "sublabel": "BullMQ, mỗi 5s" },
-    { "id": "momo", "type": "external", "label": "MoMo", "sublabel": "cổng thanh toán" }
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Trình duyệt",
+      "sublabel": "người mua"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Server flash-sale",
+      "sublabel": "REST + Socket.IO"
+    },
+    {
+      "id": "worker",
+      "type": "messagebus",
+      "label": "Người gọi số",
+      "sublabel": "Queue worker BullMQ, 5s/lần"
+    },
+    {
+      "id": "momo",
+      "type": "external",
+      "label": "MoMo",
+      "sublabel": "cổng thanh toán"
+    }
   ],
   "segments": [
-    { "from": 150, "to": 360, "label": "Hàng chờ" },
-    { "from": 375, "to": 680, "label": "Thanh toán" }
+    {
+      "from": 150,
+      "to": 360,
+      "label": "Hàng chờ"
+    },
+    {
+      "from": 375,
+      "to": 680,
+      "label": "Thanh toán"
+    }
   ],
   "messages": [
-    { "id": "join", "from": "browser", "to": "api", "y": 170, "label": "POST /queue/join (REST)", "variant": "emphasis" },
-    { "id": "pos", "from": "api", "to": "browser", "y": 200, "label": "200 { position: 120 }", "variant": "return" },
-    { "id": "ws", "from": "browser", "to": "api", "y": 230, "label": "WebSocket /flash-sale + JWT", "note": "Vào room user:{id}, mọi tab đều nhận" },
-    { "id": "pop", "from": "worker", "to": "api", "y": 285, "label": "ZPOPMIN 50 người", "variant": "dashed" },
-    { "id": "ready", "from": "api", "to": "browser", "y": 320, "label": "emit checkout_ready (WebSocket)", "variant": "emphasis" },
-    { "id": "checkout", "from": "browser", "to": "api", "y": 395, "label": "POST /checkout (REST)", "variant": "emphasis" },
-    { "id": "create", "from": "api", "to": "momo", "y": 425, "label": "tạo giao dịch, timeout 5s" },
-    { "id": "payurl", "from": "momo", "to": "api", "y": 455, "label": "payUrl", "variant": "return" },
-    { "id": "redirect", "from": "api", "to": "browser", "y": 485, "label": "201 + payUrl", "variant": "return" },
-    { "id": "pay", "from": "browser", "to": "momo", "y": 515, "label": "trả tiền trên trang MoMo" },
-    { "id": "ipn", "from": "momo", "to": "api", "y": 550, "label": "POST /webhooks/momo/ipn", "variant": "security", "note": "Webhook có chữ ký HMAC; MoMo gửi lại nếu không nhận 204" },
-    { "id": "ack", "from": "api", "to": "momo", "y": 610, "label": "204 No Content", "variant": "return" },
-    { "id": "result", "from": "api", "to": "browser", "y": 645, "label": "emit order_result (WebSocket)", "variant": "emphasis" }
+    {
+      "id": "join",
+      "from": "browser",
+      "to": "api",
+      "y": 170,
+      "label": "POST /queue/join (REST)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pos",
+      "from": "api",
+      "to": "browser",
+      "y": 200,
+      "label": "200: bạn đang ở vị trí 120",
+      "variant": "return"
+    },
+    {
+      "id": "ws",
+      "from": "browser",
+      "to": "api",
+      "y": 230,
+      "label": "mở WebSocket, kèm token",
+      "note": "Vào phòng riêng user:{id}, tab nào cũng nhận"
+    },
+    {
+      "id": "pop",
+      "from": "worker",
+      "to": "api",
+      "y": 285,
+      "label": "gọi 50 người đầu hàng",
+      "variant": "dashed",
+      "note": "ZPOPMIN trên sorted set hàng chờ trong Redis"
+    },
+    {
+      "id": "ready",
+      "from": "api",
+      "to": "browser",
+      "y": 320,
+      "label": "báo \"tới lượt bạn\" (WebSocket)",
+      "variant": "emphasis",
+      "note": "Sự kiện checkout_ready"
+    },
+    {
+      "id": "checkout",
+      "from": "browser",
+      "to": "api",
+      "y": 395,
+      "label": "POST /checkout (REST)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "create",
+      "from": "api",
+      "to": "momo",
+      "y": 425,
+      "label": "tạo giao dịch, chờ tối đa 5s"
+    },
+    {
+      "id": "payurl",
+      "from": "momo",
+      "to": "api",
+      "y": 455,
+      "label": "link trang thanh toán",
+      "variant": "return"
+    },
+    {
+      "id": "redirect",
+      "from": "api",
+      "to": "browser",
+      "y": 485,
+      "label": "201 + link thanh toán",
+      "variant": "return"
+    },
+    {
+      "id": "pay",
+      "from": "browser",
+      "to": "momo",
+      "y": 515,
+      "label": "trả tiền trên trang MoMo"
+    },
+    {
+      "id": "ipn",
+      "from": "momo",
+      "to": "api",
+      "y": 550,
+      "label": "MoMo báo đã trả tiền (webhook)",
+      "variant": "security",
+      "note": "POST /webhooks/momo/ipn có chữ ký HMAC; MoMo gửi lại nếu không nhận 204"
+    },
+    {
+      "id": "ack",
+      "from": "api",
+      "to": "momo",
+      "y": 610,
+      "label": "204: đã nhận",
+      "variant": "return"
+    },
+    {
+      "id": "result",
+      "from": "api",
+      "to": "browser",
+      "y": 645,
+      "label": "báo kết quả đơn (WebSocket)",
+      "variant": "emphasis",
+      "note": "Sự kiện order_result"
+    }
   ],
   "cards": [
-    { "dot": "cyan", "title": "Ai mở lời", "items": ["REST: trình duyệt hỏi, server đáp", "WebSocket: server chủ động đẩy tin", "Webhook: hệ thống bên ngoài gọi ngược vào"] },
-    { "dot": "amber", "title": "Webhook an toàn", "items": ["Kiểm chữ ký trước mọi thứ", "Trùng sự kiện: UNIQUE(providerRef)", "Return URL qua trình duyệt chỉ để hiển thị"] }
+    {
+      "dot": "cyan",
+      "title": "Ai mở lời",
+      "items": [
+        "REST: trình duyệt hỏi, server đáp",
+        "WebSocket: server chủ động đẩy tin",
+        "Webhook: hệ thống bên ngoài gọi ngược vào"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Webhook an toàn",
+      "items": [
+        "Kiểm chữ ký trước mọi thứ",
+        "Sự kiện trùng: database chặn bằng khóa duy nhất",
+        "Return URL qua trình duyệt chỉ để hiển thị"
+      ]
+    }
   ]
 }

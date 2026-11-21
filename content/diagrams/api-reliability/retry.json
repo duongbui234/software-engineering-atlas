@@ -7,34 +7,167 @@
     "quality_profile": "showcase"
   },
   "participants": [
-    { "id": "client", "type": "frontend", "label": "Client", "sublabel": "app thanh toán" },
-    { "id": "api", "type": "backend", "label": "Payments API", "sublabel": "POST /payments" },
-    { "id": "store", "type": "database", "label": "Idempotency store", "sublabel": "Redis, TTL 24h" },
-    { "id": "psp", "type": "external", "label": "Cổng thanh toán", "sublabel": "trừ tiền thật" }
+    {
+      "id": "client",
+      "type": "frontend",
+      "label": "Client",
+      "sublabel": "app thanh toán"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Server thanh toán",
+      "sublabel": "POST /payments"
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Sổ ghi mã đơn",
+      "sublabel": "Idempotency store, Redis 24h"
+    },
+    {
+      "id": "psp",
+      "type": "external",
+      "label": "Cổng thanh toán",
+      "sublabel": "trừ tiền thật"
+    }
   ],
   "segments": [
-    { "from": 150, "to": 400, "label": "Lần gọi 1" },
-    { "from": 410, "to": 560, "label": "Retry cùng key" }
+    {
+      "from": 150,
+      "to": 415,
+      "label": "Lần gọi 1"
+    },
+    {
+      "from": 425,
+      "to": 575,
+      "label": "Retry cùng key"
+    }
   ],
   "messages": [
-    { "id": "req-1", "from": "client", "to": "api", "y": 165, "label": "POST · Idempotency-Key: k1", "variant": "emphasis" },
-    { "id": "lock", "from": "api", "to": "store", "y": 195, "label": "SET k1 processing NX", "variant": "default" },
-    { "id": "lock-ok", "from": "store", "to": "api", "y": 225, "label": "OK: key mới", "variant": "return" },
-    { "id": "charge", "from": "api", "to": "psp", "y": 255, "label": "charge 100.000đ", "variant": "emphasis" },
-    { "id": "charged", "from": "psp", "to": "api", "y": 285, "label": "đã trừ tiền", "variant": "return" },
-    { "id": "save", "from": "api", "to": "store", "y": 315, "label": "lưu response cho k1", "variant": "default" },
-    { "id": "lost", "from": "api", "to": "client", "y": 345, "label": "201 Created", "variant": "dashed", "note": "Mạng rớt: client không nhận được phản hồi" },
-    { "id": "req-2", "from": "client", "to": "api", "y": 425, "label": "retry · cùng key k1", "variant": "emphasis" },
-    { "id": "lookup", "from": "api", "to": "store", "y": 455, "label": "GET k1", "variant": "default" },
-    { "id": "hit", "from": "store", "to": "api", "y": 485, "label": "đã có response", "variant": "return" },
-    { "id": "replay", "from": "api", "to": "client", "y": 515, "label": "201 Created (bản cũ)", "variant": "return", "note": "Không gọi cổng thanh toán lần 2" }
+    {
+      "id": "req-1",
+      "from": "client",
+      "to": "api",
+      "y": 165,
+      "label": "POST · Idempotency-Key: k1",
+      "variant": "emphasis"
+    },
+    {
+      "id": "lock",
+      "from": "api",
+      "to": "store",
+      "y": 195,
+      "label": "giữ chỗ mã k1: đang xử lý",
+      "variant": "default",
+      "note": "SET k1 processing NX: chỉ ghi nếu chưa có"
+    },
+    {
+      "id": "lock-ok",
+      "from": "store",
+      "to": "api",
+      "y": 240,
+      "label": "mã mới, được làm",
+      "variant": "return"
+    },
+    {
+      "id": "charge",
+      "from": "api",
+      "to": "psp",
+      "y": 270,
+      "label": "charge 100.000đ",
+      "variant": "emphasis"
+    },
+    {
+      "id": "charged",
+      "from": "psp",
+      "to": "api",
+      "y": 300,
+      "label": "đã trừ tiền",
+      "variant": "return"
+    },
+    {
+      "id": "save",
+      "from": "api",
+      "to": "store",
+      "y": 330,
+      "label": "lưu kết quả theo mã k1",
+      "variant": "default"
+    },
+    {
+      "id": "lost",
+      "from": "api",
+      "to": "client",
+      "y": 360,
+      "label": "201 Created",
+      "variant": "dashed",
+      "note": "Mạng rớt: client không nhận được phản hồi"
+    },
+    {
+      "id": "req-2",
+      "from": "client",
+      "to": "api",
+      "y": 440,
+      "label": "retry · cùng key k1",
+      "variant": "emphasis"
+    },
+    {
+      "id": "lookup",
+      "from": "api",
+      "to": "store",
+      "y": 470,
+      "label": "tra mã k1",
+      "variant": "default"
+    },
+    {
+      "id": "hit",
+      "from": "store",
+      "to": "api",
+      "y": 500,
+      "label": "đã có kết quả",
+      "variant": "return"
+    },
+    {
+      "id": "replay",
+      "from": "api",
+      "to": "client",
+      "y": 530,
+      "label": "201 Created (bản cũ)",
+      "variant": "return",
+      "note": "Không gọi cổng thanh toán lần 2"
+    }
   ],
   "activations": [
-    { "participant": "api", "from": 165, "to": 350, "type": "backend" },
-    { "participant": "store", "from": 190, "to": 230, "type": "database" },
-    { "participant": "psp", "from": 250, "to": 290, "type": "external" },
-    { "participant": "api", "from": 425, "to": 520, "type": "backend" },
-    { "participant": "store", "from": 450, "to": 490, "type": "database" }
+    {
+      "participant": "api",
+      "from": 165,
+      "to": 365,
+      "type": "backend"
+    },
+    {
+      "participant": "store",
+      "from": 190,
+      "to": 245,
+      "type": "database"
+    },
+    {
+      "participant": "psp",
+      "from": 265,
+      "to": 305,
+      "type": "external"
+    },
+    {
+      "participant": "api",
+      "from": 440,
+      "to": 535,
+      "type": "backend"
+    },
+    {
+      "participant": "store",
+      "from": 465,
+      "to": 505,
+      "type": "database"
+    }
   ],
   "cards": [
     {

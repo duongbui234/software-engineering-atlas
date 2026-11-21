@@ -186,12 +186,12 @@ sequenceDiagram
     participant X as Exchange
     participant Q as Queue
     participant C as Consumer
-    P->>X: basic.publish (routing key, properties, body)
-    X->>Q: so binding, chép tin vào các queue khớp
+    P->>X: basic.publish<br/>(routing key,<br/>properties, body)
+    X->>Q: so binding,<br/>chép vào queue khớp
     Note over Q: tin nằm chờ (ready)
-    Q->>C: basic.deliver (đẩy tới consumer đã đăng ký)
+    Q->>C: basic.deliver<br/>(đẩy tới consumer)
     Note over C: xử lý xong
-    C->>Q: basic.ack, tin bị xóa khỏi queue
+    C->>Q: basic.ack,<br/>tin bị xóa
 ```
 
 Consumer nhận tin theo kiểu **đẩy** (push): nó đăng ký một lần bằng `basic.consume`, broker tự đẩy tin tới khi có. Cũng có kiểu **kéo** (`basic.get`, hỏi từng tin một), nhưng tài liệu RabbitMQ khuyên tránh vì rất tốn: mỗi lần hỏi là một vòng mạng, kể cả khi hàng trống. Bước `ack` cuối cùng là chủ đề của [[2026-11-21-rabbitmq-ack-confirm|ga 4]].

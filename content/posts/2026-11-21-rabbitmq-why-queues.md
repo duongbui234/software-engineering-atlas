@@ -52,13 +52,16 @@ Cả tuyến dùng một hình ảnh: **RabbitMQ là một bưu điện**. Ga n�
 ```mermaid
 flowchart TB
     subgraph Call["Gọi điện (đồng bộ)"]
-        A1["Dịch vụ đặt hàng"] -->|"gọi và chờ"| B1["Dịch vụ email"]
-        B1 -->|"trả lời sau 2 giây"| A1
+        direction LR
+        A1["Dịch vụ<br/>đặt hàng"] -->|"gọi và chờ"| B1["Dịch vụ<br/>email"]
+        B1 -->|"trả lời<br/>sau 2 giây"| A1
     end
     subgraph Mail["Gửi thư (bất đồng bộ)"]
-        A2["Dịch vụ đặt hàng"] -->|"bỏ thư, đi tiếp"| P["Bưu điện<br/>(RabbitMQ)"]
-        P -->|"phát thư khi rảnh"| B2["Dịch vụ email"]
+        direction LR
+        A2["Dịch vụ<br/>đặt hàng"] -->|"bỏ thư,<br/>đi tiếp"| P["Bưu điện<br/>(RabbitMQ)"]
+        P -->|"phát thư<br/>khi rảnh"| B2["Dịch vụ<br/>email"]
     end
+    Call ~~~ Mail
 ```
 
 Bên trái, dịch vụ đặt hàng phải đứng chờ email gửi xong. Bên phải, nó giao thư cho bưu điện rồi làm việc tiếp; dịch vụ email nhận thư khi nào rảnh.

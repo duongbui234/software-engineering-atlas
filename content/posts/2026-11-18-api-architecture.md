@@ -51,7 +51,7 @@ sources:
 Chỗ cần để ý nhất là câu "muốn hỏi thì phải gọi điện". Trong siêu thị, nhân viên chỉ cần quay sang kệ bên cạnh. Ở trung tâm thương mại, mỗi câu hỏi là một cuộc gọi: có độ trễ, có thể không ai nghe máy, và hai cửa hàng không thể cùng "tính tiền chung một hóa đơn". Toàn bộ cái giá của microservices nằm ở câu đó.
 
 ```mermaid
-flowchart LR
+flowchart TB
     B([Trình duyệt]) --> G["Cửa vào chung<br/>(gateway / Main)<br/>kiểm thẻ, chỉ đường"]
     G --> O["Đơn hàng"]
     G --> P["Sản phẩm"]

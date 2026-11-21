@@ -1,6 +1,6 @@
 ---
-title: "Phân loại thư: direct, fanout, topic, headers và chuyện thư không có người nhận"
-description: Exchange quyết định một tin được chép vào những queue nào; ga này đi qua bốn kiểu exchange, cách khớp `*` và `#` của topic, và ba số phận của một tin không khớp quy tắc nào.
+title: "Bốn kiểu exchange chuẩn: direct, fanout, topic, headers, nên chọn kiểu nào và thư không có người nhận"
+description: Exchange quyết định một tin được chép vào những queue nào; ga này đi qua bốn kiểu exchange chuẩn, so sánh chúng, chỉ ra kiểu nào phổ biến nhất và nên chọn kiểu nào, cách khớp `*` và `#` của topic, và ba số phận của một tin không khớp quy tắc nào.
 date: 2026-11-21
 tags: [rabbitmq, messaging]
 type: learn
@@ -16,6 +16,9 @@ sources:
   - https://www.rabbitmq.com/docs/sender-selected
   - https://www.rabbitmq.com/docs/publishers
   - https://www.rabbitmq.com/docs/confirms
+  - https://docs.nestjs.com/microservices/rabbitmq
+  - https://docs.spring.io/spring-amqp/reference/amqp/sending-messages.html
+  - https://masstransit.massient.com/documentation/transports/rabbitmq
 ---
 
 > [!tldr] Đọc nhanh
@@ -23,6 +26,7 @@ sources:
 > - [[fanout-exchange|Fanout]]: chép tin vào **mọi** queue đã bind, bỏ qua routing key. Đây là kiểu "phát loa".
 > - [[topic-exchange|Topic]]: routing key là các từ nối bằng dấu chấm; trong binding, `*` khớp đúng **một** từ, `#` khớp **không hoặc nhiều** từ.
 > - [[headers-exchange|Headers]] định tuyến theo bảng headers thay vì routing key. [[exchange-to-exchange-binding|Exchange-to-exchange binding]] cho phép nối exchange vào exchange.
+> - **Phổ biến nhất**: default exchange (đứng sau `sendToQueue`, nhiều framework dùng mặc định) cho hàng đợi công việc, và **topic** cho sự kiện. Headers hiếm gặp nhất. Phân vân thì chọn topic.
 > - Một [[unroutable-message|tin không khớp binding nào]] mặc định **bị bỏ im lặng**. Muốn biết thì dùng cờ `mandatory` (broker trả tin lại) hoặc [[alternate-exchange|alternate exchange]] (broker chuyển tin sang exchange dự phòng).
 
 > [!info] Bối cảnh
@@ -54,18 +58,22 @@ Bàn phân loại ở ga 2 thật ra có bốn kiểu nhân viên, mỗi ngườ
 ```mermaid
 flowchart TB
     subgraph D["Direct: khớp nguyên văn"]
+        direction LR
         DX["exchange"] -->|"payment.paid"| DQ1["queue thanh toán"]
     end
     subgraph F["Fanout: ai cũng nhận"]
+        direction LR
         FX["exchange"] --> FQ1["queue email"]
         FX --> FQ2["queue thống kê"]
         FX --> FQ3["queue tìm kiếm"]
     end
     subgraph T["Topic: khớp theo mẫu"]
+        direction LR
         TX["exchange"] -->|"*.cancelled"| TQ1["queue hoàn kho"]
         TX -->|"order.#"| TQ2["queue đơn hàng"]
-        TX -->|"#"| TQ3["queue audit"]
+        TX -->|"mọi thứ (#)"| TQ3["queue audit"]
     end
+    D ~~~ F ~~~ T
 ```
 
 ## Vấn đề: một sự kiện, nhiều kiểu người nghe
@@ -134,6 +142,45 @@ Mẹo đặt tên: đi từ chung tới riêng, `<thực thể>.<khu vực>.<hà
 - `all-with-x` và `any-with-x`: như trên nhưng tính cả các header bắt đầu bằng `x-` (bản thường bỏ qua chúng).
 
 Ví dụ binding `{ "x-match": "all", "region": "vn", "tier": "vip" }` chỉ nhận tin có cả hai header đó. Headers exchange hợp khi tiêu chí lọc không xếp được thành chuỗi có thứ tự, nhưng ít dùng hơn topic vì khó đọc và khó gỡ lỗi. Exchange có sẵn: `amq.headers` (và `amq.match`).
+
+### So sánh bốn kiểu chuẩn
+
+Đặt bốn kiểu cạnh nhau, khác biệt nằm ở chỗ exchange **nhìn vào đâu** và **lọc được gì**:
+
+| | Direct | Fanout | Topic | Headers |
+|---|---|---|---|---|
+| Nhìn vào | routing key | không nhìn gì | routing key | headers của tin |
+| Cách khớp | trùng khớp hoàn toàn | ai bind cũng nhận | theo mẫu `*` / `#` | `x-match: all` hoặc `any` |
+| Lọc được | một tập khóa cố định | không lọc | theo cấp, theo nhóm | theo nhiều thuộc tính không thứ tự |
+| Exchange có sẵn | `amq.direct`, `""` | `amq.fanout` | `amq.topic` | `amq.headers`, `amq.match` |
+| Hợp với | lệnh, việc cần làm (`send-email`), mức log | phát loa: làm mới cache, thông báo cho mọi bản sao | sự kiện nghiệp vụ (`order.placed`) | lọc theo tổ hợp thuộc tính, hiếm |
+| Bưu điện | đọc đúng mã bưu chính | loa phường | đọc địa chỉ theo cấp | đọc tờ ghi chú kẹp kèm |
+
+Topic là kiểu "bao" các kiểu kia: binding không có `*` hay `#` thì topic hành xử như direct, binding `#` thì như fanout. Đổi lại, nó phải so mẫu nên làm việc nhiều hơn direct một chút; với đa số hệ thống, đó không phải chỗ nghẽn.
+
+### Kiểu nào phổ biến nhất?
+
+RabbitMQ không công bố thống kê, nên câu trả lời dưới đây dựa vào mặc định của các thư viện phổ biến và các tutorial chính thức:
+
+- **Default exchange là kiểu được dùng nhiều nhất mà người dùng ít để ý.** Mỗi lần gọi `sendToQueue` là một lần dùng nó. Client RabbitMQ của NestJS mặc định gửi bằng `sendToQueue`. Spring AMQP (`RabbitTemplate`) mặc định gửi vào exchange tên rỗng. Đây là đường đi của mẫu **work queue**: một việc, một hàng, nhiều worker chia nhau ([[2026-11-21-rabbitmq-ack-confirm|ga 4]]).
+- **Topic là kiểu được khai báo tường minh nhiều nhất cho sự kiện.** Hệ thống hướng sự kiện cần "ai muốn nghe gì thì tự bind" và cần thêm người nghe mà không sửa producer. Cả **14 exchange** của flash-sale đều là `topic`.
+- **Direct** hợp khi khóa là một danh sách cố định và nhỏ: loại lệnh, mức log, tên tenant.
+- **Fanout** hợp cho phát loa. MassTransit (thư viện .NET) mặc định tạo một fanout exchange cho mỗi loại message, rồi bind queue của từng consumer vào đó.
+- **Headers** ít gặp nhất: khó đọc, khó gỡ lỗi, và phần lớn nhu cầu lọc đã xếp được thành routing key có thứ tự.
+
+### Chọn kiểu nào?
+
+```mermaid
+flowchart TB
+    Q1["Gửi tới đúng một hàng đợi<br/>công việc, biết sẵn tên?"] -->|"có"| A1["Default exchange<br/>(sendToQueue)"]
+    Q1 -->|"không"| Q2["Mọi bên đang nghe<br/>đều cần mọi tin?"]
+    Q2 -->|"có"| A2["Fanout"]
+    Q2 -->|"không, cần lọc"| Q3["Lọc được bằng một<br/>nhãn có cấp (a.b.c)?"]
+    Q3 -->|"có"| A3["Topic<br/>(khóa cố định, ít: direct cũng được)"]
+    Q3 -->|"không, lọc theo<br/>nhiều thuộc tính"| A4["Headers"]
+```
+
+Nếu phân vân giữa direct và topic, mình chọn **topic**. Hôm nay dùng khóa nguyên văn thì nó chạy y như direct. Mai có một bên muốn nghe "mọi thứ bị hủy", chỉ cần thêm binding `*.cancelled`, không phải đổi kiểu exchange (đổi kiểu buộc phải xóa và tạo lại exchange, vì khai báo lại với kiểu khác sẽ bị lỗi `406`).
 
 ### Exchange-to-exchange binding và CC/BCC
 
@@ -221,6 +268,51 @@ basic.return: 312 NO_ROUTE key = khong-ai-nghe
 - Lúc đầu AE trống, vì `#` của queue audit đã "hứng" mọi tin. Gỡ `#` ra thì `payment.paid` không ai nghe và rơi sang AE.
 - Tin `khong-ai-nghe` (có `mandatory`) được trả về với mã 312. Tin `khong-ai-nghe-2` (không `mandatory`) biến mất, không một dòng log.
 
+### So sánh bốn kiểu trên cùng một bộ tin
+
+File `compare-types.ts` gửi **cùng bốn tin** (`order.placed`, `order.cancelled`, `refund.cancelled`, `payment.paid`) qua bốn exchange khác kiểu. Mỗi exchange có ba queue với cùng một mong muốn: **email** nghe `order.placed` và `payment.paid`, **hoàn kho** nghe mọi thứ bị hủy, **audit** nghe tất cả. Bản đầy đủ: [compare-types.ts](../code/rabbitmq-exchanges/compare-types.ts).
+
+```ts
+// direct: khớp nguyên văn, muốn "mọi thứ bị hủy" hay "tất cả" thì phải liệt kê từng khóa
+{ queue: 'hoan-kho', key: 'order.cancelled' }, { queue: 'audit', key: 'order.placed' },
+// topic: khớp theo mẫu
+{ queue: 'hoan-kho', key: '*.cancelled' }, { queue: 'audit', key: '#' },
+// headers: bỏ qua routing key, so headers của tin
+{ queue: 'hoan-kho', args: { 'x-match': 'all', action: 'cancelled' } },
+{ queue: 'audit', args: { 'x-match': 'all' } }, // all mà không có điều kiện nào: khớp mọi tin
+```
+
+```text
+$ node compare-types.ts
+
+DIRECT
+  email     <- order.placed, payment.paid
+  hoan-kho  <- order.cancelled
+  audit     <- order.placed
+
+FANOUT
+  email     <- order.placed, order.cancelled, refund.cancelled, payment.paid
+  hoan-kho  <- order.placed, order.cancelled, refund.cancelled, payment.paid
+  audit     <- order.placed, order.cancelled, refund.cancelled, payment.paid
+
+TOPIC
+  email     <- order.placed, payment.paid
+  hoan-kho  <- order.cancelled, refund.cancelled
+  audit     <- order.placed, order.cancelled, refund.cancelled, payment.paid
+
+HEADERS
+  email     <- order.placed, payment.paid
+  hoan-kho  <- order.cancelled, refund.cancelled
+  audit     <- order.placed, order.cancelled, refund.cancelled, payment.paid
+```
+
+Đọc output:
+
+- **Direct** làm đúng phần email, nhưng hoàn kho bỏ sót `refund.cancelled` và audit chỉ có một tin: mỗi khóa mới phải thêm một binding bằng tay.
+- **Fanout** không lọc: queue nào cũng nhận cả bốn tin, kể cả những tin nó không cần.
+- **Topic** đáp ứng cả ba mong muốn chỉ với bốn binding. Đây là lý do nó là lựa chọn mặc định cho sự kiện.
+- **Headers** cũng làm được, nhưng producer phải gắn thêm headers `entity` và `action` cho mỗi tin, và quy tắc nằm trong tham số binding nên khó đọc hơn hẳn `*.cancelled`.
+
 Exchange trong ví dụ để `durable: false` cho gọn vì đây là thử nghiệm. Với queue thì không được: lần chạy đầu khai báo queue `durable: false` làm connection sập với lỗi `541 … transient_nonexcl_queues is deprecated` trên RabbitMQ 4.4 (xem ga 2).
 
 ## Hiểu lầm và bẫy hay gặp
@@ -253,6 +345,12 @@ Một queue có thể bind nhiều khóa. Tạo quá nhiều queue tốn tài ng
 > [!question]- `order.vn.cancelled` có khớp `*.cancelled` không?
 > Không. `*` chỉ khớp đúng một từ, mà trước `cancelled` có hai từ. Muốn khớp thì dùng `#.cancelled`.
 
+> [!question]- Kiểu exchange nào phổ biến nhất?
+> Default exchange, vì `sendToQueue` và mặc định của nhiều framework (NestJS, Spring AMQP) đều đi qua nó, phục vụ mẫu work queue. Trong các exchange khai báo tường minh, topic là lựa chọn phổ biến cho sự kiện. Headers hiếm gặp nhất.
+
+> [!question]- Dùng direct với khóa `order.cancelled`, sau này muốn thêm người nghe "mọi thứ bị hủy" thì sao?
+> Phải bind thêm từng khóa (`refund.cancelled`, `payment.cancelled`…) và nhớ thêm mỗi khi có loại hủy mới. Với topic chỉ cần một binding `*.cancelled`. Đổi kiểu exchange về sau phải xóa rồi tạo lại exchange.
+
 > [!question]- Khi nào chọn fanout thay vì topic?
 > Khi mọi bên nghe cần mọi tin và không có nhu cầu lọc. Fanout đơn giản, bỏ qua routing key.
 
@@ -274,4 +372,5 @@ Một queue có thể bind nhiều khóa. Tạo quá nhiều queue tốn tài ng
 - [RabbitMQ: Exchange to Exchange Bindings](https://www.rabbitmq.com/docs/e2e)
 - [RabbitMQ: Sender-selected Distribution](https://www.rabbitmq.com/docs/sender-selected)
 - [RabbitMQ: Publishers](https://www.rabbitmq.com/docs/publishers) (unroutable, mandatory)
+- [NestJS: RabbitMQ transport](https://docs.nestjs.com/microservices/rabbitmq), [Spring AMQP: Sending Messages](https://docs.spring.io/spring-amqp/reference/amqp/sending-messages.html), [MassTransit: RabbitMQ transport](https://masstransit.massient.com/documentation/transports/rabbitmq) (exchange mặc định của từng thư viện)
 - [Consistent hash exchange plugin](https://github.com/rabbitmq/rabbitmq-server/tree/main/deps/rabbitmq_consistent_hash_exchange) và [Local random exchange](https://www.rabbitmq.com/docs/local-random-exchange)

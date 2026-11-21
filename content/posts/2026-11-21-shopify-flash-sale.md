@@ -103,18 +103,18 @@ Phần II kể lại bản sửa:
 ```mermaid
 sequenceDiagram
     participant K as Khách
-    participant LB as Load balancer (Nginx + Lua)
+    participant LB as Load balancer<br/>(Nginx + Lua)
     participant App as Checkout
     K->>LB: lần đầu vào checkout
-    LB-->>K: cookie ký: "đến lúc 21:00:03"
+    LB-->>K: cookie ký:<br/>"đến lúc 21:00:03"
     loop mỗi lần trang chờ hỏi lại
         K->>LB: gửi kèm cookie
-        Note over LB: ngưỡng hiện tại 21:00:01<br/>(chỉnh theo chỗ trống của bucket)
-        LB-->>K: chưa tới lượt, thử lại sau
+        Note over LB: ngưỡng hiện tại 21:00:01<br/>(chỉnh theo chỗ trống<br/>của bucket)
+        LB-->>K: chưa tới lượt,<br/>thử lại sau
     end
-    Note over LB: bucket còn chỗ, ngưỡng tiến tới 21:00:05
+    Note over LB: bucket còn chỗ,<br/>ngưỡng tiến tới 21:00:05
     K->>LB: gửi kèm cookie
-    LB->>App: cho qua (giờ đến sớm hơn ngưỡng)
+    LB->>App: cho qua (giờ đến<br/>sớm hơn ngưỡng)
 ```
 
 Cái hay là **không cần trạng thái chung**: hàng chờ nằm trong cookie của từng khách, mỗi load balancer tự quyết định. Cái giá là công bằng chỉ gần đúng, vì các máy có thể tính ra ngưỡng hơi khác nhau.

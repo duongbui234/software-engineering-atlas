@@ -55,11 +55,11 @@ Bảo mật API có rất nhiều thuật ngữ, nhưng gần như khái niệm 
 Hai bước quan trọng nhất luôn đi theo thứ tự này:
 
 ```mermaid
-flowchart LR
-    R([Request tới]) --> A{"Có thẻ hợp lệ không?<br/>(authentication)"}
-    A -- không --> E1["401: tôi không biết bạn là ai"]
-    A -- có --> B{"Thẻ này được làm việc này không?<br/>(authorization)"}
-    B -- không --> E2["403: tôi biết bạn, nhưng bạn không được phép"]
+flowchart TB
+    R([Request tới]) --> A["Có thẻ hợp lệ không?<br/>(authentication)"]
+    A -- không --> E1["401: tôi không biết<br/>bạn là ai"]
+    A -- có --> B["Thẻ này được làm<br/>việc này không?<br/>(authorization)"]
+    B -- không --> E2["403: tôi biết bạn, nhưng<br/>bạn không được phép"]
     B -- có --> C["Xử lý request"]
 ```
 
@@ -185,16 +185,16 @@ Luồng nên dùng hiện nay là **Authorization Code + PKCE**:
 ```mermaid
 sequenceDiagram
     participant U as Người dùng
-    participant App as Ứng dụng (client)
-    participant AS as Authorization Server
-    participant API as Resource Server
-    App->>App: tạo code_verifier ngẫu nhiên, code_challenge = SHA256(verifier)
-    App->>AS: chuyển hướng /authorize?response_type=code&scope=...&code_challenge=...
-    U->>AS: đăng nhập và đồng ý cấp quyền
-    AS->>App: chuyển hướng về redirect_uri?code=abc
-    App->>AS: POST /token (code + code_verifier)
-    AS->>App: access_token (+ refresh_token)
-    App->>API: Authorization: Bearer access_token
+    participant App as Ứng dụng<br/>(client)
+    participant AS as Authorization<br/>Server
+    participant API as Resource<br/>Server
+    App->>App: tạo code_verifier ngẫu nhiên,<br/>code_challenge =<br/>SHA256(verifier)
+    App->>AS: chuyển hướng /authorize<br/>?response_type=code<br/>&scope=...&code_challenge=...
+    U->>AS: đăng nhập và<br/>đồng ý cấp quyền
+    AS->>App: chuyển hướng về<br/>redirect_uri?code=abc
+    App->>AS: POST /token<br/>(code + code_verifier)
+    AS->>App: access_token<br/>(+ refresh_token)
+    App->>API: Authorization:<br/>Bearer access_token
 ```
 
 Bốn vai: *resource owner* (người dùng), *client* (ứng dụng), *authorization server* (nơi đăng nhập và cấp token), *resource server* (API giữ dữ liệu). **Scope** giới hạn token làm được gì. **PKCE** chống việc kẻ gian chặn được `code` trên đường chuyển hướng rồi đổi lấy token: họ không có `code_verifier`.
@@ -235,12 +235,12 @@ Vẽ ra cho dễ thấy *ai* đang chặn:
 
 ```mermaid
 sequenceDiagram
-    participant JS as JavaScript trên evil.example
+    participant JS as JavaScript trên<br/>evil.example
     participant BR as Trình duyệt
     participant API as api.example.com
-    JS->>BR: fetch("https://api.example.com/orders")
-    BR->>API: OPTIONS (preflight): "evil.example được đọc không?"
-    API-->>BR: không có Access-Control-Allow-Origin cho evil.example
+    JS->>BR: fetch("https://<br/>api.example.com/orders")
+    BR->>API: OPTIONS (preflight):<br/>"evil.example<br/>được đọc không?"
+    API-->>BR: không có Access-Control-<br/>Allow-Origin<br/>cho evil.example
     BR-->>JS: chặn, báo lỗi CORS
     Note over BR,API: server vẫn nhận được request.<br/>Người chặn là trình duyệt.
 ```

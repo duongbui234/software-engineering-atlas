@@ -20,11 +20,57 @@ sources:
 > - Method nói lên *ý định* và các cam kết đi kèm (safe, idempotent), header mang *ngữ cảnh*, body JSON mang *dữ liệu*, status code là *kết luận* ([[http-methods]], [[headers]], [[json]], [[status-codes]]).
 > - Phần dễ sai nhất là [[error-handling|xử lý lỗi]]: backend của mình làm rơi mất mã lỗi, nên người dùng chỉ thấy "Request failed with status code 409".
 
+> [!info] Bối cảnh: flash-sale là gì, và bạn cần biết gì để đọc bài
+> Cả series lấy ví dụ từ **flash-sale**, một trang bán hàng giảm giá giờ vàng mình tự viết. Đúng 21:00 mở bán, mỗi sản phẩm chỉ có vài trăm suất, và hàng nghìn người cùng bấm "Mua ngay". Phần chạy trên máy chủ (*backend*) viết bằng **NestJS**, một framework của Node.js. Phần chạy trong trình duyệt (*frontend*) gọi backend qua API.
+>
+> Bạn **không cần** biết NestJS hay đọc code của dự án. Mỗi khi bài nhắc tới một tên riêng trong dự án, ngay bên cạnh có giải thích nó làm gì bằng lời thường. Đoạn code trích từ dự án chỉ để minh họa. Phần "Ví dụ chạy được" là TypeScript thuần, tự chạy độc lập bằng `node`.
+
+> [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
+> - **API**: "quầy giao dịch" của một chương trình. Chương trình khác gửi yêu cầu theo đúng mẫu thì nhận về kết quả, không cần biết bên trong làm gì.
+> - **Client / server**: bên hỏi / bên trả lời. Trình duyệt, app điện thoại hay `curl` đều là client.
+> - **HTTP**: ngôn ngữ chung mà client và server dùng để nói chuyện trên web.
+> - **Framework**: bộ khung code dựng sẵn (NestJS, Express, Spring…). Mình chỉ viết phần nghiệp vụ, còn framework lo việc nhận và trả request.
+> - **Redis / Postgres**: hai loại cơ sở dữ liệu. Redis giữ dữ liệu trong RAM nên rất nhanh và hay dùng làm bộ nhớ tạm. Postgres lưu bền trên đĩa.
+> - **Pod**: một bản đang chạy của backend. Flash-sale chạy nhiều pod giống hệt nhau để chia tải.
+> - **axios**: thư viện mà frontend dùng để gửi request. Khi gặp lỗi, câu mặc định của nó là "Request failed with status code …".
+
+## Hình dung trước: gọi món ở nhà hàng
+
+Trước khi vào chữ nghĩa, mình thấy dễ nhất là coi một lần gọi API như **gọi món ở nhà hàng**:
+
+| Ở nhà hàng | Trong API | Khái niệm |
+|---|---|---|
+| Món trên thực đơn, ví dụ "món số 12, gọi thêm" | Địa chỉ cộng hành động: `POST /api/v1/checkout` | [[endpoint\|Endpoint]] |
+| Gọi món thì phải chờ phục vụ mang ra. Mỗi lần gọi là một lần nhận | Gửi một request thì nhận đúng một response | [[request-response\|Request-Response]] |
+| "Gọi món", "hỏi giá", "hủy món" là những việc khác nhau | `POST` tạo mới, `GET` đọc, `DELETE` xóa… | [[http-methods\|HTTP Methods]] |
+| Thông tin ghi ở góc phiếu: số bàn, thẻ thành viên, "phiếu này là gọi lại" | `Authorization`, `Idempotency-Key`, `Content-Type`… | [[headers\|Headers]] |
+| Nội dung phiếu gọi món, viết theo mẫu chung | Body dạng `{"items": ["SKU-1"]}` | [[json\|JSON]] |
+| Phục vụ báo "có ngay", "hết món", "bạn chưa đặt bàn" | `201`, `409`, `401` | [[status-codes\|Status Codes]] |
+| Hết món thì phải nói *món nào* hết, để khách chọn món khác | Lỗi có `code` rõ ràng để client biết xử lý | [[error-handling\|Error Handling]] |
+
+Và trước khi bếp nấu, phiếu gọi món đi qua vài người, mỗi người kiểm một việc:
+
+```mermaid
+flowchart TB
+    K(["Khách đưa phiếu gọi món<br/>(trình duyệt gửi request)"]) --> A["Lễ tân: ghi số phiếu"]
+    A --> B["Bảo vệ: có thẻ thành viên không?"]
+    B -- có --> C["Thu ngân: phiếu điền đúng mẫu không?"]
+    C -- đúng --> D["Bếp: còn món không?"]
+    D -- còn --> E["Phục vụ: bày ra đĩa chuẩn"]
+    E --> OK(["Món ra bàn<br/>(response thành công)"])
+    B -- không --> X["Quản lý: xin lỗi kèm lý do"]
+    C -- sai --> X
+    D -- hết --> X
+    X --> ERR(["Khách nhận lời giải thích<br/>(response lỗi)"])
+```
+
+Phần còn lại của bài là phiên bản "kỹ thuật" của đúng câu chuyện này.
+
 ## Vấn đề: "gọi API" là gọi cái gì?
 
 Mình viết backend flash-sale bằng NestJS khá lâu rồi, nhưng thú thật là phần lớn các mảnh như guard, interceptor, filter mình viết theo mẫu. Khi bắt đầu tuyến [[api-concepts|API Concepts]], mình quyết định không học bảy khái niệm nền một cách rời rạc, mà theo chân **đúng một request**: người dùng bấm "Đặt hàng" trong giỏ hàng.
 
-Frontend gửi đi thế này:
+Frontend gửi đi thế này (mình chú thích từng dòng ngay bên dưới):
 
 ```http
 POST /api/v1/checkout HTTP/1.1
@@ -36,6 +82,15 @@ Content-Type: application/json
 {"items": ["SKU-1"], "addressId": "addr_9"}
 ```
 
+Đọc từng dòng bằng lời thường:
+
+- `POST /api/v1/checkout`: "tôi muốn **tạo** một đơn hàng" (POST) ở địa chỉ `/api/v1/checkout`.
+- `Host`: gửi tới máy chủ nào.
+- `Authorization: Bearer …`: "đây là thẻ chứng minh tôi đã đăng nhập" (ga 3 giải thích thẻ này).
+- `Idempotency-Key`: "đây là mã số của lần bấm này. Nếu tôi lỡ gửi lại thì đừng tạo đơn thứ hai" (ga 4).
+- `Content-Type`: "phần nội dung bên dưới viết bằng JSON".
+- Dòng trống, rồi tới **body**: mua sản phẩm `SKU-1`, giao tới địa chỉ `addr_9`.
+
 Và nhận về:
 
 ```http
@@ -46,27 +101,31 @@ X-Correlation-ID: req-6f1c…
 {"success": true, "data": {"groupId": "grp_1", "totalAmount": "1990000.00"}, "msg": "Đặt hàng thành công"}
 ```
 
+Đọc bằng lời thường: `201 Created` nghĩa là "đã tạo xong". `X-Correlation-ID` là mã tra cứu của request này, giống mã vận đơn. Body cho biết đơn thuộc nhóm `grp_1`, tổng tiền 1.990.000đ.
+
 Mọi khái niệm của ga này đều nằm trong hai khối chữ trên. Phần còn lại của bài đi lần lượt từng mảnh.
 
 ## Cơ chế: request đi qua những trạm nào
 
-NestJS xử lý một request theo thứ tự cố định: middleware chạy trước, rồi tới guard, interceptor (nửa đầu), pipe, handler, rồi interceptor (nửa sau) trên đường về. Ném lỗi ở bất kỳ bước nào thì luồng nhảy thẳng sang exception filter. Trong flash-sale, mỗi trạm có một việc rõ ràng:
+Đây là phiên bản kỹ thuật của chuỗi "lễ tân → bảo vệ → thu ngân → bếp → phục vụ" ở trên. Framework nào cũng có chuỗi trạm như vậy, chỉ khác tên gọi. NestJS gọi chúng là middleware, guard, pipe, handler, interceptor và exception filter. Express thì gọi tất cả là middleware. Bạn chỉ cần nhớ **mỗi trạm làm một việc, và trạm nào phát hiện lỗi thì chuyển thẳng sang trạm báo lỗi**.
 
-| Trạm | Thành phần trong flash-sale | Việc nó làm |
-|---|---|---|
-| Middleware | `CorrelationIdMiddleware` | Đọc hoặc sinh `X-Correlation-ID`, gắn vào `AsyncLocalStorage` để log nào cũng có |
-| Guard | `JwtAuthGuard`, `RateLimitGuard`, `PoliciesGuard` | Ai đang gọi? Gọi quá nhiều chưa? Có quyền `order:create` không? |
-| Pipe | `ValidationPipe` (whitelist, forbidNonWhitelisted, transform) | Chặn body sai kiểu, field lạ |
-| Handler | `CheckoutController.checkout` | Kiểm tra `Idempotency-Key`, gọi service đặt hàng |
-| Interceptor | `TransformInterceptor` | Bọc kết quả vào vỏ `{ success, data, msg }` |
-| Filter | `HttpExceptionFilter` | Biến mọi exception thành response lỗi |
+| Trạm (tên NestJS) | Ở nhà hàng | Việc nó làm trong flash-sale | Tên lớp trong code |
+|---|---|---|---|
+| Middleware | Lễ tân ghi số phiếu | Đọc hoặc sinh mã tra cứu `X-Correlation-ID` để dòng log nào cũng có mã này | `CorrelationIdMiddleware` |
+| Guard | Bảo vệ | Ai đang gọi? Gọi quá nhiều chưa? Có quyền đặt hàng không? | `JwtAuthGuard`, `RateLimitGuard`, `PoliciesGuard` |
+| Pipe | Thu ngân kiểm phiếu | Chặn body sai kiểu hoặc có field lạ | `ValidationPipe` |
+| Handler | Bếp | Làm việc chính: kiểm `Idempotency-Key`, gọi phần đặt hàng | `CheckoutController.checkout` |
+| Interceptor | Phục vụ bày món | Bọc kết quả vào một "vỏ" chung `{ success, data, msg }` | `TransformInterceptor` |
+| Exception filter | Quản lý xử lý sự cố | Biến mọi lỗi thành một response lỗi | `HttpExceptionFilter` |
+
+Cột cuối chỉ để ai muốn đối chiếu với code. Đọc bài không cần nhớ cột này.
 
 <figure class="figure-map" style="--ar: 1 / 1">
 <div class="frame"><iframe data-archify="../diagrams/api-foundations/request-lifecycle.html" title="Sơ đồ tuần tự: vòng đời request POST /checkout trong NestJS" loading="lazy"></iframe></div>
 <figcaption><span><b>Hình 1.</b> Một request checkout đi qua middleware, guard, pipe, handler rồi interceptor; khi hết hàng, lỗi rẽ sang exception filter.</span><a href="../diagrams/api-foundations/request-lifecycle.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
 </figure>
 
-Điểm mình mới hiểu ra: thứ tự này quyết định cả *bảo mật* lẫn *hiệu năng*. Guard chạy trước pipe, nên một request không có token bị trả `401` mà server không tốn công parse và validate body. Rate limit nằm ở guard, nên request spam bị chặn trước khi chạm vào database.
+Điểm mình mới hiểu ra: thứ tự này quyết định cả *bảo mật* lẫn *hiệu năng*. Guard chạy trước pipe, giống như bảo vệ đứng trước thu ngân. Một request không có token bị trả `401` ngay ở cửa, server không tốn công đọc và kiểm tra body. Rate limit (giới hạn số lần gọi) cũng nằm ở guard, nên request spam bị chặn trước khi chạm vào database.
 
 ## Endpoint: địa chỉ cộng với động từ
 
@@ -185,7 +244,7 @@ export class FlashSaleOutOfStockException extends ConflictException {
 }
 ```
 
-Nhưng `HttpExceptionFilter`, nơi mọi lỗi đi qua trước khi ra ngoài, chỉ lấy đúng `message`:
+Nhưng `HttpExceptionFilter`, tức "người quản lý" mà mọi lỗi phải đi qua trước khi ra ngoài, chỉ lấy đúng `message`:
 
 ```ts
 // rút gọn từ http-exception.filter.ts
@@ -205,7 +264,22 @@ if (data?.code) return data.code
 return err.message // "Request failed with status code 409"
 ```
 
-Backend gửi `msg`, frontend đọc `message`. Không khớp. Mình dựng lại đúng tình huống này trong ví dụ dưới đây và kết quả đúng như dự đoán: mọi lỗi đều hiện ra thành câu mặc định của axios.
+Backend gửi `msg`, frontend đọc `message`. Không khớp. Vẽ ra thì thấy rõ chỗ thông tin bị rơi:
+
+```mermaid
+sequenceDiagram
+    participant FE as Frontend
+    participant F as Bộ xử lý lỗi (filter)
+    participant S as Phần đặt hàng
+    FE->>S: POST /checkout
+    S-->>F: lỗi { code: "FLASH_SALE_OUT_OF_STOCK", message: "Rất tiếc, sản phẩm đã hết hàng" }
+    Note over F: chỉ giữ message, đổi tên thành msg,<br/>bỏ mất code
+    F-->>FE: 409 { success: false, msg: "Rất tiếc..." }
+    Note over FE: tìm data.message → không có<br/>tìm data.code → không có
+    FE->>FE: hiện "Request failed with status code 409"
+```
+
+Giống nhà hàng mà bếp báo "hết món số 12", quản lý ra bàn chỉ nói "có lỗi", còn khách thì đang chờ nghe chữ "món" nên không hiểu gì. Mình dựng lại đúng tình huống này trong ví dụ dưới đây và kết quả đúng như dự đoán: mọi lỗi đều hiện ra thành câu mặc định của axios.
 
 Bài học không nằm ở chuyện đặt tên `msg` hay `message`, mà ở chỗ **lỗi là một phần của hợp đồng API**, cần định dạng cố định như response thành công. RFC 9457 (Problem Details) đã chuẩn hóa định dạng đó:
 

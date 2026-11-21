@@ -21,6 +21,45 @@ sources:
 > - [[filtering-sorting|Lọc và sắp xếp]]: query string luôn là *string*, `Boolean("false")` là `true`; sort phải theo whitelist và luôn có trường phụ để thứ tự xác định.
 > - [[load-balancing|Load balancing]] chia request cho nhiều pod; chỉ làm được khi pod *stateless*, và thuật toán chia quan trọng khi request nặng nhẹ khác nhau.
 
+> [!info] Bối cảnh
+> Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết. Trang tìm kiếm sản phẩm đọc từ **Elasticsearch** (một cỗ máy tìm kiếm chuyên dụng), kết quả được nhớ tạm trong **Redis**. Backend chạy thành nhiều bản giống nhau trên **Kubernetes**. Bạn không cần biết các công cụ này. Mỗi đoạn có giải thích bằng lời thường trước khi vào code.
+
+> [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
+> - **Redis**: cơ sở dữ liệu trong RAM, đọc ghi rất nhanh, hay dùng làm cache.
+> - **Elasticsearch (ES)**: phần mềm chuyên tìm kiếm văn bản, như "tai nghe bluetooth giá dưới 500k".
+> - **Postgres**: cơ sở dữ liệu chính, lưu bền trên đĩa.
+> - **TTL**: thời gian sống của một mục cache, hết hạn thì tự xóa.
+> - **CDN**: mạng máy chủ đặt gần người dùng, giữ sẵn bản sao ảnh và trang tĩnh.
+> - **Pod / Kubernetes**: pod là một bản đang chạy của backend. Kubernetes là hệ thống bật, tắt và theo dõi các pod.
+> - **Ingress**: cửa vào của cụm Kubernetes, nhận request từ Internet rồi chia cho các pod.
+> - **Index (database)**: mục lục giúp database tìm nhanh, khỏi phải đọc từng dòng.
+> - **DTO**: lớp mô tả dữ liệu mà một endpoint nhận vào, kèm luật kiểm tra.
+> - **Query string**: phần sau dấu `?` trên URL, ví dụ `?page=2&sort=price_asc`.
+
+## Hình dung trước: một siêu thị giờ cao điểm
+
+| Đời thường | Khái niệm |
+|---|---|
+| Nhân viên quầy dán tờ giấy "giá vàng hôm nay" lên bàn, thay vì gọi điện hỏi ngân hàng mỗi khi có khách hỏi. Hết ngày thì gỡ ra viết lại | [[caching\|Caching]] (tờ giấy là cache, "hết ngày" là TTL) |
+| Đọc sách theo kiểu "đọc tiếp từ trang 41", nhưng ai đó vừa chèn 5 trang mới vào đầu sách | [[pagination\|Phân trang offset]]: trang 41 bây giờ là nội dung khác, bạn đọc lặp hoặc bỏ sót |
+| Kẹp **bookmark** vào đúng dòng đang đọc dở | [[pagination\|Phân trang cursor]]: chèn bao nhiêu trang vào đầu sách cũng không lạc chỗ |
+| Bảo nhân viên kho "lấy giúp tai nghe, giá thấp tới cao", chọn từ danh sách có sẵn | [[filtering-sorting\|Lọc và sắp xếp]] |
+| Nhiều quầy thu ngân. Người điều phối chỉ khách vào quầy đang vắng nhất | [[load-balancing\|Load balancing]] |
+
+Ví dụ tờ giấy còn cho thấy một rủi ro: tờ giấy vừa bị gỡ xuống, 100 khách cùng hỏi giá. Nếu cả 100 người cùng gọi ngân hàng thì ngân hàng nghẽn. Cách khôn hơn là cử **một** người đi hỏi, 99 người kia đứng chờ nghe lại. Đó chính là "khóa chống stampede" ở bên dưới:
+
+```mermaid
+flowchart TB
+    Q([Request tìm kiếm]) --> C{"Có sẵn trong cache?"}
+    C -- có --> HIT["Trả ngay (~1ms)"]
+    C -- không --> L{"Giành được khóa?"}
+    L -- "được (chỉ 1 request)" --> ES["Hỏi Elasticsearch (~50ms)"]
+    ES --> W["Ghi kết quả vào cache 60 giây"]
+    W --> RET["Trả kết quả"]
+    L -- "không (99 request còn lại)" --> P["Chờ 250ms rồi xem lại cache"]
+    P --> C
+```
+
 ## Vấn đề: đọc nhiều hơn ghi hàng trăm lần
 
 Trong một đợt flash sale, số lần *xem* sản phẩm và *tìm kiếm* lớn hơn số lần *đặt hàng* hàng trăm lần. Ba ga trước nói về chuyện làm đúng (đúng hợp đồng, đúng người, đúng một lần). Ga này nói về chuyện làm **nhanh** khi đông người, và hầu hết các kỹ thuật đều nhắm vào đường đọc.
@@ -68,7 +107,7 @@ try {
 }
 ```
 
-Bước 2 và 3 chống **cache stampede**: một từ khóa "hot" vừa hết hạn, hàng trăm request cùng thấy cache trống và cùng đập vào Elasticsearch. Có khóa thì chỉ một request đi hỏi, số còn lại chờ tối đa 750ms rồi đọc kết quả từ cache. Ví dụ ở cuối bài: 100 request đồng thời khi cache trống, không khóa là 100 truy vấn, có khóa là 1.
+Bước 2 và 3 chống **cache stampede** (cảnh "giẫm đạp" ở tờ giấy giá vàng): một từ khóa "hot" vừa hết hạn, hàng trăm request cùng thấy cache trống và cùng đập vào Elasticsearch. Có khóa thì chỉ một request đi hỏi, số còn lại chờ tối đa 750ms rồi đọc kết quả từ cache. Ví dụ ở cuối bài: 100 request đồng thời khi cache trống, không khóa là 100 truy vấn, có khóa là 1.
 
 Hai chi tiết tinh tế:
 
@@ -80,6 +119,20 @@ Còn một mẫu nữa là **invalidation chủ động**: quyền của mỗi r
 ## Pagination: chia nhỏ danh sách
 
 Không API nào nên trả về "tất cả sản phẩm". [[pagination|Phân trang]] có hai trường phái:
+
+Nhìn bằng hình trước khi đọc chữ. Danh sách mới nhất lên đầu, mỗi trang 3 sản phẩm, và trong lúc bạn xem trang 1 thì có sản phẩm `p8` mới được đăng:
+
+```mermaid
+flowchart LR
+    subgraph OFF["Offset: 'bỏ qua 3 cái đầu'"]
+        direction TB
+        o1["Trang 1: p7 p6 p5"] --> o0["p8 mới chen vào đầu"] --> o2["Trang 2 = bỏ 3 cái đầu (p8 p7 p6)<br/>→ p5 p4 p3<br/>p5 bị lặp"]
+    end
+    subgraph CUR["Cursor: 'lấy những cái cũ hơn p5'"]
+        direction TB
+        c1["Trang 1: p7 p6 p5"] --> c0["p8 mới chen vào đầu"] --> c2["Trang 2 = cũ hơn p5<br/>→ p4 p3 p2<br/>không lặp"]
+    end
+```
 
 **Offset**: `?page=3&limit=20` → `OFFSET 40 LIMIT 20`. Dễ làm, cho phép nhảy tới trang bất kỳ. Nhưng có hai vấn đề:
 
@@ -115,7 +168,9 @@ Cái giá của cursor: không nhảy được tới "trang 37", và cursor gắ
 
 ### Lỗi thật: `Boolean("false")` là `true`
 
-DTO tìm kiếm khai báo:
+Nói bằng lời: trên URL, mọi thứ đều là **chữ**. `?isFlashSale=false` gửi lên server là chuỗi năm ký tự `"false"`, không phải giá trị đúng/sai. Muốn có giá trị đúng/sai thì phải tự đổi. Cách đổi nhanh nhất trong JavaScript là `Boolean(x)`, và cách này trả `true` cho mọi chuỗi không rỗng, kể cả chính chuỗi `"false"`.
+
+DTO tìm kiếm (lớp mô tả các tham số mà endpoint nhận) khai báo:
 
 ```ts
 @IsOptional()
@@ -154,7 +209,18 @@ Bài học vẫn đáng giữ, chỉ là theo hướng khác: **code chết mà 
 
 ## Load Balancing: nhiều pod, một địa chỉ
 
-Một pod Node.js xử lý được có hạn. [[load-balancing|Load balancing]] cho phép chạy nhiều bản sao và chia request cho chúng. Trong flash-sale trên Kubernetes có hai tầng:
+Một pod Node.js xử lý được có hạn. Giống siêu thị đông khách thì mở thêm quầy thu ngân, và cần một người đứng đầu hàng chỉ khách vào quầy nào:
+
+```mermaid
+flowchart LR
+    U1([Người dùng]) & U2([Người dùng]) & U3([Người dùng]) --> LB["Load balancer<br/>(người điều phối)"]
+    LB --> P1["Pod 1"]
+    LB --> P2["Pod 2"]
+    LB --> P3["Pod 3"]
+    P1 & P2 & P3 --> R[("Redis + Postgres<br/>dữ liệu dùng chung")]
+```
+
+Mấu chốt nằm ở hộp dưới cùng: các quầy không giữ sổ sách riêng mà cùng ghi vào một cuốn sổ chung. Nhờ vậy khách quay lại quầy nào cũng được phục vụ như nhau. [[load-balancing|Load balancing]] cho phép chạy nhiều bản sao và chia request cho chúng. Trong flash-sale trên Kubernetes có hai tầng:
 
 - **Ingress NGINX** (tầng 7, hiểu HTTP): kết thúc TLS, chia request theo round robin (mặc định của ingress-nginx), giới hạn tốc độ ở rìa.
 - **Service ClusterIP** (tầng 4, chỉ thấy kết nối TCP): kube-proxy chọn một pod khỏe trong danh sách endpoint.

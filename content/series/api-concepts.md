@@ -20,6 +20,10 @@ stations:
     concepts: [API Gateway, API Versioning, OpenAPI, Microservices]
 ---
 
+## Nếu bạn mới bắt đầu
+
+Mọi ví dụ trong tuyến này đến từ **flash-sale**, một trang bán hàng giảm giá giờ vàng mình tự viết: đúng giờ mở bán, hàng nghìn người tranh vài trăm suất. Bạn không cần đọc code của dự án. Mỗi ga mở đầu bằng một phần **"Hình dung trước"**, so khái niệm với một chuyện đời thường (gọi món, ra vào tòa nhà, đặt bánh qua điện thoại…) kèm sơ đồ. Mỗi ga cũng có một **từ điển nhanh** cho các thuật ngữ mới. Đọc hai phần đó trước rồi mới vào phần kỹ thuật thì sẽ dễ theo hơn nhiều.
+
 ## Vì sao xếp theo thứ tự này
 
 Không thể hiểu idempotency nếu chưa rõ HTTP method nào vốn idempotent, và không thể bàn rate limit mà chưa biết request được xác thực ra sao. Mỗi ga dùng lại từ vựng của ga trước, nên mình học và viết theo đúng thứ tự đó: nền tảng của một request, các kiểu API, bảo mật, rồi tới những thứ giữ cho API chạy ổn (độ tin cậy, hiệu năng) và cách tổ chức nhiều API trong một hệ thống.

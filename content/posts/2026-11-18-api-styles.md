@@ -23,6 +23,52 @@ sources:
 > - [[grpc|gRPC]]: hợp đồng `.proto`, nhị phân, HTTP/2; hợp cho gọi nội bộ giữa các service.
 > - [[websockets|WebSockets]]: kết nối mở liên tục, server đẩy tin bất cứ lúc nào. [[webhooks|Webhooks]]: hệ thống *bên ngoài* gọi ngược vào mình khi có sự kiện.
 
+> [!info] Bối cảnh
+> Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: đúng giờ mở bán, hàng nghìn người tranh vài trăm suất. Vì quá đông, người mua phải vào một **hàng chờ ảo** trước, tới lượt mới được thanh toán. Thanh toán đi qua ví **MoMo** hoặc **VNPay**. Bạn không cần đọc code dự án. Tên riêng nào xuất hiện cũng có giải thích bằng lời thường.
+
+> [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
+> - **Endpoint, request, status code**: xem [[2026-11-18-api-foundations|ga 1]].
+> - **Polling**: client cứ vài giây hỏi lại một lần "có gì mới chưa?".
+> - **Push**: server chủ động gửi tin cho client mà không chờ client hỏi.
+> - **Service**: một chương trình chạy riêng, làm một phần việc của hệ thống (đăng nhập, thanh toán…).
+> - **Protobuf (Protocol Buffers)**: cách đóng gói dữ liệu thành dãy byte gọn, máy đọc nhanh nhưng người không đọc được.
+> - **HTTP/2**: phiên bản HTTP cho phép nhiều request chạy song song trên cùng một kết nối.
+> - **Socket.IO**: thư viện dựng sẵn trên WebSocket, có thêm tự kết nối lại, chia phòng (room)…
+> - **Redis Pub/Sub**: một "loa phát thanh" trong Redis. Một nơi phát tin, mọi nơi đang nghe đều nhận được.
+> - **IPN**: tên các cổng thanh toán Việt Nam đặt cho webhook báo kết quả thanh toán.
+> - **HMAC / chữ ký**: một chuỗi tính từ nội dung tin nhắn và một mật khẩu chung. Sửa nội dung thì chuỗi không còn khớp.
+
+## Hình dung trước: năm cách liên lạc với một quán cà phê
+
+Mỗi kiểu API giống một cách liên lạc khác nhau. Câu hỏi để phân biệt chỉ có hai: **ai mở lời**, và **nói xong thì gác máy hay giữ máy**.
+
+| Đời thường | Kiểu API | Ai mở lời | Hợp với |
+|---|---|---|---|
+| Ra quầy hỏi "cho một ly cà phê sữa", nhận ly rồi đi | [[rest\|REST]] | Khách | Hầu hết mọi việc hỏi-đáp |
+| Điền phiếu, tự tick đúng những thứ mình muốn: "ít đá, thêm shot, không đường" | [[graphql\|GraphQL]] | Khách | Mỗi khách cần một kiểu dữ liệu khác nhau |
+| Quầy và kho nói chuyện bằng bộ đàm, dùng mã số ngắn thay cho câu dài | [[grpc\|gRPC]] | Bộ phận nội bộ | Các service trong cùng hệ thống gọi nhau |
+| Gọi điện cho quán rồi **giữ máy**, khi nào đồ xong quán nói luôn | [[websockets\|WebSockets]] | Cả hai, lúc nào cũng được | Server cần báo tin ngay khi có |
+| Để lại số điện thoại, **ngân hàng tự gọi** báo "tiền đã vào tài khoản" | [[webhooks\|Webhooks]] | Hệ thống bên ngoài | Chờ kết quả từ một bên thứ ba |
+
+Nếu không có WebSocket, cách duy nhất để biết "đồ xong chưa" là cứ hai phút lại chạy ra quầy hỏi (polling). Hỏi nhiều thì mệt, hỏi ít thì biết tin muộn.
+
+```mermaid
+flowchart TB
+    subgraph REST["REST: hỏi một câu, nhận một trả lời"]
+        direction LR
+        c1([Trình duyệt]) -- "GET /products/42" --> s1[(Server)]
+        s1 -- "200 + dữ liệu" --> c1
+    end
+    subgraph WS["WebSocket: giữ máy, server nói bất cứ lúc nào"]
+        direction LR
+        c2([Trình duyệt]) <== "kết nối mở suốt" ==> s2[(Server)]
+    end
+    subgraph WH["Webhook: bên ngoài gọi vào mình"]
+        direction LR
+        m([MoMo]) -- "POST /webhooks/momo/ipn" --> s3[(Server của mình)]
+    end
+```
+
 ## Vấn đề: một lượt mua, bốn kiểu giao tiếp
 
 Ở ga 1 mình theo chân một request đặt hàng. Nhưng một lượt săn flash sale thật trong dự án của mình dài hơn nhiều:
@@ -127,12 +173,12 @@ Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
 
 Sau `101`, hai bên gửi frame cho nhau tự do, không còn header lặp lại mỗi lần.
 
-Flash-sale dùng **Socket.IO** trên namespace `/flash-sale`:
+Flash-sale dùng **Socket.IO**, một thư viện xây trên WebSocket. Bằng lời thường thì nó làm thế này:
 
 - Xác thực bằng JWT trong `handshake.auth.token` lúc kết nối; sai thì `disconnect()` ngay.
-- Mỗi user vào room `user:{userId}`, nên mở nhiều tab thì tab nào cũng nhận tin.
+- Mỗi user vào một "phòng" (room) riêng tên `user:{userId}`. Mở nhiều tab thì tab nào cũng ở trong phòng đó, nên tab nào cũng nhận tin.
 - Server đẩy các sự kiện `queue_position`, `checkout_ready`, `stock_update`, `order_result`, `campaign_ended`.
-- `RedisIoAdapter` dùng Redis Pub/Sub, nên khi worker ở pod A phát `checkout_ready` thì client đang kết nối với pod B vẫn nhận được.
+- Backend chạy nhiều bản (pod) cùng lúc. Trình duyệt của bạn có thể đang nối với bản B, trong khi bản A mới là bản biết "tới lượt bạn rồi". Vì vậy các bản nói chuyện với nhau qua "loa phát thanh" Redis Pub/Sub (lớp `RedisIoAdapter`): A phát tin, B nghe được và chuyển tới bạn.
 - Vẫn giữ endpoint REST `GET /queue/position` (giới hạn 30 request mỗi 10 giây) làm **đường lùi** khi socket chưa kết nối hoặc người dùng tải lại trang.
 
 Ví dụ ở cuối bài tính thử: theo dõi hàng chờ 60 giây, vị trí đổi 3 lần. Polling mỗi 2 giây tốn 30 request, 27 cái thừa, tin mới trễ tới 2 giây. WebSocket chỉ cần 1 kết nối và 3 message.
@@ -143,7 +189,25 @@ Một chi tiết mình từng nhầm: **Socket.IO không phải WebSocket thuầ
 
 Khi người mua trả tiền trên trang MoMo, server của mình không biết lúc nào xong. [[webhooks|Webhook]] là hợp đồng ngược: mình đăng ký một URL, và *bên kia* gửi HTTP request tới URL đó khi có sự kiện. Các cổng thanh toán Việt Nam gọi nó là **IPN** (Instant Payment Notification).
 
-Flash-sale có hai controller webhook, và chúng cho thấy gần đủ mọi nguyên tắc:
+Trình tự dễ hình dung nhất:
+
+```mermaid
+sequenceDiagram
+    participant B as Trình duyệt
+    participant S as Server flash-sale
+    participant M as MoMo
+    B->>S: Thanh toán đơn ord_1
+    S-->>B: Chuyển sang trang MoMo
+    B->>M: Người mua xác nhận trả tiền
+    M->>S: Webhook (IPN): "ord_1 đã trả 1.990.000đ" + chữ ký
+    Note over S: kiểm chữ ký, kiểm số tiền,<br/>đánh dấu đơn đã trả
+    S-->>M: 204 "đã nhận"
+    M-->>B: Chuyển về trang "thanh toán xong" (chỉ để hiển thị)
+```
+
+Chỗ đáng chú ý là **mũi tên webhook đi từ MoMo vào server**, không phải từ trình duyệt. Endpoint này ai trên Internet cũng gọi được, nên server phải tự hỏi "có đúng là MoMo gửi không?". Đây là việc của chữ ký.
+
+Flash-sale có hai controller webhook (controller là lớp chứa các endpoint). Chúng cho thấy gần đủ mọi nguyên tắc. Các dòng bắt đầu bằng `@` là *decorator*, tức nhãn dán lên hàm để framework biết cách xử lý; mình chú thích nghĩa của từng nhãn ở cuối dòng:
 
 ```ts
 // rút gọn từ momo-webhook.controller.ts

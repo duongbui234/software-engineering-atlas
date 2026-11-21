@@ -23,6 +23,46 @@ sources:
 > - [[api-keys|API key]] định danh *ứng dụng*, [[oauth-2|OAuth 2.0]] cho phép *ủy quyền* truy cập thay người dùng mà không đưa mật khẩu.
 > - [[https-tls|HTTPS]] bảo vệ đường truyền; [[cors|CORS]] là luật của *trình duyệt*, không phải tường lửa của server.
 
+> [!info] Bối cảnh
+> Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết (backend NestJS, dữ liệu phiên đăng nhập để trong Redis). Bạn không cần đọc code dự án. Bài kể lại cách nó đăng nhập, cấp "thẻ" cho người dùng và phát hiện thẻ bị đánh cắp.
+
+> [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
+> - **Token**: một chuỗi ký tự server cấp sau khi đăng nhập, giống thẻ ra vào. Request sau chỉ cần đưa thẻ, không phải gửi lại mật khẩu.
+> - **Hash**: biến một chuỗi thành "dấu vân tay" cố định, không đảo ngược được. Lưu hash của mật khẩu thay vì mật khẩu.
+> - **bcrypt**: hàm hash dành cho mật khẩu, cố ý chạy chậm (~100ms) để kẻ gian không thử được hàng tỷ mật khẩu.
+> - **Chữ ký (HMAC, RSA)**: chuỗi tính từ nội dung và một khóa bí mật. Ai sửa nội dung thì chữ ký không còn khớp.
+> - **base64 / base64url**: cách viết dữ liệu bất kỳ bằng chữ cái và số. Đây *không* phải mã hóa, ai cũng giải ra được.
+> - **Redis**: cơ sở dữ liệu trong RAM, rất nhanh. Flash-sale dùng nó để nhớ phiên đăng nhập nào còn hiệu lực.
+> - **Cookie `httpOnly`**: cookie mà JavaScript trên trang không đọc được, chỉ trình duyệt tự gửi đi.
+> - **XSS**: kẻ gian chèn được đoạn script của họ vào trang của mình.
+> - **CSRF**: trang web khác lừa trình duyệt của bạn gửi request tới trang của mình, kèm luôn cookie của bạn.
+> - **Origin**: bộ ba giao thức + tên miền + cổng, ví dụ `https://shop.example.com`.
+
+## Hình dung trước: ra vào một tòa nhà văn phòng
+
+Bảo mật API có rất nhiều thuật ngữ, nhưng gần như khái niệm nào cũng có một "bản sao" ở tòa nhà văn phòng:
+
+| Ở tòa nhà | Trong API | Khái niệm |
+|---|---|---|
+| Lễ tân kiểm tra căn cước: "anh là ai?" | Kiểm email và mật khẩu | [[authentication\|Authentication]] |
+| Thẻ khách có dấu mộc của tòa nhà, ghi tên và tầng được vào. Ai nhìn cũng đọc được, nhưng không làm giả được dấu mộc | Token chứa `{ sub, role }` kèm chữ ký | [[jwt\|JWT]] |
+| Thẻ chỉ quẹt mở được tầng 3. Vào tầng 3 rồi cũng chỉ mở được phòng của mình | Kiểm role, rồi kiểm "đơn hàng này có phải của bạn không" | [[authorization\|Authorization]] |
+| Thẻ nhà thầu cấp cho *công ty* dịch vụ vệ sinh, không ghi tên người | Chuỗi bí mật gắn với một ứng dụng | [[api-keys\|API Keys]] |
+| Đưa chìa khóa "valet" cho nhân viên giữ xe: nổ máy được, mở cốp thì không | Cho ứng dụng khác quyền hạn chế, không đưa mật khẩu | [[oauth-2\|OAuth 2.0]] |
+| Xe chở tiền bọc thép, không ai nhìn vào được | Mã hóa đường truyền | [[https-tls\|HTTPS và TLS]] |
+| Phụ huynh dặn con: "chỉ nhận đồ từ người quen". Người lạ vẫn tới gõ cửa được, chỉ là đứa trẻ không nhận | Trình duyệt chặn trang lạ đọc response | [[cors\|CORS]] |
+
+Hai bước quan trọng nhất luôn đi theo thứ tự này:
+
+```mermaid
+flowchart LR
+    R([Request tới]) --> A{"Có thẻ hợp lệ không?<br/>(authentication)"}
+    A -- không --> E1["401: tôi không biết bạn là ai"]
+    A -- có --> B{"Thẻ này được làm việc này không?<br/>(authorization)"}
+    B -- không --> E2["403: tôi biết bạn, nhưng bạn không được phép"]
+    B -- có --> C["Xử lý request"]
+```
+
 ## Vấn đề: endpoint public trên Internet
 
 Ở ga 1, request checkout mang header `Authorization: Bearer eyJ...`. Mình biết phải gửi nó, nhưng khi tự hỏi thì không trả lời trọn được: token đó chứa gì, ai kiểm tra, hết hạn thì sao, bị lộ thì sao, và vì sao gọi từ Postman thì được còn từ trang web khác thì trình duyệt chặn?
@@ -36,7 +76,7 @@ OWASP xếp **Broken Object Level Authorization** và **Broken Authentication** 
 <figcaption><span><b>Hình 1.</b> Đăng nhập tạo một phiên trong Redis; mỗi lần refresh xóa token cũ, nên token bị đánh cắp dùng lại sẽ làm lộ ra kẻ gian và thu hồi cả phiên.</span><a href="../diagrams/api-security/token-rotation.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
 </figure>
 
-Tóm tắt các mảnh trong flash-sale:
+Tóm tắt bằng lời: đăng nhập xong, bạn nhận **hai** thẻ. *Thẻ ngày* (access token) dùng cho mọi request nhưng chỉ sống 15 phút. *Phiếu đổi thẻ* (refresh token) sống 7 ngày, chỉ dùng để xin thẻ ngày mới khi thẻ cũ hết hạn. Server ghi trong Redis những phiên nào còn hiệu lực. Bảng dưới là chi tiết kỹ thuật:
 
 | Mảnh | Giá trị | Nằm ở đâu phía client |
 |---|---|---|
@@ -102,7 +142,17 @@ if (!stored || !timingSafeEqual(hash(stored), hash(incoming))) {
 return generateTokens(userId, role, sid) // cấp cặp token mới, lưu hash của refresh token mới
 ```
 
-Mỗi refresh token chỉ dùng được **một lần**. Nếu kẻ gian lấy được token `r1` và người dùng thật đã refresh trước (nhận `r2`), thì khi kẻ gian dùng `r1`, hash không khớp → server biết có hai bên cùng giữ token của một phiên → thu hồi cả phiên. Người dùng thật phải đăng nhập lại, nhưng kẻ gian cũng bị đá ra. Ngược lại, nếu kẻ gian refresh trước, thì lần refresh kế tiếp của người dùng thật sẽ kích hoạt đúng cơ chế đó.
+Mỗi refresh token chỉ dùng được **một lần**. Giống phiếu gửi xe: đổi phiếu lấy xe xong thì phiếu bị thu lại. Ai cầm phiếu đã thu tới đòi xe thì chắc chắn có chuyện. Kể thành chuyện thì như sau:
+
+| Bước | Người dùng thật | Kẻ gian | Server đang nhớ phiếu nào |
+|---|---|---|---|
+| 1 | Đăng nhập, nhận phiếu `r1` | | `r1` |
+| 2 | | Trộm được `r1` (ví dụ qua máy tính dùng chung) | `r1` |
+| 3 | Thẻ ngày hết hạn, đưa `r1` đổi lấy thẻ mới và phiếu `r2` | | `r2` (đã xóa `r1`) |
+| 4 | | Đưa `r1` ra đổi | Không khớp `r2`. **Báo động: có hai người cùng giữ phiếu của một phiên** |
+| 5 | Phải đăng nhập lại | Bị đá ra | Xóa cả phiên |
+
+Người dùng thật chịu phiền một chút (đăng nhập lại), đổi lại kẻ gian mất quyền truy cập. Nếu kẻ gian đổi phiếu *trước* thì sao? Khi đó tới lượt người dùng thật cầm phiếu cũ, và báo động vẫn kêu y như vậy.
 
 Hai chi tiết nhỏ: server chỉ lưu **hash** của refresh token (lộ Redis cũng không dùng được), và so sánh bằng `timingSafeEqual` để không rò rỉ thông tin qua thời gian so sánh.
 
@@ -167,7 +217,7 @@ Trong flash-sale, TLS được xử lý ở rìa:
 
 ## CORS: luật của trình duyệt
 
-Đây là khái niệm mình hiểu sai lâu nhất. Mình từng nghĩ CORS *bảo vệ server*. Thật ra **[[cors|CORS]] bảo vệ người dùng trong trình duyệt**, và nó là một cách *nới lỏng* Same-Origin Policy chứ không phải siết thêm.
+Đây là khái niệm mình hiểu sai lâu nhất. Mình từng nghĩ CORS *bảo vệ server*. Nhớ lại hình ảnh phụ huynh và đứa trẻ ở đầu bài: người lạ vẫn tới gõ cửa được, chỉ là đứa trẻ (JavaScript trong trình duyệt) không được nhận đồ. Thật ra **[[cors|CORS]] bảo vệ người dùng trong trình duyệt**, và nó là một cách *nới lỏng* Same-Origin Policy chứ không phải siết thêm.
 
 Mặc định, JavaScript trên `https://evil.example` không được đọc response từ `https://api.example.com` (khác origin). CORS là cách server nói "origin này được phép đọc":
 
@@ -180,6 +230,20 @@ app.enableCors({
 ```
 
 Với request "không đơn giản" (method khác GET/POST/HEAD, hoặc có header như `Authorization`, hoặc `Content-Type: application/json`), trình duyệt gửi trước một request `OPTIONS` (*preflight*) để hỏi. Server trả `Access-Control-Allow-Origin` khớp origin thì trình duyệt mới gửi request thật.
+
+Vẽ ra cho dễ thấy *ai* đang chặn:
+
+```mermaid
+sequenceDiagram
+    participant JS as JavaScript trên evil.example
+    participant BR as Trình duyệt
+    participant API as api.example.com
+    JS->>BR: fetch("https://api.example.com/orders")
+    BR->>API: OPTIONS (preflight): "evil.example được đọc không?"
+    API-->>BR: không có Access-Control-Allow-Origin cho evil.example
+    BR-->>JS: chặn, báo lỗi CORS
+    Note over BR,API: server vẫn nhận được request.<br/>Người chặn là trình duyệt.
+```
 
 Ba hệ quả:
 

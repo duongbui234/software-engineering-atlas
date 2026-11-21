@@ -23,6 +23,50 @@ sources:
 > - [[circuit-breaker|Circuit breaker]]: dependency lỗi liên tục thì ngừng gọi một lúc, trả lỗi ngay (fail fast), rồi thử lại bằng một request duy nhất.
 > - [[rate-limiting|Rate limiting]] từ chối phần vượt mức (`429`); [[throttling|throttling]] làm chậm hoặc xếp hàng phần vượt mức. Flash-sale dùng cả hai.
 
+> [!info] Bối cảnh
+> Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: đúng 21:00 mở bán, hàng nghìn người tranh vài trăm suất, rồi trả tiền qua MoMo hoặc VNPay. Đây đúng là kiểu hệ thống mà "thỉnh thoảng hỏng" sẽ thành "chắc chắn hỏng". Bạn không cần đọc code dự án. Đoạn code trích chỉ để minh họa, còn mỗi cơ chế đều có giải thích bằng lời thường trước.
+
+> [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
+> - **Dependency**: thứ bên ngoài mà hệ thống của mình phải gọi tới, như cổng thanh toán, database hay hàng đợi tin nhắn.
+> - **Redis**: cơ sở dữ liệu trong RAM, rất nhanh. Ở đây dùng làm bộ nhớ chung cho mọi bản backend.
+> - **`SET … NX`**: lệnh Redis "chỉ ghi nếu chưa có". Hai người cùng ghi thì đảm bảo chỉ một người thắng.
+> - **TTL**: thời gian sống của một mục dữ liệu, hết hạn thì tự xóa.
+> - **Interceptor / decorator**: trong NestJS, interceptor là đoạn code bọc quanh endpoint (chạy trước và sau). Decorator `@Something()` là nhãn dán lên hàm để bật nó.
+> - **Pod**: một bản đang chạy của backend. Có nhiều pod giống nhau chạy cùng lúc.
+> - **Lua script**: đoạn code nhỏ chạy *bên trong* Redis, chạy trọn vẹn một lần, không bị chen ngang.
+> - **opossum**: thư viện circuit breaker cho Node.js.
+> - **BullMQ**: thư viện chạy việc nền định kỳ, dùng Redis.
+> - **Sorted set**: danh sách trong Redis tự sắp xếp theo điểm số, ở đây là thời điểm xếp hàng.
+
+## Hình dung trước: đặt bánh qua điện thoại
+
+Sáu khái niệm của ga này giống những phép lịch sự khi gọi điện đặt bánh sinh nhật:
+
+| Đời thường | Khái niệm | Nếu thiếu thì sao |
+|---|---|---|
+| Đọc **mã đơn** "đơn số 123" mỗi lần gọi lại. Tiệm tra mã thấy đã làm rồi thì không làm thêm cái thứ hai | [[idempotency\|Idempotency]] | Rớt cuộc gọi, gọi lại, nhận hai cái bánh và trả tiền hai lần |
+| Chờ máy tối đa 1 phút, không ai nghe thì cúp | [[timeouts\|Timeout]] | Cầm máy chờ cả buổi, không làm được việc khác |
+| Máy bận thì gọi lại sau 1 phút, rồi 2, rồi 4 phút. Mỗi người lệch nhau vài giây | [[retries-with-backoff\|Retry + backoff + jitter]] | Cả trăm người cùng gọi lại đúng một giây, tổng đài nghẽn thêm |
+| Cầu dao nhảy khi chập điện. Đợi một lúc rồi bật thử một lần | [[circuit-breaker\|Circuit breaker]] | Cứ bật lại liên tục, cháy luôn cả nhà |
+| Bảo vệ chỉ cho 10 người mỗi phút vào cửa hàng, quá thì mời về | [[rate-limiting\|Rate limiting]] | Một người (hoặc một bot) chiếm hết quầy |
+| Ngân hàng phát **số thứ tự**, ai cũng được phục vụ, chỉ phải chờ | [[throttling\|Throttling]] | Cả nghìn người chen vào quầy một lúc |
+
+Ghép lại, một lời gọi từ backend ra cổng thanh toán đi qua các lớp bảo vệ theo thứ tự này:
+
+```mermaid
+flowchart TB
+    R([Request checkout]) --> RL{"Rate limit<br/>còn lượt không?"}
+    RL -- hết lượt --> E429["429 + Retry-After"]
+    RL -- còn --> ID{"Idempotency-Key<br/>đã thấy chưa?"}
+    ID -- "rồi, đã xong" --> OLD["trả lại kết quả cũ"]
+    ID -- chưa --> CB{"Circuit breaker<br/>đang mở?"}
+    CB -- mở --> FF["báo lỗi ngay (fail fast)"]
+    CB -- đóng --> T["Gọi MoMo,<br/>tối đa 5 giây (timeout)"]
+    T -- "lỗi tạm thời" --> W["chờ ngẫu nhiên, lâu dần<br/>(backoff + jitter)"]
+    W --> T
+    T -- thành công --> OK["lưu kết quả theo key<br/>và trả về"]
+```
+
 ## Vấn đề: mọi thứ đều có thể hỏng giữa chừng
 
 Ở ga 1 mình thấy `POST /checkout` bắt buộc `Idempotency-Key`; ở ga 2, webhook của MoMo có thể tới hai lần. Ga này gom tất cả những tình huống "không có gì sai trong code, nhưng hệ thống vẫn hỏng":
@@ -36,6 +80,8 @@ Mình từng nghĩ những chuyện này thuộc về "hạ tầng". Đọc kỹ
 
 ## Idempotency: một chìa khóa cho mỗi ý định
 
+Câu hỏi khó nhất của mọi request thanh toán: **request bị timeout thì tiền đã trừ chưa?** Client không thể biết. Có thể server chưa nhận được, cũng có thể server đã trừ tiền xong nhưng câu trả lời rơi dọc đường. Gửi lại thì có nguy cơ trừ hai lần, không gửi thì có nguy cơ mất đơn. Idempotency key giải quyết đúng chỗ này: gửi lại thoải mái, vì server nhận ra "lần này là lần trước".
+
 Client sinh một chuỗi ngẫu nhiên cho *mỗi ý định thanh toán* và gửi kèm header `Idempotency-Key`. Mọi lần retry của cùng ý định đó dùng lại đúng chuỗi này. Sơ đồ dưới đây đi qua tình huống mất phản hồi rồi retry; bạn có thể kéo, phóng to, bấm vào từng mũi tên để xem chi tiết.
 
 <figure class="figure-map" style="--ar: 1 / 1">
@@ -43,7 +89,7 @@ Client sinh một chuỗi ngẫu nhiên cho *mỗi ý định thanh toán* và g
 <figcaption><span><b>Hình 1.</b> Lần gọi đầu đã trừ tiền nhưng phản hồi bị mất; lần retry chỉ đọc lại kết quả.</span><a href="../diagrams/api-reliability/retry.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
 </figure>
 
-Flash-sale cài cơ chế này thành `IdempotencyInterceptor`, gắn vào endpoint bằng decorator `@UseIdempotency()`. Những điểm mình thấy đáng học:
+Flash-sale cài cơ chế này thành một interceptor (đoạn code bọc quanh endpoint, chạy trước và sau nó) tên `IdempotencyInterceptor`. Muốn bật cho endpoint nào thì dán nhãn `@UseIdempotency()` lên endpoint đó. Logic bằng lời thường: *giành mã → nếu mã đã xong thì trả lại kết quả cũ → nếu chưa thì làm → làm xong thì lưu kết quả → lỗi thì nhả mã ra*. Code rút gọn:
 
 ```ts
 // rút gọn từ idempotency.interceptor.ts
@@ -99,7 +145,7 @@ Toàn bộ file: <a href="../code/api-reliability/idempotency.ts">code/api-relia
 
 ## Timeouts: không chờ vô hạn
 
-Một lời gọi không có [[timeouts|timeout]] là một lời hứa chờ mãi mãi. Khi dependency chậm, mỗi request đang chờ giữ một kết nối, một ít bộ nhớ, có khi cả một transaction. Hết tài nguyên thì cả những endpoint *không liên quan* cũng chết theo. Đây là kiểu sự cố dây chuyền mà Amazon gọi là "brownout lan rộng".
+Một lời gọi không có [[timeouts|timeout]] là một lời hứa chờ mãi mãi. Hình dung một quán có 10 nhân viên. Mỗi người gọi điện cho nhà cung cấp rồi cầm máy chờ, mà nhà cung cấp không nghe máy. Mười người cầm mười cái điện thoại, và khách mới vào quán không còn ai phục vụ. Khi dependency chậm, mỗi request đang chờ giữ một kết nối, một ít bộ nhớ, có khi cả một transaction. Hết tài nguyên thì cả những endpoint *không liên quan* cũng chết theo. Đây là kiểu sự cố dây chuyền mà Amazon gọi là "brownout lan rộng".
 
 Flash-sale đặt timeout cho từng dependency, mỗi cái một con số khác nhau:
 
@@ -161,6 +207,8 @@ stateDiagram-v2
 - **OPEN**: không gọi nữa, trả lỗi ngay. Dependency có thời gian thở, request của mình không phải chờ timeout.
 - **HALF_OPEN**: hết thời gian chờ, cho *một* request đi thử. Thành công thì đóng lại, thất bại thì mở tiếp.
 
+Ví dụ trong flash-sale: MoMo sập. Không có breaker, mỗi request thanh toán chờ đủ 5 giây timeout, retry 3 lần, rồi mới báo lỗi. Người dùng chờ gần 20 giây chỉ để nghe "lỗi". Có breaker, sau vài lỗi đầu tiên mọi request sau được báo lỗi ngay lập tức, kiểu "MoMo đang bảo trì, bạn chọn VNPay nhé".
+
 Flash-sale dùng thư viện `opossum`, cấu hình mặc định: mở khi **≥ 50% lỗi** trong cửa sổ 10 giây, nhưng chỉ khi có **ít nhất 5 request** (để 1 lỗi trên 1 request không làm mở cầu dao), chờ **30 giây** rồi thử lại. RabbitMQ nhạy hơn: ngưỡng 30%, chờ 15 giây.
 
 Chi tiết mình thấy tinh tế nhất là thứ tự lồng nhau:
@@ -185,7 +233,7 @@ Retry nằm **bên trong** circuit breaker: breaker chỉ thấy kết quả cu�
 | `TokenBucketGuard` (theo route) | Token bucket, script Lua chạy nguyên tử trong Redis | Checkout: 10 token, hồi 1 token mỗi ~6s |
 | Đăng nhập | Bộ đếm cố định theo email và IP | 5 lần sai / 15 phút |
 
-Token bucket là thuật toán mình thích nhất vì cho phép **burst** hợp lý. Xô chứa tối đa `capacity` token, hồi `rate` token mỗi giây, mỗi request tốn một token:
+Token bucket là thuật toán mình thích nhất vì cho phép **burst** (dồn dập một lúc) hợp lý. Hình dung một chiếc **xô đựng xu**: xô chứa tối đa 10 xu, cứ 6 giây được thả thêm 1 xu, mỗi request phải bỏ 1 xu. Bấm liên tục 10 lần thì vẫn qua vì xô đang đầy. Lần thứ 11 thì xô hết, phải chờ xu mới. Dưới đây là phần lõi của script Lua chạy trong Redis:
 
 ```lua
 -- rút gọn từ token-bucket.lua

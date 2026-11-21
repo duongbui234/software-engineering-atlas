@@ -22,6 +22,45 @@ sources:
 > - [[api-versioning|API versioning]]: thay đổi *thêm vào* thì không cần version mới; thay đổi *phá vỡ* thì cần, và cách tốt nhất là để code lõi chỉ biết bản mới, còn rìa chuyển đổi cho client cũ.
 > - [[openapi|OpenAPI]] là hợp đồng máy đọc được: sinh tài liệu, sinh client, kiểm tra request và test hợp đồng từ cùng một nguồn.
 
+> [!info] Bối cảnh
+> Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết. Hiện nó là **một** ứng dụng (mình gọi là *Main*). Trong repo có một bản thiết kế, chưa làm, để tách phần đăng nhập và phân quyền (gọi là **IAM**, Identity and Access Management) ra thành ứng dụng riêng. Bạn không cần đọc code dự án. Bài dùng bản thiết kế này như một ví dụ thực tế cho cả bốn khái niệm.
+
+> [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
+> - **Monolith**: toàn bộ hệ thống là một ứng dụng, deploy một lần.
+> - **Modular monolith**: vẫn là một ứng dụng, nhưng code chia thành các khu có ranh giới rõ (đơn hàng, thanh toán, sản phẩm…).
+> - **Service**: một ứng dụng chạy riêng, có database riêng, nói chuyện với các service khác qua mạng.
+> - **gRPC**: cách gọi hàm giữa các service qua mạng, gọn và nhanh (xem [[2026-11-18-api-styles|ga 2]]).
+> - **JOIN**: câu SQL ghép dữ liệu từ hai bảng, ví dụ đơn hàng kèm tên người mua.
+> - **Transaction**: nhóm thao tác database "hoặc thành công hết, hoặc không có gì xảy ra".
+> - **Saga**: cách làm thay transaction khi các bước nằm ở nhiều service. Bước sau lỗi thì chạy bước "hoàn tác" cho các bước trước.
+> - **Private key / public key**: cặp khóa. Khóa riêng dùng để ký, chỉ một nơi giữ. Khóa công khai dùng để kiểm chữ ký, ai giữ cũng được.
+> - **Rolling deploy**: thay dần từng bản đang chạy bằng bản mới, nên có lúc bản cũ và bản mới chạy song song.
+> - **Swagger UI**: trang web tự sinh từ file OpenAPI, cho phép đọc tài liệu và thử gọi API.
+
+## Hình dung trước: từ siêu thị tới trung tâm thương mại
+
+| Đời thường | Khái niệm |
+|---|---|
+| Một siêu thị lớn: một kho, một hệ thống thu ngân, một ông quản lý | Monolith |
+| Vẫn một siêu thị, nhưng chia khu rõ ràng: khu điện tử không lấy hàng từ kệ khu thực phẩm | Modular monolith (flash-sale hiện tại) |
+| Trung tâm thương mại: mỗi cửa hàng tự có kho và nhân viên, tự mở cửa đóng cửa. Muốn hỏi hàng của cửa hàng khác thì phải gọi điện | [[microservices\|Microservices]] |
+| Cửa chính có quầy thông tin và bảo vệ: kiểm vé, chỉ đường tới đúng cửa hàng | [[api-gateway\|API Gateway]] |
+| Đổi sang ổ cắm điện kiểu mới nhưng phát **adapter** cho thiết bị cũ, để ai cũng còn cắm được | [[api-versioning\|API Versioning]] |
+| Bản đồ và danh bạ in sẵn ở cửa: cửa hàng nào ở đâu, bán gì, giờ mở cửa | [[openapi\|OpenAPI]] |
+
+Chỗ cần để ý nhất là câu "muốn hỏi thì phải gọi điện". Trong siêu thị, nhân viên chỉ cần quay sang kệ bên cạnh. Ở trung tâm thương mại, mỗi câu hỏi là một cuộc gọi: có độ trễ, có thể không ai nghe máy, và hai cửa hàng không thể cùng "tính tiền chung một hóa đơn". Toàn bộ cái giá của microservices nằm ở câu đó.
+
+```mermaid
+flowchart LR
+    B([Trình duyệt]) --> G["Cửa vào chung<br/>(gateway / Main)<br/>kiểm thẻ, chỉ đường"]
+    G --> O["Đơn hàng"]
+    G --> P["Sản phẩm"]
+    G -- "đăng nhập" --> I["IAM<br/>(tách riêng)"]
+    O -. "gọi qua mạng<br/>thay vì JOIN" .-> I
+    O --> DB1[("DB đơn hàng")]
+    I --> DB2[("DB người dùng")]
+```
+
 ## Vấn đề: API không còn là một khối
 
 Năm ga trước nhìn API từ góc một request. Ga cuối nhìn từ trên cao: chuyện gì xảy ra khi hệ thống lớn dần, nhiều team, nhiều client, và một phần hệ thống muốn tách ra chạy riêng?
@@ -39,6 +78,8 @@ Flash-sale đang ở đúng thời điểm đó. Nó là một **modular monolit
 
 Bản thiết kế tách IAM liệt kê thẳng thắn những thứ phải trả:
 
+Bảng dưới đọc từng dòng theo kiểu "trước đây làm thế này, sau khi tách phải làm thế kia":
+
 | Trong monolith | Sau khi tách IAM |
 |---|---|
 | `orders JOIN users` trong một câu SQL | Gọi `GetUsersByIds` qua gRPC rồi tự ghép; "N+1 is a hard no" |
@@ -48,8 +89,8 @@ Bản thiết kế tách IAM liệt kê thẳng thắn những thứ phải tr�
 
 Hai quyết định trong thiết kế mình thấy rất đáng học:
 
-- **Đường nóng không phụ thuộc IAM.** Mỗi request đã đăng nhập chỉ cần kiểm chữ ký JWT tại chỗ (public key) và tra blocklist trong Redis dùng chung. IAM chết thì không đăng nhập mới được, nhưng người đã đăng nhập vẫn mua hàng bình thường. Thiết kế cố ý *không* có RPC `ValidateToken`: gọi IAM ở mỗi request là biến IAM thành điểm chết của cả hệ thống.
-- **Strangler fig**: không viết lại từ đầu, mà rút dần từng phần ra khỏi monolith, giữ nguyên giao diện bên ngoài (`/auth/*` vẫn ở Main, chỉ chuyển tiếp vào IAM).
+- **Đường nóng không phụ thuộc IAM.** "Đường nóng" là những request chạy liên tục, như xem sản phẩm hay đặt hàng. Mỗi request đã đăng nhập chỉ cần kiểm chữ ký JWT tại chỗ (public key) và tra blocklist trong Redis dùng chung. IAM chết thì không đăng nhập mới được, nhưng người đã đăng nhập vẫn mua hàng bình thường. Thiết kế cố ý *không* có RPC `ValidateToken`: gọi IAM ở mỗi request là biến IAM thành điểm chết của cả hệ thống.
+- **Strangler fig** (tên một loài cây đa bóp cổ: mọc bao quanh cây chủ, tới khi cây chủ mục đi thì nó đứng thay chỗ): không viết lại từ đầu, mà rút dần từng phần ra khỏi monolith, giữ nguyên giao diện bên ngoài (`/auth/*` vẫn ở Main, chỉ chuyển tiếp vào IAM).
 
 Ví dụ ở cuối bài đo cái giá của JOIN biến thành lời gọi mạng: 20 đơn hàng, gọi `GetUser` từng cái là 20 lần gọi, tối thiểu 100ms chỉ riêng độ trễ mạng (giả định 5ms mỗi lần); gọi gộp `GetUsersByIds` là 1 lần, 5ms.
 
@@ -76,6 +117,8 @@ Bẫy lớn nhất của gateway là nó dần dần chứa logic nghiệp vụ 
 
 Client cũ (app mobile chưa cập nhật, script của đối tác) vẫn sẽ gọi API của mình nhiều tháng sau khi mình đổi nó. [[api-versioning|Versioning]] là cách cho phép thay đổi mà không phá vỡ họ.
 
+Hình dung app trên điện thoại của bạn: bạn chưa cập nhật app sáu tháng, nó vẫn gọi API theo cách sáu tháng trước. Nếu backend đổi tên field `total` thành `amount`, app của bạn hỏng ngay, dù bạn chẳng làm gì sai.
+
 **Bước một là phân loại thay đổi:**
 
 | Không phá vỡ (thêm vào) | Phá vỡ |
@@ -96,6 +139,8 @@ Phần lớn thay đổi trong thực tế thuộc cột trái, và không cần
 **Bước ba là ngừng hỗ trợ có báo trước**: header `Deprecation` (RFC 9745) báo endpoint sắp bỏ, `Sunset` (RFC 8594) báo ngày tắt hẳn, kèm link tài liệu chuyển đổi. Và đo xem còn ai gọi bản cũ trước khi tắt.
 
 ## OpenAPI: hợp đồng mà máy đọc được
+
+Ở [[2026-11-18-api-foundations|ga 1]], backend gửi lỗi trong field `msg`, frontend lại đọc `message`. Hai bên "thỏa thuận bằng miệng" và hiểu khác nhau. OpenAPI là bản hợp đồng **viết ra giấy**, và cả người lẫn máy đều đọc được.
 
 [[openapi|OpenAPI]] (trước gọi là Swagger) là một định dạng YAML/JSON mô tả API: endpoint, tham số, header, schema request và response, các status code, cách xác thực. Bản 3.1 dùng thẳng JSON Schema 2020-12 cho phần schema.
 

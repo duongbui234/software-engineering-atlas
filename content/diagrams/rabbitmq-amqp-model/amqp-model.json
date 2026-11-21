@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Bên trong bưu điện: mô hình AMQP 0-9-1",
+    "output": "content/diagrams/rabbitmq-amqp-model/amqp-model.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "producer", "type": "backend", "label": "Người gửi thư", "sublabel": "producer: dịch vụ đặt hàng", "pos": [40, 200], "size": [160, 70] },
+    { "id": "exchange", "type": "messagebus", "label": "Bàn phân loại", "sublabel": "exchange orders (topic)", "pos": [320, 200], "size": [170, 70] },
+    { "id": "q-stock", "type": "database", "label": "Hộc thư kho", "sublabel": "queue stock.q", "pos": [610, 80], "size": [160, 64] },
+    { "id": "q-email", "type": "database", "label": "Hộc thư email", "sublabel": "queue email.q", "pos": [610, 320], "size": [160, 64] },
+    { "id": "c-stock", "type": "backend", "label": "Nhân viên kho", "sublabel": "consumer: trừ kho", "pos": [880, 80], "size": [160, 64] },
+    { "id": "c-email", "type": "backend", "label": "Nhân viên email", "sublabel": "consumer: gửi email", "pos": [880, 320], "size": [160, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Bưu điện RabbitMQ · chi nhánh (vhost) /", "wraps": ["exchange", "q-stock", "q-email"] }
+  ],
+  "connections": [
+    { "id": "publish", "from": "producer", "to": "exchange", "label": "gửi thư, nhãn order.cancelled", "variant": "emphasis" },
+    { "id": "bind-stock", "from": "exchange", "to": "q-stock", "label": "quy tắc: order.cancelled", "fromSide": "top", "toSide": "left" },
+    { "id": "bind-email", "from": "exchange", "to": "q-email", "label": "quy tắc: order.*", "fromSide": "bottom", "toSide": "left" },
+    { "id": "deliver-stock", "from": "q-stock", "to": "c-stock", "label": "phát thư" },
+    { "id": "deliver-email", "from": "q-email", "to": "c-email", "label": "phát thư" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Người gửi không chọn hộc thư",
+      "items": [
+        "Producer chỉ đưa thư cho exchange kèm nhãn (routing key)",
+        "Binding là quy tắc nối exchange với queue",
+        "Một thư khớp hai quy tắc thì có hai bản"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Xe chở thư",
+      "items": [
+        "Connection: một kết nối TCP sống lâu, có đăng nhập",
+        "Channel: làn logic bên trong connection, mỗi luồng một làn",
+        "Vhost: chi nhánh tách biệt tên, quyền và chính sách"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Thư không khớp quy tắc nào",
+      "items": [
+        "Mặc định bị bỏ, không báo lỗi",
+        "Ga 3: mandatory, alternate exchange"
+      ]
+    }
+  ]
+}

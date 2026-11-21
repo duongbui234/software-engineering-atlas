@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Quorum queue: ba bưu cục cùng giữ sổ, đa số đồng ý mới tính",
+    "output": "content/diagrams/rabbitmq-queue-types/quorum-raft.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "producer",
+      "type": "backend",
+      "label": "Người gửi",
+      "sublabel": "producer, confirm"
+    },
+    {
+      "id": "n1",
+      "type": "messagebus",
+      "label": "Bưu cục 1",
+      "sublabel": "node 1: leader"
+    },
+    {
+      "id": "n2",
+      "type": "messagebus",
+      "label": "Bưu cục 2",
+      "sublabel": "node 2: follower"
+    },
+    {
+      "id": "n3",
+      "type": "messagebus",
+      "label": "Bưu cục 3",
+      "sublabel": "node 3: follower"
+    },
+    {
+      "id": "consumer",
+      "type": "backend",
+      "label": "Người nhận",
+      "sublabel": "consumer"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 345,
+      "label": "Ghi một thư"
+    },
+    {
+      "from": 355,
+      "to": 545,
+      "label": "Leader mất"
+    }
+  ],
+  "messages": [
+    {
+      "id": "publish",
+      "from": "producer",
+      "to": "n1",
+      "y": 165,
+      "label": "gửi thư, xin biên nhận",
+      "variant": "emphasis",
+      "note": "publish vào quorum queue"
+    },
+    {
+      "id": "rep2",
+      "from": "n1",
+      "to": "n2",
+      "y": 215,
+      "label": "chép vào sổ",
+      "variant": "default"
+    },
+    {
+      "id": "rep3",
+      "from": "n1",
+      "to": "n3",
+      "y": 245,
+      "label": "chép vào sổ",
+      "variant": "default",
+      "note": "Raft: leader gửi cho mọi follower"
+    },
+    {
+      "id": "ok2",
+      "from": "n2",
+      "to": "n1",
+      "y": 292,
+      "label": "đã chép",
+      "variant": "return"
+    },
+    {
+      "id": "confirm",
+      "from": "n1",
+      "to": "producer",
+      "y": 322,
+      "label": "biên nhận: 2/3 bưu cục có thư",
+      "variant": "return",
+      "note": "không chờ bưu cục 3"
+    },
+    {
+      "id": "down",
+      "from": "n1",
+      "to": "n2",
+      "y": 377,
+      "label": "bưu cục 1 mất điện",
+      "variant": "dashed"
+    },
+    {
+      "id": "vote",
+      "from": "n2",
+      "to": "n3",
+      "y": 417,
+      "label": "bầu tôi làm leader?",
+      "variant": "emphasis",
+      "note": "cần đa số: 2 trên 3"
+    },
+    {
+      "id": "yes",
+      "from": "n3",
+      "to": "n2",
+      "y": 462,
+      "label": "đồng ý",
+      "variant": "return"
+    },
+    {
+      "id": "deliver",
+      "from": "n2",
+      "to": "consumer",
+      "y": 497,
+      "label": "giao thư tiếp từ bưu cục 2",
+      "variant": "default",
+      "note": "thư chưa ack được giao lại"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "n1",
+      "from": 165,
+      "to": 322,
+      "type": "messagebus"
+    },
+    {
+      "participant": "n2",
+      "from": 215,
+      "to": 292,
+      "type": "messagebus"
+    },
+    {
+      "participant": "n2",
+      "from": 417,
+      "to": 497,
+      "type": "messagebus"
+    },
+    {
+      "participant": "n3",
+      "from": 417,
+      "to": 462,
+      "type": "messagebus"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Đa số mới tính",
+      "items": [
+        "Biên nhận chỉ gửi khi đa số bản sao đã có thư",
+        "3 bản sao chịu được 1 node chết, 5 bản sao chịu được 2",
+        "Mất đa số thì queue ngừng nhận, không đoán bừa"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Cái giá",
+      "items": [
+        "Mỗi thư ghi ở nhiều node: chậm hơn classic",
+        "Đổi leader làm thư chưa ack bị giao lại (trùng)",
+        "Không exclusive, không transient, không global QoS"
+      ]
+    }
+  ]
+}

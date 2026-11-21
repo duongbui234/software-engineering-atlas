@@ -11,6 +11,7 @@ import {
   SeriesLine,
   SeriesHub,
   ARCHIFY_SCRIPT,
+  MERMAID_SCRIPT,
 } from "./components.js"
 
 const Brand = AtlasBrand()
@@ -117,6 +118,13 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 .page[data-frame="atlas"] pre {
   max-width: 46rem; border: 0; border-left: 3px solid var(--contour); border-radius: 0; background: var(--code-bg);
 }
+/* Sơ đồ Mermaid (MERMAID_SCRIPT render): cùng khung với khối code */
+.atlas-mermaid {
+  max-width: 46rem; margin: 1.5rem 0; padding: 1rem; overflow-x: auto; text-align: center;
+  border-left: 3px solid var(--contour); background: var(--code-bg);
+}
+.atlas-mermaid svg { max-width: 100%; height: auto; }
+.atlas-mermaid[data-src]:empty { min-height: 4rem; }
 .standfirst { font-size: 1.1875rem; color: var(--ink-2); max-width: var(--measure); margin: 0 0 1rem; }
 .page[data-frame="atlas"] .center > hr { display: none; }
 .page-footer:empty { display: none; }
@@ -339,6 +347,7 @@ export const AtlasFrame = {
     const render = (C) => h(C, componentData)
     return h(Fragment, null, [
       h("script", { dangerouslySetInnerHTML: { __html: ARCHIFY_SCRIPT } }),
+      h("script", { dangerouslySetInnerHTML: { __html: MERMAID_SCRIPT } }),
       h("div", { class: "atlas-sheet" }, [
         tl && h("span", { class: "corner tl" }, tl),
         br && h("span", { class: "corner br" }, br),

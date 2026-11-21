@@ -72,6 +72,9 @@ plugins:
     options:
       enableInHtmlEmbed: false
       enableCheckbox: true
+      # Mermaid do plugins/atlas tự render (tuần tự, id không trùng); renderer của plugin này
+      # chạy hai lần chồng nhau (nav + render) và làm các sơ đồ trùng id, vẽ đè lên nhau.
+      mermaid: false
     order: 40
   - source: "@quartz-community/github-flavored-markdown"
     enabled: true

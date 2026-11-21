@@ -48,6 +48,85 @@ document.addEventListener("nav", atlasArchifySync);
 document.addEventListener("themechange", atlasArchifySync);
 `
 
+// ── Mermaid: tự render thay cho renderer của obsidian-flavored-markdown ──────
+// Renderer của plugin chạy mermaid.run hai lần chồng nhau (nav + render), hai sơ đồ
+// có thể nhận cùng id và vẽ đè lên nhau. Ở đây: render tuần tự bằng mermaid.render với
+// id riêng cho từng khối; lượt render mới (nav, đổi theme) hủy lượt cũ. Không có JS thì
+// khối code Mermaid vẫn hiện nguyên văn.
+export const MERMAID_SCRIPT = `
+var atlasMermaidLib = null;
+var atlasMermaidRun = 0;
+function atlasMermaidVar(name) {
+  // Token màu của Atlas khai báo trên .page (theo theme Quartz), không phải :root
+  var el = document.querySelector('.page[data-frame="atlas"]') || document.documentElement;
+  return getComputedStyle(el).getPropertyValue(name).trim();
+}
+async function atlasRenderMermaid() {
+  document.querySelectorAll('pre[data-language="mermaid"]').forEach(function (pre) {
+    var box = document.createElement("div");
+    box.className = "atlas-mermaid";
+    box.setAttribute("data-src", pre.textContent);
+    var fig = pre.closest("figure[data-rehype-pretty-code-figure]") || pre;
+    fig.replaceWith(box);
+  });
+  var boxes = document.querySelectorAll(".atlas-mermaid[data-src]");
+  if (boxes.length === 0) return;
+  var run = ++atlasMermaidRun;
+  if (!atlasMermaidLib) {
+    atlasMermaidLib = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.0/mermaid.esm.min.mjs")).default;
+  }
+  if (run !== atlasMermaidRun) return;
+  var dark = document.documentElement.getAttribute("saved-theme") === "dark";
+  atlasMermaidLib.initialize({
+    startOnLoad: false,
+    securityLevel: "strict",
+    theme: "base",
+    themeVariables: {
+      darkMode: dark,
+      fontFamily: atlasMermaidVar("--bodyFont") || "Be Vietnam Pro, sans-serif",
+      fontSize: "15px",
+      background: atlasMermaidVar("--code-bg"),
+      primaryColor: atlasMermaidVar("--paper"),
+      primaryTextColor: atlasMermaidVar("--ink"),
+      primaryBorderColor: atlasMermaidVar("--contour"),
+      secondaryColor: atlasMermaidVar("--code-bg"),
+      tertiaryColor: atlasMermaidVar("--paper-2"),
+      lineColor: atlasMermaidVar("--ink-2"),
+      textColor: atlasMermaidVar("--ink"),
+      clusterBkg: atlasMermaidVar("--paper-2"),
+      clusterBorder: atlasMermaidVar("--grid"),
+      edgeLabelBackground: atlasMermaidVar("--paper"),
+      actorBkg: atlasMermaidVar("--paper"),
+      actorBorder: atlasMermaidVar("--contour"),
+      actorTextColor: atlasMermaidVar("--ink"),
+      signalColor: atlasMermaidVar("--ink"),
+      signalTextColor: atlasMermaidVar("--ink"),
+      noteBkgColor: atlasMermaidVar("--paper-2"),
+      noteBorderColor: atlasMermaidVar("--grid"),
+      noteTextColor: atlasMermaidVar("--ink"),
+      labelBoxBkgColor: atlasMermaidVar("--paper"),
+      labelBoxBorderColor: atlasMermaidVar("--contour"),
+      loopTextColor: atlasMermaidVar("--ink"),
+    },
+  });
+  for (var i = 0; i < boxes.length; i++) {
+    try {
+      var out = await atlasMermaidLib.render("atlas-mermaid-" + run + "-" + i, boxes[i].getAttribute("data-src"));
+      if (run !== atlasMermaidRun) return;
+      boxes[i].innerHTML = out.svg;
+    } catch (err) {
+      if (run !== atlasMermaidRun) return;
+      var pre = document.createElement("pre");
+      pre.textContent = boxes[i].getAttribute("data-src");
+      boxes[i].replaceChildren(pre);
+      console.error("Mermaid:", err);
+    }
+  }
+}
+document.addEventListener("nav", atlasRenderMermaid);
+document.addEventListener("themechange", atlasRenderMermaid);
+`
+
 // ── Masthead brand ────────────────────────────────────────────────────────────
 export const AtlasBrand = (opts = {}) => {
   const Component = ({ fileData, cfg, allFiles }) => {

@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quartz setup
 
 - `main` is built on top of upstream Quartz history (`upstream` remote → `jackyzha0/quartz`, branch `v5`). Update with `npx quartz upgrade` (`update` is an alias) on a branch, then `npx quartz plugin doctor --fix` (moves plugins absorbed into core, e.g. `quartz-fonts` → `configuration.fonts`) and `npx quartz plugin install --from-config`, then build before merging into `main`. To keep merges clean, avoid editing upstream files (`quartz/`, `docs/`, upstream `.github/` files) unless necessary. Site-specific changes belong in `quartz.config.yaml`, `content/`, our own components and styles, and `.github/workflows/deploy.yml`.
-- Upstream workflows are guarded by `github.repository == 'jackyzha0/quartz'` and do not run here. Our CI is `.github/workflows/deploy.yml`: it builds on PRs and builds and deploys on push to `main`. In the repo settings, set Pages → Source to **GitHub Actions**.
+- Upstream workflows are guarded by `github.repository == 'jackyzha0/quartz'` and do not run here. Our CI is `.github/workflows/deploy.yml`: it builds on PRs and builds and deploys on push to `main`. After the build it runs `scripts/check-render.mjs` (render check, see Commands), so a page that scrolls sideways or an unreadable Mermaid diagram fails the PR. In the repo settings, set Pages → Source to **GitHub Actions**.
 - `@quartz-community/*` plugins are npm packages installed by `npm ci`. The only non-npm plugin is the local `./plugins/atlas` (see below).
 - Drafts are handled by Quartz core: `draft: true` pages are not emitted. `cname` is disabled because the site runs under the `/software-engineering-atlas` subpath.
 - Comments (giscus) and analytics (GoatCounter) are configured but off. Comments need GitHub Discussions plus `repoId`/`categoryId` from giscus.app. Analytics needs a GoatCounter `websiteId`.
@@ -25,6 +25,10 @@ npx quartz build --serve        # dev server on http://localhost:8080 with live 
 npx quartz build                # production build into public/
 npx quartz plugin doctor        # check plugin config
 npm run check                   # tsc + prettier (upstream code)
+
+# Render check (also runs in CI after build): every page at 390px and 1440px.
+# Fails on horizontal page scroll, broken Mermaid, "Unsupported markdown" labels, or diagrams shrunk below 75%.
+npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
 
 # Preview the prototype (iframes and theme sync need http, not file://)
 cd prototype && python3 -m http.server 8765

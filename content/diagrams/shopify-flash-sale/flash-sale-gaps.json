@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Một suất flash sale đi qua flash-sale: bốn chỗ hở",
+    "output": "content/diagrams/shopify-flash-sale/flash-sale-gaps.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "buyer",
+      "type": "frontend",
+      "label": "Người mua",
+      "sublabel": "trình duyệt"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Server bán hàng",
+      "sublabel": "NestJS, nhiều pod"
+    },
+    {
+      "id": "worker",
+      "type": "messagebus",
+      "label": "Người gọi số",
+      "sublabel": "BullMQ, 5s/lần"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Hàng chờ + kho nhanh",
+      "sublabel": "Redis: ZSET + Lua"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Sổ kho chính",
+      "sublabel": "Postgres: đơn, tồn kho"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 330,
+      "label": "Xếp hàng"
+    },
+    {
+      "from": 345,
+      "to": 560,
+      "label": "Mua"
+    },
+    {
+      "from": 575,
+      "to": 780,
+      "label": "Sau khi mua"
+    }
+  ],
+  "messages": [
+    {
+      "id": "join",
+      "from": "buyer",
+      "to": "api",
+      "y": 170,
+      "label": "xin vào hàng chờ",
+      "variant": "emphasis"
+    },
+    {
+      "id": "zadd",
+      "from": "api",
+      "to": "redis",
+      "y": 200,
+      "label": "ghi giờ đến",
+      "note": "ZADD NX: mỗi người một chỗ"
+    },
+    {
+      "id": "pop",
+      "from": "worker",
+      "to": "redis",
+      "y": 255,
+      "label": "lấy 50 người đầu, phát vé 5 phút",
+      "variant": "dashed",
+      "note": "Hở 3: không xem kho, hết hàng vẫn phát vé"
+    },
+    {
+      "id": "ready",
+      "from": "api",
+      "to": "buyer",
+      "y": 310,
+      "label": "tới lượt bạn (WebSocket)",
+      "variant": "return"
+    },
+    {
+      "id": "buy",
+      "from": "buyer",
+      "to": "api",
+      "y": 365,
+      "label": "mua 1 suất",
+      "variant": "emphasis"
+    },
+    {
+      "id": "lua",
+      "from": "api",
+      "to": "redis",
+      "y": 395,
+      "label": "trừ kho + đếm suất mỗi người",
+      "variant": "security",
+      "note": "flash_purchase.lua, nguyên tử"
+    },
+    {
+      "id": "tx",
+      "from": "api",
+      "to": "db",
+      "y": 450,
+      "label": "tạo đơn chờ thanh toán",
+      "note": "Hở 2: pod chết giữa hai bước, Redis đã trừ mà không có đơn"
+    },
+    {
+      "id": "ok",
+      "from": "api",
+      "to": "buyer",
+      "y": 510,
+      "label": "201: đặt hàng xong",
+      "variant": "return"
+    },
+    {
+      "id": "expire",
+      "from": "worker",
+      "to": "db",
+      "y": 595,
+      "label": "quá 15 phút chưa trả tiền: hủy đơn",
+      "variant": "dashed"
+    },
+    {
+      "id": "release",
+      "from": "api",
+      "to": "db",
+      "y": 640,
+      "label": "nhận sự kiện hủy, trả hàng vào kệ thường",
+      "note": "Hở 1: suất flash sale về nhầm kệ"
+    },
+    {
+      "id": "end",
+      "from": "worker",
+      "to": "redis",
+      "y": 700,
+      "label": "hết giờ: đọc số đã bán",
+      "variant": "dashed"
+    },
+    {
+      "id": "fix",
+      "from": "worker",
+      "to": "db",
+      "y": 735,
+      "label": "sửa sổ kho theo Redis",
+      "note": "Hở 2b: suất bán ma thành đã bán"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Đã làm tốt",
+      "items": [
+        "Hàng chờ theo giờ đến, mỗi người một chỗ",
+        "Lua trừ kho nguyên tử, không bán quá ở Redis",
+        "Có kill switch và giới hạn tốc độ"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chỗ hở",
+      "items": [
+        "1. Hủy hay hoàn tất đơn đều đi luồng kho thường",
+        "2. Ghi hai nơi, đối soát lại tin Redis",
+        "3. Hết hàng mà hàng chờ vẫn chạy"
+      ]
+    }
+  ]
+}

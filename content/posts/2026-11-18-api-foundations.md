@@ -269,14 +269,14 @@ Backend gửi `msg`, frontend đọc `message`. Không khớp. Vẽ ra thì th�
 ```mermaid
 sequenceDiagram
     participant FE as Frontend
-    participant F as Bộ xử lý lỗi (filter)
+    participant F as Bộ xử lý lỗi<br/>(filter)
     participant S as Phần đặt hàng
     FE->>S: POST /checkout
-    S-->>F: lỗi { code: "FLASH_SALE_OUT_OF_STOCK", message: "Rất tiếc, sản phẩm đã hết hàng" }
-    Note over F: chỉ giữ message, đổi tên thành msg,<br/>bỏ mất code
-    F-->>FE: 409 { success: false, msg: "Rất tiếc..." }
+    S-->>F: lỗi { code: "FLASH_SALE_<br/>OUT_OF_STOCK", message:<br/>"Rất tiếc, sản phẩm<br/>đã hết hàng" }
+    Note over F: chỉ giữ message,<br/>đổi tên thành msg,<br/>bỏ mất code
+    F-->>FE: 409 { success: false,<br/>msg: "Rất tiếc..." }
     Note over FE: tìm data.message → không có<br/>tìm data.code → không có
-    FE->>FE: hiện "Request failed with status code 409"
+    FE->>FE: hiện "Request failed<br/>with status code 409"
 ```
 
 Giống nhà hàng mà bếp báo "hết món số 12", quản lý ra bàn chỉ nói "có lỗi", còn khách thì đang chờ nghe chữ "món" nên không hiểu gì. Mình dựng lại đúng tình huống này trong ví dụ dưới đây và kết quả đúng như dự đoán: mọi lỗi đều hiện ra thành câu mặc định của axios.

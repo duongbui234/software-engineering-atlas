@@ -67,6 +67,7 @@ flowchart TB
         direction LR
         m([MoMo]) -- "POST /webhooks/momo/ipn" --> s3[(Server của mình)]
     end
+    REST ~~~ WS ~~~ WH
 ```
 
 ## Vấn đề: một lượt mua, bốn kiểu giao tiếp
@@ -198,11 +199,11 @@ sequenceDiagram
     participant M as MoMo
     B->>S: Thanh toán đơn ord_1
     S-->>B: Chuyển sang trang MoMo
-    B->>M: Người mua xác nhận trả tiền
-    M->>S: Webhook (IPN): "ord_1 đã trả 1.990.000đ" + chữ ký
-    Note over S: kiểm chữ ký, kiểm số tiền,<br/>đánh dấu đơn đã trả
+    B->>M: Người mua xác nhận<br/>trả tiền
+    M->>S: Webhook (IPN):<br/>"ord_1 đã trả 1.990.000đ"<br/>+ chữ ký
+    Note over S: kiểm chữ ký,<br/>kiểm số tiền,<br/>đánh dấu đơn đã trả
     S-->>M: 204 "đã nhận"
-    M-->>B: Chuyển về trang "thanh toán xong" (chỉ để hiển thị)
+    M-->>B: Chuyển về trang<br/>"thanh toán xong"<br/>(chỉ để hiển thị)
 ```
 
 Chỗ đáng chú ý là **mũi tên webhook đi từ MoMo vào server**, không phải từ trình duyệt. Endpoint này ai trên Internet cũng gọi được, nên server phải tự hỏi "có đúng là MoMo gửi không?". Đây là việc của chữ ký.

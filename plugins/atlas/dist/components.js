@@ -108,12 +108,19 @@ async function atlasRenderMermaid() {
       labelBoxBorderColor: atlasMermaidVar("--contour"),
       loopTextColor: atlasMermaidVar("--ink"),
     },
+    // Cột bài chỉ ~40rem: thu hẹp ô và khoảng cách giữa các bên tham gia để sequence
+    // diagram không bị co nhỏ chữ (mặc định 150px + 50px mỗi bên).
+    sequence: { width: 110, actorMargin: 24, boxMargin: 8, noteMargin: 8, messageMargin: 32 },
   });
   for (var i = 0; i < boxes.length; i++) {
     try {
       var out = await atlasMermaidLib.render("atlas-mermaid-" + run + "-" + i, boxes[i].getAttribute("data-src"));
       if (run !== atlasMermaidRun) return;
       boxes[i].innerHTML = out.svg;
+      // Không cho sơ đồ co dưới 75% cỡ thật (chữ sẽ quá nhỏ); khung hẹp hơn thì cuộn ngang trong khung.
+      var svg = boxes[i].querySelector("svg");
+      var vb = svg && svg.viewBox && svg.viewBox.baseVal;
+      if (vb && vb.width) svg.style.minWidth = Math.round(vb.width * 0.75) + "px";
     } catch (err) {
       if (run !== atlasMermaidRun) return;
       var pre = document.createElement("pre");

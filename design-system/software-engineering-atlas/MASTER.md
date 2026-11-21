@@ -61,6 +61,7 @@ Hiện ở cột lề trái bài viết, đầu mỗi hàng trong danh mục, v�
 
 - **Neatline (`.sheet`)**: viền đôi (border + outline lệch 5px), vạch chia độ mỗi 48px ở 4 cạnh. Chú thích lề (`.corner`) nằm **ngoài** khung, chữ mono 11px.
 - **Bản đồ kiến thức (trang chủ)**: SVG; vùng = đường đồng mức `--contour`; khái niệm = địa danh (tròn: learn, vuông: code); tuyến series = đường `--survey` (đặc: đã đi, chấm: chưa đi); vị trí hiện tại có vòng "ping" (tắt khi reduced-motion). Nhãn có halo `paint-order: stroke` màu `--paper`. Mobile: `preserveAspectRatio="xMinYMid slice"`, cao 19rem, nhãn to hơn.
+- **Hai tỉ lệ, để trang chủ không vỡ khi có hàng trăm tuyến**: bản đồ SVG chỉ vẽ *một* tuyến, tuyến vừa đi gần nhất (ga, làng khái niệm, "bạn đang ở đây"). Mọi tuyến nằm trong **Mục lục bản đồ**: lưới "mảnh" (mã, vùng in nghiêng, tên tuyến, mini-line tiến độ, số ga), 6 mảnh mới nhất hiện sẵn, còn lại trong `<details>`; khái niệm không thuộc tuyến nào gom theo vùng thành "mảnh lẻ". "Bài mới" hiện 20 bài, kèm link tới `posts/` (Tất cả bài).
 - **Thước tỉ lệ**: bar đen/trắng xen kẽ + vạch `--survey` tại số bài đã viết.
 - **Danh mục bài (gazetteer)**: lưới `mã | ký hiệu | tiêu đề + mô tả | ngày`; hover tô nền `--water` 6%.
 - **Dải tuyến mini (đầu bài series)**: 6 ga, đã đi = chấm đặc `--survey`, ga hiện tại = vòng dày, chưa đi = vòng rỗng + ray chấm.

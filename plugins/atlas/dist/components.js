@@ -345,7 +345,7 @@ export const SeriesHub = () => {
       h(
         "nav",
         {
-          class: "metro",
+          class: state.stations.length >= 8 ? "metro long" : "metro",
           "aria-label": `Các ga trên ${fm(fileData).title}`,
           style: `--n: ${state.stations.length}; --done: ${Math.max(doneUpTo - 1, 0)}`,
         },
@@ -373,7 +373,9 @@ export const SeriesHub = () => {
                   null,
                   s.concepts.map((c) => {
                     const note = concepts.get(String(c).toLowerCase())
-                    return h("li", null, note ? h("a", { class: "internal", href: rel(slug, note.slug) }, c) : c)
+                    // tên khái niệm thuần tiếng Anh: đánh dấu lang="en" để trình duyệt ngắt dòng bằng gạch nối
+                    const lang = /^[\x20-\x7E]+$/.test(String(c)) ? { lang: "en" } : {}
+                    return h("li", lang, note ? h("a", { class: "internal", href: rel(slug, note.slug) }, c) : c)
                   }),
                 ),
             ])

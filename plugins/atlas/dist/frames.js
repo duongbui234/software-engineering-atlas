@@ -244,7 +244,7 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
 .series-hub .facts div { display: grid; gap: .2rem; }
 .series-hub .facts dt { font-size: .8125rem; color: var(--ink-2); }
 .series-hub .facts dd { margin: 0; font: 600 1.5rem/1 var(--headerFont); color: var(--ink); }
-.metro { margin: 3rem 0 2rem; }
+.metro { margin: 3rem 0 2rem; container: metro / inline-size; }
 .metro ol { list-style: none; margin: 0; padding: 0; position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 0 .75rem; }
 .metro ol::before { content: ""; position: absolute; top: 1.05rem; left: calc(50% / var(--n)); right: calc(50% / var(--n)); border-top: 3px dotted var(--ink-2); }
 .metro ol::after {
@@ -253,7 +253,7 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
   transform-origin: left; animation: atlas-draw 1.1s var(--ease) .2s both;
 }
 @keyframes atlas-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-.stop { position: relative; z-index: 1; display: grid; justify-items: center; align-content: start; text-align: center; gap: .5rem; margin: 0; }
+.stop { position: relative; z-index: 1; min-width: 0; display: grid; justify-items: center; align-content: start; text-align: center; gap: .5rem; margin: 0; }
 .stop .dot { width: 2.2rem; height: 2.2rem; box-sizing: border-box; border-radius: 50%; border: 3px solid var(--ink-2); background: var(--paper); display: grid; place-items: center; font: 600 .875rem/1 var(--codeFont); color: var(--ink-2); }
 .stop.done .dot { background: var(--survey); border-color: var(--survey); color: var(--paper); }
 .stop.now .dot { border: 5px solid var(--survey); color: var(--survey); width: 2.6rem; height: 2.6rem; margin-top: -.2rem; box-shadow: 0 0 0 6px color-mix(in srgb, var(--survey) 18%, transparent); }
@@ -263,7 +263,21 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
 .stop .status { font-size: .8125rem; color: var(--ink-2); }
 .stop.now .status { color: var(--survey); font-weight: 600; }
 .stop ul { list-style: none; margin: .5rem 0 0; padding: .75rem 0 0; border-top: 1px solid var(--grid); width: 100%; display: grid; gap: .3rem; font-size: .875rem; }
-.stop ul li { margin: 0; }
+.stop ul li { margin: 0; min-width: 0; }
+.stop ul li a, .stop ul li { overflow-wrap: anywhere; }
+.stop ul li[lang="en"] { hyphens: auto; }
+.page[data-frame="atlas"] .stop h2 { overflow-wrap: anywhere; }
+.metro.long ol { column-gap: .5rem; }
+.metro.long .stop ul { font-size: .8125rem; }
+/* Tuyến dài (≥ 8 ga): khung hẹp không đủ chỗ cho từng cột, chuyển sang dạng dọc sớm hơn */
+@container metro (max-width: 56rem) {
+  .metro.long ol { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .metro.long ol::before { top: 1rem; bottom: 1rem; left: 1.1rem; right: auto; border-top: 0; border-left: 3px dotted var(--ink-2); }
+  .metro.long ol::after { display: none; }
+  .metro.long .stop { grid-template-columns: 2.6rem minmax(0, 1fr); justify-items: start; text-align: left; column-gap: 1rem; }
+  .metro.long .stop .dot { grid-row: span 3; justify-self: center; }
+  .metro.long .stop ul { grid-column: 2; }
+}
 .stop.ahead ul { color: var(--ink-2); }
 
 /* ── Khung archify ────────────────────────────────────────── */

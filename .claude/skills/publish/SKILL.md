@@ -14,7 +14,7 @@ The rules for content live in `CLAUDE.md` and are not repeated here. Apply them 
 - **Writing conventions:** voice, the `learn` skeleton, sources, private code.
 - **archify embedding contract:** file layout, embed snippet, size budget.
 
-`content/posts/2026-11-18-idempotency.md` is the reference post. Match its shape and tone.
+`content/posts/2026-11-18-api-reliability.md` is the reference post. Match its shape and tone.
 
 ## 1. Load the log
 
@@ -46,6 +46,13 @@ Shape the post from the log, not from a generic outline:
 - The self-check questions reuse the logged check questions.
 - The owner's verbatim questions decide what the body explains at length.
 
+Then write the three opening blocks from `CLAUDE.md` for a reader who has never seen the owner's code:
+- **Bối cảnh**: what the example project is, in 2–4 sentences.
+- **Từ điển nhanh**: every tool or term the post uses without explaining. Scan the finished draft for one more pass; a term you missed is a term a newcomer stops at.
+- **Hình dung trước**: pick one everyday analogy that covers *every* concept of the post, write the `Đời thường | Khái niệm` table and a Mermaid diagram. Done when each concept in the post's tldr has a row.
+
+In the body, lead with the plain role and put the class name second.
+
 `description` is one sentence that names the problem the post solves; it shows under the title, on the home page and in RSS. Wikilink each concept on first mention (`[[idempotency]]`). Set `draft: false`: the PR is the review gate.
 
 ## 4. Code
@@ -58,6 +65,8 @@ Copy each logged example into `content/code/<slug>/`, using a file name differen
 ## 5. Diagram
 
 Invoke the `archify` skill with the logged diagram idea. Write the candidate to `content/diagrams/<slug>/<name>.json`, with `meta.output` set to the sibling `.html`, and run `finalize` until it passes.
+
+Label it as the archify contract in `CLAUDE.md` says: plain-Vietnamese roles in `label`, class and tool names in `sublabel`, commands and routes in message `note`s.
 
 Embed it with the snippet from the archify contract. Set `--ar` so the whole diagram plus the archify toolbar fits (`1 / 1` is a safe start for sequence diagrams). Write a caption sentence that states what the diagram proves.
 
@@ -81,6 +90,7 @@ Every check below must pass:
    - the margin and standfirst render;
    - the series mini-line marks this station;
    - the archify iframe loads in the right theme and is not cut off;
+   - every Mermaid block renders as a diagram (no "Syntax error"), and its text is legible at 1440px;
    - the code block matches the file;
    - concept notes link both ways.
 3. `public/diagrams/<slug>/` and `public/code/<slug>/` contain the files with their real names and extensions.

@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Hash map một lượt trên [3, 2, 4], target 6",
+    "output": "content/diagrams/neetcode-two-sum/one-pass.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Vòng lặp",
+      "sublabel": "đọc nums[i]"
+    },
+    {
+      "id": "map",
+      "type": "database",
+      "label": "Sổ giá trị → vị trí",
+      "sublabel": "Map / dict / map / HashMap"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 300,
+      "label": "i = 0: hỏi trước, ghi sau"
+    },
+    {
+      "from": 320,
+      "to": 450,
+      "label": "i = 1: chưa có phần bù"
+    },
+    {
+      "from": 470,
+      "to": 610,
+      "label": "i = 2: tìm thấy"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "loop",
+      "to": "map",
+      "y": 170,
+      "label": "có giá trị 3 chưa?",
+      "variant": "default",
+      "note": "x = 3, cần 6 − 3 = 3"
+    },
+    {
+      "id": "a2",
+      "from": "map",
+      "to": "loop",
+      "y": 215,
+      "label": "chưa (sổ rỗng)",
+      "variant": "return",
+      "note": "ghi trước thì sẽ thấy chính nó"
+    },
+    {
+      "id": "a3",
+      "from": "loop",
+      "to": "map",
+      "y": 260,
+      "label": "ghi 3 → 0",
+      "variant": "default"
+    },
+    {
+      "id": "b1",
+      "from": "loop",
+      "to": "map",
+      "y": 340,
+      "label": "có giá trị 4 chưa?",
+      "variant": "default",
+      "note": "x = 2, cần 4"
+    },
+    {
+      "id": "b2",
+      "from": "map",
+      "to": "loop",
+      "y": 385,
+      "label": "chưa: ghi 2 → 1",
+      "variant": "return"
+    },
+    {
+      "id": "c1",
+      "from": "loop",
+      "to": "map",
+      "y": 490,
+      "label": "có giá trị 2 chưa?",
+      "variant": "emphasis",
+      "note": "x = 4, cần 2"
+    },
+    {
+      "id": "c2",
+      "from": "map",
+      "to": "loop",
+      "y": 540,
+      "label": "có, ở vị trí 1",
+      "variant": "emphasis",
+      "note": "trả về [1, 2]"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Tra phần bù",
+      "items": [
+        "Cần đúng target − x",
+        "Một lần tra map",
+        "O(n) thời gian, O(n) bộ nhớ"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Hai con trỏ",
+      "items": [
+        "Cần mảng đã sắp xếp",
+        "Sắp xếp chỉ số, giữ vị trí gốc",
+        "O(n log n)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "O(1) là trung bình",
+      "items": [
+        "Va chạm: nhiều khóa một ô",
+        "Java: ô ≥ 8 khóa thành cây",
+        "Nới bảng: O(1) khấu hao"
+      ]
+    }
+  ]
+}

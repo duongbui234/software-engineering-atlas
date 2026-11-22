@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tìm số trùng trong [1, 2, 3, 1]",
+    "output": "content/diagrams/neetcode-contains-duplicate/seen-set.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Vòng lặp",
+      "sublabel": "đọc từng số"
+    },
+    {
+      "id": "set",
+      "type": "database",
+      "label": "Sổ đã thấy",
+      "sublabel": "Set / set / HashSet / map"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 470,
+      "label": "Ba số đầu: chưa thấy, ghi vào sổ"
+    },
+    {
+      "from": 495,
+      "to": 640,
+      "label": "Số 1 lần hai: đã có, dừng"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "loop",
+      "to": "set",
+      "y": 170,
+      "label": "có 1 chưa?",
+      "variant": "default",
+      "note": "i = 0, x = 1"
+    },
+    {
+      "id": "a2",
+      "from": "set",
+      "to": "loop",
+      "y": 215,
+      "label": "chưa: ghi 1",
+      "variant": "return"
+    },
+    {
+      "id": "b1",
+      "from": "loop",
+      "to": "set",
+      "y": 270,
+      "label": "có 2 chưa?",
+      "variant": "default",
+      "note": "i = 1, x = 2"
+    },
+    {
+      "id": "b2",
+      "from": "set",
+      "to": "loop",
+      "y": 315,
+      "label": "chưa: ghi 2",
+      "variant": "return"
+    },
+    {
+      "id": "c1",
+      "from": "loop",
+      "to": "set",
+      "y": 370,
+      "label": "có 3 chưa?",
+      "variant": "default",
+      "note": "i = 2, x = 3"
+    },
+    {
+      "id": "c2",
+      "from": "set",
+      "to": "loop",
+      "y": 415,
+      "label": "chưa: ghi 3",
+      "variant": "return",
+      "note": "sổ = {1, 2, 3}"
+    },
+    {
+      "id": "d1",
+      "from": "loop",
+      "to": "set",
+      "y": 515,
+      "label": "có 1 chưa?",
+      "variant": "emphasis",
+      "note": "i = 3, x = 1"
+    },
+    {
+      "id": "d2",
+      "from": "set",
+      "to": "loop",
+      "y": 565,
+      "label": "có rồi: true",
+      "variant": "security",
+      "note": "không cần đọc tiếp"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Vét cạn",
+      "items": [
+        "So mọi cặp: n(n−1)/2",
+        "O(n²) thời gian",
+        "O(1) bộ nhớ"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Sắp xếp rồi quét",
+      "items": [
+        "Số trùng nằm cạnh nhau",
+        "O(n log n) thời gian",
+        "JS: nhớ hàm so sánh"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Hash set",
+      "items": [
+        "Tra sổ O(1) trung bình",
+        "O(n) thời gian và bộ nhớ",
+        "Dừng ngay khi gặp trùng"
+      ]
+    }
+  ]
+}

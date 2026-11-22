@@ -136,98 +136,94 @@ function byHeap(nums: number[], k: number): number[] {
 }
 ```
 
-> [!example]- JavaScript
-> ```js
-> function topKFrequent(nums, k) {
->   const count = new Map();
->   for (const x of nums) count.set(x, (count.get(x) || 0) + 1);
->   // buckets[f] = các giá trị xuất hiện đúng f lần. Một giá trị xuất hiện tối đa n lần.
->   const buckets = Array.from({ length: nums.length + 1 }, () => []);
->   for (const [value, freq] of count) buckets[freq].push(value);
->   const out = [];
->   for (let f = buckets.length - 1; f > 0; f--) {
->     for (const v of buckets[f]) {
->       out.push(v);
->       if (out.length === k) return out;
->     }
->   }
->   return out;
-> }
-> ```
+```python
+import heapq
+from collections import Counter
 
-> [!example]- Python
-> ```python
-> import heapq
-> from collections import Counter
->
-> def top_k_counter(nums: list[int], k: int) -> list[int]:
->     # most_common(k) gọi heapq.nlargest bên dưới: O(n + m log k)
->     return [v for v, _ in Counter(nums).most_common(k)]
->
-> def top_k_heap(nums: list[int], k: int) -> list[int]:
->     heap: list[tuple[int, int]] = []  # heapq là min-heap trên list thường
->     for v, c in Counter(nums).items():
->         heapq.heappush(heap, (c, v))
->         if len(heap) > k:
->             heapq.heappop(heap)  # bỏ phần tử ít phổ biến nhất
->     return [v for _, v in sorted(heap, reverse=True)]
-> ```
+def top_k_counter(nums: list[int], k: int) -> list[int]:
+    # most_common(k) gọi heapq.nlargest bên dưới: O(n + m log k)
+    return [v for v, _ in Counter(nums).most_common(k)]
 
-> [!example]- Go
-> ```go
-> type entry struct{ val, freq int }
->
-> // container/heap: bạn cài 5 phương thức, gói heap lo phần nổi/chìm.
-> type minHeap []entry
->
-> func (h minHeap) Len() int           { return len(h) }
-> func (h minHeap) Less(i, j int) bool { return h[i].freq < h[j].freq }
-> func (h minHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-> func (h *minHeap) Push(x any)        { *h = append(*h, x.(entry)) }
-> func (h *minHeap) Pop() any {
-> 	old := *h
-> 	x := old[len(old)-1]
-> 	*h = old[:len(old)-1]
-> 	return x
-> }
->
-> func topKHeap(nums []int, k int) []int {
-> 	count := map[int]int{}
-> 	for _, x := range nums {
-> 		count[x]++
-> 	}
-> 	h := &minHeap{}
-> 	for v, f := range count {
-> 		heap.Push(h, entry{v, f}) // gọi heap.Push, không gọi h.Push trực tiếp
-> 		if h.Len() > k {
-> 			heap.Pop(h)
-> 		}
-> 	}
-> 	out := make([]int, h.Len())
-> 	for i := len(out) - 1; i >= 0; i-- {
-> 		out[i] = heap.Pop(h).(entry).val
-> 	}
-> 	return out
-> }
-> ```
+def top_k_heap(nums: list[int], k: int) -> list[int]:
+    heap: list[tuple[int, int]] = []  # heapq là min-heap trên list thường
+    for v, c in Counter(nums).items():
+        heapq.heappush(heap, (c, v))
+        if len(heap) > k:
+            heapq.heappop(heap)  # bỏ phần tử ít phổ biến nhất
+    return [v for _, v in sorted(heap, reverse=True)]
+```
 
-> [!example]- Java
-> ```java
-> static int[] topKHeap(int[] nums, int k) {
->     Map<Integer, Integer> count = new HashMap<>();
->     for (int x : nums) count.merge(x, 1, Integer::sum);
->     // PriorityQueue mặc định là min-heap. So sánh bằng Integer.compare, đừng trừ hai số.
->     PriorityQueue<Map.Entry<Integer, Integer>> heap =
->             new PriorityQueue<>((a, b) -> Integer.compare(a.getValue(), b.getValue()));
->     for (Map.Entry<Integer, Integer> e : count.entrySet()) {
->         heap.offer(e);
->         if (heap.size() > k) heap.poll(); // O(log k)
->     }
->     int[] out = new int[heap.size()];
->     for (int i = out.length - 1; i >= 0; i--) out[i] = heap.poll().getKey();
->     return out;
-> }
-> ```
+```go
+type entry struct{ val, freq int }
+
+// container/heap: bạn cài 5 phương thức, gói heap lo phần nổi/chìm.
+type minHeap []entry
+
+func (h minHeap) Len() int           { return len(h) }
+func (h minHeap) Less(i, j int) bool { return h[i].freq < h[j].freq }
+func (h minHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func (h *minHeap) Push(x any)        { *h = append(*h, x.(entry)) }
+func (h *minHeap) Pop() any {
+	old := *h
+	x := old[len(old)-1]
+	*h = old[:len(old)-1]
+	return x
+}
+
+func topKHeap(nums []int, k int) []int {
+	count := map[int]int{}
+	for _, x := range nums {
+		count[x]++
+	}
+	h := &minHeap{}
+	for v, f := range count {
+		heap.Push(h, entry{v, f}) // gọi heap.Push, không gọi h.Push trực tiếp
+		if h.Len() > k {
+			heap.Pop(h)
+		}
+	}
+	out := make([]int, h.Len())
+	for i := len(out) - 1; i >= 0; i-- {
+		out[i] = heap.Pop(h).(entry).val
+	}
+	return out
+}
+```
+
+```java
+static int[] topKHeap(int[] nums, int k) {
+    Map<Integer, Integer> count = new HashMap<>();
+    for (int x : nums) count.merge(x, 1, Integer::sum);
+    // PriorityQueue mặc định là min-heap. So sánh bằng Integer.compare, đừng trừ hai số.
+    PriorityQueue<Map.Entry<Integer, Integer>> heap =
+            new PriorityQueue<>((a, b) -> Integer.compare(a.getValue(), b.getValue()));
+    for (Map.Entry<Integer, Integer> e : count.entrySet()) {
+        heap.offer(e);
+        if (heap.size() > k) heap.poll(); // O(log k)
+    }
+    int[] out = new int[heap.size()];
+    for (int i = out.length - 1; i >= 0; i--) out[i] = heap.poll().getKey();
+    return out;
+}
+```
+
+```js
+function topKFrequent(nums, k) {
+  const count = new Map();
+  for (const x of nums) count.set(x, (count.get(x) || 0) + 1);
+  // buckets[f] = các giá trị xuất hiện đúng f lần. Một giá trị xuất hiện tối đa n lần.
+  const buckets = Array.from({ length: nums.length + 1 }, () => []);
+  for (const [value, freq] of count) buckets[freq].push(value);
+  const out = [];
+  for (let f = buckets.length - 1; f > 0; f--) {
+    for (const v of buckets[f]) {
+      out.push(v);
+      if (out.length === k) return out;
+    }
+  }
+  return out;
+}
+```
 
 File TypeScript chạy test cho bốn cách, rồi đo trên một triệu số với số giá trị khác nhau (m) và k khác nhau. Cột "chỉ đếm" là riêng bước đếm, phần mà mọi cách đều phải làm:
 

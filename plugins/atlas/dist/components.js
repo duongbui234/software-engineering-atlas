@@ -174,6 +174,122 @@ document.addEventListener("nav", atlasRenderMermaid);
 document.addEventListener("themechange", atlasRenderMermaid);
 `
 
+// ── Tab code: các khối code liền nhau, khác ngôn ngữ → một thanh tab ngang ──────
+// Viết bài: chỉ cần đặt các khối ```ts, ```python, ```go… liền nhau (không xen đoạn văn).
+// Script gom chúng thành một nhóm tab, xếp theo thứ tự TS · Python · Go · Java · JS.
+// Chọn một ngôn ngữ thì mọi nhóm trên trang cùng chuyển, và lựa chọn được nhớ (localStorage).
+// Không có JS: các khối vẫn hiện dọc như cũ.
+export const CODETABS_SCRIPT = `
+var ATLAS_TAB_LANGS = {
+  ts: ["ts", "TypeScript"], typescript: ["ts", "TypeScript"], tsx: ["ts", "TypeScript"],
+  python: ["python", "Python"], py: ["python", "Python"],
+  go: ["go", "Go"],
+  java: ["java", "Java"],
+  js: ["js", "JavaScript"], javascript: ["js", "JavaScript"], jsx: ["js", "JavaScript"],
+  rust: ["rust", "Rust"], rs: ["rust", "Rust"], kotlin: ["kotlin", "Kotlin"],
+  c: ["c", "C"], cpp: ["cpp", "C++"], csharp: ["csharp", "C#"], cs: ["csharp", "C#"],
+  ruby: ["ruby", "Ruby"], swift: ["swift", "Swift"], php: ["php", "PHP"],
+};
+var ATLAS_TAB_ORDER = ["ts", "python", "go", "java", "js"];
+var ATLAS_TAB_KEY = "atlas-code-lang";
+function atlasTabLang(fig) {
+  var pre = fig.matches && fig.matches("figure[data-rehype-pretty-code-figure]") && fig.querySelector(":scope > pre[data-language]");
+  return pre ? ATLAS_TAB_LANGS[pre.getAttribute("data-language")] || null : null;
+}
+function atlasTabRank(id) {
+  var i = ATLAS_TAB_ORDER.indexOf(id);
+  return i < 0 ? 99 : i;
+}
+function atlasTabSelect(group, id, focus) {
+  var tabs = group.querySelectorAll(":scope > .code-tabs-bar > [role=tab]");
+  var hit = false;
+  tabs.forEach(function (t) { if (t.getAttribute("data-lang") === id) hit = true; });
+  if (!hit) return false;
+  tabs.forEach(function (t) {
+    var on = t.getAttribute("data-lang") === id;
+    t.setAttribute("aria-selected", on ? "true" : "false");
+    t.tabIndex = on ? 0 : -1;
+    document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    if (on && focus) t.focus();
+  });
+  return true;
+}
+function atlasTabSelectAll(id, except) {
+  document.querySelectorAll(".code-tabs").forEach(function (g) { if (g !== except) atlasTabSelect(g, id, false); });
+}
+function atlasSetupCodeTabs() {
+  var article = document.querySelector('.page[data-frame="atlas"] article');
+  if (!article) return;
+  var saved = null;
+  try { saved = localStorage.getItem(ATLAS_TAB_KEY); } catch (e) {}
+  var en = (document.documentElement.lang || "").indexOf("en") === 0;
+  var figs = Array.prototype.slice.call(article.querySelectorAll("figure[data-rehype-pretty-code-figure]"));
+  var seen = new Set();
+  var n = 0;
+  figs.forEach(function (fig) {
+    if (seen.has(fig) || !atlasTabLang(fig) || fig.closest(".code-tabs")) return;
+    // gom dãy khối code anh em liền nhau, mỗi ngôn ngữ một lần
+    var run = [fig];
+    var ids = [atlasTabLang(fig)[0]];
+    var next = fig.nextElementSibling;
+    while (next && atlasTabLang(next) && ids.indexOf(atlasTabLang(next)[0]) < 0) {
+      run.push(next); ids.push(atlasTabLang(next)[0]); next = next.nextElementSibling;
+    }
+    run.forEach(function (f) { seen.add(f); });
+    if (run.length < 2) return;
+    n++;
+    var group = document.createElement("div");
+    group.className = "code-tabs";
+    var bar = document.createElement("div");
+    bar.className = "code-tabs-bar";
+    bar.setAttribute("role", "tablist");
+    bar.setAttribute("aria-label", en ? "Language" : "Ngôn ngữ");
+    group.appendChild(bar);
+    fig.before(group);
+    run.sort(function (a, b) { return atlasTabRank(atlasTabLang(a)[0]) - atlasTabRank(atlasTabLang(b)[0]); });
+    run.forEach(function (f, i) {
+      var L = atlasTabLang(f);
+      var tab = document.createElement("button");
+      tab.type = "button";
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("data-lang", L[0]);
+      tab.id = "code-tab-" + n + "-" + i;
+      f.id = f.id || "code-panel-" + n + "-" + i;
+      tab.setAttribute("aria-controls", f.id);
+      f.setAttribute("role", "tabpanel");
+      f.setAttribute("aria-labelledby", tab.id);
+      tab.textContent = L[1];
+      bar.appendChild(tab);
+      group.appendChild(f);
+    });
+    if (!(saved && atlasTabSelect(group, saved, false))) atlasTabSelect(group, atlasTabLang(run[0])[0], false);
+    bar.addEventListener("click", function (ev) {
+      var t = ev.target.closest("[role=tab]");
+      if (!t) return;
+      var id = t.getAttribute("data-lang");
+      // giữ khối đang bấm đứng yên trên màn hình khi các nhóm phía trên đổi chiều cao
+      var top = group.getBoundingClientRect().top;
+      atlasTabSelect(group, id, false);
+      atlasTabSelectAll(id, group);
+      window.scrollBy(0, group.getBoundingClientRect().top - top);
+      try { localStorage.setItem(ATLAS_TAB_KEY, id); } catch (e) {}
+    });
+    bar.addEventListener("keydown", function (ev) {
+      var tabs = Array.prototype.slice.call(bar.querySelectorAll("[role=tab]"));
+      var i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      var j = ev.key === "ArrowRight" ? (i + 1) % tabs.length : ev.key === "ArrowLeft" ? (i - 1 + tabs.length) % tabs.length
+        : ev.key === "Home" ? 0 : ev.key === "End" ? tabs.length - 1 : -1;
+      if (j < 0) return;
+      ev.preventDefault();
+      tabs[j].click();
+      tabs[j].focus();
+    });
+  });
+}
+document.addEventListener("nav", atlasSetupCodeTabs);
+`
+
 // ── Danh mục bài: tải thêm theo con trỏ khi cuộn tới cuối ─────────────────────
 // Mỗi file feed/<lang>/after-<slug>.json = { items: [...], next: "after-….json" | null }.
 // IntersectionObserver gọi tải khi ô .gz-more gần vào khung nhìn; nút bấm là đường dự phòng

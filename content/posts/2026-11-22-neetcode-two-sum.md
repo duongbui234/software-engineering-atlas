@@ -144,56 +144,52 @@ function twoPointers(nums: number[], target: number): [number, number] | null {
 }
 ```
 
-> [!example]- JavaScript
-> ```js
-> function twoSum(nums, target) {
->   const seen = new Map(); // dùng Map, đừng dùng {}: khóa của object luôn bị đổi thành chuỗi
->   for (let i = 0; i < nums.length; i++) {
->     const need = target - nums[i];
->     if (seen.has(need)) return [seen.get(need), i];
->     seen.set(nums[i], i);
->   }
->   return [];
-> }
-> ```
+```python
+def two_sum(nums: list[int], target: int) -> list[int]:
+    seen: dict[int, int] = {}  # giá trị → chỉ số
+    for i, x in enumerate(nums):
+        if (need := target - x) in seen:  # hỏi trước khi ghi
+            return [seen[need], i]
+        seen[x] = i
+    return []
+```
 
-> [!example]- Python
-> ```python
-> def two_sum(nums: list[int], target: int) -> list[int]:
->     seen: dict[int, int] = {}  # giá trị → chỉ số
->     for i, x in enumerate(nums):
->         if (need := target - x) in seen:  # hỏi trước khi ghi
->             return [seen[need], i]
->         seen[x] = i
->     return []
-> ```
+```go
+func twoSum(nums []int, target int) []int {
+	seen := make(map[int]int, len(nums)) // giá trị → chỉ số
+	for i, x := range nums {
+		if j, ok := seen[target-x]; ok { // "comma ok": phân biệt "không có" với "có, giá trị 0"
+			return []int{j, i}
+		}
+		seen[x] = i
+	}
+	return nil
+}
+```
 
-> [!example]- Go
-> ```go
-> func twoSum(nums []int, target int) []int {
-> 	seen := make(map[int]int, len(nums)) // giá trị → chỉ số
-> 	for i, x := range nums {
-> 		if j, ok := seen[target-x]; ok { // "comma ok": phân biệt "không có" với "có, giá trị 0"
-> 			return []int{j, i}
-> 		}
-> 		seen[x] = i
-> 	}
-> 	return nil
-> }
-> ```
+```java
+static int[] twoSum(int[] nums, int target) {
+    Map<Integer, Integer> seen = new HashMap<>(); // giá trị → chỉ số
+    for (int i = 0; i < nums.length; i++) {
+        Integer j = seen.get(target - nums[i]);
+        if (j != null) return new int[] {j, i};
+        seen.put(nums[i], i);
+    }
+    return new int[0];
+}
+```
 
-> [!example]- Java
-> ```java
-> static int[] twoSum(int[] nums, int target) {
->     Map<Integer, Integer> seen = new HashMap<>(); // giá trị → chỉ số
->     for (int i = 0; i < nums.length; i++) {
->         Integer j = seen.get(target - nums[i]);
->         if (j != null) return new int[] {j, i};
->         seen.put(nums[i], i);
->     }
->     return new int[0];
-> }
-> ```
+```js
+function twoSum(nums, target) {
+  const seen = new Map(); // dùng Map, đừng dùng {}: khóa của object luôn bị đổi thành chuỗi
+  for (let i = 0; i < nums.length; i++) {
+    const need = target - nums[i];
+    if (seen.has(need)) return [seen.get(need), i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}
+```
 
 ```text
 $ node two-sum.ts

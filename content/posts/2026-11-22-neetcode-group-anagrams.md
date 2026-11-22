@@ -144,69 +144,65 @@ function bySortedKey(strs: string[]): string[][] {
 }
 ```
 
-> [!example]- JavaScript
-> ```js
-> function groupAnagrams(strs) {
->   const groups = new Map();
->   for (const s of strs) {
->     const count = new Array(26).fill(0);
->     for (let i = 0; i < s.length; i++) count[s.charCodeAt(i) - 97]++;
->     const key = count.join('#'); // mảng làm khóa Map thì so theo danh tính, không theo nội dung
->     if (!groups.has(key)) groups.set(key, []);
->     groups.get(key).push(s);
->   }
->   return [...groups.values()];
-> }
-> ```
+```python
+from collections import defaultdict
 
-> [!example]- Python
-> ```python
-> from collections import defaultdict
->
-> def group_anagrams(strs: list[str]) -> list[list[str]]:
->     groups: defaultdict[tuple[int, ...], list[str]] = defaultdict(list)
->     for s in strs:
->         count = [0] * 26
->         for ch in s:
->             count[ord(ch) - ord("a")] += 1
->         groups[tuple(count)].append(s)  # tuple băm được; list thì không
->     return list(groups.values())
-> ```
+def group_anagrams(strs: list[str]) -> list[list[str]]:
+    groups: defaultdict[tuple[int, ...], list[str]] = defaultdict(list)
+    for s in strs:
+        count = [0] * 26
+        for ch in s:
+            count[ord(ch) - ord("a")] += 1
+        groups[tuple(count)].append(s)  # tuple băm được; list thì không
+    return list(groups.values())
+```
 
-> [!example]- Go
-> ```go
-> func groupAnagrams(strs []string) [][]string {
-> 	// [26]uint8 so sánh được bằng ==, nên làm khóa map trực tiếp.
-> 	// uint8 đủ vì mỗi từ tối đa 100 chữ (< 256).
-> 	groups := map[[26]uint8][]string{}
-> 	for _, s := range strs {
-> 		var key [26]uint8
-> 		for i := 0; i < len(s); i++ {
-> 			key[s[i]-'a']++
-> 		}
-> 		groups[key] = append(groups[key], s)
-> 	}
-> 	out := make([][]string, 0, len(groups))
-> 	for _, g := range groups { // thứ tự duyệt map ngẫu nhiên mỗi lần chạy
-> 		out = append(out, g)
-> 	}
-> 	return out
-> }
-> ```
+```go
+func groupAnagrams(strs []string) [][]string {
+	// [26]uint8 so sánh được bằng ==, nên làm khóa map trực tiếp.
+	// uint8 đủ vì mỗi từ tối đa 100 chữ (< 256).
+	groups := map[[26]uint8][]string{}
+	for _, s := range strs {
+		var key [26]uint8
+		for i := 0; i < len(s); i++ {
+			key[s[i]-'a']++
+		}
+		groups[key] = append(groups[key], s)
+	}
+	out := make([][]string, 0, len(groups))
+	for _, g := range groups { // thứ tự duyệt map ngẫu nhiên mỗi lần chạy
+		out = append(out, g)
+	}
+	return out
+}
+```
 
-> [!example]- Java
-> ```java
-> static List<List<String>> groupAnagrams(String[] strs) {
->     Map<String, List<String>> groups = new HashMap<>();
->     for (String s : strs) {
->         char[] count = new char[26]; // char là số 16 bit
->         for (int i = 0; i < s.length(); i++) count[s.charAt(i) - 'a']++;
->         String key = new String(count); // 26 "ký tự" = 26 con số, không cần dấu phân cách
->         groups.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
->     }
->     return new ArrayList<>(groups.values());
-> }
-> ```
+```java
+static List<List<String>> groupAnagrams(String[] strs) {
+    Map<String, List<String>> groups = new HashMap<>();
+    for (String s : strs) {
+        char[] count = new char[26]; // char là số 16 bit
+        for (int i = 0; i < s.length(); i++) count[s.charAt(i) - 'a']++;
+        String key = new String(count); // 26 "ký tự" = 26 con số, không cần dấu phân cách
+        groups.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+    }
+    return new ArrayList<>(groups.values());
+}
+```
+
+```js
+function groupAnagrams(strs) {
+  const groups = new Map();
+  for (const s of strs) {
+    const count = new Array(26).fill(0);
+    for (let i = 0; i < s.length; i++) count[s.charCodeAt(i) - 97]++;
+    const key = count.join('#'); // mảng làm khóa Map thì so theo danh tính, không theo nội dung
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(s);
+  }
+  return [...groups.values()];
+}
+```
 
 ```text
 $ node group-anagrams.ts

@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đếm chữ của rat và car",
+    "output": "content/diagrams/neetcode-valid-anagram/count-26.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "s",
+      "type": "frontend",
+      "label": "Chuỗi s",
+      "sublabel": "rat"
+    },
+    {
+      "id": "cnt",
+      "type": "database",
+      "label": "Khay 26 ngăn",
+      "sublabel": "int[26], ban đầu toàn 0"
+    },
+    {
+      "id": "t",
+      "type": "frontend",
+      "label": "Chuỗi t",
+      "sublabel": "car"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 200,
+      "label": "Cùng độ dài 3: duyệt chung"
+    },
+    {
+      "from": 215,
+      "to": 560,
+      "label": "Cộng theo s, trừ theo t"
+    },
+    {
+      "from": 580,
+      "to": 690,
+      "label": "Kiểm tra khay"
+    }
+  ],
+  "messages": [
+    {
+      "id": "l",
+      "from": "s",
+      "to": "t",
+      "y": 170,
+      "label": "độ dài bằng nhau?",
+      "variant": "default",
+      "note": "3 = 3"
+    },
+    {
+      "id": "s0",
+      "from": "s",
+      "to": "cnt",
+      "y": 235,
+      "label": "ngăn r +1",
+      "variant": "default",
+      "note": "i = 0"
+    },
+    {
+      "id": "t0",
+      "from": "t",
+      "to": "cnt",
+      "y": 280,
+      "label": "ngăn c −1",
+      "variant": "default"
+    },
+    {
+      "id": "s1",
+      "from": "s",
+      "to": "cnt",
+      "y": 335,
+      "label": "ngăn a +1",
+      "variant": "default",
+      "note": "i = 1"
+    },
+    {
+      "id": "t1",
+      "from": "t",
+      "to": "cnt",
+      "y": 380,
+      "label": "ngăn a −1",
+      "variant": "default",
+      "note": "a về 0"
+    },
+    {
+      "id": "s2",
+      "from": "s",
+      "to": "cnt",
+      "y": 435,
+      "label": "ngăn t +1",
+      "variant": "default",
+      "note": "i = 2"
+    },
+    {
+      "id": "t2",
+      "from": "t",
+      "to": "cnt",
+      "y": 480,
+      "label": "ngăn r −1",
+      "variant": "default",
+      "note": "r về 0"
+    },
+    {
+      "id": "chk",
+      "from": "cnt",
+      "to": "s",
+      "y": 600,
+      "label": "t còn +1, c còn −1",
+      "variant": "security",
+      "note": "khác 0: không phải anagram"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Sắp xếp rồi so",
+      "items": [
+        "O(n log n)",
+        "Đúng với mọi bảng chữ",
+        "Đo 1 triệu chữ: 201 ms"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Mảng 26 ô",
+      "items": [
+        "O(n) thời gian, O(1) bộ nhớ",
+        "Chỉ đúng với a–z",
+        "Đo 1 triệu chữ: 3,4 ms"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Unicode",
+      "items": [
+        "Đếm theo code point",
+        "Chuẩn hóa NFC trước",
+        "split('') làm vỡ emoji"
+      ]
+    }
+  ]
+}

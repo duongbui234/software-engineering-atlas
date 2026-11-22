@@ -12,6 +12,7 @@ import {
   SeriesHub,
   ARCHIFY_SCRIPT,
   MERMAID_SCRIPT,
+  FEED_SCRIPT,
 } from "./components.js"
 
 const Brand = AtlasBrand()
@@ -241,6 +242,21 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
 .gz-all a { font-weight: 600; }
 
 .gazetteer h2 { font-size: 1.625rem; margin: 2rem 0 .75rem; }
+.gz-head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem 1.5rem; flex-wrap: wrap; }
+.page[data-frame="atlas"] .gz-head .gz-all-link { font-size: .9375rem; font-weight: 600; }
+.gz-more { margin: 1.25rem 0 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.gz-load {
+  font: 500 .875rem/1 var(--bodyFont); color: var(--ink); background: none; cursor: pointer;
+  border: 1px solid var(--ink); padding: .6rem .9rem; min-height: 2.75rem;
+}
+.gz-load:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+.gz-load:disabled { cursor: progress; color: var(--ink-2); border-color: var(--ink-2); }
+.gz-status { margin: 0; color: var(--ink-2); font-size: .9375rem; }
+.gz-status:empty { display: none; }
+/* trang thẻ tiếng Anh (en/tags/*) do theme render */
+.atlas-tags .tag-count { color: var(--ink-2); }
+.atlas-tags ul.tag-index { list-style: none; padding: 0; columns: 14rem; }
+.atlas-tags ul.tag-index li { margin: 0 0 .35rem; }
 .gz { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
 .gz li { border-bottom: 1px solid var(--grid); margin: 0; }
 .page[data-frame="atlas"] .gz a.row {
@@ -387,6 +403,23 @@ function atlasSetLang() {
 }
 atlasSetLang();
 document.addEventListener("nav", atlasSetLang);
+// Tìm kiếm và đồ thị đọc chung static/contentIndex.json qua promise toàn cục fetchData và chỉ
+// dựng chỉ mục một lần mỗi lần tải trang. Đổi ngôn ngữ luôn tải lại cả trang (lang-switch có
+// data-router-ignore, trang tiếng Anh chỉ link trang tiếng Anh), nên bỏ các mục khác ngôn ngữ
+// khỏi dữ liệu đó ngay khi tải xong: kết quả tìm kiếm và đồ thị chỉ còn trang cùng ngôn ngữ.
+if (!window.atlasIndexLang && typeof fetchData !== "undefined") {
+  const sheet = document.querySelector(".atlas-sheet[data-lang]");
+  const lang = sheet && sheet.dataset.lang === "en" ? "en" : "vi";
+  window.atlasIndexLang = lang;
+  fetchData.then((data) => {
+    const index = data && typeof data.content === "object" ? data.content : data;
+    if (!index || typeof index !== "object") return;
+    for (const slug of Object.keys(index)) {
+      const isEn = slug === "en" || slug.startsWith("en/");
+      if (isEn !== (lang === "en")) delete index[slug];
+    }
+  });
+}
 `
 
 function cornerText(fileData, allFiles, S) {
@@ -409,6 +442,9 @@ export const AtlasFrame = {
     const S = STR[L]
     // component có sẵn của Quartz (mục lục, liên kết ngược, đồ thị, tìm kiếm) lấy chữ theo cfg.locale
     if (L !== "vi") componentData = { ...componentData, cfg: { ...componentData.cfg, locale: S.locale } }
+    // mọi component (kể cả trang thẻ, liên kết ngược của Quartz) chỉ thấy trang cùng ngôn ngữ;
+    // atlasAllFiles giữ cả hai để nút VI/EN tìm trang tương ứng
+    componentData = { ...componentData, allFiles: forLang(allFiles, L), atlasAllFiles: allFiles }
     const showMargin = hasMargin(fileData)
     const showRail = right.length > 0 && !isIndex(fileData) && !isHub(fileData)
     const [tl, br] = cornerText(fileData, forLang(allFiles, L), S)
@@ -417,6 +453,7 @@ export const AtlasFrame = {
     return h(Fragment, null, [
       h("script", { dangerouslySetInnerHTML: { __html: ARCHIFY_SCRIPT } }),
       h("script", { dangerouslySetInnerHTML: { __html: MERMAID_SCRIPT } }),
+      h("script", { dangerouslySetInnerHTML: { __html: FEED_SCRIPT } }),
       h("div", { class: isIndex(fileData) ? "atlas-sheet is-home" : "atlas-sheet", "data-lang": L, lang: L }, [
         tl && h("span", { class: "corner tl" }, tl),
         br && h("span", { class: "corner br" }, br),

@@ -14,7 +14,10 @@
   "quartz": {
     "name": "atlas",
     "displayName": "Atlas theme",
-    "category": "emitter",
+    "category": [
+      "emitter",
+      "pageType"
+    ],
     "quartzVersion": ">=5.0.0",
     "defaultEnabled": true,
     "frames": {

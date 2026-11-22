@@ -108,7 +108,7 @@ Mọi thuật toán sắp xếp chỉ dựa vào phép so sánh hai phần tử 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-top-k-frequent/top-k-frequent.ts) · [JavaScript](../code/neetcode-top-k-frequent/top-k-frequent.js) · [Python](../code/neetcode-top-k-frequent/top_k_frequent.py) · [Go](../code/neetcode-top-k-frequent/top_k_frequent.go) · [Java](../code/neetcode-top-k-frequent/TopKFrequent.java)
+[TypeScript](../code/neetcode-top-k-frequent/top-k-frequent.ts) · [JavaScript](../code/neetcode-top-k-frequent/top-k-frequent.js) · [Python](../code/neetcode-top-k-frequent/top_k_frequent.py) · [Go](../code/neetcode-top-k-frequent/top_k_frequent.go) · [Java](../code/neetcode-top-k-frequent/top-k-frequent.java)
 
 ```ts
 // TypeScript: bucket sort theo tần suất, O(n)
@@ -265,7 +265,7 @@ $ go run top_k_frequent.go
 [1] 1 → heap [1] | bucket [1]
 [4 4 4 4 -1 -1 -1 2 2 7] 3 → heap [4 -1 2] | bucket [4 -1 2]
 
-$ java TopKFrequent.java
+$ java top-k-frequent.java
 ...
 so sánh MIN_VALUE với 1 bằng phép trừ: 2147483647 (dương, tức 'lớn hơn': sai) | Integer.compare: -1
 ```

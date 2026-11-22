@@ -1,5 +1,5 @@
 // NC-05 Top K Frequent Elements (LeetCode 347), Java 21: PriorityQueue và bucket sort.
-// Chạy: java TopKFrequent.java
+// Chạy: java top-k-frequent.java
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-public class TopKFrequent {
+class TopKFrequent { // không public: tên file không cần trùng tên class
     static int[] topKHeap(int[] nums, int k) {
         Map<Integer, Integer> count = new HashMap<>();
         for (int x : nums) count.merge(x, 1, Integer::sum);

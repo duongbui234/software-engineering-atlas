@@ -117,7 +117,7 @@ Hai cơ chế làm "O(1)" đúng trong thực tế:
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-two-sum/two-sum.ts) · [JavaScript](../code/neetcode-two-sum/two-sum.js) · [Python](../code/neetcode-two-sum/two_sum.py) · [Go](../code/neetcode-two-sum/two_sum.go) · [Java](../code/neetcode-two-sum/TwoSum.java)
+[TypeScript](../code/neetcode-two-sum/two-sum.ts) · [JavaScript](../code/neetcode-two-sum/two-sum.js) · [Python](../code/neetcode-two-sum/two_sum.py) · [Go](../code/neetcode-two-sum/two_sum.go) · [Java](../code/neetcode-two-sum/two-sum.java)
 
 ```ts
 // TypeScript: hash map một lượt
@@ -225,7 +225,7 @@ onePass      n = 20 000:     1.81 ms
 Bản Java thêm một phép thử va chạm. Chuỗi `"Aa"` và `"BB"` có cùng `hashCode` (2112), nên ghép 16 khối như vậy cho ra 65 536 chuỗi có **cùng một** hashCode:
 
 ```text
-$ java TwoSum.java
+$ java two-sum.java
 [0, 1] [1, 2] [0, 1]
 "Aa".hashCode() = 2112, "BB".hashCode() = 2112
 hashCode khác nhau: chuỗi xấu 1, chuỗi thường 65536

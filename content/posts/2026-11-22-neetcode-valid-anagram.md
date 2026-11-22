@@ -110,7 +110,7 @@ Ngay cả code point cũng chưa phải "ký tự người đọc thấy": cờ 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-valid-anagram/valid-anagram.ts) · [JavaScript](../code/neetcode-valid-anagram/valid-anagram.js) · [Python](../code/neetcode-valid-anagram/valid_anagram.py) · [Go](../code/neetcode-valid-anagram/valid_anagram.go) · [Java](../code/neetcode-valid-anagram/ValidAnagram.java)
+[TypeScript](../code/neetcode-valid-anagram/valid-anagram.ts) · [JavaScript](../code/neetcode-valid-anagram/valid-anagram.js) · [Python](../code/neetcode-valid-anagram/valid_anagram.py) · [Go](../code/neetcode-valid-anagram/valid_anagram.go) · [Java](../code/neetcode-valid-anagram/valid-anagram.java)
 
 ```ts
 // TypeScript: mảng 26 ô cho đề gốc (chỉ a–z)
@@ -226,7 +226,7 @@ true false false
 len("é") = 2 byte; số rune = 1
 true false
 
-$ java ValidAnagram.java
+$ java valid-anagram.java
 true false
 emoji, sắp xếp char[]: true (sai) | theo code point: false
 café vs éfac: false | NFC: true

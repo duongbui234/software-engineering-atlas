@@ -86,7 +86,7 @@ Hình dưới là khuôn này chạy trên Two Sum với `[3, 2, 4]` và target 
 |---|---|---|
 | [[problems/contains-duplicate\|Contains Duplicate]] | `x` có trong bảng chưa? | Trùng nghĩa là gặp lại đúng giá trị đó |
 | [[problems/two-sum\|Two Sum]] | `target − x` có trong bảng chưa? | Chỉ đúng một giá trị ghép được với x ([[concepts/complement-lookup\|phần bù]]) |
-| Longest Consecutive Sequence | `x − 1` có trong bảng không? | Không có thì x là **đầu** một dãy liên tiếp; chỉ đếm từ đầu dãy |
+| [[problems/longest-consecutive-sequence\|Longest Consecutive Sequence]] | `x − 1` có trong bảng không? | Không có thì x là **đầu** một dãy liên tiếp; chỉ đếm từ đầu dãy |
 
 ### Quyết định 3: hỏi trước hay ghi trước
 
@@ -303,7 +303,7 @@ Cả hai bản đều ra 20 000. Bản duyệt mảng gặp số 1 tới 20 001 
 
 ## Hiểu lầm và bẫy hay gặp
 
-- **"Có vòng lặp lồng thì chắc chắn O(n²)."** Không phải lúc nào cũng vậy. Ở Longest Consecutive Sequence, vòng `while` chỉ chạy từ đầu dãy, nên tổng số bước của nó qua mọi lần lặp là O(n). Phải đếm tổng công, không đếm số tầng vòng lặp.
+- **"Có vòng lặp lồng thì chắc chắn O(n²)."** Không phải lúc nào cũng vậy. Ở Longest Consecutive Sequence, vòng `while` chỉ chạy từ đầu dãy, nên tổng số bước của nó qua mọi lần lặp là O(n). Phải đếm tổng công ([[concepts/aggregate-analysis|phân tích gộp]]), không đếm số tầng vòng lặp. Trang [[problems/longest-consecutive-sequence|Longest Consecutive Sequence]] chứng minh chi tiết và so với cách sắp xếp.
 - **Duyệt mảng gốc thay vì duyệt Set.** Đúng kết quả nhưng mất đảm bảo O(n) khi đầu dãy bị lặp lại (đo ở trên: 2,7 ms thành gần 4 giây).
 - **Ghi trước rồi mới hỏi ở Two Sum.** Phần tử ghép với chính nó: `[3, 3]`, target 6 thành `[0, 0]`.
 - **Kiểm tra kết quả tra bằng "truthy".** `if (j)` trong JS hay `if j:` trong Python bỏ qua chỉ số 0. Hãy so với `undefined`/`None`, hoặc dùng `has`/`in`, hoặc "comma ok" trong Go.

@@ -87,7 +87,7 @@ The figure below runs this template on Two Sum with `[3, 2, 4]` and target 6: at
 |---|---|---|
 | [[en/problems/contains-duplicate\|Contains Duplicate]] | Is `x` already in the table? | A duplicate means meeting that exact value again |
 | [[en/problems/two-sum\|Two Sum]] | Is `target − x` already in the table? | Exactly one value pairs with x (the [[en/concepts/complement-lookup\|complement]]) |
-| Longest Consecutive Sequence | Is `x − 1` in the table? | If not, x is the **start** of a consecutive run; count only from run starts |
+| [[en/problems/longest-consecutive-sequence\|Longest Consecutive Sequence]] | Is `x − 1` in the table? | If not, x is the **start** of a consecutive run; count only from run starts |
 
 ### Decision 3: ask first or write first
 
@@ -306,7 +306,7 @@ Both versions return 20 000. The array version meets the number 1 20 001 times, 
 
 ## Misconceptions and common traps
 
-- **"A nested loop always means O(n²)."** Not always. In Longest Consecutive Sequence, the `while` loop only runs from run starts, so its steps across all iterations add up to O(n). Count the total work, not the number of loop levels.
+- **"A nested loop always means O(n²)."** Not always. In Longest Consecutive Sequence, the `while` loop only runs from run starts, so its steps across all iterations add up to O(n). Count the total work ([[en/concepts/aggregate-analysis|aggregate analysis]]), not the number of loop levels. The [[en/problems/longest-consecutive-sequence|Longest Consecutive Sequence]] page proves it in detail and compares it with the sorting approach.
 - **Iterating over the original array instead of the Set.** The result is correct, but the O(n) guarantee is gone when a run start repeats (measured above: 2.7 ms becomes almost 4 seconds).
 - **Writing before asking in Two Sum.** An element pairs with itself: `[3, 3]`, target 6 becomes `[0, 0]`.
 - **Checking a lookup result for "truthiness".** `if (j)` in JS or `if j:` in Python skips index 0. Compare against `undefined`/`None`, or use `has`/`in`, or "comma ok" in Go.

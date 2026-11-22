@@ -8,7 +8,7 @@ draft: false
 aliases: [series/neetcode-arrays-hashing]
 stations:
   - name: "Tra cứu bằng hash"
-    concepts: [Big-O Notation, Brute Force, Hash Set, Sort Then Scan, Space-Time Tradeoff, Complement Lookup, One-pass Hash Map, Two Pointers, Hash Collision, Amortized O(1)]
+    concepts: [Big-O Notation, Brute Force, Hash Set, Sort Then Scan, Space-Time Tradeoff, Complement Lookup, One-pass Hash Map, Two Pointers, Hash Collision, Amortized O(1), Aggregate Analysis]
   - name: "Khóa chuẩn và đếm tần suất"
     concepts: [Frequency Counting, Counting Array, Hash Map, Unicode Normalization, Canonical Key, Count Key, Key Serialization, Group By, Heap, Bucket Sort, Quickselect, Sorting Lower Bound]
   - name: "Tiền tố, hậu tố và mã hóa"

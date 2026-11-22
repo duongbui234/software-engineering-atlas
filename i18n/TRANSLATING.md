@@ -230,6 +230,8 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | xô (bucket sort) | bucket |
 | dấu phân cách | delimiter |
 | hỏi trước, ghi sau | ask first, write later |
+| phân tích gộp | aggregate analysis |
+| dãy (số) liên tiếp | consecutive run |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

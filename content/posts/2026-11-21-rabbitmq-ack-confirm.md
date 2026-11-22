@@ -19,23 +19,23 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[work-queue|Work queue]]: nhiều consumer cùng đọc một queue, broker chia tin cho họ. Muốn chia *công bằng* thì cần ack và prefetch.
-> - [[consumer-acknowledgement|Consumer ack]]: consumer báo "xử lý xong" thì broker mới xóa tin. Chết trước khi ack, tin quay lại hàng và được [[redelivery|giao lại]] với cờ `redelivered = true`.
-> - [[auto-ack|Auto-ack]] coi tin là xong ngay khi vừa gửi đi. Nhanh nhưng mất tin khi consumer chết, và NestJS bật nó **mặc định**.
-> - [[prefetch|Prefetch]] giới hạn số tin chưa ack mà một consumer được giữ. Prefetch 1 chia việc theo ai rảnh; không đặt thì broker chia đều bất kể ai chậm.
-> - [[publisher-confirms|Publisher confirm]] là biên nhận broker gửi cho producer. Ba điều kiện để tin sống qua lần broker khởi động lại: queue durable, tin [[message-persistence|persistent]], và có confirm.
+> - [[concepts/work-queue|Work queue]]: nhiều consumer cùng đọc một queue, broker chia tin cho họ. Muốn chia *công bằng* thì cần ack và prefetch.
+> - [[concepts/consumer-acknowledgement|Consumer ack]]: consumer báo "xử lý xong" thì broker mới xóa tin. Chết trước khi ack, tin quay lại hàng và được [[concepts/redelivery|giao lại]] với cờ `redelivered = true`.
+> - [[concepts/auto-ack|Auto-ack]] coi tin là xong ngay khi vừa gửi đi. Nhanh nhưng mất tin khi consumer chết, và NestJS bật nó **mặc định**.
+> - [[concepts/prefetch|Prefetch]] giới hạn số tin chưa ack mà một consumer được giữ. Prefetch 1 chia việc theo ai rảnh; không đặt thì broker chia đều bất kể ai chậm.
+> - [[concepts/publisher-confirms|Publisher confirm]] là biên nhận broker gửi cho producer. Ba điều kiện để tin sống qua lần broker khởi động lại: queue durable, tin [[concepts/message-persistence|persistent]], và có confirm.
 
 > [!info] Bối cảnh
 > Ga 4 của **tuyến RabbitMQ**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: mỗi đơn đặt xong sinh ra một tin, các consumer trừ kho, gửi email, cập nhật tìm kiếm. Ở ga này, câu hỏi chỉ có một: làm sao để tin *không mất* trên đường từ producer tới lúc consumer làm xong. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Exchange, queue, binding, channel, connection**: xem [[2026-11-21-rabbitmq-amqp-model|ga 2]].
+> - **Exchange, queue, binding, channel, connection**: xem [[posts/2026-11-21-rabbitmq-amqp-model|ga 2]].
 > - **Worker**: một consumer làm một loại việc nặng (gửi email, xử lý ảnh).
 > - **Round-robin**: chia lần lượt mỗi người một cái, hết vòng thì quay lại người đầu.
 > - **Ghi xuống đĩa / fsync**: ghi dữ liệu từ RAM ra ổ cứng để mất điện không mất. `fsync` là lệnh ép hệ điều hành ghi thật xuống đĩa ngay.
 > - **Buffer**: vùng nhớ đệm, dữ liệu chờ ở đó trước khi được gửi đi.
 > - **Transaction (giao dịch)**: nhóm thao tác hoặc thành công hết, hoặc không cái nào có hiệu lực.
-> - **NestJS**: framework Node.js mà flash-sale dùng. Xem [[2026-11-18-api-foundations|tuyến API]].
+> - **NestJS**: framework Node.js mà flash-sale dùng. Xem [[posts/2026-11-18-api-foundations|tuyến API]].
 
 ## Hình dung trước: ký nhận và biên nhận
 
@@ -43,13 +43,13 @@ Bưu điện chuyên nghiệp có hai tờ giấy: **biên nhận** đưa cho ng
 
 | Đời thường | Khái niệm |
 |---|---|
-| Nhiều nhân viên cùng lấy thư từ một hộc để đi phát | [[work-queue\|Work queue]] |
-| Người nhận ký vào phiếu: "đã nhận và xử lý xong" | [[consumer-acknowledgement\|Consumer ack]] |
-| Bưu tá ném thư qua cổng rồi đi luôn, không cần ai ký | [[auto-ack\|Auto-ack]] |
-| Mỗi nhân viên cầm tối đa N lá thư chưa phát xong | [[prefetch\|Prefetch]] |
-| Nhân viên ốm giữa ca, thư trong túi được trả về hộc cho người khác, có đóng dấu "phát lại" | [[redelivery\|Redelivery]] |
-| Bưu điện đưa người gửi tờ biên nhận "đã nhận giữ thư" | [[publisher-confirms\|Publisher confirm]] |
-| Thư bảo đảm: được cất vào kho có khóa, mất điện cũng còn | [[message-persistence\|Message persistence]] |
+| Nhiều nhân viên cùng lấy thư từ một hộc để đi phát | [[concepts/work-queue\|Work queue]] |
+| Người nhận ký vào phiếu: "đã nhận và xử lý xong" | [[concepts/consumer-acknowledgement\|Consumer ack]] |
+| Bưu tá ném thư qua cổng rồi đi luôn, không cần ai ký | [[concepts/auto-ack\|Auto-ack]] |
+| Mỗi nhân viên cầm tối đa N lá thư chưa phát xong | [[concepts/prefetch\|Prefetch]] |
+| Nhân viên ốm giữa ca, thư trong túi được trả về hộc cho người khác, có đóng dấu "phát lại" | [[concepts/redelivery\|Redelivery]] |
+| Bưu điện đưa người gửi tờ biên nhận "đã nhận giữ thư" | [[concepts/publisher-confirms\|Publisher confirm]] |
+| Thư bảo đảm: được cất vào kho có khóa, mất điện cũng còn | [[concepts/message-persistence\|Message persistence]] |
 
 ```mermaid
 flowchart TB
@@ -79,13 +79,13 @@ Thêm một chuyện nữa không phải mất tin nhưng cũng hỏng: một wo
 
 ### Work queue: nhiều người cùng làm một loại việc
 
-[[work-queue|Work queue]] (còn gọi là *competing consumers*) là mẫu đơn giản nhất: một queue, nhiều consumer giống nhau cùng đăng ký. Broker chia tin cho họ; mỗi tin chỉ một consumer nhận. Muốn xử lý nhanh hơn thì chạy thêm consumer. Đây là cách "san tải" ở ga 1 thành hiện thực.
+[[concepts/work-queue|Work queue]] (còn gọi là *competing consumers*) là mẫu đơn giản nhất: một queue, nhiều consumer giống nhau cùng đăng ký. Broker chia tin cho họ; mỗi tin chỉ một consumer nhận. Muốn xử lý nhanh hơn thì chạy thêm consumer. Đây là cách "san tải" ở ga 1 thành hiện thực.
 
 Mặc định broker chia kiểu **round-robin**: tin 1 cho A, tin 2 cho B, tin 3 cho A… bất kể A hay B đang bận. Hai phần dưới sửa chuyện đó.
 
 ### Consumer ack: chỉ xóa khi đã xong
 
-[[consumer-acknowledgement|Consumer acknowledgement]] (ack) là cách consumer báo cho broker biết một tin đã được xử lý. Với **ack thủ công**:
+[[concepts/consumer-acknowledgement|Consumer acknowledgement]] (ack) là cách consumer báo cho broker biết một tin đã được xử lý. Với **ack thủ công**:
 
 1. Broker giao tin, đánh dấu tin là **unacked** (đã giao, chưa xác nhận). Tin vẫn nằm trong queue.
 2. Consumer xử lý xong thì gửi `basic.ack`. Lúc này broker mới xóa tin.
@@ -102,13 +102,13 @@ Ngoài `ack`, consumer có hai cách từ chối:
 | `basic.nack` | từ chối, có thêm `multiple` | phần mở rộng của RabbitMQ; trong `amqplib`, `nack` mặc định `requeue = true` |
 
 > [!warning] Requeue không phải retry
-> Trả tin về queue (`requeue = true`) làm tin được giao lại **gần như ngay lập tức**. Nếu lỗi là do dữ liệu hỏng, tin sẽ quay vòng mãi: giao, lỗi, trả về, giao… Đó là vòng lặp nóng ăn hết CPU. Retry có độ trễ và giới hạn số lần là chuyện của [[2026-11-21-rabbitmq-dlx-retry|ga 6]].
+> Trả tin về queue (`requeue = true`) làm tin được giao lại **gần như ngay lập tức**. Nếu lỗi là do dữ liệu hỏng, tin sẽ quay vòng mãi: giao, lỗi, trả về, giao… Đó là vòng lặp nóng ăn hết CPU. Retry có độ trễ và giới hạn số lần là chuyện của [[posts/2026-11-21-rabbitmq-dlx-retry|ga 6]].
 
 Quên ack cũng là một lỗi: tin nằm mãi ở trạng thái unacked, bộ nhớ broker tăng dần, và sau 30 phút (mặc định), broker cho rằng consumer đã treo. Quá hạn đó, broker hủy consumer hoặc đóng channel bằng lỗi `PRECONDITION_FAILED`, và tin unacked quay lại queue. Thời hạn chỉnh được bằng tham số `x-consumer-timeout` hoặc policy. Từ 4.3, chỉ quorum queue còn áp dụng thời hạn này.
 
 ### Auto-ack: nhanh và nguy hiểm
 
-[[auto-ack|Auto-ack]] (cờ `noAck: true`) bảo broker coi tin là **xong ngay khi vừa gửi xuống mạng**. Không cần ack, nên nhanh hơn. Đổi lại:
+[[concepts/auto-ack|Auto-ack]] (cờ `noAck: true`) bảo broker coi tin là **xong ngay khi vừa gửi xuống mạng**. Không cần ack, nên nhanh hơn. Đổi lại:
 
 - Consumer chết khi đang xử lý là tin mất, broker không giao lại.
 - Prefetch không có tác dụng: broker đẩy tin xuống nhanh hết mức mạng cho phép, consumer chậm có thể bị ngập tới hết bộ nhớ.
@@ -117,7 +117,7 @@ Tài liệu RabbitMQ nói thẳng: chế độ này "nên được coi là khôn
 
 ### Prefetch: mỗi người cầm tối đa N lá
 
-[[prefetch|Prefetch]] (lệnh `basic.qos`) đặt số tin **chưa ack** tối đa mà broker được giao cho một consumer. Đủ N tin chưa ack thì broker ngừng giao cho consumer đó tới khi nó ack bớt.
+[[concepts/prefetch|Prefetch]] (lệnh `basic.qos`) đặt số tin **chưa ack** tối đa mà broker được giao cho một consumer. Đủ N tin chưa ack thì broker ngừng giao cho consumer đó tới khi nó ack bớt.
 
 - **Prefetch 1**: mỗi worker chỉ cầm một việc. Ai rảnh mới nhận việc mới, nên worker nhanh làm nhiều hơn worker chậm. Công bằng nhất, nhưng mỗi tin tốn một vòng mạng chờ.
 - **Không đặt** (0 = không giới hạn): broker đẩy hết tin cho các consumer theo round-robin. Worker chậm ôm một đống việc trong khi worker nhanh ngồi chơi; và nếu queue có một triệu tin, consumer có thể bị đẩy một triệu tin vào RAM.
@@ -129,20 +129,20 @@ Liên quan tới prefetch là **consumer priority**: consumer đăng ký với t
 
 ### Redelivery: dấu "phát lại"
 
-[[redelivery|Redelivery]] xảy ra khi tin unacked được trả về queue (consumer chết, hoặc bị `nack`/`reject` với `requeue = true`) rồi giao lại. Tin giao lại mang cờ `redelivered = true`. Broker cố đặt tin về đúng vị trí cũ trong hàng; không được thì đặt gần đầu hàng.
+[[concepts/redelivery|Redelivery]] xảy ra khi tin unacked được trả về queue (consumer chết, hoặc bị `nack`/`reject` với `requeue = true`) rồi giao lại. Tin giao lại mang cờ `redelivered = true`. Broker cố đặt tin về đúng vị trí cũ trong hàng; không được thì đặt gần đầu hàng.
 
 Ý nghĩa của cờ này *không đối xứng*:
 
 - `redelivered = false`: chắc chắn tin **chưa từng** được giao cho ai.
 - `redelivered = true`: tin **có thể** đã được xử lý một phần hoặc toàn bộ. Không phải chắc chắn đã xử lý.
 
-Vì vậy cờ này không đủ để chống xử lý trùng; [[2026-11-21-rabbitmq-delivery-guarantees|ga 5]] có cách làm đúng.
+Vì vậy cờ này không đủ để chống xử lý trùng; [[posts/2026-11-21-rabbitmq-delivery-guarantees|ga 5]] có cách làm đúng.
 
 Có hai thông tin consumer hay gặp cùng lúc: **consumer tag** là tên của một lượt đăng ký `consume`, dùng để hủy đăng ký (`basic.cancel`). Và broker cũng có thể **tự hủy** consumer, ví dụ khi queue bị xóa; khi đó `amqplib` gọi callback với giá trị `null`, nên mọi handler nên bắt đầu bằng `if (!msg) return`.
 
 ### Publisher confirm: biên nhận cho người gửi
 
-Phía producer có vấn đề ngược lại: `publish` chỉ đẩy tin vào buffer, không có gì đảm bảo broker đã nhận. [[publisher-confirms|Publisher confirms]] sửa chuyện này. Producer bật **confirm mode** trên channel (`createConfirmChannel` trong `amqplib`), và broker gửi lại một `basic.ack` cho mỗi tin (hoặc một lô tin) khi đã **nhận trách nhiệm** với tin đó:
+Phía producer có vấn đề ngược lại: `publish` chỉ đẩy tin vào buffer, không có gì đảm bảo broker đã nhận. [[concepts/publisher-confirms|Publisher confirms]] sửa chuyện này. Producer bật **confirm mode** trên channel (`createConfirmChannel` trong `amqplib`), và broker gửi lại một `basic.ack` cho mỗi tin (hoặc một lô tin) khi đã **nhận trách nhiệm** với tin đó:
 
 - Tin không khớp binding nào: confirm ngay khi broker xác định không có queue nào (ga 3: biên nhận ≠ có người nhận).
 - Tin persistent vào queue durable: confirm **sau khi đã ghi xuống đĩa**.
@@ -163,13 +163,13 @@ Một cái bẫy nhỏ phía client: trong `amqplib`, `publish` trả `false` kh
 
 ### Message persistence: thư bảo đảm
 
-[[message-persistence|Message persistence]] là tổng hợp ba điều kiện để tin sống qua lần broker khởi động lại:
+[[concepts/message-persistence|Message persistence]] là tổng hợp ba điều kiện để tin sống qua lần broker khởi động lại:
 
 1. **Queue durable** (hoặc quorum/stream, vốn luôn bền). Queue không bền bị xóa khi khởi động lại, kéo theo mọi tin bên trong.
 2. **Tin persistent** (`delivery_mode = 2`, trong `amqplib` là `persistent: true`). Tin không bền trong queue bền vẫn mất khi khởi động lại.
 3. **Publisher confirm**. RabbitMQ không `fsync` từng tin ngay khi nhận; có một khoảng ngắn tin đã được nhận nhưng chưa nằm trên đĩa. Confirm mới là lời hứa "đã ghi".
 
-Tutorial chính thức nói rõ: đánh dấu persistent thôi "không đảm bảo hoàn toàn" tin không mất. Thiếu một trong ba điều kiện là có một khe hở. Và cả ba chỉ bảo vệ tin trên **một** node; node đó hỏng ổ đĩa thì cần bản sao ở node khác, chuyện của [[2026-11-21-rabbitmq-queue-types|ga 7]].
+Tutorial chính thức nói rõ: đánh dấu persistent thôi "không đảm bảo hoàn toàn" tin không mất. Thiếu một trong ba điều kiện là có một khe hở. Và cả ba chỉ bảo vệ tin trên **một** node; node đó hỏng ổ đĩa thì cần bản sao ở node khác, chuyện của [[posts/2026-11-21-rabbitmq-queue-types|ga 7]].
 
 ## Ví dụ chạy được
 

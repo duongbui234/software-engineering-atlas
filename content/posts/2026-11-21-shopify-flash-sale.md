@@ -19,7 +19,7 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Con số "32 triệu request mỗi phút" là đỉnh của cả Shopify trong Black Friday 2021, không phải của một đợt flash sale. Con số đáng nhớ hơn: **một** đợt flash sale từng ăn hơn 20% toàn bộ năng lực tính toán của Shopify.
-> - Shopify xử lý flash sale bằng bốn lớp: chặn bớt ở cửa ([[throttling]]), xếp hàng công bằng theo giờ đến ([[virtual-queue|hàng chờ ảo]]), giữ kho không bán quá ([[inventory-reservation|giữ kho]]), và cô lập để một shop nóng không kéo sập shop khác.
+> - Shopify xử lý flash sale bằng bốn lớp: chặn bớt ở cửa ([[concepts/throttling]]), xếp hàng công bằng theo giờ đến ([[concepts/virtual-queue|hàng chờ ảo]]), giữ kho không bán quá ([[concepts/inventory-reservation|giữ kho]]), và cô lập để một shop nóng không kéo sập shop khác.
 > - Mỗi lớp đều có một lần sửa sai được kể công khai: hàng chờ kiểu xổ số bắt khách chờ 40 phút, hàng chờ ở cửa không biết kho đã hết, giữ kho bằng Redis không ghi nguyên tử được với sổ kho chính.
 > - Dự án của mình làm đúng phần khó nhất (trừ kho nguyên tử bằng Lua, hàng chờ theo giờ đến), nhưng còn bốn chỗ hở. Nặng nhất: đơn flash sale bị hủy thì hàng trả về **nhầm kệ**, và lúc đối soát cuối đợt thì tin Redis hơn tin đơn hàng thật.
 
@@ -32,14 +32,14 @@ sources:
 > - **Flash sale**: đợt bán giới hạn số lượng và thời gian, ví dụ 300 đôi giày mở bán lúc 21:00.
 > - **RPM (requests per minute)**: số request mỗi phút mà hệ thống nhận.
 > - **Edge / load balancer**: lớp máy đứng ngoài cùng, nhận request từ Internet trước khi chuyển vào ứng dụng. Shopify dùng Nginx kèm Lua (OpenResty).
-> - **Leaky bucket**: mỗi khoảng thời gian chỉ cho một số request nhất định đi qua, phần thừa phải chờ (xem [[rate-limiting]]).
+> - **Leaky bucket**: mỗi khoảng thời gian chỉ cho một số request nhất định đi qua, phần thừa phải chờ (xem [[concepts/rate-limiting]]).
 > - **Cookie có chữ ký**: cookie server ký bằng khóa bí mật. Khách đọc được nhưng sửa thì chữ ký sai.
 > - **Redis / Lua script**: Redis là cơ sở dữ liệu trong RAM. Lua script chạy bên trong Redis, trọn vẹn một lần, không bị lệnh khác chen vào.
 > - **ZSET**: danh sách trong Redis tự sắp xếp theo điểm, ở đây điểm là giờ đến.
-> - **Ghi hai nơi (dual write)**: một thao tác phải cập nhật hai hệ thống, như Redis và Postgres, mà không có transaction chung. Xem [[dual-write]].
+> - **Ghi hai nơi (dual write)**: một thao tác phải cập nhật hai hệ thống, như Redis và Postgres, mà không có transaction chung. Xem [[concepts/dual-write]].
 > - **Đối soát (reconcile)**: so số liệu giữa hai nơi lưu rồi sửa cho khớp.
 > - **`SELECT … FOR UPDATE SKIP LOCKED`**: lệnh SQL khóa dòng để sửa, dòng nào đang bị người khác khóa thì bỏ qua lấy dòng khác.
-> - **Circuit breaker, timeout**: xem [[2026-11-18-api-reliability|ga Độ tin cậy]].
+> - **Circuit breaker, timeout**: xem [[posts/2026-11-18-api-reliability|ga Độ tin cậy]].
 
 ## Hình dung trước: tiệm bánh mở bán 300 cái bánh lúc 9 giờ
 
@@ -47,10 +47,10 @@ Một tiệm bánh nổi tiếng thông báo: đúng 9 giờ sáng bán 300 cái
 
 | Đời thường | Khái niệm | Shopify | flash-sale của mình |
 |---|---|---|---|
-| Bảo vệ chỉ cho 50 người vào mỗi 5 phút, người còn lại đứng chờ ngoài cửa | [[throttling\|Throttling]] | Leaky bucket ở lớp Nginx | Mỗi 5 giây gọi 50 người |
-| Phát **số thứ tự** theo giờ đến, gọi số từ nhỏ đến lớn | [[virtual-queue\|Hàng chờ ảo]] | Ghi giờ đến vào cookie có chữ ký | Ghi giờ đến vào ZSET trong Redis |
-| Thu ngân **giữ** cái bánh cho bạn trong lúc bạn móc ví, trả tiền xong mới trừ hẳn khỏi sổ | [[inventory-reservation\|Giữ kho]] | Mỗi suất là một dòng trong MySQL | Lua trừ kho trong Redis, rồi tạo đơn trong Postgres |
-| Bảng đếm ở cửa và sổ kho trong bếp phải khớp nhau | [[dual-write\|Ghi hai nơi]] | Bỏ Redis, chỉ còn MySQL | Vẫn ghi hai nơi, cuối đợt đối soát |
+| Bảo vệ chỉ cho 50 người vào mỗi 5 phút, người còn lại đứng chờ ngoài cửa | [[concepts/throttling\|Throttling]] | Leaky bucket ở lớp Nginx | Mỗi 5 giây gọi 50 người |
+| Phát **số thứ tự** theo giờ đến, gọi số từ nhỏ đến lớn | [[concepts/virtual-queue\|Hàng chờ ảo]] | Ghi giờ đến vào cookie có chữ ký | Ghi giờ đến vào ZSET trong Redis |
+| Thu ngân **giữ** cái bánh cho bạn trong lúc bạn móc ví, trả tiền xong mới trừ hẳn khỏi sổ | [[concepts/inventory-reservation\|Giữ kho]] | Mỗi suất là một dòng trong MySQL | Lua trừ kho trong Redis, rồi tạo đơn trong Postgres |
+| Bảng đếm ở cửa và sổ kho trong bếp phải khớp nhau | [[concepts/dual-write\|Ghi hai nơi]] | Bỏ Redis, chỉ còn MySQL | Vẫn ghi hai nơi, cuối đợt đối soát |
 | Hết bánh thì ra cửa báo ngay cho người đang xếp hàng | Đóng hàng chờ khi hết | Chuyển hàng chờ vào trong ứng dụng để biết kho | **Chưa có** |
 | Khách bỏ về không trả tiền thì bánh quay về đúng kệ bánh giảm giá | Trả hàng đúng kho | Giải phóng suất đã giữ | **Trả nhầm sang kệ thường** |
 
@@ -86,7 +86,7 @@ flowchart TB
 
 Năm 2017, Emil Stolarsky kể lại lý do Shopify phải chặn ở checkout. Mỗi phiên checkout tạo một bản ghi MySQL, và mỗi bước trong checkout lại sửa đúng bản ghi đó. Flash sale biến checkout thành điểm nóng ghi. Cách sửa tận gốc là viết lại checkout để gộp các lần ghi, nhưng không kịp trước đợt bán tiếp theo. Nên họ chọn một giải pháp tạm ở lớp ngoài cùng.
 
-Throttle chạy trong Nginx bằng Lua (OpenResty), theo kiểu [[rate-limiting|leaky bucket]]: mỗi chu kỳ **5 giây** chỉ cho một số request checkout đi qua, con số này đặt theo sức chịu của ứng dụng. Ai qua được thì nhận một cookie có chữ ký, cho phép đi thẳng suốt phiên đó. Ai không qua thì thấy trang chờ (do merchant thiết kế, cache sẵn ở Nginx), JavaScript trên trang tự hỏi lại.
+Throttle chạy trong Nginx bằng Lua (OpenResty), theo kiểu [[concepts/rate-limiting|leaky bucket]]: mỗi chu kỳ **5 giây** chỉ cho một số request checkout đi qua, con số này đặt theo sức chịu của ứng dụng. Ai qua được thì nhận một cookie có chữ ký, cho phép đi thẳng suốt phiên đó. Ai không qua thì thấy trang chờ (do merchant thiết kế, cache sẵn ở Nginx), JavaScript trên trang tự hỏi lại.
 
 Họ cố ý **không trả `429`**: với người mua, một trang lỗi trông như shop bị sập. Trang chờ giữ được cảm giác "đang xếp hàng".
 
@@ -138,7 +138,7 @@ Kết quả: trong các đợt flash sale lớn, CPU của máy ghi dưới 50%,
 ### Lớp 4: cô lập và chống lan lỗi
 
 - **Pods** (2016): các shop được chia thành nhóm, mỗi nhóm có bộ datastore riêng hoàn toàn. Một phần mềm tên Sorting Hat trong load balancer gắn mỗi request vào đúng pod. Một shop đang flash sale chỉ đè lên pod của nó, không lan ra cả nền tảng.
-- **Semian** (từ 2014): [[circuit-breaker]] cộng *bulkhead* (chỉ cho một số worker cùng chạm vào một tài nguyên, như các khoang kín trên tàu). Lý do được nói rất rõ: timeout thôi là không đủ, một dependency chậm còn tệ hơn một dependency chết.
+- **Semian** (từ 2014): [[concepts/circuit-breaker]] cộng *bulkhead* (chỉ cho một số worker cùng chạm vào một tài nguyên, như các khoang kín trên tàu). Lý do được nói rất rõ: timeout thôi là không đủ, một dependency chậm còn tệ hơn một dependency chết.
 - **Toxiproxy và ma trận chịu lỗi**: một bảng hàng là các dịch vụ phụ thuộc, cột là các phần của ứng dụng, mỗi ô ghi phần đó cư xử ra sao khi dịch vụ chậm hoặc chết. Toxiproxy chèn độ trễ và sự cố thật vào test để kiểm từng ô.
 - **Load test ở quy mô thật**: chuẩn bị cho Black Friday 2021 từ tháng 7, lần test lớn nhất đạt 50,7 triệu request mỗi phút ở load balancer, gấp rưỡi đỉnh thật.
 

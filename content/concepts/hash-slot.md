@@ -8,4 +8,4 @@ region: Vùng Cache
 
 **Hash slot** cho phép chuyển từng slot khi thêm node, client được chuyển hướng bằng `MOVED`/`ASK`. Lệnh nhiều key, transaction và Lua chỉ chạy khi mọi key cùng slot (không thì `CROSSSLOT`); hash tag `{...}` ép key về cùng slot.
 
-Đọc thêm trong bài [[2026-11-22-caching-distributed|Nhiều tầng, nhiều máy]].
+Đọc thêm trong bài [[posts/2026-11-22-caching-distributed|Nhiều tầng, nhiều máy]].

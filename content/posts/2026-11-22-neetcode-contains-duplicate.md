@@ -18,10 +18,10 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Đề: cho một mảng số nguyên, trả `true` nếu có số xuất hiện từ hai lần trở lên.
-> - [[brute-force|Vét cạn]] so mọi cặp: [[big-o-notation|O(n²)]]. Với 10 000 số mất 38 ms; với 100 000 số sẽ mất vài giây.
-> - [[sort-then-scan|Sắp xếp rồi quét]]: số trùng nằm cạnh nhau, O(n log n). Trong JS phải truyền hàm so sánh, vì `sort()` mặc định so sánh **chuỗi**.
-> - [[hash-set|Hash set]]: ghi mọi số đã thấy vào một `Set`, tra mất O(1) trung bình, tổng O(n). Gặp trùng sớm thì dừng ngay: 0,000 ms so với 206 ms của cách sắp xếp.
-> - Đổi thời gian lấy bộ nhớ là một [[space-time-tradeoff|đánh đổi]], không phải bữa trưa miễn phí: Set tốn O(n) bộ nhớ, sắp xếp tại chỗ thì gần như không.
+> - [[concepts/brute-force|Vét cạn]] so mọi cặp: [[concepts/big-o-notation|O(n²)]]. Với 10 000 số mất 38 ms; với 100 000 số sẽ mất vài giây.
+> - [[concepts/sort-then-scan|Sắp xếp rồi quét]]: số trùng nằm cạnh nhau, O(n log n). Trong JS phải truyền hàm so sánh, vì `sort()` mặc định so sánh **chuỗi**.
+> - [[concepts/hash-set|Hash set]]: ghi mọi số đã thấy vào một `Set`, tra mất O(1) trung bình, tổng O(n). Gặp trùng sớm thì dừng ngay: 0,000 ms so với 206 ms của cách sắp xếp.
+> - Đổi thời gian lấy bộ nhớ là một [[concepts/space-time-tradeoff|đánh đổi]], không phải bữa trưa miễn phí: Set tốn O(n) bộ nhớ, sắp xếp tại chỗ thì gần như không.
 
 > [!info] Bối cảnh
 > Ga 1 của **tuyến NeetCode 150: Arrays & Hashing**. NeetCode 150 là danh sách 150 bài LeetCode xếp theo mẫu giải; đây là bài đầu tiên của cả danh sách. Mỗi ga có lời giải chạy được bằng TypeScript, JavaScript, Python, Go và Java. Bạn chỉ cần biết viết vòng lặp và hàm trong một ngôn ngữ bất kỳ.
@@ -40,11 +40,11 @@ Một buổi hòa nhạc phát vé có số. Bạn đứng ở cửa, nhiệm v�
 
 | Đời thường | Khái niệm |
 |---|---|
-| Mỗi người tới, bạn so vé của họ với vé của **từng người** đã vào | [[brute-force\|Vét cạn]], O(n²) |
-| Gom hết vé, xếp theo số, rồi nhìn từng cặp vé nằm cạnh nhau | [[sort-then-scan\|Sắp xếp rồi quét]], O(n log n) |
-| Cầm một cuốn sổ có mục lục theo số vé; người tới thì tra sổ, chưa có thì ghi vào | [[hash-set\|Hash set]], O(n) |
-| Cuốn sổ phải đủ dày để ghi mọi số vé | [[space-time-tradeoff\|Đánh đổi bộ nhớ lấy thời gian]] |
-| Khách tăng gấp đôi thì việc của bạn tăng gấp mấy lần? | [[big-o-notation\|Big-O]] |
+| Mỗi người tới, bạn so vé của họ với vé của **từng người** đã vào | [[concepts/brute-force\|Vét cạn]], O(n²) |
+| Gom hết vé, xếp theo số, rồi nhìn từng cặp vé nằm cạnh nhau | [[concepts/sort-then-scan\|Sắp xếp rồi quét]], O(n log n) |
+| Cầm một cuốn sổ có mục lục theo số vé; người tới thì tra sổ, chưa có thì ghi vào | [[concepts/hash-set\|Hash set]], O(n) |
+| Cuốn sổ phải đủ dày để ghi mọi số vé | [[concepts/space-time-tradeoff\|Đánh đổi bộ nhớ lấy thời gian]] |
+| Khách tăng gấp đôi thì việc của bạn tăng gấp mấy lần? | [[concepts/big-o-notation\|Big-O]] |
 
 ```mermaid
 flowchart TB
@@ -77,17 +77,17 @@ Giá trị lên tới 10⁹ cũng loại luôn mẹo "tạo một mảng đánh 
 
 ### Big-O: đo hình dạng, không đo giây
 
-[[big-o-notation|Big-O]] mô tả số bước tăng thế nào khi n tăng, bỏ qua hằng số và các số hạng nhỏ hơn. "O(n²)" nghĩa là n tăng gấp 10 thì số bước tăng khoảng gấp 100. Big-O không nói thuật toán chạy mất bao nhiêu mili giây; nó nói đường cong cong cỡ nào. Hai thuật toán cùng O(n) có thể chênh nhau 10 lần, và một thuật toán O(n) có thể chậm hơn một thuật toán O(n log n) ở mọi kích thước bạn gặp thật (ga 5 có ví dụ).
+[[concepts/big-o-notation|Big-O]] mô tả số bước tăng thế nào khi n tăng, bỏ qua hằng số và các số hạng nhỏ hơn. "O(n²)" nghĩa là n tăng gấp 10 thì số bước tăng khoảng gấp 100. Big-O không nói thuật toán chạy mất bao nhiêu mili giây; nó nói đường cong cong cỡ nào. Hai thuật toán cùng O(n) có thể chênh nhau 10 lần, và một thuật toán O(n) có thể chậm hơn một thuật toán O(n log n) ở mọi kích thước bạn gặp thật (ga 5 có ví dụ).
 
 Có hai thứ để đo: **thời gian** (số bước) và **bộ nhớ phụ** (bộ nhớ dùng thêm ngoài input). Khi nói "O(1) bộ nhớ", người ta thường không tính chính mảng input.
 
 ### Cách 1, vét cạn: O(n²) thời gian, O(1) bộ nhớ
 
-[[brute-force|Vét cạn]] thử mọi khả năng: với mỗi i, so `nums[i]` với mọi `nums[j]` đứng sau. Số cặp là n(n−1)/2, tức O(n²). Đúng, không tốn bộ nhớ, và là điểm xuất phát tốt để nói "mình biết cách đúng, giờ làm nhanh hơn".
+[[concepts/brute-force|Vét cạn]] thử mọi khả năng: với mỗi i, so `nums[i]` với mọi `nums[j]` đứng sau. Số cặp là n(n−1)/2, tức O(n²). Đúng, không tốn bộ nhớ, và là điểm xuất phát tốt để nói "mình biết cách đúng, giờ làm nhanh hơn".
 
 ### Cách 2, sắp xếp rồi quét: O(n log n) thời gian
 
-Sau khi sắp xếp, mọi số bằng nhau nằm liền nhau, nên chỉ cần so mỗi phần tử với phần tử ngay trước nó. Đây là mẹo [[sort-then-scan|sắp xếp rồi quét]], dùng lại rất nhiều về sau. Chi phí nằm ở bước sắp xếp, O(n log n) với mọi thuật toán sắp xếp dựa trên so sánh.
+Sau khi sắp xếp, mọi số bằng nhau nằm liền nhau, nên chỉ cần so mỗi phần tử với phần tử ngay trước nó. Đây là mẹo [[concepts/sort-then-scan|sắp xếp rồi quét]], dùng lại rất nhiều về sau. Chi phí nằm ở bước sắp xếp, O(n log n) với mọi thuật toán sắp xếp dựa trên so sánh.
 
 Bộ nhớ phụ thì tùy:
 
@@ -99,11 +99,11 @@ Mỗi ngôn ngữ dùng một thuật toán khác nhau (bảng ở dưới), nh�
 
 ### Cách 3, hash set: O(n) thời gian, O(n) bộ nhớ
 
-Một [[hash-set|hash set]] trả lời "có x chưa?" mà không phải duyệt hết. Nó tính hash của x để biết x phải nằm ở ô nào, rồi chỉ nhìn ô đó. Trung bình mỗi lần tra và ghi là O(1), nên cả bài là O(n). Đặc tả ECMAScript không bắt `Set` phải là hash table; nó chỉ yêu cầu thời gian truy cập trung bình **dưới tuyến tính** theo số phần tử.
+Một [[concepts/hash-set|hash set]] trả lời "có x chưa?" mà không phải duyệt hết. Nó tính hash của x để biết x phải nằm ở ô nào, rồi chỉ nhìn ô đó. Trung bình mỗi lần tra và ghi là O(1), nên cả bài là O(n). Đặc tả ECMAScript không bắt `Set` phải là hash table; nó chỉ yêu cầu thời gian truy cập trung bình **dưới tuyến tính** theo số phần tử.
 
 Điểm cộng ít được nhắc: **dừng sớm**. Nếu hai số đầu đã trùng, vòng lặp kết thúc sau 2 bước. Cách sắp xếp luôn phải sắp xếp cả mảng trước đã.
 
-Đó là một [[space-time-tradeoff|đánh đổi bộ nhớ lấy thời gian]]: cuốn sổ tốn O(n) bộ nhớ. Với 100 000 số thì không đáng kể. Với một tỷ số trên một máy ít RAM, sắp xếp tại chỗ có thể là lựa chọn duy nhất.
+Đó là một [[concepts/space-time-tradeoff|đánh đổi bộ nhớ lấy thời gian]]: cuốn sổ tốn O(n) bộ nhớ. Với 100 000 số thì không đáng kể. Với một tỷ số trên một máy ít RAM, sắp xếp tại chỗ có thể là lựa chọn duy nhất.
 
 ### Bên dưới năm ngôn ngữ
 

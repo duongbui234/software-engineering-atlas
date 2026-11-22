@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Limit of 2 units per buyer: Snapshot Isolation misses it, Serializable stops it",
+    "output": "content/diagrams/transactions-isolation/write-skew.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "t1",
+      "type": "frontend",
+      "label": "Tab 1",
+      "sublabel": "user 7, already has 1 order"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "orders"
+    },
+    {
+      "id": "t2",
+      "type": "frontend",
+      "label": "Tab 2",
+      "sublabel": "same user 7"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 430,
+      "label": "REPEATABLE READ: both get through"
+    },
+    {
+      "from": 455,
+      "to": 730,
+      "label": "SERIALIZABLE: one side is aborted"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "t1",
+      "to": "pg",
+      "y": 170,
+      "label": "how many orders do I have?",
+      "variant": "default",
+      "note": "SELECT count(*) → 1 (snapshot)"
+    },
+    {
+      "id": "a2",
+      "from": "t2",
+      "to": "pg",
+      "y": 220,
+      "label": "how many orders do I have?",
+      "variant": "default",
+      "note": "SELECT count(*) → 1 (snapshot)"
+    },
+    {
+      "id": "a3",
+      "from": "t1",
+      "to": "pg",
+      "y": 275,
+      "label": "1 < 2, add an order",
+      "variant": "emphasis",
+      "note": "INSERT orders (buyer 7)"
+    },
+    {
+      "id": "a4",
+      "from": "t2",
+      "to": "pg",
+      "y": 325,
+      "label": "1 < 2, add an order",
+      "variant": "emphasis",
+      "note": "INSERT a different row: no write conflict"
+    },
+    {
+      "id": "a5",
+      "from": "pg",
+      "to": "t2",
+      "y": 385,
+      "label": "both COMMIT: user 7 has 3 orders",
+      "variant": "security",
+      "note": "write skew"
+    },
+    {
+      "id": "b1",
+      "from": "t1",
+      "to": "pg",
+      "y": 475,
+      "label": "count, then add",
+      "variant": "default",
+      "note": "SELECT count → 1; INSERT"
+    },
+    {
+      "id": "b2",
+      "from": "t2",
+      "to": "pg",
+      "y": 525,
+      "label": "count, then add",
+      "variant": "default",
+      "note": "SELECT count → 1; INSERT"
+    },
+    {
+      "id": "b3",
+      "from": "pg",
+      "to": "t1",
+      "y": 580,
+      "label": "COMMIT succeeds",
+      "variant": "return"
+    },
+    {
+      "id": "b4",
+      "from": "pg",
+      "to": "t2",
+      "y": 635,
+      "label": "can't be put in a serial order",
+      "variant": "security",
+      "note": "40001 could not serialize access"
+    },
+    {
+      "id": "b5",
+      "from": "t2",
+      "to": "pg",
+      "y": 690,
+      "label": "retry: counts 2, refuses",
+      "variant": "dashed",
+      "note": "retry the whole transaction"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Snapshot Isolation",
+      "items": [
+        "Postgres calls it Repeatable Read",
+        "Stops lost updates on the same row",
+        "Doesn't stop write skew"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Serializable (SSI)",
+      "items": [
+        "Tracks who read and wrote what",
+        "Doesn't block; aborts one side",
+        "The app must retry 40001"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Read Committed",
+      "items": [
+        "Default in Postgres and Prisma",
+        "A new snapshot per statement",
+        "Even allows lost updates"
+      ]
+    }
+  ]
+}

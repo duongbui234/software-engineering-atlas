@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Two-tier feature flag cache across many pods",
+    "output": "content/diagrams/caching-distributed/two-tier.en.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "lb", "type": "cloud", "label": "Entry point", "sublabel": "load balancer", "pos": [40, 240], "size": [150, 64] },
+    { "id": "pod1", "type": "backend", "label": "Pod 1", "sublabel": "L1: in-RAM Map + 'absent' set", "pos": [280, 100], "size": [210, 64] },
+    { "id": "pod2", "type": "backend", "label": "Pod 2", "sublabel": "L1: in-RAM Map + 'absent' set", "pos": [280, 380], "size": [210, 64] },
+    { "id": "redis", "type": "database", "label": "Shared cache", "sublabel": "L2 Redis: flags hash + invalidation channel", "pos": [600, 240], "size": [220, 64] },
+    { "id": "pg", "type": "database", "label": "Source of truth", "sublabel": "PostgreSQL: feature_flags table", "pos": [920, 240], "size": [200, 64] },
+    { "id": "admin", "type": "frontend", "label": "Admin page", "sublabel": "admin toggles flags", "pos": [920, 60], "size": [200, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Each pod keeps its own copy, no self-sync", "wraps": ["pod1", "pod2"] }
+  ],
+  "connections": [
+    { "id": "in1", "from": "lb", "to": "pod1", "fromSide": "top", "toSide": "left" },
+    { "id": "in2", "from": "lb", "to": "pod2", "fromSide": "bottom", "toSide": "left" },
+    { "id": "r1", "from": "pod1", "to": "redis", "label": "read L2, listen for invalidations", "fromSide": "right", "toSide": "top" },
+    { "id": "r2", "from": "pod2", "to": "redis", "label": "read L2, listen for invalidations", "fromSide": "right", "toSide": "bottom" },
+    { "id": "db", "from": "redis", "to": "pg", "label": "L2 miss: read the source", "variant": "emphasis" },
+    { "id": "write", "from": "admin", "to": "pg", "label": "write flag, then delete L2", "variant": "security" },
+    { "id": "bcast", "from": "admin", "to": "redis", "label": "publish: drop L1 flag X", "variant": "dashed", "fromSide": "left", "toSide": "top" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Read path",
+      "items": [
+        "L1 in RAM: tens of nanoseconds, no network",
+        "L2 Redis: shared by every pod",
+        "PostgreSQL only as the last stop"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The gap",
+      "items": [
+        "Pub/Sub stores nothing: a disconnected pod misses it",
+        "L1 without a TTL stays wrong until the pod restarts",
+        "Fix: a TTL on L1, clear all of L1 on reconnect"
+      ]
+    }
+  ]
+}

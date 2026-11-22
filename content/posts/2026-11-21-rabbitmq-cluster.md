@@ -21,17 +21,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[clustering|Cụm]] (cluster) là nhiều node RabbitMQ dùng chung một bộ siêu dữ liệu. Ứng dụng nối vào node nào cũng thấy mọi queue. Nhưng **nội dung** chỉ có bản sao nếu là quorum queue hoặc stream.
-> - Từ RabbitMQ 4.3, siêu dữ liệu nằm trong [[khepri|Khepri]], một kho dùng Raft. Cụm cần **đa số node sống** để khởi động và để đổi cấu trúc, nên luôn dùng số node lẻ: 3 hoặc 5.
-> - [[network-partition|Network partition]] (mạng bị chia cắt): từ 4.3 không còn các chiến lược `pause_minority`, `autoheal`… Raft quyết định: phía đa số chạy tiếp, phía thiểu số đứng im.
-> - Cụm chỉ dành cho mạng LAN. Nối các cụm ở xa nhau thì dùng [[federation|federation]] (cụm xa tự kéo tin về khi có người cần) hoặc [[shovel|shovel]] (bơm tin một chiều từ nơi này sang nơi khác).
-> - [[feature-flags|Feature flags]] cho phép các node khác phiên bản chạy chung trong lúc nâng cấp lần lượt (rolling upgrade). Bật rồi thì không tắt được.
+> - [[concepts/clustering|Cụm]] (cluster) là nhiều node RabbitMQ dùng chung một bộ siêu dữ liệu. Ứng dụng nối vào node nào cũng thấy mọi queue. Nhưng **nội dung** chỉ có bản sao nếu là quorum queue hoặc stream.
+> - Từ RabbitMQ 4.3, siêu dữ liệu nằm trong [[concepts/khepri|Khepri]], một kho dùng Raft. Cụm cần **đa số node sống** để khởi động và để đổi cấu trúc, nên luôn dùng số node lẻ: 3 hoặc 5.
+> - [[concepts/network-partition|Network partition]] (mạng bị chia cắt): từ 4.3 không còn các chiến lược `pause_minority`, `autoheal`… Raft quyết định: phía đa số chạy tiếp, phía thiểu số đứng im.
+> - Cụm chỉ dành cho mạng LAN. Nối các cụm ở xa nhau thì dùng [[concepts/federation|federation]] (cụm xa tự kéo tin về khi có người cần) hoặc [[concepts/shovel|shovel]] (bơm tin một chiều từ nơi này sang nơi khác).
+> - [[concepts/feature-flags|Feature flags]] cho phép các node khác phiên bản chạy chung trong lúc nâng cấp lần lượt (rolling upgrade). Bật rồi thì không tắt được.
 
 > [!info] Bối cảnh
-> Ga 8 của **tuyến RabbitMQ**. Ở [[2026-11-21-rabbitmq-queue-types|ga 7]], quorum queue chép tin ra nhiều node. Ga này dựng chính các node đó: một cụm 3 node bằng Docker Compose, rồi tắt dần từng node. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết, hiện chạy một node RabbitMQ duy nhất trong dev. Bạn không cần biết code dự án.
+> Ga 8 của **tuyến RabbitMQ**. Ở [[posts/2026-11-21-rabbitmq-queue-types|ga 7]], quorum queue chép tin ra nhiều node. Ga này dựng chính các node đó: một cụm 3 node bằng Docker Compose, rồi tắt dần từng node. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết, hiện chạy một node RabbitMQ duy nhất trong dev. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Quorum queue, Raft, leader, đa số**: xem [[2026-11-21-rabbitmq-queue-types|ga 7]].
+> - **Quorum queue, Raft, leader, đa số**: xem [[posts/2026-11-21-rabbitmq-queue-types|ga 7]].
 > - **Siêu dữ liệu (metadata)**: thông tin *về* hệ thống chứ không phải tin nhắn: user, vhost, exchange, queue, binding, policy.
 > - **Erlang**: ngôn ngữ RabbitMQ được viết. Các node Erlang nói chuyện với nhau qua một cơ chế riêng.
 > - **Erlang cookie**: một chuỗi bí mật; hai node chỉ nói chuyện được nếu có cùng cookie. Công cụ dòng lệnh cũng cần cookie này.
@@ -44,12 +44,12 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Ba bưu cục cùng một thành phố dùng chung sổ địa chỉ và danh bạ nhân viên; khách vào bưu cục nào cũng gửi được | [[clustering\|Clustering]] |
-| Sổ địa chỉ chung, chỉ sửa được khi đa số trưởng bưu cục đồng ý | [[khepri\|Khepri]] |
-| Đường dây điện thoại giữa các bưu cục bị đứt, mỗi nhóm tưởng nhóm kia đã đóng cửa | [[network-partition\|Network partition]] |
-| Bưu điện Đà Nẵng nhờ Hà Nội gửi bản sao thư có liên quan, chỉ khi có người ở Đà Nẵng cần | [[federation\|Federation]] |
-| Xe tải định kỳ chở thư từ kho cũ sang kho mới | [[shovel\|Shovel]] |
-| Quy trình mới chỉ áp dụng khi mọi bưu cục đã được tập huấn | [[feature-flags\|Feature flags]] |
+| Ba bưu cục cùng một thành phố dùng chung sổ địa chỉ và danh bạ nhân viên; khách vào bưu cục nào cũng gửi được | [[concepts/clustering\|Clustering]] |
+| Sổ địa chỉ chung, chỉ sửa được khi đa số trưởng bưu cục đồng ý | [[concepts/khepri\|Khepri]] |
+| Đường dây điện thoại giữa các bưu cục bị đứt, mỗi nhóm tưởng nhóm kia đã đóng cửa | [[concepts/network-partition\|Network partition]] |
+| Bưu điện Đà Nẵng nhờ Hà Nội gửi bản sao thư có liên quan, chỉ khi có người ở Đà Nẵng cần | [[concepts/federation\|Federation]] |
+| Xe tải định kỳ chở thư từ kho cũ sang kho mới | [[concepts/shovel\|Shovel]] |
+| Quy trình mới chỉ áp dụng khi mọi bưu cục đã được tập huấn | [[concepts/feature-flags\|Feature flags]] |
 
 ```mermaid
 flowchart TB
@@ -77,7 +77,7 @@ Mình từng nghĩ "thêm node thứ hai là xong". Đọc tài liệu mới th�
 
 ### Cụm chép gì, không chép gì
 
-[[clustering|Cụm]] RabbitMQ là một nhóm node ngang hàng (không có node "chính" cố định):
+[[concepts/clustering|Cụm]] RabbitMQ là một nhóm node ngang hàng (không có node "chính" cố định):
 
 - **Siêu dữ liệu** (user, vhost, quyền, exchange, queue, binding, policy) được chép tới **mọi** node.
 - **Nội dung queue** thì tùy loại: classic queue chỉ nằm trên một node; quorum queue và stream có bản sao trên nhiều node.
@@ -99,7 +99,7 @@ Siêu dữ liệu của cụm cần một nơi lưu nhất quán. Lịch sử:
 | Phiên bản | Kho siêu dữ liệu |
 |---|---|
 | 3.x | Mnesia, cơ sở dữ liệu có sẵn của Erlang |
-| 3.13 | [[khepri\|Khepri]] thử nghiệm |
+| 3.13 | [[concepts/khepri\|Khepri]] thử nghiệm |
 | 4.0 | Khepri được hỗ trợ chính thức |
 | 4.2 | Khepri là mặc định cho cụm mới |
 | 4.3 | **Mnesia bị gỡ**, Khepri là kho duy nhất |
@@ -108,7 +108,7 @@ Khepri dùng Raft, cùng thuật toán với quorum queue. Hệ quả: **cụm c
 
 ### Network partition: khi mạng bị cắt
 
-[[network-partition|Network partition]] là khi các node vẫn sống nhưng không thấy nhau: dây mạng lỏng, switch hỏng, tường lửa đổi cấu hình. Mỗi nhóm node tưởng nhóm kia đã chết. Nguy hiểm là cả hai nhóm cùng nhận ghi, và khi nối lại thì dữ liệu mâu thuẫn.
+[[concepts/network-partition|Network partition]] là khi các node vẫn sống nhưng không thấy nhau: dây mạng lỏng, switch hỏng, tường lửa đổi cấu hình. Mỗi nhóm node tưởng nhóm kia đã chết. Nguy hiểm là cả hai nhóm cùng nhận ghi, và khi nối lại thì dữ liệu mâu thuẫn.
 
 - **Trước 4.3** (thời Mnesia), RabbitMQ có các chiến lược `cluster_partition_handling`: `ignore`, `pause_minority`, `pause_if_all_down`, `autoheal`. Nhiều bài viết, kể cả production checklist hiện tại của RabbitMQ, vẫn khuyên "không chắc thì chọn `pause_minority`".
 - **Từ 4.3**, các chiến lược này bị gỡ. Khóa cấu hình vẫn được chấp nhận nhưng không còn tác dụng. Raft quyết định: phía có đa số bầu leader (nếu cần) và chạy tiếp; phía thiểu số không ghi được gì. Khi mạng nối lại, phía thiểu số tự bắt kịp.
@@ -126,13 +126,13 @@ Tin unacked trên leader cũ được trả về hàng khi có leader mới, nê
 
 Khi cần RabbitMQ ở nhiều trung tâm dữ liệu, mỗi nơi chạy một **cụm riêng**, và tin đi giữa các cụm bằng một trong hai plugin. Cả hai đều chạy được khi hai bên khác phiên bản, khác user, và chịu được mạng WAN chập chờn.
 
-[[federation|Federation]]:
+[[concepts/federation|Federation]]:
 
 - **Federated exchange**: exchange ở cụm xuống (downstream) nhận bản sao những tin được gửi vào exchange cùng tên ở cụm nguồn (upstream). Hợp cho "phát sự kiện ra nhiều vùng".
 - **Federated queue**: queue ở cụm xuống kéo tin từ queue cùng tên ở upstream **khi nó có consumer mà không có tin**. Hợp cho chia tải giữa các vùng.
 - Cấu hình bằng policy và tham số, bất đồng bộ.
 
-[[shovel|Shovel]]:
+[[concepts/shovel|Shovel]]:
 
 - Một tiến trình đơn giản: đọc từ một nguồn (queue hoặc exchange), gửi tới một đích (queue hoặc exchange), một chiều, có ack và confirm ở hai đầu.
 - Nói được AMQP 0-9-1 lẫn AMQP 1.0, nên còn dùng để chuyển tin giữa hai hệ thống khác nhau.
@@ -143,7 +143,7 @@ Quy tắc nhớ: **cụm** cho độ sẵn sàng trong một trung tâm dữ li�
 
 ### Feature flags và nâng cấp
 
-Các node trong cụm có thể khác phiên bản trong lúc nâng cấp lần lượt. [[feature-flags|Feature flags]] giữ cho chuyện đó an toàn: tính năng mới chỉ bật khi **mọi** node đã hỗ trợ nó.
+Các node trong cụm có thể khác phiên bản trong lúc nâng cấp lần lượt. [[concepts/feature-flags|Feature flags]] giữ cho chuyện đó an toàn: tính năng mới chỉ bật khi **mọi** node đã hỗ trợ nó.
 
 - Nâng hết các node rồi chạy `rabbitmqctl enable_feature_flag all`.
 - Một flag đã bật thì **không tắt được**. Có flag là bắt buộc (required) ở bản sau: phải bật trước khi nâng tiếp.

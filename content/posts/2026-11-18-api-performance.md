@@ -17,9 +17,9 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - [[concepts/caching|Cache]] nhanh nhất là request không bao giờ tới server; cache khó nhất là biết khi nào bỏ nó đi. Khi cache trống, 100 request đồng thời có thể thành 100 truy vấn DB (*stampede*); một khóa ngắn hạn biến nó thành 1.
-> - [[pagination|Phân trang]] bằng `OFFSET` chậm dần và lặp hoặc sót bản ghi khi dữ liệu thay đổi; phân trang bằng **cursor** (keyset) ổn định và nhanh đều.
-> - [[filtering-sorting|Lọc và sắp xếp]]: query string luôn là *string*, `Boolean("false")` là `true`; sort phải theo whitelist và luôn có trường phụ để thứ tự xác định.
-> - [[load-balancing|Load balancing]] chia request cho nhiều pod; chỉ làm được khi pod *stateless*, và thuật toán chia quan trọng khi request nặng nhẹ khác nhau.
+> - [[concepts/pagination|Phân trang]] bằng `OFFSET` chậm dần và lặp hoặc sót bản ghi khi dữ liệu thay đổi; phân trang bằng **cursor** (keyset) ổn định và nhanh đều.
+> - [[concepts/filtering-sorting|Lọc và sắp xếp]]: query string luôn là *string*, `Boolean("false")` là `true`; sort phải theo whitelist và luôn có trường phụ để thứ tự xác định.
+> - [[concepts/load-balancing|Load balancing]] chia request cho nhiều pod; chỉ làm được khi pod *stateless*, và thuật toán chia quan trọng khi request nặng nhẹ khác nhau.
 
 > [!info] Bối cảnh
 > Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết. Trang tìm kiếm sản phẩm đọc từ **Elasticsearch** (một cỗ máy tìm kiếm chuyên dụng), kết quả được nhớ tạm trong **Redis**. Backend chạy thành nhiều bản giống nhau trên **Kubernetes**. Bạn không cần biết các công cụ này. Mỗi đoạn có giải thích bằng lời thường trước khi vào code.
@@ -41,10 +41,10 @@ sources:
 | Đời thường | Khái niệm |
 |---|---|
 | Nhân viên quầy dán tờ giấy "giá vàng hôm nay" lên bàn, thay vì gọi điện hỏi ngân hàng mỗi khi có khách hỏi. Hết ngày thì gỡ ra viết lại | [[concepts/caching\|Caching]] (tờ giấy là cache, "hết ngày" là TTL) |
-| Đọc sách theo kiểu "đọc tiếp từ trang 41", nhưng ai đó vừa chèn 5 trang mới vào đầu sách | [[pagination\|Phân trang offset]]: trang 41 bây giờ là nội dung khác, bạn đọc lặp hoặc bỏ sót |
-| Kẹp **bookmark** vào đúng dòng đang đọc dở | [[pagination\|Phân trang cursor]]: chèn bao nhiêu trang vào đầu sách cũng không lạc chỗ |
-| Bảo nhân viên kho "lấy giúp tai nghe, giá thấp tới cao", chọn từ danh sách có sẵn | [[filtering-sorting\|Lọc và sắp xếp]] |
-| Nhiều quầy thu ngân. Người điều phối chỉ khách vào quầy đang vắng nhất | [[load-balancing\|Load balancing]] |
+| Đọc sách theo kiểu "đọc tiếp từ trang 41", nhưng ai đó vừa chèn 5 trang mới vào đầu sách | [[concepts/pagination\|Phân trang offset]]: trang 41 bây giờ là nội dung khác, bạn đọc lặp hoặc bỏ sót |
+| Kẹp **bookmark** vào đúng dòng đang đọc dở | [[concepts/pagination\|Phân trang cursor]]: chèn bao nhiêu trang vào đầu sách cũng không lạc chỗ |
+| Bảo nhân viên kho "lấy giúp tai nghe, giá thấp tới cao", chọn từ danh sách có sẵn | [[concepts/filtering-sorting\|Lọc và sắp xếp]] |
+| Nhiều quầy thu ngân. Người điều phối chỉ khách vào quầy đang vắng nhất | [[concepts/load-balancing\|Load balancing]] |
 
 Ví dụ tờ giấy còn cho thấy một rủi ro: tờ giấy vừa bị gỡ xuống, 100 khách cùng hỏi giá. Nếu cả 100 người cùng gọi ngân hàng thì ngân hàng nghẽn. Cách khôn hơn là cử **một** người đi hỏi, 99 người kia đứng chờ nghe lại. Đó chính là "khóa chống stampede" ở bên dưới:
 
@@ -118,7 +118,7 @@ Còn một mẫu nữa là **invalidation chủ động**: quyền của mỗi r
 
 ## Pagination: chia nhỏ danh sách
 
-Không API nào nên trả về "tất cả sản phẩm". [[pagination|Phân trang]] có hai trường phái:
+Không API nào nên trả về "tất cả sản phẩm". [[concepts/pagination|Phân trang]] có hai trường phái:
 
 Nhìn bằng hình trước khi đọc chữ. Danh sách mới nhất lên đầu, mỗi trang 3 sản phẩm, và trong lúc bạn xem trang 1 thì có sản phẩm `p8` mới được đăng:
 
@@ -164,7 +164,7 @@ Cái giá của cursor: không nhảy được tới "trang 37", và cursor gắ
 
 ## Filtering và Sorting: một lỗi thật, một lần mình đọc nhầm
 
-[[filtering-sorting|Lọc và sắp xếp]] nghe đơn giản: thêm vài query param. Đọc lại code, mình tìm ra một lỗi thật thuộc loại "không báo lỗi gì, chỉ trả sai kết quả", và suýt công bố thêm một lỗi không có thật.
+[[concepts/filtering-sorting|Lọc và sắp xếp]] nghe đơn giản: thêm vài query param. Đọc lại code, mình tìm ra một lỗi thật thuộc loại "không báo lỗi gì, chỉ trả sai kết quả", và suýt công bố thêm một lỗi không có thật.
 
 ### Lỗi thật: `Boolean("false")` là `true`
 
@@ -220,7 +220,7 @@ flowchart LR
     P1 & P2 & P3 --> R[("Redis + Postgres<br/>dữ liệu dùng chung")]
 ```
 
-Mấu chốt nằm ở hộp dưới cùng: các quầy không giữ sổ sách riêng mà cùng ghi vào một cuốn sổ chung. Nhờ vậy khách quay lại quầy nào cũng được phục vụ như nhau. [[load-balancing|Load balancing]] cho phép chạy nhiều bản sao và chia request cho chúng. Trong flash-sale trên Kubernetes có hai tầng:
+Mấu chốt nằm ở hộp dưới cùng: các quầy không giữ sổ sách riêng mà cùng ghi vào một cuốn sổ chung. Nhờ vậy khách quay lại quầy nào cũng được phục vụ như nhau. [[concepts/load-balancing|Load balancing]] cho phép chạy nhiều bản sao và chia request cho chúng. Trong flash-sale trên Kubernetes có hai tầng:
 
 - **Ingress NGINX** (tầng 7, hiểu HTTP): kết thúc TLS, chia request theo round robin (mặc định của ingress-nginx), giới hạn tốc độ ở rìa.
 - **Service ClusterIP** (tầng 4, chỉ thấy kết nối TCP): kube-proxy chọn một pod khỏe trong danh sách endpoint.

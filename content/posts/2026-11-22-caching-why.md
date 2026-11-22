@@ -16,11 +16,11 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[concepts/caching|Cache]] là một bản sao nhỏ, nhanh của dữ liệu nằm ở chỗ chậm hơn. Đọc trúng bản sao gọi là [[cache-hit-va-miss|hit]], không có gọi là miss.
-> - [[hit-ratio|Hit ratio]] (tỉ lệ trúng) quyết định cache có đáng không. Trong ví dụ, cache giữ 1% sản phẩm mà trúng 39% lượt xem; giữ 10% thì trúng 68%.
-> - Cache nhỏ trúng nhiều được là nhờ [[locality|locality]]: người dùng đọc lặp lại một nhóm nhỏ dữ liệu ([[working-set|working set]]). Truy cập đều thì cache 10% chỉ trúng đúng 10%.
-> - [[cache-key|Cache key]] quyết định hai request có dùng chung một bản sao không. Thiếu thông tin trong key là trả nhầm dữ liệu; thừa thì không bao giờ trúng.
-> - Cái giá: bản sao có thể [[staleness|cũ]] so với bản gốc. Mọi quyết định về cache bắt đầu từ câu hỏi "cũ bao lâu thì chấp nhận được".
+> - [[concepts/caching|Cache]] là một bản sao nhỏ, nhanh của dữ liệu nằm ở chỗ chậm hơn. Đọc trúng bản sao gọi là [[concepts/cache-hit-va-miss|hit]], không có gọi là miss.
+> - [[concepts/hit-ratio|Hit ratio]] (tỉ lệ trúng) quyết định cache có đáng không. Trong ví dụ, cache giữ 1% sản phẩm mà trúng 39% lượt xem; giữ 10% thì trúng 68%.
+> - Cache nhỏ trúng nhiều được là nhờ [[concepts/locality|locality]]: người dùng đọc lặp lại một nhóm nhỏ dữ liệu ([[concepts/working-set|working set]]). Truy cập đều thì cache 10% chỉ trúng đúng 10%.
+> - [[concepts/cache-key|Cache key]] quyết định hai request có dùng chung một bản sao không. Thiếu thông tin trong key là trả nhầm dữ liệu; thừa thì không bao giờ trúng.
+> - Cái giá: bản sao có thể [[concepts/staleness|cũ]] so với bản gốc. Mọi quyết định về cache bắt đầu từ câu hỏi "cũ bao lâu thì chấp nhận được".
 
 > [!info] Bối cảnh
 > Ga 1 của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: đúng 21:00, hàng nghìn người cùng mở trang sản phẩm, tìm kiếm và bấm mua vài trăm suất hàng. Cùng một trang sản phẩm bị mở hàng chục nghìn lần trong vài phút, nên không thể lần nào cũng hỏi database. Bạn không cần biết code dự án hay framework nào.
@@ -42,12 +42,12 @@ Một thư viện có kho sách ở tầng hầm với một triệu cuốn. M�
 |---|---|
 | Kho sách ở tầng hầm: đủ mọi cuốn, đi lấy mất lâu | Database, nguồn dữ liệu gốc |
 | Giá sách cạnh quầy: vài trăm cuốn, lấy ngay | [[concepts/caching\|Cache]] |
-| Cuốn sách cần mượn có sẵn trên giá / phải xuống kho | [[cache-hit-va-miss\|Cache hit / miss]] |
-| Bao nhiêu phần trăm lượt mượn được phục vụ từ giá | [[hit-ratio\|Hit ratio]] |
-| Mùa thi, ai cũng mượn mấy cuốn giáo trình giống nhau | [[locality\|Locality]] |
-| Nhóm sách đang "nóng" trong tuần này | [[working-set\|Working set]] |
-| Mã số trên gáy sách để tìm đúng cuốn trên giá | [[cache-key\|Cache key]] |
-| Giá giữ bản in năm ngoái, kho đã có bản sửa | [[staleness\|Staleness (dữ liệu cũ)]] |
+| Cuốn sách cần mượn có sẵn trên giá / phải xuống kho | [[concepts/cache-hit-va-miss\|Cache hit / miss]] |
+| Bao nhiêu phần trăm lượt mượn được phục vụ từ giá | [[concepts/hit-ratio\|Hit ratio]] |
+| Mùa thi, ai cũng mượn mấy cuốn giáo trình giống nhau | [[concepts/locality\|Locality]] |
+| Nhóm sách đang "nóng" trong tuần này | [[concepts/working-set\|Working set]] |
+| Mã số trên gáy sách để tìm đúng cuốn trên giá | [[concepts/cache-key\|Cache key]] |
+| Giá giữ bản in năm ngoái, kho đã có bản sửa | [[concepts/staleness\|Staleness (dữ liệu cũ)]] |
 
 ```mermaid
 flowchart TB
@@ -78,7 +78,7 @@ Nếu thiếu cả ba (dữ liệu đổi liên tục, mỗi người một kế
 
 Một lần đọc qua cache có hai kết cục:
 
-- **[[cache-hit-va-miss|Hit]]**: dữ liệu đã có trong cache, trả về ngay. Ví dụ dưới coi một lần đọc cache tốn 0,5 ms.
+- **[[concepts/cache-hit-va-miss|Hit]]**: dữ liệu đã có trong cache, trả về ngay. Ví dụ dưới coi một lần đọc cache tốn 0,5 ms.
 - **Miss**: không có. Phải đọc nguồn (DB, 20 ms), *cộng thêm* thời gian đã hỏi cache, rồi thường ghi kết quả vào cache cho lần sau.
 
 Miss đắt hơn không có cache một chút, vì phải hỏi cache trước. Nên thời gian trung bình mỗi request là:
@@ -91,7 +91,7 @@ Với cache 0,5 ms và DB 20 ms: hit ratio 0% cho 20,5 ms (tệ hơn không có 
 
 ### Hit ratio: con số quyết định cache có đáng không
 
-[[hit-ratio|Hit ratio]] là số lần trúng chia tổng số lần đọc. Nó không chỉ đo tốc độ, mà còn đo **tải mà nguồn phải chịu**: hit ratio 95% nghĩa là DB chỉ thấy 5% lượt đọc. Lên 99% thì DB chỉ thấy 1%, tức tải DB giảm thêm *năm lần* dù con số chỉ nhích 4 điểm.
+[[concepts/hit-ratio|Hit ratio]] là số lần trúng chia tổng số lần đọc. Nó không chỉ đo tốc độ, mà còn đo **tải mà nguồn phải chịu**: hit ratio 95% nghĩa là DB chỉ thấy 5% lượt đọc. Lên 99% thì DB chỉ thấy 1%, tức tải DB giảm thêm *năm lần* dù con số chỉ nhích 4 điểm.
 
 Hai thứ quyết định hit ratio:
 
@@ -100,14 +100,14 @@ Hai thứ quyết định hit ratio:
 
 ### Locality và working set: vì sao cache nhỏ mà vẫn trúng nhiều
 
-**[[locality|Locality]]** (tính cục bộ) là quan sát rằng truy cập không rải đều:
+**[[concepts/locality|Locality]]** (tính cục bộ) là quan sát rằng truy cập không rải đều:
 
 - **Temporal locality** (cục bộ thời gian): thứ vừa được đọc sẽ sớm được đọc lại. Ai vừa mở sản phẩm 42 thì vài giây sau người khác cũng mở.
 - **Spatial locality** (cục bộ không gian): thứ nằm cạnh thứ vừa đọc cũng sắp được đọc. CPU đọc cả một dải bộ nhớ một lúc vì lý do này; ở tầng ứng dụng, mở trang 1 của danh sách thì hay mở tiếp trang 2.
 
-**[[working-set|Working set]]** là nhóm dữ liệu đang được đọc trong một khoảng thời gian. Cache chỉ cần chứa vừa working set, không cần chứa cả database. Trong giờ flash sale, working set là vài chục sản phẩm đang giảm giá chứ không phải mười nghìn sản phẩm của cả shop.
+**[[concepts/working-set|Working set]]** là nhóm dữ liệu đang được đọc trong một khoảng thời gian. Cache chỉ cần chứa vừa working set, không cần chứa cả database. Trong giờ flash sale, working set là vài chục sản phẩm đang giảm giá chứ không phải mười nghìn sản phẩm của cả shop.
 
-Đo bằng ví dụ ở cuối bài (10.000 sản phẩm, 200.000 lượt xem, cache [[lru-va-lfu|LRU]]):
+Đo bằng ví dụ ở cuối bài (10.000 sản phẩm, 200.000 lượt xem, cache [[concepts/lru-va-lfu|LRU]]):
 
 | Cache giữ | % catalog | Lượt xem kiểu Zipf: trúng | TB/request | Lượt xem đều: trúng | TB/request |
 |---|---|---|---|---|---|
@@ -123,7 +123,7 @@ Cùng một cache 1.000 món: với người dùng thật (đọc dồn vào mó
 
 ### Cache key: hai request có dùng chung một bản sao không
 
-Mỗi mục trong cache được tìm bằng một **[[cache-key|cache key]]**, giống mã số trên gáy sách. Key phải chứa **mọi thứ làm kết quả khác đi**, và **chỉ những thứ đó**:
+Mỗi mục trong cache được tìm bằng một **[[concepts/cache-key|cache key]]**, giống mã số trên gáy sách. Key phải chứa **mọi thứ làm kết quả khác đi**, và **chỉ những thứ đó**:
 
 - **Thiếu** → trả nhầm. Cache kết quả tìm kiếm theo key `search:tai nghe` nhưng quên trang và cách sắp xếp, thì người xem trang 2 nhận trang 1. Tệ hơn: quên user id trên dữ liệu riêng, người này thấy giỏ hàng của người kia. Ga 8 có một lỗ hổng bảo mật thật sinh ra từ đúng lỗi này.
 - **Thừa** → không bao giờ trúng. Đưa cả timestamp hoặc request id vào key thì mỗi request một key riêng, hit ratio về 0.
@@ -142,7 +142,7 @@ Quy ước đặt tên giúp vận hành: `<loại>:<id>[:<phần>]`, ví dụ `
 
 ### Staleness: cái giá của mọi cache
 
-Bản sao trong cache được chụp ở một thời điểm. Sau đó nguồn đổi, bản sao không tự biết. Khoảng cách giữa hai bản là **[[staleness|staleness]]** (độ cũ). Cache luôn đổi **độ tươi lấy tốc độ**; câu hỏi không phải "có cũ không" mà là "cũ tối đa bao lâu, với dữ liệu nào, thì chấp nhận được".
+Bản sao trong cache được chụp ở một thời điểm. Sau đó nguồn đổi, bản sao không tự biết. Khoảng cách giữa hai bản là **[[concepts/staleness|staleness]]** (độ cũ). Cache luôn đổi **độ tươi lấy tốc độ**; câu hỏi không phải "có cũ không" mà là "cũ tối đa bao lâu, với dữ liệu nào, thì chấp nhận được".
 
 | Dữ liệu trong flash-sale | Cũ bao lâu thì chấp nhận được | Hệ quả khi cũ |
 |---|---|---|
@@ -234,4 +234,4 @@ Thử đổi `s` của Zipf (ví dụ `1 / (k + 1) ** 0.6` cho truy cập ít d�
 - [AWS whitepaper: Database Caching Strategies Using Redis](https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html)
 - Nishtala và cộng sự, [Scaling Memcache at Facebook](https://www.usenix.org/conference/nsdi13/technical-sessions/presentation/nishtala), NSDI 2013 (cache đứng trước MySQL ở quy mô lớn)
 - Peter J. Denning, *The Working Set Model for Program Behavior*, Communications of the ACM, 1968
-- Ga trước liên quan: [[2026-11-18-api-performance|Hiệu năng API]] (tuyến API)
+- Ga trước liên quan: [[posts/2026-11-18-api-performance|Hiệu năng API]] (tuyến API)

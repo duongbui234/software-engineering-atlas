@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Pessimistic locking queues; optimistic retries on losing",
+    "output": "content/diagrams/transactions-locking/pess-vs-opt.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "a",
+      "type": "backend",
+      "label": "Request A",
+      "sublabel": "buyer 1"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "items: stock 5, version 7"
+    },
+    {
+      "id": "b",
+      "type": "backend",
+      "label": "Request B",
+      "sublabel": "buyer 2"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 420,
+      "label": "Pessimistic: lock, then read"
+    },
+    {
+      "from": 445,
+      "to": 740,
+      "label": "Optimistic: read freely, write conditionally"
+    }
+  ],
+  "messages": [
+    {
+      "id": "p1",
+      "from": "a",
+      "to": "pg",
+      "y": 170,
+      "label": "read and lock the row",
+      "variant": "emphasis",
+      "note": "SELECT … FOR UPDATE → 5"
+    },
+    {
+      "id": "p2",
+      "from": "b",
+      "to": "pg",
+      "y": 220,
+      "label": "read and lock the row",
+      "variant": "default",
+      "note": "SELECT … FOR UPDATE"
+    },
+    {
+      "id": "p3",
+      "from": "pg",
+      "to": "b",
+      "y": 270,
+      "label": "wait for A to finish",
+      "variant": "dashed",
+      "note": "queued, no retries wasted"
+    },
+    {
+      "id": "p4",
+      "from": "a",
+      "to": "pg",
+      "y": 320,
+      "label": "write 4, commit",
+      "variant": "default",
+      "note": "UPDATE stock = 4; COMMIT"
+    },
+    {
+      "id": "p5",
+      "from": "pg",
+      "to": "b",
+      "y": 375,
+      "label": "your turn: sees 4",
+      "variant": "return",
+      "note": "reads newest version, writes 3"
+    },
+    {
+      "id": "o1",
+      "from": "a",
+      "to": "pg",
+      "y": 465,
+      "label": "read without locking",
+      "variant": "default",
+      "note": "SELECT stock, version → 5, 7"
+    },
+    {
+      "id": "o2",
+      "from": "b",
+      "to": "pg",
+      "y": 515,
+      "label": "read without locking",
+      "variant": "default",
+      "note": "SELECT → 5, 7"
+    },
+    {
+      "id": "o3",
+      "from": "a",
+      "to": "pg",
+      "y": 565,
+      "label": "write if version is still 7",
+      "variant": "emphasis",
+      "note": "UPDATE … WHERE version = 7 → 1 row"
+    },
+    {
+      "id": "o4",
+      "from": "b",
+      "to": "pg",
+      "y": 620,
+      "label": "write if version is still 7",
+      "variant": "security",
+      "note": "0 rows: A changed it to 8"
+    },
+    {
+      "id": "o5",
+      "from": "b",
+      "to": "pg",
+      "y": 675,
+      "label": "re-read 4, 8 and retry",
+      "variant": "dashed",
+      "note": "hot row: a great many retries"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Pessimistic",
+      "items": [
+        "SELECT … FOR UPDATE",
+        "Fits high contention",
+        "Hold locks briefly, no external APIs"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Optimistic",
+      "items": [
+        "Version column, compared on write",
+        "Fits rare conflicts, long requests",
+        "300 people, 100 units: 4289 transactions"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "No waiting",
+      "items": [
+        "NOWAIT: error 55P03 at once",
+        "SKIP LOCKED: skip locked rows",
+        "Advisory lock: lock by name"
+      ]
+    }
+  ]
+}

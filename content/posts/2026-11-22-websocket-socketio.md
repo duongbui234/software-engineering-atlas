@@ -18,21 +18,21 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - Socket.IO là **thư viện có giao thức riêng**, gồm hai tầng: [[engine-io|Engine.IO]] giữ một phiên (mã `sid`) qua long polling hoặc WebSocket; Socket.IO đặt sự kiện, namespace, ack lên trên.
-> - [[transport-upgrade|Transport upgrade]]: mặc định Engine.IO mở phiên bằng một `GET` long polling, rồi thử WebSocket (`2probe` → `3probe`) và chuyển hẳn (`5`). Có thể bỏ bước polling bằng `transports: ['websocket']`.
-> - [[heartbeat|Heartbeat]] của Engine.IO: server gửi ping mỗi 25 giây, client phải trả pong trong 20 giây. Đây không phải frame ping của RFC 6455.
-> - Trên dây, `socket.emit('stock_update', data)` là chuỗi `42["stock_update",{…}]`: [[socket-io-packet|gói Socket.IO]] (2 = event) nằm trong gói Engine.IO (4 = message). [[acknowledgement|Ack]] thêm một mã số để trả lời đúng lần emit đó.
+> - Socket.IO là **thư viện có giao thức riêng**, gồm hai tầng: [[concepts/engine-io|Engine.IO]] giữ một phiên (mã `sid`) qua long polling hoặc WebSocket; Socket.IO đặt sự kiện, namespace, ack lên trên.
+> - [[concepts/transport-upgrade|Transport upgrade]]: mặc định Engine.IO mở phiên bằng một `GET` long polling, rồi thử WebSocket (`2probe` → `3probe`) và chuyển hẳn (`5`). Có thể bỏ bước polling bằng `transports: ['websocket']`.
+> - [[concepts/heartbeat|Heartbeat]] của Engine.IO: server gửi ping mỗi 25 giây, client phải trả pong trong 20 giây. Đây không phải frame ping của RFC 6455.
+> - Trên dây, `socket.emit('stock_update', data)` là chuỗi `42["stock_update",{…}]`: [[concepts/socket-io-packet|gói Socket.IO]] (2 = event) nằm trong gói Engine.IO (4 = message). [[concepts/acknowledgement|Ack]] thêm một mã số để trả lời đúng lần emit đó.
 > - Hệ quả: client WebSocket thuần nối vào server Socket.IO nhận `0{"sid":…}` rồi bị đóng; client Socket.IO nối vào server WebSocket thuần thì chờ gói `0` mãi rồi báo `timeout`.
 
 > [!info] Bối cảnh
 > Ga 3 của **tuyến WebSocket và Socket.IO**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: backend NestJS có hai "cổng realtime" dùng Socket.IO, `/flash-sale` (lượt thanh toán, tồn kho, kết quả đơn) và `/notifications` (thông báo); frontend Next.js dùng `socket.io-client`. Bạn không cần biết NestJS hay React: mọi đoạn code đều được giải thích.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Long polling, WebSocket, frame, ping/pong, handshake 101**: xem [[2026-11-22-websocket-realtime-options|ga 1]] và [[2026-11-22-websocket-protocol|ga 2]].
+> - **Long polling, WebSocket, frame, ping/pong, handshake 101**: xem [[posts/2026-11-22-websocket-realtime-options|ga 1]] và [[posts/2026-11-22-websocket-protocol|ga 2]].
 > - **Thư viện vs giao thức**: giao thức là luật hai bên phải theo (RFC 6455); thư viện là code cài vào dự án, có thể đặt thêm luật riêng của nó.
 > - **NestJS gateway**: một lớp (class) trong NestJS gom các handler realtime, giống controller nhưng cho WebSocket. `@WebSocketGateway({ namespace })` là **decorator**: một chú thích đặt trên lớp để framework biết cách dùng nó.
 > - **Handler**: hàm chạy khi nhận một sự kiện.
-> - **JWT (access token)**: chuỗi đã ký chứng minh bạn là ai, xem ga [[2026-11-18-api-security|Bảo mật API]].
+> - **JWT (access token)**: chuỗi đã ký chứng minh bạn là ai, xem ga [[posts/2026-11-18-api-security|Bảo mật API]].
 > - **sid**: session id, mã phiên do server cấp.
 > - **Callback**: hàm bạn truyền vào để được gọi lại khi có kết quả.
 
@@ -42,11 +42,11 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Tổng đài lo việc giữ liên lạc: nếu chưa có điện thoại thì liên lạc bằng thư, có rồi thì chuyển sang gọi | [[engine-io\|Engine.IO]] |
-| Bắt đầu bằng thư, gọi thử "alo, nghe rõ không?", rõ thì báo "từ giờ gọi điện nhé" | [[transport-upgrade\|Transport upgrade]] |
-| Tổng đài cứ 25 giây hỏi "còn đó không?", 20 giây không trả lời thì coi như mất liên lạc | [[heartbeat\|Heartbeat]] |
-| Mỗi câu được bỏ vào phong bì có mã loại thư, tên phòng, tên việc | [[socket-io-packet\|Gói tin Socket.IO]] |
-| "Nhận được thì ký vào phiếu số 7 gửi lại" | [[acknowledgement\|Acknowledgement]] |
+| Tổng đài lo việc giữ liên lạc: nếu chưa có điện thoại thì liên lạc bằng thư, có rồi thì chuyển sang gọi | [[concepts/engine-io\|Engine.IO]] |
+| Bắt đầu bằng thư, gọi thử "alo, nghe rõ không?", rõ thì báo "từ giờ gọi điện nhé" | [[concepts/transport-upgrade\|Transport upgrade]] |
+| Tổng đài cứ 25 giây hỏi "còn đó không?", 20 giây không trả lời thì coi như mất liên lạc | [[concepts/heartbeat\|Heartbeat]] |
+| Mỗi câu được bỏ vào phong bì có mã loại thư, tên phòng, tên việc | [[concepts/socket-io-packet\|Gói tin Socket.IO]] |
+| "Nhận được thì ký vào phiếu số 7 gửi lại" | [[concepts/acknowledgement\|Acknowledgement]] |
 | Một chiếc điện thoại thường gọi vào tổng đài: nghe thấy tiếng nhưng không hiểu mật mã | WebSocket thuần ↔ Socket.IO |
 
 ```mermaid
@@ -85,7 +85,7 @@ Tài liệu Socket.IO nói thẳng điều này: Socket.IO **không phải** m�
 
 ### Engine.IO: tầng giữ phiên
 
-**[[engine-io|Engine.IO]]** là tầng dưới của Socket.IO. Việc của nó: mở một **phiên** giữa client và server, giữ phiên đó sống, và chở các gói tin qua đường truyền tốt nhất đang có. Hiện có ba đường truyền: HTTP long polling, WebSocket, và WebTransport (mới, phải bật riêng).
+**[[concepts/engine-io|Engine.IO]]** là tầng dưới của Socket.IO. Việc của nó: mở một **phiên** giữa client và server, giữ phiên đó sống, và chở các gói tin qua đường truyền tốt nhất đang có. Hiện có ba đường truyền: HTTP long polling, WebSocket, và WebTransport (mới, phải bật riêng).
 
 Mỗi gói Engine.IO bắt đầu bằng **một chữ số** cho biết loại:
 
@@ -113,7 +113,7 @@ Server cấp `sid` (mã phiên), cho biết có thể nâng cấp lên `websocke
 
 Vì sao không mở WebSocket ngay? Vì có những mạng chặn WebSocket: proxy công ty, phần mềm diệt virus, một số firewall. Nếu chỉ thử WebSocket rồi thất bại thì người dùng phải chờ hết thời gian chờ mới biết. Engine.IO chọn cách chắc ăn: **mở phiên bằng long polling trước** (luôn chạy được), rồi mới thử WebSocket ở phía sau.
 
-**[[transport-upgrade|Transport upgrade]]** diễn ra như sau:
+**[[concepts/transport-upgrade|Transport upgrade]]** diễn ra như sau:
 
 | Bước | Ai gửi | Gói | Nghĩa |
 |---|---|---|---|
@@ -142,7 +142,7 @@ const socket = io(`${baseUrl}/flash-sale`, {
 
 ### Heartbeat: tổng đài hỏi "còn đó không?"
 
-Ga 2 nói trình duyệt không gửi được ping WebSocket. Engine.IO tự làm **[[heartbeat|heartbeat]]** ở tầng ứng dụng, dùng gói `2` và `3` của chính nó, nên chạy được cả trên long polling:
+Ga 2 nói trình duyệt không gửi được ping WebSocket. Engine.IO tự làm **[[concepts/heartbeat|heartbeat]]** ở tầng ứng dụng, dùng gói `2` và `3` của chính nó, nên chạy được cả trên long polling:
 
 - Server gửi `2` (ping) mỗi **`pingInterval`** (mặc định 25.000 ms).
 - Client phải trả `3` (pong) trong **`pingTimeout`** (mặc định 20.000 ms). Không thấy thì server đóng phiên.
@@ -152,7 +152,7 @@ Ga 2 nói trình duyệt không gửi được ping WebSocket. Engine.IO tự l�
 
 ### Gói tin Socket.IO: phong bì trong phong bì
 
-Socket.IO đặt **[[socket-io-packet|gói của nó]]** vào trong gói `4` (message) của Engine.IO. Chữ số thứ hai là loại gói Socket.IO:
+Socket.IO đặt **[[concepts/socket-io-packet|gói của nó]]** vào trong gói `4` (message) của Engine.IO. Chữ số thứ hai là loại gói Socket.IO:
 
 | Số | Loại | Ví dụ trên dây |
 |---|---|---|
@@ -175,7 +175,7 @@ Chi tiết của bước CONNECT: token xác thực đi trong **gói `40`**, t�
 
 ### Acknowledgement: ký nhận cho đúng lần gửi
 
-Sự kiện thường là "bắn rồi quên". **[[acknowledgement|Ack]]** biến một lần emit thành hỏi-đáp: truyền thêm một callback ở cuối, Socket.IO gắn một mã số vào gói (`42/flash-sale,7[…]`), bên nhận chạy handler rồi trả gói ACK cùng mã (`43/flash-sale,7[…]`), callback được gọi với kết quả.
+Sự kiện thường là "bắn rồi quên". **[[concepts/acknowledgement|Ack]]** biến một lần emit thành hỏi-đáp: truyền thêm một callback ở cuối, Socket.IO gắn một mã số vào gói (`42/flash-sale,7[…]`), bên nhận chạy handler rồi trả gói ACK cùng mã (`43/flash-sale,7[…]`), callback được gọi với kết quả.
 
 ```ts
 // client: chờ server xác nhận đã vào phòng

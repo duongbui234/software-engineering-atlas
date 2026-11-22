@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Access token, refresh token rotation and reuse detection",
+    "output": "content/diagrams/api-security/token-rotation.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Browser",
+      "sublabel": "the real user"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Login server",
+      "sublabel": "JwtAuthGuard + /auth"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Session ledger",
+      "sublabel": "Redis: session, refresh_token"
+    },
+    {
+      "id": "attacker",
+      "type": "external",
+      "label": "Attacker",
+      "sublabel": "stole ticket r1"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 255,
+      "label": "Login"
+    },
+    {
+      "from": 265,
+      "to": 390,
+      "label": "API call"
+    },
+    {
+      "from": 400,
+      "to": 500,
+      "label": "Refresh"
+    },
+    {
+      "from": 510,
+      "to": 720,
+      "label": "Reuse"
+    }
+  ],
+  "messages": [
+    {
+      "id": "login",
+      "from": "browser",
+      "to": "api",
+      "y": 170,
+      "label": "POST /auth/login",
+      "variant": "emphasis"
+    },
+    {
+      "id": "save",
+      "from": "api",
+      "to": "redis",
+      "y": 200,
+      "label": "store session + hash of ticket r1",
+      "note": "SET session:{sid} and refresh_token:{sid}"
+    },
+    {
+      "id": "tokens",
+      "from": "api",
+      "to": "browser",
+      "y": 230,
+      "label": "15-minute pass + ticket r1 (cookie)",
+      "variant": "return"
+    },
+    {
+      "id": "call",
+      "from": "browser",
+      "to": "api",
+      "y": 285,
+      "label": "call the API, with the pass"
+    },
+    {
+      "id": "check",
+      "from": "api",
+      "to": "redis",
+      "y": 315,
+      "label": "session still valid?",
+      "variant": "security",
+      "note": "Verify the JWT signature, then GET session:{sid}"
+    },
+    {
+      "id": "ok",
+      "from": "api",
+      "to": "browser",
+      "y": 370,
+      "label": "200",
+      "variant": "return"
+    },
+    {
+      "id": "ref",
+      "from": "browser",
+      "to": "api",
+      "y": 420,
+      "label": "trade ticket r1 for a new pass",
+      "note": "POST /auth/refresh"
+    },
+    {
+      "id": "getdel",
+      "from": "api",
+      "to": "redis",
+      "y": 450,
+      "label": "fetch and delete the old ticket",
+      "variant": "security",
+      "note": "GETDEL refresh_token:{sid}: read and delete in one command"
+    },
+    {
+      "id": "r2",
+      "from": "api",
+      "to": "browser",
+      "y": 480,
+      "label": "new pass + ticket r2",
+      "variant": "return"
+    },
+    {
+      "id": "steal",
+      "from": "attacker",
+      "to": "api",
+      "y": 530,
+      "label": "trade the used ticket r1",
+      "variant": "dashed"
+    },
+    {
+      "id": "mismatch",
+      "from": "api",
+      "to": "redis",
+      "y": 560,
+      "label": "mismatch: delete the whole session",
+      "variant": "security",
+      "note": "A used ticket = a second person; DEL session:{sid}"
+    },
+    {
+      "id": "deny",
+      "from": "api",
+      "to": "attacker",
+      "y": 615,
+      "label": "401",
+      "variant": "return"
+    },
+    {
+      "id": "late",
+      "from": "browser",
+      "to": "api",
+      "y": 650,
+      "label": "trade ticket r2"
+    },
+    {
+      "id": "relogin",
+      "from": "api",
+      "to": "browser",
+      "y": 685,
+      "label": "401: log in again",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Why it is safer",
+      "items": [
+        "A refresh token works only once",
+        "Only the ticket's hash is stored, compared in constant time",
+        "Deleting the session voids the pass immediately"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The price",
+      "items": [
+        "One extra Redis lookup per request",
+        "The real user has to log in again too"
+      ]
+    }
+  ]
+}

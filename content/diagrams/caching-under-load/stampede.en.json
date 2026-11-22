@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A hot key expires: only one request asks the source",
+    "output": "content/diagrams/caching-under-load/stampede.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "a", "type": "backend", "label": "Request A", "sublabel": "pod 1, arrives first" },
+    { "id": "b", "type": "backend", "label": "Request B", "sublabel": "pod 2, arrives 5 ms later" },
+    { "id": "cache", "type": "database", "label": "Cache", "sublabel": "Redis: search:<hash>, lock:search:<hash>" },
+    { "id": "src", "type": "database", "label": "Slow source", "sublabel": "Elasticsearch / DB: 300 ms" }
+  ],
+  "segments": [
+    { "from": 150, "to": 300, "label": "Both miss, only A wins the lock" },
+    { "from": 325, "to": 480, "label": "A asks the source, B waits" },
+    { "from": 505, "to": 650, "label": "B rereads the cache" }
+  ],
+  "messages": [
+    { "id": "a-get", "from": "a", "to": "cache", "y": 170, "label": "got a result? empty", "variant": "default", "note": "GET search:<hash>" },
+    { "id": "a-lock", "from": "a", "to": "cache", "y": 225, "label": "take the lock: only I ask", "variant": "emphasis", "note": "SET lock NX EX 5 <token>" },
+    { "id": "b-lock", "from": "b", "to": "cache", "y": 280, "label": "take the lock: lost", "variant": "dashed", "note": "someone already holds it" },
+    { "id": "a-src", "from": "a", "to": "src", "y": 345, "label": "the real query, once", "variant": "emphasis" },
+    { "id": "a-set", "from": "a", "to": "cache", "y": 405, "label": "write result, release my lock", "variant": "default", "note": "SET EX 60, Lua: compare token, then DEL" },
+    { "id": "b-wait", "from": "b", "to": "cache", "y": 460, "label": "wait 250 ms, then check again", "variant": "dashed", "note": "at most 3 times, then ask the source itself" },
+    { "id": "b-hit", "from": "cache", "to": "b", "y": 525, "label": "it's there: return A's result", "variant": "return" },
+    { "id": "a-done", "from": "cache", "to": "a", "y": 585, "label": "lock released", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "a", "from": 170, "to": 405, "type": "backend" },
+    { "participant": "src", "from": 345, "to": 395, "type": "database" },
+    { "participant": "b", "from": 280, "to": 525, "type": "backend" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Without coalescing requests",
+      "items": [
+        "Every request during the source wait misses",
+        "500 requests become 500 identical queries",
+        "The slower the source, the longer the miss window"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "The lock must be safe",
+      "items": [
+        "Has an expiry: if the holder dies, the lock goes away",
+        "Own token: never delete someone else's lock",
+        "Bounded wait: never hang a request"
+      ]
+    }
+  ]
+}

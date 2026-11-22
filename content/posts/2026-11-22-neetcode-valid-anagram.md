@@ -18,15 +18,15 @@ sources:
 > [!tldr] Đọc nhanh
 > - Đề: `s` và `t` là anagram khi xếp lại các chữ của `s` thì được `t`. Nói cách khác: cùng chữ, cùng số lần.
 > - Sắp xếp hai chuỗi rồi so sánh: O(n log n). Đúng, ngắn, nhưng chậm nhất: 201 ms với hai chuỗi một triệu chữ.
-> - [[frequency-counting|Đếm tần suất]] bằng một [[counting-array|mảng 26 ô]]: cộng theo `s`, trừ theo `t`, cuối cùng mọi ô phải bằng 0. O(n) thời gian, O(1) bộ nhớ, 3,4 ms.
-> - Khi bảng chữ cái không cố định (Unicode), đếm bằng [[hash-map|hash map]] theo **code point**, sau khi [[unicode-normalization|chuẩn hóa Unicode]].
+> - [[concepts/frequency-counting|Đếm tần suất]] bằng một [[concepts/counting-array|mảng 26 ô]]: cộng theo `s`, trừ theo `t`, cuối cùng mọi ô phải bằng 0. O(n) thời gian, O(1) bộ nhớ, 3,4 ms.
+> - Khi bảng chữ cái không cố định (Unicode), đếm bằng [[concepts/hash-map|hash map]] theo **code point**, sau khi [[concepts/unicode-normalization|chuẩn hóa Unicode]].
 > - Bẫy: `split('')` trong JS và `char[]` trong Java tách theo đơn vị UTF-16, nên coi "😀🌃" và "🜃🈀" là anagram. Python và Go không mắc lỗi này.
 
 > [!info] Bối cảnh
 > Ga 2 của **tuyến NeetCode 150: Arrays & Hashing**. Ga 1 hỏi "đã thấy chưa?"; ga này hỏi "thấy **bao nhiêu lần**?". Lời giải có đủ TypeScript, JavaScript, Python, Go và Java. Bạn chỉ cần biết vòng lặp và mảng.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Big-O, hash, Set**: xem [[2026-11-22-neetcode-contains-duplicate|ga 1]].
+> - **Big-O, hash, Set**: xem [[posts/2026-11-22-neetcode-contains-duplicate|ga 1]].
 > - **Mã ký tự**: mỗi ký tự được lưu bằng một con số. Chữ `'a'` là 97, `'b'` là 98… nên `mã - 97` cho ra vị trí 0..25 trong bảng chữ cái.
 > - **Code point**: con số Unicode gán cho một ký tự, ví dụ `é` là U+00E9, `😀` là U+1F600.
 > - **UTF-16, code unit**: cách JS và Java lưu chuỗi, mỗi đơn vị 16 bit. Ký tự có code point lớn hơn U+FFFF (như emoji) cần **hai** code unit, gọi là một cặp surrogate.
@@ -39,10 +39,10 @@ Bạn có hai túi đựng các miếng chữ của trò xếp chữ. Câu hỏi
 | Đời thường | Khái niệm |
 |---|---|
 | Đổ cả hai túi ra, xếp từng túi theo thứ tự A→Z, rồi so hai hàng | Sắp xếp rồi so sánh, O(n log n) |
-| Một khay 26 ngăn: miếng từ túi 1 thì bỏ vào ngăn đúng chữ (+1), miếng từ túi 2 thì lấy ra (−1) | [[counting-array\|Mảng đếm 26 ô]] |
-| Cuối cùng mọi ngăn trống trơn thì hai túi giống nhau | [[frequency-counting\|Đếm tần suất]] |
-| Miếng chữ lạ (chữ Thái, emoji): không có ngăn sẵn, phải dán nhãn thêm ngăn mới | [[hash-map\|Hash map]] |
-| Miếng "é" in liền và miếng "e" kèm miếng dấu sắc rời: trông như nhau, đếm thành khác nhau | [[unicode-normalization\|Chuẩn hóa Unicode]] |
+| Một khay 26 ngăn: miếng từ túi 1 thì bỏ vào ngăn đúng chữ (+1), miếng từ túi 2 thì lấy ra (−1) | [[concepts/counting-array\|Mảng đếm 26 ô]] |
+| Cuối cùng mọi ngăn trống trơn thì hai túi giống nhau | [[concepts/frequency-counting\|Đếm tần suất]] |
+| Miếng chữ lạ (chữ Thái, emoji): không có ngăn sẵn, phải dán nhãn thêm ngăn mới | [[concepts/hash-map\|Hash map]] |
+| Miếng "é" in liền và miếng "e" kèm miếng dấu sắc rời: trông như nhau, đếm thành khác nhau | [[concepts/unicode-normalization\|Chuẩn hóa Unicode]] |
 
 ```mermaid
 flowchart TB
@@ -80,7 +80,7 @@ Hai anagram sau khi sắp xếp chữ cái thì thành **cùng một chuỗi**. 
 
 ### Cách 2, đếm bằng mảng 26 ô: O(n) thời gian, O(1) bộ nhớ
 
-[[frequency-counting|Đếm tần suất]] biến câu hỏi "cùng chữ, cùng số lần" thành "hai bảng đếm bằng nhau". Khi bảng chữ cái nhỏ và biết trước, bảng đếm là một [[counting-array|mảng]]: chỉ số `c - 'a'` là ngăn của chữ `c`. Hai mẹo nhỏ:
+[[concepts/frequency-counting|Đếm tần suất]] biến câu hỏi "cùng chữ, cùng số lần" thành "hai bảng đếm bằng nhau". Khi bảng chữ cái nhỏ và biết trước, bảng đếm là một [[concepts/counting-array|mảng]]: chỉ số `c - 'a'` là ngăn của chữ `c`. Hai mẹo nhỏ:
 
 - **So độ dài trước.** Khác độ dài thì chắc chắn không phải anagram, trả lời ngay. Cùng độ dài thì có thể duyệt cả hai chuỗi trong cùng một vòng lặp.
 - **Một mảng, cộng và trừ.** Thay vì hai bảng rồi so, cộng theo `s[i]` và trừ theo `t[i]`; cuối cùng mọi ô phải bằng 0.
@@ -89,14 +89,14 @@ Mảng luôn có 26 ô, bất kể n lớn cỡ nào, nên bộ nhớ là O(1). 
 
 ### Cách 3, hash map: khi không biết trước bảng chữ cái
 
-Câu hỏi mở rộng phá vỡ giả định "26 ô". Riêng chữ thường tiếng Việt đã có hơn 60 chữ có dấu, emoji thì có hàng nghìn. Khi đó bảng đếm phải là một [[hash-map|hash map]]: khóa là ký tự, giá trị là số lần. Vẫn O(n) trung bình, nhưng mỗi lần đếm phải tính hash, nên chậm hơn mảng khoảng 10 lần trong phép đo dưới.
+Câu hỏi mở rộng phá vỡ giả định "26 ô". Riêng chữ thường tiếng Việt đã có hơn 60 chữ có dấu, emoji thì có hàng nghìn. Khi đó bảng đếm phải là một [[concepts/hash-map|hash map]]: khóa là ký tự, giá trị là số lần. Vẫn O(n) trung bình, nhưng mỗi lần đếm phải tính hash, nên chậm hơn mảng khoảng 10 lần trong phép đo dưới.
 
 ### Unicode: "một ký tự" là gì?
 
 Đếm theo ký tự thì phải biết đơn vị ký tự. Có ba bẫy:
 
 1. **JS và Java lưu chuỗi bằng UTF-16.** `s.length`, `s[i]`, `split('')`, `charAt` đều làm việc với *code unit*, không phải ký tự. Emoji 😀 (U+1F600) là hai code unit `d83d de00`. Tách theo code unit rồi sắp xếp là trộn lẫn nửa của các emoji khác nhau. Với "😀🌃" và "🜃🈀", hai chuỗi khác hẳn nhau nhưng có **cùng bốn code unit**, nên cách sắp xếp kết luận là anagram.
-2. **Cùng một chữ có thể có hai cách mã hóa.** `é` có thể là một code point (U+00E9) hoặc là `e` cộng dấu sắc kết hợp (U+0301). Hai cách hiển thị giống hệt nhau. [[unicode-normalization|Chuẩn hóa]] về dạng NFC đưa cả hai về một dạng (UAX #15).
+2. **Cùng một chữ có thể có hai cách mã hóa.** `é` có thể là một code point (U+00E9) hoặc là `e` cộng dấu sắc kết hợp (U+0301). Hai cách hiển thị giống hệt nhau. [[concepts/unicode-normalization|Chuẩn hóa]] về dạng NFC đưa cả hai về một dạng (UAX #15).
 3. **Mảng 26 ô với chữ ngoài a–z.** `'é'.charCodeAt(0) - 97` là 136, ngoài 26 ô. JS lặng lẽ nới mảng lên 137 phần tử và ghi `NaN` vào ô 136, Java ném `ArrayIndexOutOfBoundsException`, Go panic.
 
 | | Chuỗi là dãy… | Duyệt theo ký tự Unicode |

@@ -8,4 +8,4 @@ region: Vùng Cache
 
 **Cache penetration** có thể do link hỏng hoặc bot quét id để đánh thẳng vào database. Vá bằng negative cache (chặn câu hỏi lặp lại) và Bloom filter (chặn ngay cả id chưa từng hỏi), kèm rate limit.
 
-Đọc thêm trong bài [[2026-11-22-caching-under-load|Cache dưới tải cao]].
+Đọc thêm trong bài [[posts/2026-11-22-caching-under-load|Cache dưới tải cao]].

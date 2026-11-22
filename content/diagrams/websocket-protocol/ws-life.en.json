@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "One WebSocket connection, from picking up to hanging up",
+    "output": "content/diagrams/websocket-protocol/ws-life.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "br", "type": "frontend", "label": "Browser", "sublabel": "new WebSocket(url, ['stock.v2'])" },
+    { "id": "px", "type": "cloud", "label": "Entry point", "sublabel": "nginx: forwards Upgrade" },
+    { "id": "srv", "type": "backend", "label": "Server", "sublabel": "ws / NestJS gateway" }
+  ],
+  "segments": [
+    { "from": 150, "to": 300, "label": "Handshake: still HTTP" },
+    { "from": 325, "to": 520, "label": "Frames: no more HTTP" },
+    { "from": 545, "to": 700, "label": "Closing with a reason" }
+  ],
+  "messages": [
+    { "id": "h1", "from": "br", "to": "px", "y": 170, "label": "ask to upgrade", "variant": "default", "note": "GET, Upgrade: websocket, Sec-WebSocket-Key" },
+    { "id": "h2", "from": "px", "to": "srv", "y": 220, "label": "forward Upgrade too", "variant": "default", "note": "proxy_http_version 1.1" },
+    { "id": "h3", "from": "srv", "to": "br", "y": 275, "label": "101, with proof it read the key", "variant": "return", "note": "Sec-WebSocket-Accept = base64(SHA1(key+GUID))" },
+    { "id": "f1", "from": "br", "to": "srv", "y": 345, "label": "send \"mua\", payload masked", "variant": "emphasis", "note": "81 83 + 4-byte mask key" },
+    { "id": "f2", "from": "srv", "to": "br", "y": 400, "label": "push stock, unmasked", "variant": "return", "note": "opcode 1 text, MASK=0" },
+    { "id": "f3", "from": "srv", "to": "br", "y": 450, "label": "can you still hear me?", "variant": "dashed", "note": "ping, opcode 9" },
+    { "id": "f4", "from": "br", "to": "srv", "y": 495, "label": "yes, the browser replies itself", "variant": "dashed", "note": "pong, opcode 10, same payload" },
+    { "id": "c1", "from": "srv", "to": "br", "y": 565, "label": "hang up: token expired", "variant": "security", "note": "close 1008 + UTF-8 reason" },
+    { "id": "c2", "from": "br", "to": "srv", "y": 620, "label": "agree to hang up", "variant": "return", "note": "close 1008 in reply" },
+    { "id": "c3", "from": "srv", "to": "br", "y": 670, "label": "server closes TCP first", "variant": "dashed", "note": "onclose wasClean=true" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Frame",
+      "items": ["2 to 14 header bytes, then the payload", "Text, binary, ping, pong, close", "Large messages are split into several frames"]
+    },
+    {
+      "dot": "amber",
+      "title": "Masking",
+      "items": ["The client always masks, the server never does", "Not encryption: the key is right in the frame", "So old proxies can't be tricked into cache poisoning"]
+    },
+    {
+      "dot": "rose",
+      "title": "Silent drop",
+      "items": ["No close frame: the client assigns 1006 itself", "1006 never travels on the wire", "Only ping/pong detects a silently dead connection"]
+    }
+  ]
+}

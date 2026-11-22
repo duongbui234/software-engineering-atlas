@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Finding a duplicate in [1, 2, 3, 1]",
+    "output": "content/diagrams/neetcode-contains-duplicate/seen-set.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Loop",
+      "sublabel": "reads each number"
+    },
+    {
+      "id": "set",
+      "type": "database",
+      "label": "Seen notebook",
+      "sublabel": "Set / set / HashSet / map"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 470,
+      "label": "First three numbers: unseen, write them down"
+    },
+    {
+      "from": 495,
+      "to": 640,
+      "label": "Second 1: already there, stop"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "loop",
+      "to": "set",
+      "y": 170,
+      "label": "is 1 there?",
+      "variant": "default",
+      "note": "i = 0, x = 1"
+    },
+    {
+      "id": "a2",
+      "from": "set",
+      "to": "loop",
+      "y": 215,
+      "label": "no: write 1",
+      "variant": "return"
+    },
+    {
+      "id": "b1",
+      "from": "loop",
+      "to": "set",
+      "y": 270,
+      "label": "is 2 there?",
+      "variant": "default",
+      "note": "i = 1, x = 2"
+    },
+    {
+      "id": "b2",
+      "from": "set",
+      "to": "loop",
+      "y": 315,
+      "label": "no: write 2",
+      "variant": "return"
+    },
+    {
+      "id": "c1",
+      "from": "loop",
+      "to": "set",
+      "y": 370,
+      "label": "is 3 there?",
+      "variant": "default",
+      "note": "i = 2, x = 3"
+    },
+    {
+      "id": "c2",
+      "from": "set",
+      "to": "loop",
+      "y": 415,
+      "label": "no: write 3",
+      "variant": "return",
+      "note": "notebook = {1, 2, 3}"
+    },
+    {
+      "id": "d1",
+      "from": "loop",
+      "to": "set",
+      "y": 515,
+      "label": "is 1 there?",
+      "variant": "emphasis",
+      "note": "i = 3, x = 1"
+    },
+    {
+      "id": "d2",
+      "from": "set",
+      "to": "loop",
+      "y": 565,
+      "label": "already there: true",
+      "variant": "security",
+      "note": "no need to read further"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Brute force",
+      "items": [
+        "Compare every pair: n(n−1)/2",
+        "O(n²) time",
+        "O(1) space"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Sort then scan",
+      "items": [
+        "Duplicates sit side by side",
+        "O(n log n) time",
+        "JS: remember the comparator"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Hash set",
+      "items": [
+        "O(1) average lookup",
+        "O(n) time and space",
+        "Stops at the first duplicate"
+      ]
+    }
+  ]
+}

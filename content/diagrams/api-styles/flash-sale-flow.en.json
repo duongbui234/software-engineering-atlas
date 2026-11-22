@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "One flash-sale purchase: REST, WebSocket and webhook",
+    "output": "content/diagrams/api-styles/flash-sale-flow.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Browser",
+      "sublabel": "buyer"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Flash-sale server",
+      "sublabel": "REST + Socket.IO"
+    },
+    {
+      "id": "worker",
+      "type": "messagebus",
+      "label": "Number caller",
+      "sublabel": "BullMQ queue worker, every 5s"
+    },
+    {
+      "id": "momo",
+      "type": "external",
+      "label": "MoMo",
+      "sublabel": "payment gateway"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 360,
+      "label": "Queue"
+    },
+    {
+      "from": 375,
+      "to": 680,
+      "label": "Payment"
+    }
+  ],
+  "messages": [
+    {
+      "id": "join",
+      "from": "browser",
+      "to": "api",
+      "y": 170,
+      "label": "POST /queue/join (REST)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pos",
+      "from": "api",
+      "to": "browser",
+      "y": 200,
+      "label": "200: you are at position 120",
+      "variant": "return"
+    },
+    {
+      "id": "ws",
+      "from": "browser",
+      "to": "api",
+      "y": 230,
+      "label": "open WebSocket, with token",
+      "note": "Joins the private room user:{id}; every tab receives"
+    },
+    {
+      "id": "pop",
+      "from": "worker",
+      "to": "api",
+      "y": 285,
+      "label": "call the first 50 in line",
+      "variant": "dashed",
+      "note": "ZPOPMIN on the queue sorted set in Redis"
+    },
+    {
+      "id": "ready",
+      "from": "api",
+      "to": "browser",
+      "y": 320,
+      "label": "tells \"it's your turn\" (WebSocket)",
+      "variant": "emphasis",
+      "note": "checkout_ready event"
+    },
+    {
+      "id": "checkout",
+      "from": "browser",
+      "to": "api",
+      "y": 395,
+      "label": "POST /checkout (REST)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "create",
+      "from": "api",
+      "to": "momo",
+      "y": 425,
+      "label": "create transaction, wait at most 5s"
+    },
+    {
+      "id": "payurl",
+      "from": "momo",
+      "to": "api",
+      "y": 455,
+      "label": "payment page link",
+      "variant": "return"
+    },
+    {
+      "id": "redirect",
+      "from": "api",
+      "to": "browser",
+      "y": 485,
+      "label": "201 + payment link",
+      "variant": "return"
+    },
+    {
+      "id": "pay",
+      "from": "browser",
+      "to": "momo",
+      "y": 515,
+      "label": "pay on the MoMo page"
+    },
+    {
+      "id": "ipn",
+      "from": "momo",
+      "to": "api",
+      "y": 550,
+      "label": "MoMo reports payment done (webhook)",
+      "variant": "security",
+      "note": "POST /webhooks/momo/ipn with an HMAC signature; MoMo resends unless it gets 204"
+    },
+    {
+      "id": "ack",
+      "from": "api",
+      "to": "momo",
+      "y": 610,
+      "label": "204: received",
+      "variant": "return"
+    },
+    {
+      "id": "result",
+      "from": "api",
+      "to": "browser",
+      "y": 645,
+      "label": "report order result (WebSocket)",
+      "variant": "emphasis",
+      "note": "order_result event"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Who speaks first",
+      "items": [
+        "REST: the browser asks, the server answers",
+        "WebSocket: the server pushes on its own",
+        "Webhook: an external system calls back in"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Safe webhooks",
+      "items": [
+        "Verify the signature before anything else",
+        "Duplicate events: the database blocks them with a unique key",
+        "The return URL via the browser is for display only"
+      ]
+    }
+  ]
+}

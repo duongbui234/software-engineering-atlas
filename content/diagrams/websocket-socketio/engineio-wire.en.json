@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Socket.IO on the wire: Engine.IO opens the session and upgrades before any event",
+    "output": "content/diagrams/websocket-socketio/engineio-wire.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "cl", "type": "frontend", "label": "Socket.IO client", "sublabel": "socket.io-client: io('/flash-sale')" },
+    { "id": "eio", "type": "backend", "label": "Transport layer", "sublabel": "Engine.IO: sid, polling, WebSocket" },
+    { "id": "gw", "type": "backend", "label": "Event desk", "sublabel": "Socket.IO namespace /flash-sale" }
+  ],
+  "segments": [
+    { "from": 150, "to": 250, "label": "Open the session with long polling" },
+    { "from": 270, "to": 470, "label": "Test WebSocket, then switch" },
+    { "from": 490, "to": 800, "label": "Socket.IO inside packet 4" }
+  ],
+  "messages": [
+    { "id": "o1", "from": "cl", "to": "eio", "y": 170, "label": "open a session", "variant": "default", "note": "GET /socket.io/?EIO=4&transport=polling" },
+    { "id": "o2", "from": "eio", "to": "cl", "y": 220, "label": "issue a session id", "variant": "return", "note": "0{\"sid\":…,\"upgrades\":[\"websocket\"]}" },
+    { "id": "u1", "from": "cl", "to": "eio", "y": 290, "label": "open WebSocket with the same sid, test it", "variant": "default", "note": "transport=websocket&sid=…, send 2probe" },
+    { "id": "u2", "from": "eio", "to": "cl", "y": 345, "label": "the new transport works", "variant": "return", "note": "3probe" },
+    { "id": "u3", "from": "eio", "to": "cl", "y": 395, "label": "polling: take a rest", "variant": "dashed", "note": "6 (noop) for the hanging request" },
+    { "id": "u4", "from": "cl", "to": "eio", "y": 445, "label": "WebSocket only from now on", "variant": "emphasis", "note": "5 (upgrade)" },
+    { "id": "c1", "from": "cl", "to": "gw", "y": 510, "label": "join the namespace, with token", "variant": "security", "note": "40/flash-sale,{\"token\":…}" },
+    { "id": "c2", "from": "gw", "to": "cl", "y": 565, "label": "you're in, here is your id", "variant": "return", "note": "40/flash-sale,{\"sid\":…}" },
+    { "id": "e1", "from": "cl", "to": "gw", "y": 620, "label": "emit with ack id 7", "variant": "default", "note": "42/flash-sale,7[\"subscribe_campaign\",…]" },
+    { "id": "e2", "from": "gw", "to": "cl", "y": 675, "label": "reply to exactly emit number 7", "variant": "return", "note": "43/flash-sale,7[{\"event\":\"subscribed\"}]" },
+    { "id": "e3", "from": "gw", "to": "cl", "y": 725, "label": "the server pushes stock", "variant": "emphasis", "note": "42/flash-sale,[\"stock_update\",…]" },
+    { "id": "e4", "from": "eio", "to": "cl", "y": 775, "label": "every 25 seconds: still there?", "variant": "dashed", "note": "2 (ping), client answers 3 within 20 seconds" }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Two layers of packets",
+      "items": ["First digit: Engine.IO (0 open, 2 ping, 4 message…)", "Second digit: Socket.IO (0 connect, 2 event, 3 ack)", "\"42\" = a message containing an event"]
+    },
+    {
+      "dot": "rose",
+      "title": "Why it doesn't mix with plain WebSocket",
+      "items": ["A plain ws client doesn't know to send 40, 42", "A Socket.IO client waits forever for packet 0{sid}", "Both use WebSocket but speak different languages"]
+    }
+  ]
+}

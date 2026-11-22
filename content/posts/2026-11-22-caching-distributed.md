@@ -17,17 +17,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[in-process-cache|Cache trong RAM của tiến trình]] (một `Map`) nhanh hơn Redis hàng trăm lần vì không qua mạng, nhưng mỗi pod giữ một bản riêng, và không có giới hạn thì thành rò rỉ bộ nhớ.
-> - [[two-tier-cache|Cache hai tầng]]: L1 trong RAM từng pod, L2 Redis dùng chung, cuối cùng là database. Khó nhất là báo cho *mọi* pod bỏ L1 khi dữ liệu đổi.
-> - [[pubsub-invalidation|Báo hủy qua Pub/Sub]] là "bắn rồi quên": pod nào đang mất kết nối đúng lúc đó sẽ không bao giờ nhận tin. L1 không có TTL thì sai tới khi pod khởi động lại; có TTL 2 giây thì tự đúng lại sau 2 giây.
-> - [[client-side-caching|Client-side caching]] của Redis 6+: Redis tự nhớ client đã đọc key nào và gửi tin báo hủy khi key đó đổi.
-> - Chia key cho nhiều node: `hash % N` bắt 80% key đổi chỗ khi thêm node thứ 5, [[consistent-hashing|consistent hashing]] chỉ 20%. Redis Cluster dùng 16384 [[hash-slot|hash slot]]. [[cache-warming|Làm nóng cache]] trước giờ cao điểm để pod mới không bắt đầu từ con số 0.
+> - [[concepts/in-process-cache|Cache trong RAM của tiến trình]] (một `Map`) nhanh hơn Redis hàng trăm lần vì không qua mạng, nhưng mỗi pod giữ một bản riêng, và không có giới hạn thì thành rò rỉ bộ nhớ.
+> - [[concepts/two-tier-cache|Cache hai tầng]]: L1 trong RAM từng pod, L2 Redis dùng chung, cuối cùng là database. Khó nhất là báo cho *mọi* pod bỏ L1 khi dữ liệu đổi.
+> - [[concepts/pubsub-invalidation|Báo hủy qua Pub/Sub]] là "bắn rồi quên": pod nào đang mất kết nối đúng lúc đó sẽ không bao giờ nhận tin. L1 không có TTL thì sai tới khi pod khởi động lại; có TTL 2 giây thì tự đúng lại sau 2 giây.
+> - [[concepts/client-side-caching|Client-side caching]] của Redis 6+: Redis tự nhớ client đã đọc key nào và gửi tin báo hủy khi key đó đổi.
+> - Chia key cho nhiều node: `hash % N` bắt 80% key đổi chỗ khi thêm node thứ 5, [[concepts/consistent-hashing|consistent hashing]] chỉ 20%. Redis Cluster dùng 16384 [[concepts/hash-slot|hash slot]]. [[concepts/cache-warming|Làm nóng cache]] trước giờ cao điểm để pod mới không bắt đầu từ con số 0.
 
 > [!info] Bối cảnh
 > Ga 7 của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: backend chạy nhiều pod sau load balancer, mỗi lần kiểm tra một feature flag (bật trang thanh toán mới chưa?) phải nhanh tới mức gần như miễn phí. flash-sale giữ cờ trong RAM của từng pod, sau đó tới Redis, sau đó tới PostgreSQL. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Cache-aside, invalidation, TTL, hot key, LRU**: xem các ga [[2026-11-22-caching-patterns|3]], [[2026-11-22-caching-invalidation|4]], [[2026-11-22-caching-under-load|5]], [[2026-11-22-caching-redis|6]].
+> - **Cache-aside, invalidation, TTL, hot key, LRU**: xem các ga [[posts/2026-11-22-caching-patterns|3]], [[posts/2026-11-22-caching-invalidation|4]], [[posts/2026-11-22-caching-under-load|5]], [[posts/2026-11-22-caching-redis|6]].
 > - **Pod**: một bản đang chạy của ứng dụng (trong Kubernetes). Mười pod là mười tiến trình riêng, mỗi cái có RAM riêng.
 > - **Pub/Sub**: kiểu nhắn tin "phát thanh": người gửi publish lên một kênh, ai đang subscribe kênh đó thì nhận. Không ai nghe thì tin mất.
 > - **Feature flag**: công tắc bật tắt tính năng mà không cần deploy lại.
@@ -41,13 +41,13 @@ Thư viện giờ có nhiều phòng đọc. Mỗi bàn giữ một **chồng s�
 
 | Đời thường | Khái niệm |
 |---|---|
-| Chồng sách trên bàn: lấy ngay, chỉ bàn đó dùng | [[in-process-cache\|In-process cache]] (L1) |
-| Chồng trên bàn, giá ở sảnh, kho tầng hầm | [[two-tier-cache\|Two-tier cache]] |
-| Phát loa "cất cuốn X đi", ai đeo tai nghe thì lỡ | [[pubsub-invalidation\|Pub/Sub invalidation]] |
-| Thủ thư ghi sổ ai đã mượn cuốn nào, có bản mới thì báo đúng người đó | [[client-side-caching\|Client-side caching]] |
-| Chia sách theo vòng tròn để thêm một phòng chỉ phải dời ít sách | [[consistent-hashing\|Consistent hashing]] |
-| Sách được xếp vào 16.384 ngăn đánh số, mỗi phòng giữ một dải ngăn | [[hash-slot\|Hash slot]] |
-| Bày sẵn giáo trình lên giá trước ngày thi | [[cache-warming\|Cache warming]] |
+| Chồng sách trên bàn: lấy ngay, chỉ bàn đó dùng | [[concepts/in-process-cache\|In-process cache]] (L1) |
+| Chồng trên bàn, giá ở sảnh, kho tầng hầm | [[concepts/two-tier-cache\|Two-tier cache]] |
+| Phát loa "cất cuốn X đi", ai đeo tai nghe thì lỡ | [[concepts/pubsub-invalidation\|Pub/Sub invalidation]] |
+| Thủ thư ghi sổ ai đã mượn cuốn nào, có bản mới thì báo đúng người đó | [[concepts/client-side-caching\|Client-side caching]] |
+| Chia sách theo vòng tròn để thêm một phòng chỉ phải dời ít sách | [[concepts/consistent-hashing\|Consistent hashing]] |
+| Sách được xếp vào 16.384 ngăn đánh số, mỗi phòng giữ một dải ngăn | [[concepts/hash-slot\|Hash slot]] |
+| Bày sẵn giáo trình lên giá trước ngày thi | [[concepts/cache-warming\|Cache warming]] |
 
 ```mermaid
 flowchart TB
@@ -76,7 +76,7 @@ Cái giá: giờ có **hai mươi bản sao** (mỗi pod một bản) cộng b�
 
 ### In-process cache: nhanh nhất, riêng từng pod
 
-**[[in-process-cache|In-process cache]]** là cache nằm ngay trong bộ nhớ của tiến trình ứng dụng: một `Map`, hoặc thư viện như `lru-cache` (Node), Caffeine (Java). Không qua mạng, không tuần tự hóa JSON, nên nhanh hơn Redis hàng trăm tới hàng nghìn lần.
+**[[concepts/in-process-cache|In-process cache]]** là cache nằm ngay trong bộ nhớ của tiến trình ứng dụng: một `Map`, hoặc thư viện như `lru-cache` (Node), Caffeine (Java). Không qua mạng, không tuần tự hóa JSON, nên nhanh hơn Redis hàng trăm tới hàng nghìn lần.
 
 Ba điểm phải để ý:
 
@@ -84,13 +84,13 @@ Ba điểm phải để ý:
 - **Mỗi pod một bản.** Hai mươi pod là hai mươi bản sao, hit ratio của từng pod thấp hơn cache dùng chung (mỗi pod chỉ thấy 1/20 lưu lượng), và pod mới khởi động thì cache trống.
 - **Không đồng bộ giữa các pod.** Pod A xóa mục của nó, pod B không biết. Đây là chủ đề của các mục sau.
 
-Hợp nhất với dữ liệu **nhỏ, đọc cực nhiều, ít đổi, và chịu được cũ vài giây**: feature flag, cấu hình, quyền theo role, template, và các [[hot-key|hot key]] ở ga 5.
+Hợp nhất với dữ liệu **nhỏ, đọc cực nhiều, ít đổi, và chịu được cũ vài giây**: feature flag, cấu hình, quyền theo role, template, và các [[concepts/hot-key|hot key]] ở ga 5.
 
 ### Two-tier cache: L1, L2, rồi nguồn
 
-**[[two-tier-cache|Cache hai tầng]]** xếp hai cache chồng lên nhau: L1 trong RAM từng pod, L2 Redis dùng chung, rồi mới tới database. Đọc đi từ trên xuống; trượt ở tầng nào thì nạp lại tầng đó trên đường về.
+**[[concepts/two-tier-cache|Cache hai tầng]]** xếp hai cache chồng lên nhau: L1 trong RAM từng pod, L2 Redis dùng chung, rồi mới tới database. Đọc đi từ trên xuống; trượt ở tầng nào thì nạp lại tầng đó trên đường về.
 
-Cache feature flag của flash-sale đúng là như vậy, thêm cả negative cache ([[2026-11-22-caching-invalidation|ga 4]]) ở L1:
+Cache feature flag của flash-sale đúng là như vậy, thêm cả negative cache ([[posts/2026-11-22-caching-invalidation|ga 4]]) ở L1:
 
 ```ts
 // trích rút gọn từ cache feature flag của flash-sale
@@ -117,7 +117,7 @@ async invalidate(name: string) {
 
 Redis Pub/Sub giao tin theo kiểu **at-most-once** (nhiều nhất một lần): tài liệu Redis nói rõ tin được gửi tới những ai *đang* subscribe, không được lưu lại, không có xác nhận. Pod đang mất kết nối tới Redis đúng lúc admin đổi cờ (mạng chập chờn, Redis đang failover, pod đang bị GC dừng lâu) sẽ không bao giờ nhận tin đó. Khi nối lại, nó không biết mình đã lỡ gì.
 
-Với **[[pubsub-invalidation|Pub/Sub invalidation]]** và L1 **không có TTL** (như flash-sale hiện nay), pod đó giữ giá trị cũ **tới khi khởi động lại**. Admin tắt trang thanh toán mới vì có lỗi, 19 pod tắt, pod thứ 20 vẫn bật.
+Với **[[concepts/pubsub-invalidation|Pub/Sub invalidation]]** và L1 **không có TTL** (như flash-sale hiện nay), pod đó giữ giá trị cũ **tới khi khởi động lại**. Admin tắt trang thanh toán mới vì có lỗi, 19 pod tắt, pod thứ 20 vẫn bật.
 
 Cách gia cố, từ rẻ tới đắt:
 
@@ -128,7 +128,7 @@ Cách gia cố, từ rẻ tới đắt:
 
 ### Client-side caching: để Redis nhớ ai đang giữ gì
 
-Redis 6 thêm **[[client-side-caching|client-side caching]]** (tracking): client bật `CLIENT TRACKING on`, và Redis tự ghi nhớ client đó đã đọc key nào. Khi key bị sửa, xóa, hết hạn hay bị đẩy, Redis gửi tin báo hủy (`invalidate`) cho đúng những client đã đọc nó. Không cần tự viết code publish ở mọi chỗ ghi.
+Redis 6 thêm **[[concepts/client-side-caching|client-side caching]]** (tracking): client bật `CLIENT TRACKING on`, và Redis tự ghi nhớ client đó đã đọc key nào. Khi key bị sửa, xóa, hết hạn hay bị đẩy, Redis gửi tin báo hủy (`invalidate`) cho đúng những client đã đọc nó. Không cần tự viết code publish ở mọi chỗ ghi.
 
 - **Chế độ mặc định**: Redis nhớ từng key cho từng client. Chính xác, nhưng tốn bộ nhớ phía server (bảng theo dõi có giới hạn, đầy thì Redis chủ động báo hủy bớt).
 - **Chế độ broadcast (`BCAST PREFIX flag:`)**: Redis không nhớ gì, báo hủy mọi thay đổi của key có tiền tố đã đăng ký. Không tốn bộ nhớ server, nhưng client nhận nhiều tin hơn.
@@ -140,11 +140,11 @@ Nó không xóa được vấn đề mất tin: tài liệu Redis khuyên khi k�
 
 Khi một Redis không đủ RAM hay CPU, chia key cho nhiều node. Cách ngây thơ là `node = hash(key) % N`. Thêm node thứ năm (N từ 4 thành 5) thì gần như mọi key đổi chỗ: khoảng 1 − 1/5 = **80%** key giờ thuộc node khác, nên đồng loạt trượt, tải dồn về database, đúng lúc vừa thêm node vì đang quá tải.
 
-**[[consistent-hashing|Consistent hashing]]** (Karger và cộng sự, 1997) đặt cả node lẫn key lên một **vòng tròn** giá trị băm. Mỗi key thuộc về node đầu tiên gặp được khi đi theo chiều kim đồng hồ. Thêm một node thì chỉ những key nằm giữa node mới và node đứng trước nó đổi chỗ, cỡ 1/N key. Mỗi node thật được đặt nhiều "điểm ảo" (virtual node) trên vòng để chia đều hơn. Trong ví dụ: 79,8% key đổi node với `hash % N`, 19,8% với consistent hashing. Nhiều client memcached, CDN và load balancer theo người dùng ([[load-balancing|load balancing]]) dùng ý tưởng này.
+**[[concepts/consistent-hashing|Consistent hashing]]** (Karger và cộng sự, 1997) đặt cả node lẫn key lên một **vòng tròn** giá trị băm. Mỗi key thuộc về node đầu tiên gặp được khi đi theo chiều kim đồng hồ. Thêm một node thì chỉ những key nằm giữa node mới và node đứng trước nó đổi chỗ, cỡ 1/N key. Mỗi node thật được đặt nhiều "điểm ảo" (virtual node) trên vòng để chia đều hơn. Trong ví dụ: 79,8% key đổi node với `hash % N`, 19,8% với consistent hashing. Nhiều client memcached, CDN và load balancer theo người dùng ([[concepts/load-balancing|load balancing]]) dùng ý tưởng này.
 
 ### Hash slot: cách Redis Cluster chia key
 
-Redis Cluster không dùng vòng tròn mà dùng **16.384 [[hash-slot|hash slot]]** cố định:
+Redis Cluster không dùng vòng tròn mà dùng **16.384 [[concepts/hash-slot|hash slot]]** cố định:
 
 ```text
 slot = CRC16(key) mod 16384
@@ -156,12 +156,12 @@ Hệ quả quan trọng: lệnh nhiều key (`MGET`, `DEL k1 k2`, transaction, L
 
 ### Cache warming: không bắt đầu từ con số không
 
-Pod mới, Redis vừa khởi động lại, hay deploy lúc 20:55: mọi cache đều trống, và lượt người dùng đầu tiên rơi thẳng xuống database. **[[cache-warming|Cache warming]]** nạp sẵn những thứ chắc chắn sẽ được đọc *trước* khi nhận lưu lượng:
+Pod mới, Redis vừa khởi động lại, hay deploy lúc 20:55: mọi cache đều trống, và lượt người dùng đầu tiên rơi thẳng xuống database. **[[concepts/cache-warming|Cache warming]]** nạp sẵn những thứ chắc chắn sẽ được đọc *trước* khi nhận lưu lượng:
 
 - Lúc khởi động: flash-sale nạp toàn bộ feature flag vào L1 bằng một query (`warmL1`) và nạp quyền của mọi role vào Redis (`warmCache`) trước khi pod nhận request.
 - Trước sự kiện: nạp trang và giá của các sản phẩm sẽ giảm giá lúc 21:00 vào cache từ 20:50.
 
-Hai bẫy: làm nóng quá mạnh thì chính nó thành đợt tải vào database (giới hạn tốc độ nạp), và làm nóng hàng nghìn key cùng lúc với cùng TTL thì chúng hết hạn cùng lúc ([[ttl-jitter|TTL jitter]] ở ga 5).
+Hai bẫy: làm nóng quá mạnh thì chính nó thành đợt tải vào database (giới hạn tốc độ nạp), và làm nóng hàng nghìn key cùng lúc với cùng TTL thì chúng hết hạn cùng lúc ([[concepts/ttl-jitter|TTL jitter]] ở ga 5).
 
 ## Ví dụ chạy được
 

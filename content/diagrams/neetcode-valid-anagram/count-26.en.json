@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Counting the letters of rat and car",
+    "output": "content/diagrams/neetcode-valid-anagram/count-26.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "s",
+      "type": "frontend",
+      "label": "String s",
+      "sublabel": "rat"
+    },
+    {
+      "id": "cnt",
+      "type": "database",
+      "label": "26-slot tray",
+      "sublabel": "int[26], all 0 at first"
+    },
+    {
+      "id": "t",
+      "type": "frontend",
+      "label": "String t",
+      "sublabel": "car"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 200,
+      "label": "Same length 3: walk together"
+    },
+    {
+      "from": 215,
+      "to": 560,
+      "label": "Add for s, subtract for t"
+    },
+    {
+      "from": 580,
+      "to": 690,
+      "label": "Check the tray"
+    }
+  ],
+  "messages": [
+    {
+      "id": "l",
+      "from": "s",
+      "to": "t",
+      "y": 170,
+      "label": "equal lengths?",
+      "variant": "default",
+      "note": "3 = 3"
+    },
+    {
+      "id": "s0",
+      "from": "s",
+      "to": "cnt",
+      "y": 235,
+      "label": "slot r +1",
+      "variant": "default",
+      "note": "i = 0"
+    },
+    {
+      "id": "t0",
+      "from": "t",
+      "to": "cnt",
+      "y": 280,
+      "label": "slot c −1",
+      "variant": "default"
+    },
+    {
+      "id": "s1",
+      "from": "s",
+      "to": "cnt",
+      "y": 335,
+      "label": "slot a +1",
+      "variant": "default",
+      "note": "i = 1"
+    },
+    {
+      "id": "t1",
+      "from": "t",
+      "to": "cnt",
+      "y": 380,
+      "label": "slot a −1",
+      "variant": "default",
+      "note": "a back to 0"
+    },
+    {
+      "id": "s2",
+      "from": "s",
+      "to": "cnt",
+      "y": 435,
+      "label": "slot t +1",
+      "variant": "default",
+      "note": "i = 2"
+    },
+    {
+      "id": "t2",
+      "from": "t",
+      "to": "cnt",
+      "y": 480,
+      "label": "slot r −1",
+      "variant": "default",
+      "note": "r back to 0"
+    },
+    {
+      "id": "chk",
+      "from": "cnt",
+      "to": "s",
+      "y": 600,
+      "label": "t still +1, c still −1",
+      "variant": "security",
+      "note": "not 0: not an anagram"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Sort then compare",
+      "items": [
+        "O(n log n)",
+        "Works for any alphabet",
+        "1 million letters: 201 ms"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "26-slot array",
+      "items": [
+        "O(n) time, O(1) space",
+        "Only correct for a–z",
+        "1 million letters: 3.4 ms"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Unicode",
+      "items": [
+        "Count by code point",
+        "Normalize to NFC first",
+        "split('') breaks emoji"
+      ]
+    }
+  ]
+}

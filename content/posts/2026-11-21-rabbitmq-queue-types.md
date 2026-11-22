@@ -20,35 +20,35 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[classic-queue|Classic queue]]: loại mặc định, tin nằm trên **một node**. Từ 4.0 không còn sao chép (mirrored queue đã bị gỡ). Hợp cho dữ liệu tạm, queue riêng của một consumer.
-> - [[quorum-queue|Quorum queue]]: tin được chép ra nhiều node theo thuật toán [[raft|Raft]]; biên nhận chỉ gửi khi **đa số** bản sao đã có tin. Đây là lựa chọn mặc định cho dữ liệu quan trọng.
-> - [[delivery-limit|Delivery limit]] của quorum queue tự dead-letter tin sau 20 lần giao thất bại. Từ 4.3, `nack` có requeue **không** được đếm; chỉ `reject` mới đếm.
-> - [[stream|Stream]] là một cuốn sổ chỉ ghi nối: đọc **không xóa** tin, mỗi consumer chọn chỗ bắt đầu bằng [[stream-offset|offset]], đọc lại được bao nhiêu lần cũng được.
-> - [[single-active-consumer|Single active consumer]]: nhiều consumer đăng ký, chỉ một người nhận tại một thời điểm; người đó rời đi thì người kế tiếp lên thay. Giữ được thứ tự mà vẫn có dự phòng.
+> - [[concepts/classic-queue|Classic queue]]: loại mặc định, tin nằm trên **một node**. Từ 4.0 không còn sao chép (mirrored queue đã bị gỡ). Hợp cho dữ liệu tạm, queue riêng của một consumer.
+> - [[concepts/quorum-queue|Quorum queue]]: tin được chép ra nhiều node theo thuật toán [[concepts/raft|Raft]]; biên nhận chỉ gửi khi **đa số** bản sao đã có tin. Đây là lựa chọn mặc định cho dữ liệu quan trọng.
+> - [[concepts/delivery-limit|Delivery limit]] của quorum queue tự dead-letter tin sau 20 lần giao thất bại. Từ 4.3, `nack` có requeue **không** được đếm; chỉ `reject` mới đếm.
+> - [[concepts/stream|Stream]] là một cuốn sổ chỉ ghi nối: đọc **không xóa** tin, mỗi consumer chọn chỗ bắt đầu bằng [[concepts/stream-offset|offset]], đọc lại được bao nhiêu lần cũng được.
+> - [[concepts/single-active-consumer|Single active consumer]]: nhiều consumer đăng ký, chỉ một người nhận tại một thời điểm; người đó rời đi thì người kế tiếp lên thay. Giữ được thứ tự mà vẫn có dự phòng.
 
 > [!info] Bối cảnh
-> Ga 7 của **tuyến RabbitMQ**. Ở [[2026-11-21-rabbitmq-ack-confirm|ga 4]], tin bền chỉ an toàn khi node chứa nó còn sống. Ga này hỏi: node đó cháy ổ cứng thì sao? Ví dụ là các sự kiện của **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết. Hiện mọi queue của dự án là classic, nên đây cũng là lúc mình tự hỏi đã đến lúc đổi chưa. Bạn không cần biết code dự án.
+> Ga 7 của **tuyến RabbitMQ**. Ở [[posts/2026-11-21-rabbitmq-ack-confirm|ga 4]], tin bền chỉ an toàn khi node chứa nó còn sống. Ga này hỏi: node đó cháy ổ cứng thì sao? Ví dụ là các sự kiện của **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết. Hiện mọi queue của dự án là classic, nên đây cũng là lúc mình tự hỏi đã đến lúc đổi chưa. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Node**: một máy (hoặc container) chạy RabbitMQ. Nhiều node nối với nhau thành một **cụm** (cluster), chi tiết ở [[2026-11-21-rabbitmq-cluster|ga 8]].
+> - **Node**: một máy (hoặc container) chạy RabbitMQ. Nhiều node nối với nhau thành một **cụm** (cluster), chi tiết ở [[posts/2026-11-21-rabbitmq-cluster|ga 8]].
 > - **Bản sao (replica)**: một bản đầy đủ của dữ liệu queue nằm trên một node khác.
 > - **Leader / follower**: trong một nhóm bản sao, leader nhận mọi lệnh ghi và chép cho các follower.
 > - **Đa số (quorum)**: hơn một nửa. 3 node thì đa số là 2, 5 node thì là 3.
-> - **Log (nhật ký chỉ ghi nối)**: cấu trúc dữ liệu chỉ thêm vào cuối, không sửa, không xóa giữa chừng. Xem [[queue-va-log|Queue và log]].
+> - **Log (nhật ký chỉ ghi nối)**: cấu trúc dữ liệu chỉ thêm vào cuối, không sửa, không xóa giữa chừng. Xem [[concepts/queue-va-log|Queue và log]].
 > - **Retention**: chính sách giữ dữ liệu bao lâu, hoặc bao nhiêu dung lượng.
-> - **Delivery limit, dead-letter, DLX**: xem [[2026-11-21-rabbitmq-dlx-retry|ga 6]].
+> - **Delivery limit, dead-letter, DLX**: xem [[posts/2026-11-21-rabbitmq-dlx-retry|ga 6]].
 
 ## Hình dung trước: một hộc thư, ba bưu cục, một cuốn sổ
 
 | Đời thường | Khái niệm |
 |---|---|
-| Hộc thư ở **một** bưu cục; bưu cục cháy là mất thư | [[classic-queue\|Classic queue]] |
-| Ba bưu cục cùng giữ một bản sổ thư; đa số đồng ý mới ghi | [[quorum-queue\|Quorum queue]] |
-| Luật bầu trưởng bưu cục và luật "đa số đồng ý mới tính" | [[raft\|Raft]] |
-| Thư phát thất bại 20 lần thì chuyển phòng thư lỗi | [[delivery-limit\|Delivery limit]] |
-| Cuốn sổ lưu trữ: đọc xong vẫn còn, ai cũng đọc lại từ trang bất kỳ | [[stream\|Stream]] |
-| Số trang trong sổ mà mỗi người đang đọc tới | [[stream-offset\|Stream offset]] |
-| Nhiều nhân viên trực, nhưng chỉ một người được phát thư tại một thời điểm | [[single-active-consumer\|Single active consumer]] |
+| Hộc thư ở **một** bưu cục; bưu cục cháy là mất thư | [[concepts/classic-queue\|Classic queue]] |
+| Ba bưu cục cùng giữ một bản sổ thư; đa số đồng ý mới ghi | [[concepts/quorum-queue\|Quorum queue]] |
+| Luật bầu trưởng bưu cục và luật "đa số đồng ý mới tính" | [[concepts/raft\|Raft]] |
+| Thư phát thất bại 20 lần thì chuyển phòng thư lỗi | [[concepts/delivery-limit\|Delivery limit]] |
+| Cuốn sổ lưu trữ: đọc xong vẫn còn, ai cũng đọc lại từ trang bất kỳ | [[concepts/stream\|Stream]] |
+| Số trang trong sổ mà mỗi người đang đọc tới | [[concepts/stream-offset\|Stream offset]] |
+| Nhiều nhân viên trực, nhưng chỉ một người được phát thư tại một thời điểm | [[concepts/single-active-consumer\|Single active consumer]] |
 
 ```mermaid
 flowchart TB
@@ -77,7 +77,7 @@ Mình từng nghĩ "chạy cụm 3 node là có dự phòng". Hóa ra cụm ch�
 
 ### Classic queue: hộc thư ở một bưu cục
 
-[[classic-queue|Classic queue]] là loại mặc định khi không đặt `x-queue-type`. Tin nằm trên node nơi queue được tạo.
+[[concepts/classic-queue|Classic queue]] là loại mặc định khi không đặt `x-queue-type`. Tin nằm trên node nơi queue được tạo.
 
 - **Không sao chép.** Trước đây có "classic mirrored queue" (chính sách `ha-mode`) để chép classic queue ra nhiều node. Tính năng này bị đánh dấu bỏ từ 2021 và **bị gỡ hẳn ở RabbitMQ 4.0**. Rất nhiều bài viết cũ vẫn hướng dẫn `ha-mode: all`; trên 4.x nó không còn tồn tại.
 - **Lưu trữ**: từ 4.0 chỉ còn định dạng CQv2. Tin nhỏ hơn 4 KB được ghi gộp vào chỉ mục; queue giữ một lượng nhỏ tin trong RAM, còn lại trên đĩa. Chế độ "lazy queue" (`x-queue-mode: lazy`) từng được khuyên bật để tiết kiệm RAM, nhưng **bị bỏ qua từ 3.12** vì classic queue giờ đã hành xử như vậy.
@@ -88,12 +88,12 @@ Classic queue hợp với: queue `exclusive` của một consumer, queue tạm, 
 
 ### Quorum queue: ba bưu cục cùng giữ sổ
 
-[[quorum-queue|Quorum queue]] (có từ 3.8) là queue được sao chép bằng thuật toán đồng thuận [[raft|Raft]]:
+[[concepts/quorum-queue|Quorum queue]] (có từ 3.8) là queue được sao chép bằng thuật toán đồng thuận [[concepts/raft|Raft]]:
 
 - Queue có một **leader** và các **follower** trên các node khác nhau (không bao giờ hai bản sao cùng một node). Mặc định 3 bản sao, chỉnh bằng `x-quorum-initial-group-size`.
 - Mọi lệnh ghi (tin mới, ack) đi qua leader, leader chép cho follower. Khi **đa số** bản sao đã ghi, lệnh mới được coi là có hiệu lực. Với confirm, producer chỉ nhận biên nhận lúc đó.
 - Leader chết thì các follower còn lại bầu leader mới, miễn là còn **đa số**. Các tin đang unacked được giao lại cho consumer, nên có thể trùng (ga 5).
-- Mất đa số thì queue **ngừng** nhận và giao tin, thay vì đoán bừa. Producer chờ biên nhận mãi; ví dụ ở [[2026-11-21-rabbitmq-cluster|ga 8]] cho thấy đúng cảnh đó trên cụm 3 node thật.
+- Mất đa số thì queue **ngừng** nhận và giao tin, thay vì đoán bừa. Producer chờ biên nhận mãi; ví dụ ở [[posts/2026-11-21-rabbitmq-cluster|ga 8]] cho thấy đúng cảnh đó trên cụm 3 node thật.
 
 | Số bản sao | Đa số | Chịu được bao nhiêu node chết |
 |---|---|---|
@@ -109,7 +109,7 @@ Quorum queue còn có **at-least-once dead-lettering**: đặt `dead-letter-stra
 
 ### Raft: luật đa số
 
-[[raft|Raft]] là thuật toán đồng thuận: cách để nhiều máy đồng ý về một chuỗi thay đổi, kể cả khi vài máy chết hoặc mạng bị cắt. Ba ý chính đủ để hiểu RabbitMQ:
+[[concepts/raft|Raft]] là thuật toán đồng thuận: cách để nhiều máy đồng ý về một chuỗi thay đổi, kể cả khi vài máy chết hoặc mạng bị cắt. Ba ý chính đủ để hiểu RabbitMQ:
 
 1. **Một leader tại một thời điểm.** Follower không nghe thấy leader một lúc thì đứng ra ứng cử; được đa số bỏ phiếu thì thành leader.
 2. **Ghi theo đa số.** Một mục chỉ được coi là "đã ghi" khi đa số đã chép. Vì hai nhóm đa số luôn có ít nhất một máy chung, leader mới chắc chắn có mọi mục đã ghi.
@@ -119,7 +119,7 @@ RabbitMQ dùng Raft (qua thư viện Ra) cho quorum queue, cho stream, và từ 
 
 ### Delivery limit: chặn tin độc
 
-[[delivery-limit|Delivery limit]] là số lần một tin được phép giao thất bại trên quorum queue. Vượt giới hạn thì tin bị dead-letter (lý do `delivery_limit`), hoặc bị bỏ nếu không có DLX. Đây là lớp phòng thủ tự động chống [[poison-message|tin độc]] ở ga 6.
+[[concepts/delivery-limit|Delivery limit]] là số lần một tin được phép giao thất bại trên quorum queue. Vượt giới hạn thì tin bị dead-letter (lý do `delivery_limit`), hoặc bị bỏ nếu không có DLX. Đây là lớp phòng thủ tự động chống [[concepts/poison-message|tin độc]] ở ga 6.
 
 - **Mặc định 20 từ 4.0.** Bản 3.13 trở về trước mặc định không giới hạn. Đặt bằng `x-delivery-limit` hoặc policy (từ 4.4).
 - **4.3 đổi cách đếm.** Header `x-delivery-count` chỉ tăng khi lần giao **thất bại**: consumer `reject`, consumer chết hoặc mất kết nối khi đang giữ tin. **`nack` với requeue không được đếm**, và hết hạn consumer timeout cũng không. Header mới `x-acquired-count` thì đếm mọi lần tin được lấy ra.
@@ -128,7 +128,7 @@ Hệ quả thực tế: thư viện nào xử lý lỗi bằng `nack(requeue = t
 
 ### Stream: cuốn sổ đọc lại được
 
-[[stream|Stream]] (có từ 3.9) là một log chỉ ghi nối, được sao chép như quorum queue. Khác biệt lớn nhất: **đọc không xóa**.
+[[concepts/stream|Stream]] (có từ 3.9) là một log chỉ ghi nối, được sao chép như quorum queue. Khác biệt lớn nhất: **đọc không xóa**.
 
 - Tin nằm trong stream theo **retention**: `x-max-age` (ví dụ `7D`) hoặc `x-max-length-bytes`. Dữ liệu được ghi theo từng đoạn (segment), và retention xóa theo cả đoạn, không theo từng tin.
 - Một tin được đọc bởi bao nhiêu consumer cũng được, không cần mỗi consumer một queue như fanout ở ga 3. Hợp khi có hàng chục hay hàng trăm bên cùng đọc một dòng sự kiện.
@@ -145,7 +145,7 @@ Stream không có TTL theo tin, DLX, priority, consumer priority hay delivery li
 
 ### Stream offset: đọc từ trang nào
 
-[[stream-offset|Stream offset]] là số thứ tự của tin trong stream, bắt đầu từ 0. Tham số `x-stream-offset` nhận:
+[[concepts/stream-offset|Stream offset]] là số thứ tự của tin trong stream, bắt đầu từ 0. Tham số `x-stream-offset` nhận:
 
 | Giá trị | Bắt đầu từ |
 |---|---|
@@ -159,7 +159,7 @@ Stream không có TTL theo tin, DLX, priority, consumer priority hay delivery li
 
 ### Single active consumer: một người trực, nhiều người dự phòng
 
-[[single-active-consumer|Single active consumer]] (SAC) bật bằng tham số `x-single-active-consumer: true` khi khai báo queue (classic hoặc quorum; với stream thì qua stream protocol). Nhiều consumer đăng ký, nhưng broker chỉ giao tin cho **một**. Consumer đó hủy đăng ký hoặc chết thì broker chọn consumer kế tiếp.
+[[concepts/single-active-consumer|Single active consumer]] (SAC) bật bằng tham số `x-single-active-consumer: true` khi khai báo queue (classic hoặc quorum; với stream thì qua stream protocol). Nhiều consumer đăng ký, nhưng broker chỉ giao tin cho **một**. Consumer đó hủy đăng ký hoặc chết thì broker chọn consumer kế tiếp.
 
 SAC giải bài ở ga 5: giữ đúng thứ tự xử lý (chỉ một người làm) mà vẫn không có điểm chết duy nhất (luôn có người dự phòng). Cái giá là không xử lý song song được trên queue đó; muốn vừa có thứ tự vừa song song thì chia thành nhiều queue theo khóa (consistent hash ở ga 3, hoặc super stream), mỗi queue một SAC.
 
@@ -189,7 +189,7 @@ node stream-offsets.ts
 node ../rabbitmq-dlx-retry/dlx-retry.ts   # phần 2: delivery limit
 ```
 
-Phần sao chép và bầu leader cần cụm nhiều node, nên ví dụ của nó nằm ở [[2026-11-21-rabbitmq-cluster|ga 8]].
+Phần sao chép và bầu leader cần cụm nhiều node, nên ví dụ của nó nằm ở [[posts/2026-11-21-rabbitmq-cluster|ga 8]].
 
 ### Stream: đọc không xóa
 

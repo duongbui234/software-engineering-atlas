@@ -8,4 +8,4 @@ region: Vùng Cache
 
 **ETag** do server đặt; client hỏi lại bằng `If-None-Match`, chưa đổi thì nhận `304 Not Modified` không có body. Strong ETag (mặc định) là giống từng byte, weak (`W/"..."`) là tương đương về nghĩa. Lấy ETag từ cột version của database rẻ hơn băm cả body.
 
-Đọc thêm trong bài [[2026-11-22-caching-http|Cache trên đường HTTP]].
+Đọc thêm trong bài [[posts/2026-11-22-caching-http|Cache trên đường HTTP]].

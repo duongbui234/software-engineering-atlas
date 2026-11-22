@@ -17,21 +17,21 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[atomic-gate|Cổng nguyên tử]]: một script Lua trong Redis kiểm tra giới hạn mỗi người, trừ kho và ghi quota trong **một lần chạy** không ai chen được. 3000 người bấm, chỉ 100 người qua cổng, Postgres chỉ thấy 100 transaction thay vì 3000.
+> - [[concepts/atomic-gate|Cổng nguyên tử]]: một script Lua trong Redis kiểm tra giới hạn mỗi người, trừ kho và ghi quota trong **một lần chạy** không ai chen được. 3000 người bấm, chỉ 100 người qua cổng, Postgres chỉ thấy 100 transaction thay vì 3000.
 > - Postgres vẫn là **sổ sự thật**: đơn được tạo bằng UPDATE có điều kiện + INSERT trong một transaction (ga 4). Redis chỉ là bộ đếm để chặn sớm.
-> - Hai nơi lưu cùng một con số thì sẽ lệch. [[compensation|Bù trừ]]: transaction Postgres lỗi thì một script Lua thứ hai trả suất và quota lại cho Redis. DB lỗi 10%: 13 lần bù trừ, cuối cùng vẫn đúng 100 đơn.
-> - [[reconciliation|Đối soát]]: pod chết **giữa** Redis và Postgres thì không ai bù trừ, 3 suất "bốc hơi". Lúc chiến dịch kết thúc, flash-sale đếm đơn thật trong Postgres và sửa lại bộ đếm.
-> - [[defense-in-depth|Phòng thủ nhiều lớp]]: Redis chặn, UPDATE có điều kiện chặn, và `CHECK (sold_count <= allocated_stock)` chặn nốt khi cả hai lớp trên có bug. Cuối bài là [[concurrency-checklist|checklist]] cho cả tuyến.
+> - Hai nơi lưu cùng một con số thì sẽ lệch. [[concepts/compensation|Bù trừ]]: transaction Postgres lỗi thì một script Lua thứ hai trả suất và quota lại cho Redis. DB lỗi 10%: 13 lần bù trừ, cuối cùng vẫn đúng 100 đơn.
+> - [[concepts/reconciliation|Đối soát]]: pod chết **giữa** Redis và Postgres thì không ai bù trừ, 3 suất "bốc hơi". Lúc chiến dịch kết thúc, flash-sale đếm đơn thật trong Postgres và sửa lại bộ đếm.
+> - [[concepts/defense-in-depth|Phòng thủ nhiều lớp]]: Redis chặn, UPDATE có điều kiện chặn, và `CHECK (sold_count <= allocated_stock)` chặn nốt khi cả hai lớp trên có bug. Cuối bài là [[concepts/concurrency-checklist|checklist]] cho cả tuyến.
 
 > [!info] Bối cảnh
 > Ga 7, ga cuối của **tuyến Transaction và khóa**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: mỗi chiến dịch dành riêng một số suất (`allocated_stock`) cho từng SKU; đúng giờ, hàng nghìn người được cho vào theo lượt và bấm mua. Mỗi người chỉ được mua tối đa vài suất mỗi SKU. Bạn không cần biết NestJS, Redis hay code của dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **UPDATE có điều kiện, CHECK**: xem [[2026-11-22-transactions-atomic-update|ga 4]]. **Dòng nóng**: xem [[2026-11-22-transactions-locking|ga 5]]. **Write skew**: xem [[2026-11-22-transactions-isolation|ga 3]].
+> - **UPDATE có điều kiện, CHECK**: xem [[posts/2026-11-22-transactions-atomic-update|ga 4]]. **Dòng nóng**: xem [[posts/2026-11-22-transactions-locking|ga 5]]. **Write skew**: xem [[posts/2026-11-22-transactions-isolation|ga 3]].
 > - **Redis**: cơ sở dữ liệu nằm trong RAM, rất nhanh, xử lý từng lệnh một trên một luồng. Xem [[series/caching|tuyến Caching]].
 > - **Lua script trong Redis**: một đoạn chương trình nhỏ gửi lên Redis bằng lệnh `EVAL`; Redis chạy trọn nó trước khi xử lý lệnh khác.
 > - **`DECRBY` / `INCRBY`**: lệnh Redis trừ / cộng một số nguyên và trả về giá trị mới.
-> - **Outbox**: bảng ghi sự kiện trong cùng transaction với dữ liệu, để gửi đi sau khi commit. Xem [[transactional-outbox|transactional outbox]].
+> - **Outbox**: bảng ghi sự kiện trong cùng transaction với dữ liệu, để gửi đi sau khi commit. Xem [[concepts/transactional-outbox|transactional outbox]].
 > - **Nguồn sự thật (source of truth)**: nơi mà khi hai bản ghi mâu thuẫn, bạn tin nơi đó.
 
 ## Hình dung trước: buổi hòa nhạc có cổng soát vé
@@ -40,11 +40,11 @@ Một buổi hòa nhạc có 100 ghế và 3000 người muốn vào.
 
 | Đời thường | Khái niệm |
 |---|---|
-| Cổng ngoài có một **máy đếm bấm tay**: đếm đủ 100 thì đóng cổng, ai chưa có vé quay về ngay | [[atomic-gate\|Cổng nguyên tử]] (Redis Lua) |
+| Cổng ngoài có một **máy đếm bấm tay**: đếm đủ 100 thì đóng cổng, ai chưa có vé quay về ngay | [[concepts/atomic-gate\|Cổng nguyên tử]] (Redis Lua) |
 | Quầy bên trong ghi tên từng khách vào **sổ ghế chính thức**; chỉ người đã qua cổng mới tới quầy | Postgres, nguồn sự thật |
-| Khách qua cổng nhưng quầy ghi sổ bị lỗi: bấm máy đếm lùi lại 1 để cổng mở cho người khác | [[compensation\|Bù trừ]] |
-| Khách qua cổng rồi ngất trước khi tới quầy: máy đếm nói 100, sổ chỉ có 97. Cuối buổi, đếm lại sổ, sửa máy đếm | [[reconciliation\|Đối soát]] |
-| Sổ ghế in sẵn đúng 100 dòng: dù cổng và quầy đều sai, không thể ghi khách thứ 101 | [[defense-in-depth\|Phòng thủ nhiều lớp]] (`CHECK`) |
+| Khách qua cổng nhưng quầy ghi sổ bị lỗi: bấm máy đếm lùi lại 1 để cổng mở cho người khác | [[concepts/compensation\|Bù trừ]] |
+| Khách qua cổng rồi ngất trước khi tới quầy: máy đếm nói 100, sổ chỉ có 97. Cuối buổi, đếm lại sổ, sửa máy đếm | [[concepts/reconciliation\|Đối soát]] |
+| Sổ ghế in sẵn đúng 100 dòng: dù cổng và quầy đều sai, không thể ghi khách thứ 101 | [[concepts/defense-in-depth\|Phòng thủ nhiều lớp]] (`CHECK`) |
 
 ```mermaid
 flowchart TB
@@ -71,7 +71,7 @@ Sáu ga trước cho mình một cách đúng: một câu `UPDATE … WHERE sold
 
 ### Cổng nguyên tử trong Redis
 
-Redis xử lý lệnh trên một luồng, và một script Lua được chạy trọn trước khi lệnh khác được xử lý. Vì vậy một script vừa đọc vừa ghi nhiều key là một [[atomic-gate|thao tác nguyên tử]]: không có khe hở read-modify-write nào để chen vào, không cần khóa phân tán. Đây là script giữ suất của flash-sale, rút gọn:
+Redis xử lý lệnh trên một luồng, và một script Lua được chạy trọn trước khi lệnh khác được xử lý. Vì vậy một script vừa đọc vừa ghi nhiều key là một [[concepts/atomic-gate|thao tác nguyên tử]]: không có khe hở read-modify-write nào để chen vào, không cần khóa phân tán. Đây là script giữ suất của flash-sale, rút gọn:
 
 ```lua
 -- KEYS[1] = flash:stock:{campaignId}:{skuId}
@@ -103,7 +103,7 @@ Vì Redis đã chặn, chỉ khoảng 100 request tới được dòng nóng, n�
 
 ### Bù trừ khi Postgres lỗi
 
-Redis đã trừ, rồi transaction Postgres lỗi (mất kết nối, timeout, vi phạm ràng buộc). Nếu không làm gì, suất đó biến mất khỏi Redis mà không có đơn nào. flash-sale bắt lỗi và chạy [[compensation|bù trừ]] bằng một script Lua thứ hai: cộng lại suất **và** trừ lại quota của người đó trong cùng một lần chạy. Comment trong code giải thích vì sao phải là một script: nếu tách hai lệnh mà lệnh thứ hai lỗi, suất đã trả nhưng quota vẫn cao, người đó bị khóa vĩnh viễn với lỗi "vượt giới hạn" dù chưa mua được gì. Script bù trừ còn chặn quota không xuống dưới 0.
+Redis đã trừ, rồi transaction Postgres lỗi (mất kết nối, timeout, vi phạm ràng buộc). Nếu không làm gì, suất đó biến mất khỏi Redis mà không có đơn nào. flash-sale bắt lỗi và chạy [[concepts/compensation|bù trừ]] bằng một script Lua thứ hai: cộng lại suất **và** trừ lại quota của người đó trong cùng một lần chạy. Comment trong code giải thích vì sao phải là một script: nếu tách hai lệnh mà lệnh thứ hai lỗi, suất đã trả nhưng quota vẫn cao, người đó bị khóa vĩnh viễn với lỗi "vượt giới hạn" dù chưa mua được gì. Script bù trừ còn chặn quota không xuống dưới 0.
 
 Bù trừ là phiên bản thu nhỏ của mẫu saga: thay vì một transaction trải qua hai hệ thống (không có), mỗi hệ thống có transaction riêng và một thao tác "hoàn tác" cho trường hợp bước sau thất bại.
 
@@ -111,7 +111,7 @@ Bù trừ là phiên bản thu nhỏ của mẫu saga: thay vì một transactio
 
 Bù trừ chạy trong khối `catch`. Nếu pod bị kill **giữa** lúc Redis trừ xong và lúc transaction Postgres commit, khối `catch` không bao giờ chạy. Redis đã trừ, Postgres không có đơn: một "suất ma". Trường hợp thứ hai: đơn bị hủy nhưng sự kiện hủy chưa tới consumer cập nhật Redis.
 
-flash-sale xử lý bằng [[reconciliation|đối soát]] lúc chiến dịch kết thúc: dừng worker hàng chờ, đếm **đơn thật chưa hủy** trong Postgres cho từng SKU (đó là nguồn sự thật, không phải `sold_count` hay Redis), trong một transaction giữ khóa chiến dịch thì sửa bộ đếm cho khớp, trả phần chưa bán về kho thường, đổi trạng thái sang ENDED, rồi xóa các key Redis. Báo cáo đối soát ghi rõ từng SKU khớp hay phải sửa, và lệch bao nhiêu.
+flash-sale xử lý bằng [[concepts/reconciliation|đối soát]] lúc chiến dịch kết thúc: dừng worker hàng chờ, đếm **đơn thật chưa hủy** trong Postgres cho từng SKU (đó là nguồn sự thật, không phải `sold_count` hay Redis), trong một transaction giữ khóa chiến dịch thì sửa bộ đếm cho khớp, trả phần chưa bán về kho thường, đổi trạng thái sang ENDED, rồi xóa các key Redis. Báo cáo đối soát ghi rõ từng SKU khớp hay phải sửa, và lệch bao nhiêu.
 
 Làm lúc kết thúc là có chủ đích: lúc đó không còn request nào đang nằm giữa Redis và Postgres, nên con số đếm được là cuối cùng. Đối soát giữa chừng thì phải tính tới các request đang bay, nếu không sẽ "trả lại" một suất đang được một request hợp lệ dùng.
 
@@ -125,9 +125,9 @@ Ba lớp, mỗi lớp bắt lỗi của lớp trước:
 | UPDATE có điều kiện trong transaction | bán quá khi Redis lệch lên trên | lớp 3 vẫn chặn |
 | `CHECK (sold_count <= allocated_stock)` | mọi câu ghi vi phạm, từ bất kỳ code nào | (không còn lớp nào: dữ liệu luôn đúng) |
 
-Đó là [[defense-in-depth|phòng thủ nhiều lớp]]: không lớp nào được giả định là các lớp khác đúng. Lớp cuối nằm trong database vì database là chỗ duy nhất mọi đường ghi đều phải đi qua.
+Đó là [[concepts/defense-in-depth|phòng thủ nhiều lớp]]: không lớp nào được giả định là các lớp khác đúng. Lớp cuối nằm trong database vì database là chỗ duy nhất mọi đường ghi đều phải đi qua.
 
-Một con đường khác cho cùng bài toán là cách của Shopify: bỏ Redis khỏi việc giữ hàng, mỗi suất là một dòng riêng trong MySQL, người mua khóa một dòng trống bằng `SKIP LOCKED` (ga 5). Không còn hai nguồn sự thật để đối soát, đổi lại database phải chịu toàn bộ lưu lượng. Xem [[2026-11-21-shopify-flash-sale|Shopify xử lý flash sale thế nào]].
+Một con đường khác cho cùng bài toán là cách của Shopify: bỏ Redis khỏi việc giữ hàng, mỗi suất là một dòng riêng trong MySQL, người mua khóa một dòng trống bằng `SKIP LOCKED` (ga 5). Không còn hai nguồn sự thật để đối soát, đổi lại database phải chịu toàn bộ lưu lượng. Xem [[posts/2026-11-21-shopify-flash-sale|Shopify xử lý flash sale thế nào]].
 
 ## Ví dụ chạy được
 
@@ -185,7 +185,7 @@ D. Một đoạn code lỗi ghi sold vượt allocated → 23514: new row for re
 
 ## Checklist cho cả tuyến
 
-[[concurrency-checklist|Checklist]] mình rút ra sau bảy ga, cho bất kỳ chỗ nào nhiều request cùng ghi:
+[[concepts/concurrency-checklist|Checklist]] mình rút ra sau bảy ga, cho bất kỳ chỗ nào nhiều request cùng ghi:
 
 1. Mọi thao tác nhiều bước nằm trong **một transaction**, truyền `tx` xuống thay vì để mỗi service tự mở (ga 1).
 2. Không có **read-modify-write** trên dữ liệu dùng chung: không đọc lên app rồi ghi lại con số app tính (ga 2).
@@ -208,7 +208,7 @@ D. Một đoạn code lỗi ghi sold vượt allocated → 23514: new row for re
 - **"Bù trừ là đủ, không cần đối soát."** Bù trừ chỉ chạy khi process còn sống để chạy nó. Pod bị kill, mạng tới Redis rớt đúng lúc: chỉ đối soát bắt được.
 - **Đối soát giữa chừng mà quên request đang bay.** Đặt Redis bằng `allocated - sold` trong lúc vẫn có request đã trừ Redis mà chưa commit Postgres là trả lại một suất đang được dùng, và lại bán quá ở tầng Redis. Đối soát khi đã dừng nhận request, hoặc trừ đi số đang bay.
 - **Lấy bộ đếm làm sự thật.** `sold_count` và Redis đều là bộ đếm có thể lệch. flash-sale đối soát theo **đơn thật chưa hủy**.
-- **Key của một script nằm trên nhiều node Redis Cluster.** Script chỉ nguyên tử khi mọi key nằm trên cùng một node; với Redis Cluster, các key phải cùng hash slot (dùng hash tag `{campaignId}`), xem [[hash-slot|hash slot]].
+- **Key của một script nằm trên nhiều node Redis Cluster.** Script chỉ nguyên tử khi mọi key nằm trên cùng một node; với Redis Cluster, các key phải cùng hash slot (dùng hash tag `{campaignId}`), xem [[concepts/hash-slot|hash slot]].
 
 ## Câu hỏi tự kiểm tra
 

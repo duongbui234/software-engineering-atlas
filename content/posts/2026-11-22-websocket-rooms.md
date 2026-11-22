@@ -18,21 +18,21 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[namespace|Namespace]] (`/flash-sale`, `/notifications`) chia server thành các kênh có middleware và handler riêng. [[room|Room]] là nhóm socket **chỉ server biết**; `to('user:u1').emit()` tới mọi tab của một người.
-> - [[multiplexing|Multiplexing]]: hai lời gọi `io()` tới hai namespace cùng origin đi chung **một** kết nối, và option `transports` của lời gọi thứ hai **bị bỏ qua**. flash-sale rất có thể đang dính đúng bẫy này.
-> - [[auto-reconnect|Auto reconnect]]: client chờ 1, 2, 4, 5, 5… giây (có ngẫu nhiên) rồi thử lại, mãi mãi. Đặt `reconnectionAttempts: 5` thì sau lần thứ năm client bỏ cuộc vĩnh viễn.
-> - [[delivery-guarantee|Delivery guarantee]] mặc định là **at most once**: client mất kết nối thì đệm tin của nó lại, còn tin server gửi trong lúc đó là mất.
-> - [[connection-state-recovery|Connection state recovery]] giữ id, room và tin bị lỡ trong một khoảng ngắn, nhưng không chạy với Redis adapter dạng Pub/Sub mà flash-sale đang dùng.
+> - [[concepts/namespace|Namespace]] (`/flash-sale`, `/notifications`) chia server thành các kênh có middleware và handler riêng. [[concepts/room|Room]] là nhóm socket **chỉ server biết**; `to('user:u1').emit()` tới mọi tab của một người.
+> - [[concepts/multiplexing|Multiplexing]]: hai lời gọi `io()` tới hai namespace cùng origin đi chung **một** kết nối, và option `transports` của lời gọi thứ hai **bị bỏ qua**. flash-sale rất có thể đang dính đúng bẫy này.
+> - [[concepts/auto-reconnect|Auto reconnect]]: client chờ 1, 2, 4, 5, 5… giây (có ngẫu nhiên) rồi thử lại, mãi mãi. Đặt `reconnectionAttempts: 5` thì sau lần thứ năm client bỏ cuộc vĩnh viễn.
+> - [[concepts/delivery-guarantee|Delivery guarantee]] mặc định là **at most once**: client mất kết nối thì đệm tin của nó lại, còn tin server gửi trong lúc đó là mất.
+> - [[concepts/connection-state-recovery|Connection state recovery]] giữ id, room và tin bị lỡ trong một khoảng ngắn, nhưng không chạy với Redis adapter dạng Pub/Sub mà flash-sale đang dùng.
 
 > [!info] Bối cảnh
 > Ga 4 của **tuyến WebSocket và Socket.IO**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: khi tới lượt, server đẩy `checkout_ready` cho đúng người đó (mọi tab họ đang mở), và đẩy `stock_update` cho mọi người đang xem một chiến dịch. Frontend mở hai kết nối Socket.IO: `/flash-sale` và `/notifications`. Bạn không cần biết NestJS hay React.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Engine.IO, transport, `transports: ['websocket']`, gói CONNECT, ack**: xem [[2026-11-22-websocket-socketio|ga 3]].
+> - **Engine.IO, transport, `transports: ['websocket']`, gói CONNECT, ack**: xem [[posts/2026-11-22-websocket-socketio|ga 3]].
 > - **Origin**: phần `giao thức://tên miền:cổng` của URL. `https://api.shop.vn/flash-sale` và `https://api.shop.vn/notifications` cùng origin.
 > - **Manager**: đối tượng trong `socket.io-client` giữ một kết nối Engine.IO và lo việc kết nối lại.
 > - **React effect (`useEffect`)**: đoạn code React chạy sau khi giao diện được vẽ, thường để mở kết nối. Effect của component con chạy **trước** effect của component cha.
-> - **At most once / at least once**: nhiều nhất một lần (có thể mất) / ít nhất một lần (có thể trùng). Xem [[at-least-once-delivery|ga RabbitMQ]].
+> - **At most once / at least once**: nhiều nhất một lần (có thể mất) / ít nhất một lần (có thể trùng). Xem [[concepts/at-least-once-delivery|ga RabbitMQ]].
 > - **Adapter**: phần của Socket.IO quyết định một lần phát tin tới những socket nào; ga 5 nói kỹ.
 
 ## Hình dung trước: tòa nhà có tổng đài nội bộ
@@ -41,12 +41,12 @@ Tổng đài ở ga 3 giờ phục vụ một tòa nhà văn phòng.
 
 | Đời thường | Khái niệm |
 |---|---|
-| Mỗi phòng ban có số máy lẻ riêng (bán hàng, chăm sóc khách) | [[namespace\|Namespace]] |
-| Nhóm chat do lễ tân lập, ai được thêm vào thì nghe; người trong nhóm không xem được danh sách | [[room\|Room]] |
-| Một đường dây vào tòa nhà chở cuộc gọi tới nhiều máy lẻ | [[multiplexing\|Multiplexing]] |
-| Rớt máy thì điện thoại tự gọi lại sau 1 giây, 2 giây, 4 giây… | [[auto-reconnect\|Auto reconnect]] |
-| Lễ tân đọc thông báo lúc bạn đang rớt máy: bạn không bao giờ nghe được | [[delivery-guarantee\|At most once]] |
-| Lễ tân ghi âm 2 phút gần nhất, gọi lại kịp thì được nghe lại | [[connection-state-recovery\|Connection state recovery]] |
+| Mỗi phòng ban có số máy lẻ riêng (bán hàng, chăm sóc khách) | [[concepts/namespace\|Namespace]] |
+| Nhóm chat do lễ tân lập, ai được thêm vào thì nghe; người trong nhóm không xem được danh sách | [[concepts/room\|Room]] |
+| Một đường dây vào tòa nhà chở cuộc gọi tới nhiều máy lẻ | [[concepts/multiplexing\|Multiplexing]] |
+| Rớt máy thì điện thoại tự gọi lại sau 1 giây, 2 giây, 4 giây… | [[concepts/auto-reconnect\|Auto reconnect]] |
+| Lễ tân đọc thông báo lúc bạn đang rớt máy: bạn không bao giờ nghe được | [[concepts/delivery-guarantee\|At most once]] |
+| Lễ tân ghi âm 2 phút gần nhất, gọi lại kịp thì được nghe lại | [[concepts/connection-state-recovery\|Connection state recovery]] |
 
 ```mermaid
 flowchart TB
@@ -78,7 +78,7 @@ Mình từng nghĩ room, namespace và việc tự nối lại là tính năng c
 
 ### Namespace: kênh theo đường dẫn
 
-**[[namespace|Namespace]]** chia một server Socket.IO thành nhiều kênh logic theo đường dẫn. Mỗi namespace có middleware riêng (ví dụ xác thực), handler riêng, room riêng. flash-sale có hai:
+**[[concepts/namespace|Namespace]]** chia một server Socket.IO thành nhiều kênh logic theo đường dẫn. Mỗi namespace có middleware riêng (ví dụ xác thực), handler riêng, room riêng. flash-sale có hai:
 
 - `/flash-sale`: `checkout_ready`, `stock_update`, `queue_position`, `campaign_ended`, `order_result`; client gửi lên `subscribe_campaign`.
 - `/notifications`: `notification:new`, `notification:unread-count`, `notification:read`.
@@ -87,7 +87,7 @@ Phía client, namespace nằm trong URL: `io('https://api…/flash-sale')`. Đư
 
 ### Room: nhóm chỉ server biết
 
-**[[room|Room]]** là một nhóm socket do server quản lý. Server cho một socket vào phòng bằng `socket.join('campaign:c-21h')`, và phát cho cả phòng bằng `to('campaign:c-21h').emit(…)`. Vài điều cần biết:
+**[[concepts/room|Room]]** là một nhóm socket do server quản lý. Server cho một socket vào phòng bằng `socket.join('campaign:c-21h')`, và phát cho cả phòng bằng `to('campaign:c-21h').emit(…)`. Vài điều cần biết:
 
 - **Client không biết gì về room.** Không có API phía client để xem mình đang ở phòng nào hay tự vào phòng. Client chỉ gửi một sự kiện (`subscribe_campaign`), server quyết định cho vào phòng nào. Đây cũng là lớp phân quyền: đừng viết handler kiểu "client gửi tên phòng nào thì cho vào phòng đó".
 - **Mỗi socket tự ở trong phòng mang id của nó**, nên `to(socketId).emit()` gửi cho riêng socket đó.
@@ -97,7 +97,7 @@ Phía client, namespace nằm trong URL: `io('https://api…/flash-sale')`. Đư
 
 ### Multiplexing: hai namespace, một kết nối, và option bị bỏ qua
 
-**[[multiplexing|Multiplexing]]**: khi bạn gọi `io()` hai lần tới hai namespace của **cùng một origin**, `socket.io-client` không mở hai kết nối. Nó giữ một bộ nhớ đệm Manager theo origin, và lời gọi thứ hai dùng lại Manager của lời gọi thứ nhất. Đọc mã nguồn `socket.io-client` 4.8 (hàm `lookup`):
+**[[concepts/multiplexing|Multiplexing]]**: khi bạn gọi `io()` hai lần tới hai namespace của **cùng một origin**, `socket.io-client` không mở hai kết nối. Nó giữ một bộ nhớ đệm Manager theo origin, và lời gọi thứ hai dùng lại Manager của lời gọi thứ nhất. Đọc mã nguồn `socket.io-client` 4.8 (hàm `lookup`):
 
 ```ts
 // trích từ socket.io-client 4.8.4, build/esm/index.js (rút gọn)
@@ -121,7 +121,7 @@ Hệ quả nằm ở ga 5: còn long polling thì phải có sticky session, và
 
 ### Auto reconnect: gọi lại, nhưng có giới hạn không?
 
-**[[auto-reconnect|Auto reconnect]]** là việc của Manager phía client. Khi kết nối đứt bất thường (1006, hết heartbeat, server tắt), nó chờ rồi thử lại với thời gian chờ tăng dần:
+**[[concepts/auto-reconnect|Auto reconnect]]** là việc của Manager phía client. Khi kết nối đứt bất thường (1006, hết heartbeat, server tắt), nó chờ rồi thử lại với thời gian chờ tăng dần:
 
 - `reconnectionDelay` 1000 ms, nhân đôi mỗi lần, tối đa `reconnectionDelayMax` 5000 ms: khoảng 1, 2, 4, 5, 5, 5… giây.
 - `randomizationFactor` 0,5: mỗi lần chờ lệch ngẫu nhiên tới ±50%, để hàng nghìn client không cùng thử lại một lúc (ga 5).
@@ -133,7 +133,7 @@ Hai trường hợp client **không** tự nối lại: bạn gọi `socket.disc
 
 ### Delivery guarantee: at most once
 
-Tài liệu Socket.IO nói rõ **[[delivery-guarantee|bảo đảm giao tin]]** mặc định:
+Tài liệu Socket.IO nói rõ **[[concepts/delivery-guarantee|bảo đảm giao tin]]** mặc định:
 
 - **Thứ tự được giữ**, kể cả khi đang nâng cấp từ polling lên WebSocket.
 - **At most once**: tin có thể mất. Kết nối đứt giữa chừng thì bên gửi không biết bên nhận đã nhận chưa, và không có gửi lại sau khi nối lại.
@@ -145,7 +145,7 @@ Muốn **at least once** cho chiều server → client, phải tự làm: mỗi 
 
 ### Connection state recovery: ghi âm 2 phút gần nhất
 
-Socket.IO 4.6 thêm **[[connection-state-recovery|connection state recovery]]**. Bật ở server:
+Socket.IO 4.6 thêm **[[concepts/connection-state-recovery|connection state recovery]]**. Bật ở server:
 
 ```ts
 const io = new Server(httpServer, {

@@ -18,24 +18,24 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - Có hai mức đảm bảo: **at-most-once** (không ack, không confirm: có thể mất, không trùng) và [[at-least-once-delivery|at-least-once]] (ack + confirm + tin bền: không mất, **có thể trùng**).
-> - RabbitMQ không hứa [[exactly-once-delivery|exactly-once]]. "Đúng một lần" là việc của ứng dụng: at-least-once cộng [[idempotent-consumer|consumer idempotent]].
+> - Có hai mức đảm bảo: **at-most-once** (không ack, không confirm: có thể mất, không trùng) và [[concepts/at-least-once-delivery|at-least-once]] (ack + confirm + tin bền: không mất, **có thể trùng**).
+> - RabbitMQ không hứa [[concepts/exactly-once-delivery|exactly-once]]. "Đúng một lần" là việc của ứng dụng: at-least-once cộng [[concepts/idempotent-consumer|consumer idempotent]].
 > - Consumer idempotent ghi mã sự kiện vào một bảng "đã xử lý" **trong cùng transaction** với việc nghiệp vụ; gặp lại mã cũ thì bỏ qua và vẫn ack.
-> - [[transactional-outbox|Transactional outbox]] giải bài "ghi database rồi gửi tin": ghi sự kiện vào bảng outbox cùng transaction với dữ liệu, một tiến trình khác đọc outbox và gửi đi.
-> - [[message-ordering|Thứ tự]] chỉ giữ trong một queue với một consumer; nhiều consumer, requeue hay priority đều đảo thứ tự. [[request-reply|Request-reply]] dùng `reply_to` + `correlation_id`.
+> - [[concepts/transactional-outbox|Transactional outbox]] giải bài "ghi database rồi gửi tin": ghi sự kiện vào bảng outbox cùng transaction với dữ liệu, một tiến trình khác đọc outbox và gửi đi.
+> - [[concepts/message-ordering|Thứ tự]] chỉ giữ trong một queue với một consumer; nhiều consumer, requeue hay priority đều đảo thứ tự. [[concepts/request-reply|Request-reply]] dùng `reply_to` + `correlation_id`.
 
 > [!info] Bối cảnh
 > Ga 5 của **tuyến RabbitMQ**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết. Khi khách hủy đơn, một sự kiện `order.cancelled` được gửi đi để dịch vụ kho **cộng lại** số lượng. Cộng thiếu thì hàng bị kẹt, cộng hai lần thì kho ảo, bán quá số có thật. Ga này chính là chuyện "không thiếu, không thừa". Đoạn code flash-sale trong bài đã rút gọn và đổi tên; bạn không cần biết dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Ack, publisher confirm, persistent, redelivered**: xem [[2026-11-21-rabbitmq-ack-confirm|ga 4]].
-> - **Transaction (giao dịch database)**: nhóm câu lệnh SQL hoặc cùng có hiệu lực, hoặc cùng bị hủy. Xem thêm [[dual-write|Ghi hai nơi]].
+> - **Ack, publisher confirm, persistent, redelivered**: xem [[posts/2026-11-21-rabbitmq-ack-confirm|ga 4]].
+> - **Transaction (giao dịch database)**: nhóm câu lệnh SQL hoặc cùng có hiệu lực, hoặc cùng bị hủy. Xem thêm [[concepts/dual-write|Ghi hai nơi]].
 > - **Commit**: lệnh chốt transaction, mọi thay đổi chính thức có hiệu lực.
 > - **Postgres**: hệ quản trị cơ sở dữ liệu flash-sale dùng.
 > - **`ON CONFLICT DO NOTHING`**: câu `INSERT` của Postgres "nếu khóa đã tồn tại thì không làm gì", không báo lỗi.
 > - **`FOR UPDATE SKIP LOCKED`**: khóa các dòng mình đọc, và bỏ qua dòng đang bị người khác khóa. Cho phép nhiều tiến trình cùng lấy việc mà không giẫm chân nhau.
 > - **Cron job**: việc chạy định kỳ, ví dụ mỗi giây một lần.
-> - **Idempotency**: làm một lần hay nhiều lần cho cùng kết quả. Xem [[idempotency|Idempotency]] ở tuyến API.
+> - **Idempotency**: làm một lần hay nhiều lần cho cùng kết quả. Xem [[concepts/idempotency|Idempotency]] ở tuyến API.
 > - **UUID**: chuỗi ngẫu nhiên đủ dài để gần như không bao giờ trùng, dùng làm mã định danh.
 
 ## Hình dung trước: sổ gửi thư và sổ đã nhận
@@ -44,12 +44,12 @@ Một văn phòng làm việc cẩn thận có hai cuốn sổ: **sổ gửi** �
 
 | Đời thường | Khái niệm |
 |---|---|
-| Bưu điện hứa: thư bảo đảm thì không mất, nhưng thỉnh thoảng phát hai lần | [[at-least-once-delivery\|At-least-once delivery]] |
-| Lời hứa "mỗi thư tới đúng một lần" mà không bưu điện nào dám ký | [[exactly-once-delivery\|Exactly-once delivery]] |
-| Phòng nhận tra sổ: thư số 7 đã làm rồi thì cất đi, không làm lại | [[idempotent-consumer\|Idempotent consumer]] |
-| Viết thư vào **sổ gửi** cùng lúc ghi việc vào sổ sách; người đưa thư đi theo sổ | [[transactional-outbox\|Transactional outbox]] |
-| Một hàng người chờ một quầy thì đúng thứ tự; mở ba quầy thì ai xong trước không biết | [[message-ordering\|Message ordering]] |
-| Gửi thư hỏi giá, ghi "trả lời về hộc số 12, mã câu hỏi A7" | [[request-reply\|Request-reply]] |
+| Bưu điện hứa: thư bảo đảm thì không mất, nhưng thỉnh thoảng phát hai lần | [[concepts/at-least-once-delivery\|At-least-once delivery]] |
+| Lời hứa "mỗi thư tới đúng một lần" mà không bưu điện nào dám ký | [[concepts/exactly-once-delivery\|Exactly-once delivery]] |
+| Phòng nhận tra sổ: thư số 7 đã làm rồi thì cất đi, không làm lại | [[concepts/idempotent-consumer\|Idempotent consumer]] |
+| Viết thư vào **sổ gửi** cùng lúc ghi việc vào sổ sách; người đưa thư đi theo sổ | [[concepts/transactional-outbox\|Transactional outbox]] |
+| Một hàng người chờ một quầy thì đúng thứ tự; mở ba quầy thì ai xong trước không biết | [[concepts/message-ordering\|Message ordering]] |
+| Gửi thư hỏi giá, ghi "trả lời về hộc số 12, mã câu hỏi A7" | [[concepts/request-reply\|Request-reply]] |
 
 ```mermaid
 flowchart TB
@@ -90,7 +90,7 @@ Không có cấu hình nào của RabbitMQ tắt được cả ba. Phải sửa 
 
 Tài liệu "Reliability" của RabbitMQ gọi tên hai mức:
 
-| | At-most-once | [[at-least-once-delivery\|At-least-once]] |
+| | At-most-once | [[concepts/at-least-once-delivery\|At-least-once]] |
 |---|---|---|
 | Cấu hình | auto-ack, không confirm, tin không bền | ack thủ công, confirm, queue bền, tin persistent |
 | Mất tin | có thể | không (trong giới hạn bản sao, ga 7) |
@@ -101,13 +101,13 @@ Hai mức là một đánh đổi: muốn không mất thì phải chấp nhận
 
 ### Vì sao không có exactly-once
 
-[[exactly-once-delivery|Exactly-once]] nghĩa là mỗi tin được *xử lý* đúng một lần, kể cả khi mạng rớt, process chết, broker đổi node. Vấn đề cốt lõi: **việc xử lý và việc ack là hai thao tác ở hai hệ thống khác nhau** (database của bạn và RabbitMQ). Không có transaction nào bao trùm cả hai, nên luôn có một khoảnh khắc giữa "đã làm" và "đã báo". Chết đúng khoảnh khắc đó thì broker không thể biết việc đã xong hay chưa, và lựa chọn an toàn duy nhất là giao lại.
+[[concepts/exactly-once-delivery|Exactly-once]] nghĩa là mỗi tin được *xử lý* đúng một lần, kể cả khi mạng rớt, process chết, broker đổi node. Vấn đề cốt lõi: **việc xử lý và việc ack là hai thao tác ở hai hệ thống khác nhau** (database của bạn và RabbitMQ). Không có transaction nào bao trùm cả hai, nên luôn có một khoảnh khắc giữa "đã làm" và "đã báo". Chết đúng khoảnh khắc đó thì broker không thể biết việc đã xong hay chưa, và lựa chọn an toàn duy nhất là giao lại.
 
 Tài liệu RabbitMQ không hứa exactly-once. Các hệ thống quảng cáo "exactly-once" thường chỉ đảm bảo trong phạm vi chính nó (ví dụ từ một topic này sang topic khác), không tới tận database của consumer. Cách thực tế ở mọi nơi là: **at-least-once + xử lý idempotent = hiệu quả như exactly-once**.
 
 ### Consumer idempotent: sổ "đã xử lý"
 
-[[idempotent-consumer|Idempotent consumer]] là consumer mà nhận một tin hai lần cũng cho kết quả như nhận một lần. Có hai cách:
+[[concepts/idempotent-consumer|Idempotent consumer]] là consumer mà nhận một tin hai lần cũng cho kết quả như nhận một lần. Có hai cách:
 
 1. **Việc tự nhiên idempotent.** "Đặt trạng thái đơn = đã hủy" chạy hai lần vẫn là đã hủy. "Cộng kho thêm 2" thì không.
 2. **Sổ đã xử lý (inbox / dedup table).** Mỗi sự kiện mang một mã duy nhất. Consumer ghi mã vào một bảng có khóa chính là mã đó; nếu ghi được thì làm việc, nếu mã đã có thì bỏ qua.
@@ -145,12 +145,12 @@ Mã sự kiện phải do **người tạo sự kiện** sinh ra và giữ nguy�
 
 ### Transactional outbox: không mất ở phía gửi
 
-Phía gửi có bài toán riêng, chính là [[dual-write|ghi hai nơi]]: hủy đơn trong database **và** gửi sự kiện cho RabbitMQ.
+Phía gửi có bài toán riêng, chính là [[concepts/dual-write|ghi hai nơi]]: hủy đơn trong database **và** gửi sự kiện cho RabbitMQ.
 
 - Commit database rồi mới gửi: process chết giữa hai bước là đơn đã hủy nhưng sự kiện không bao giờ đi. Kho kẹt mãi.
 - Gửi rồi mới commit: commit lỗi (ràng buộc dữ liệu, deadlock) là sự kiện đã đi cho một việc không xảy ra.
 
-[[transactional-outbox|Transactional outbox]] chuyển việc "gửi" thành việc "ghi":
+[[concepts/transactional-outbox|Transactional outbox]] chuyển việc "gửi" thành việc "ghi":
 
 1. Trong **cùng transaction** với việc nghiệp vụ, ghi sự kiện vào bảng `outbox` (trạng thái PENDING).
 2. Một tiến trình riêng, **relay**, định kỳ đọc các dòng PENDING, gửi chúng cho RabbitMQ với publisher confirm.
@@ -176,18 +176,18 @@ Nhờ outbox, broker sập cũng không làm mất sự kiện: chúng nằm tro
 
 ### Thứ tự tin
 
-[[message-ordering|Thứ tự]] trong RabbitMQ giữ được ở mức này: các tin gửi bởi **một producer trên một channel** vào **một queue** sẽ được giao theo đúng thứ tự gửi. Nhưng thứ tự bị đảo khi:
+[[concepts/message-ordering|Thứ tự]] trong RabbitMQ giữ được ở mức này: các tin gửi bởi **một producer trên một channel** vào **một queue** sẽ được giao theo đúng thứ tự gửi. Nhưng thứ tự bị đảo khi:
 
 - **Nhiều consumer cùng đọc một queue**: tin 1 cho A, tin 2 cho B; B nhanh hơn thì tin 2 xong trước.
 - **Requeue**: tin bị trả về được đặt lại vị trí cũ nếu có thể, không thì gần đầu hàng, nhưng trong lúc đó các tin sau đã được giao.
 - **Priority** (ga 6): tin ưu tiên cao vượt lên trước.
 - **Nhiều producer** hay nhiều channel: không có thứ tự chung giữa chúng.
 
-Nếu thứ tự quan trọng (ví dụ "đặt" phải trước "hủy" của cùng một đơn), có ba hướng: một consumer duy nhất cho queue đó, dùng **Single Active Consumer** để vẫn có máy dự phòng ([[2026-11-21-rabbitmq-queue-types|ga 7]]), hoặc chia tin theo khóa bằng consistent hash exchange (ga 3) để mọi tin của một đơn vào cùng một queue. Cách bền nhất là làm consumer **không phụ thuộc thứ tự**: mang số phiên bản trong sự kiện và bỏ qua sự kiện cũ hơn trạng thái hiện tại.
+Nếu thứ tự quan trọng (ví dụ "đặt" phải trước "hủy" của cùng một đơn), có ba hướng: một consumer duy nhất cho queue đó, dùng **Single Active Consumer** để vẫn có máy dự phòng ([[posts/2026-11-21-rabbitmq-queue-types|ga 7]]), hoặc chia tin theo khóa bằng consistent hash exchange (ga 3) để mọi tin của một đơn vào cùng một queue. Cách bền nhất là làm consumer **không phụ thuộc thứ tự**: mang số phiên bản trong sự kiện và bỏ qua sự kiện cũ hơn trạng thái hiện tại.
 
 ### Request-reply: hỏi và chờ trả lời qua broker
 
-Đôi khi cần hỏi qua broker và chờ câu trả lời (RPC). [[request-reply|Request-reply]] dùng hai property ở ga 2:
+Đôi khi cần hỏi qua broker và chờ câu trả lời (RPC). [[concepts/request-reply|Request-reply]] dùng hai property ở ga 2:
 
 - `reply_to`: tên queue mà bên hỏi muốn nhận câu trả lời.
 - `correlation_id`: mã của câu hỏi, để bên hỏi biết câu trả lời nào ứng với câu hỏi nào.

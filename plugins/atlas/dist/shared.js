@@ -3,8 +3,160 @@
 
 export const fm = (f) => (f && f.frontmatter) || {}
 
-export const TYPE_LABEL = { learn: "Bài học", code: "Đọc code dự án", note: "Ghi chú ngắn" }
-export const LEVEL_LABEL = { beginner: "Cơ bản", intermediate: "Trung bình", advanced: "Nâng cao" }
+// ── Song ngữ ─────────────────────────────────────────────────────────────────
+// Tiếng Việt là bản gốc ở gốc content/; bản tiếng Anh là cây song song content/en/ cùng tên file.
+// Mọi danh sách (bản đồ, tuyến, bài mới) chỉ lấy trang cùng ngôn ngữ với trang đang xem.
+export const LANGS = ["vi", "en"]
+const slugOf = (f) => (typeof f === "string" ? f : (f && f.slug) || "")
+export const langOf = (f) => (slugOf(f).startsWith("en/") || slugOf(f) === "en" ? "en" : "vi")
+/** Slug bỏ tiền tố ngôn ngữ: "en/posts/x" → "posts/x". */
+export const baseSlug = (f) => slugOf(f).replace(/^en\//, "")
+/** Slug của cùng trang ở ngôn ngữ `lang`. */
+export const slugIn = (f, lang) => (lang === "en" ? `en/${baseSlug(f)}` : baseSlug(f))
+export const homeSlug = (lang) => (lang === "en" ? "en/index" : "index")
+export const forLang = (allFiles, lang) => allFiles.filter((f) => langOf(f) === lang)
+
+export const STR = {
+  vi: {
+    locale: "vi-VN",
+    tagline: "Sổ tay học kỹ thuật phần mềm",
+    route: "Lộ trình",
+    mainNav: "Điều hướng chính",
+    langNav: "Ngôn ngữ",
+    otherLang: "English",
+    otherLangShort: "EN",
+    otherLangTitle: "Read this page in English",
+    otherLangMissing: "Trang này chưa có bản tiếng Anh, mở trang chủ tiếng Anh",
+    type: { learn: "Bài học", code: "Đọc code dự án", note: "Ghi chú ngắn" },
+    level: { beginner: "Cơ bản", intermediate: "Trung bình", advanced: "Nâng cao" },
+    walked: (n) => `Đã đi ${n} bài`,
+    scaleAria: (n) => `Thước tỉ lệ: đã viết ${n} bài`,
+    currentLine: (t) => `Đang đi ${t}`,
+    currentState: (v, here, n, concepts) => `Đã qua ${v} ga, đang ở ga ${here} trên ${n}${concepts ? `: ${concepts}` : ""}.`,
+    seeRoute: "Xem lộ trình",
+    newPosts: "Bài mới",
+    noPosts: "Chưa có bài nào. Bài đầu tiên sẽ xuất hiện ở đây.",
+    allPosts: (n) => `Xem tất cả ${n} bài`,
+    showing: (n) => ` · đang hiện ${n} bài mới nhất`,
+    postInfo: "Thông tin bài",
+    coord: "Tọa độ",
+    kind: "Loại",
+    written: "Ngày viết",
+    read: "Đọc",
+    minutes: (n) => `${n} phút`,
+    levelLabel: "Mức",
+    tags: "Thẻ",
+    prevStation: (n) => `Ga trước: ${n}`,
+    firstStation: "Ga đầu tiên",
+    wholeLine: (v, n) => `Cả tuyến (${v}/${n})`,
+    walkedStations: (v, n) => `${v} / ${n} ga`,
+    walkedLabel: "Đã đi",
+    concepts: "Khái niệm",
+    nextStation: "Ga tiếp theo",
+    lineDone: "Đã hết tuyến",
+    stationsOf: (t) => `Các ga trên ${t}`,
+    youAreHere: "Bạn đang ở đây",
+    youAreHereLower: "bạn đang ở đây",
+    visitedOn: (d) => `Đã đi${d ? ` ngày ${d}` : ""}`,
+    ahead: "Chưa đi",
+    legendLearn: "Bài học",
+    legendCode: "Đọc code dự án",
+    legendNote: "Ghi chú ngắn",
+    mapTitle: "Bản đồ kiến thức",
+    mapLine: (t, v, n, here) => `Tuyến ${t} đã đi ${v} trên ${n} ga${here ? `, đang ở ga ${here}` : ""}.`,
+    sheetsTitle: "Mục lục bản đồ",
+    sheetsLede: (n) => `${n} tuyến, mỗi tuyến một mảnh. Bản đồ phía trên là mảnh vừa đi.`,
+    sheetsAll: (n) => `Xem tất cả ${n} mảnh`,
+    sheetStations: (v, n) => `${v}/${n} ga`,
+    sheetDone: " · đã đi hết",
+    sheetHere: (n) => ` · đang ở ga ${n}`,
+    looseCode: "LẺ",
+    looseCount: (n) => `${n} địa danh rời`,
+    looseMore: (n) => `và ${n} địa danh khác`,
+    regionFromTag: (t) => `Vùng ${t}`,
+    otherRegion: "Vùng khác",
+    lineTitleShort: (t) => String(t || "").replace(/^Tuyến\s+/i, ""),
+    updated: (d) => `Cập nhật ${d}`,
+    drawnWith: "Vẽ bằng Quartz và archify",
+    hubCorner: (t, n) => `${t}, ${n} ga`,
+    writtenOn: (d) => `Viết ${d}`,
+    railNav: "Điều hướng phụ",
+  },
+  en: {
+    locale: "en-US",
+    tagline: "A software engineering learning journal",
+    route: "Route",
+    mainNav: "Main navigation",
+    langNav: "Language",
+    otherLang: "Tiếng Việt",
+    otherLangShort: "VI",
+    otherLangTitle: "Đọc trang này bằng tiếng Việt",
+    otherLangMissing: "This page has no Vietnamese version; open the Vietnamese home page",
+    type: { learn: "Lesson", code: "Code walkthrough", note: "Short note" },
+    level: { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" },
+    walked: (n) => `${n} posts walked`,
+    scaleAria: (n) => `Scale bar: ${n} posts written`,
+    currentLine: (t) => `Now traveling ${String(t).replace(/^The /, "the ")}`,
+    currentState: (v, here, n, concepts) =>
+      `${v} ${v === 1 ? "station" : "stations"} visited, now at station ${here} of ${n}${concepts ? `: ${concepts}` : ""}.`,
+    seeRoute: "See the route",
+    newPosts: "Latest posts",
+    noPosts: "No posts yet. The first one will show up here.",
+    allPosts: (n) => `See all ${n} posts`,
+    showing: (n) => ` · showing the ${n} newest`,
+    postInfo: "About this post",
+    coord: "Coordinates",
+    kind: "Type",
+    written: "Written",
+    read: "Reading",
+    minutes: (n) => `${n} min`,
+    levelLabel: "Level",
+    tags: "Tags",
+    prevStation: (n) => `Previous station: ${n}`,
+    firstStation: "First station",
+    wholeLine: (v, n) => `Whole line (${v}/${n})`,
+    walkedStations: (v, n) => `${v} / ${n} stations`,
+    walkedLabel: "Visited",
+    concepts: "Concepts",
+    nextStation: "Next station",
+    lineDone: "End of the line",
+    stationsOf: (t) => `Stations on ${t}`,
+    youAreHere: "You are here",
+    youAreHereLower: "you are here",
+    visitedOn: (d) => `Visited${d ? ` ${d}` : ""}`,
+    ahead: "Not yet visited",
+    legendLearn: "Lesson",
+    legendCode: "Code walkthrough",
+    legendNote: "Short note",
+    mapTitle: "Knowledge map",
+    mapLine: (t, v, n, here) => `${t}: ${v} of ${n} stations visited${here ? `, now at ${here}` : ""}.`,
+    sheetsTitle: "Map index",
+    sheetsLede: (n) => `${n} ${n === 1 ? "line" : "lines"}, one sheet each. The map above is the sheet you visited last.`,
+    sheetsAll: (n) => `See all ${n} sheets`,
+    sheetStations: (v, n) => `${v}/${n} stations`,
+    sheetDone: " · line complete",
+    sheetHere: (n) => ` · at station ${n}`,
+    looseCode: "MISC",
+    looseCount: (n) => `${n} standalone ${n === 1 ? "place" : "places"}`,
+    looseMore: (n) => `and ${n} more`,
+    regionFromTag: (t) => `${t} Region`,
+    otherRegion: "Other Region",
+    lineTitleShort: (t) =>
+      String(t || "")
+        .replace(/^The\s+/i, "")
+        .replace(/\s+Line(?=$|:)/, ""),
+    updated: (d) => `Updated ${d}`,
+    drawnWith: "Drawn with Quartz and archify",
+    hubCorner: (t, n) => `${t}, ${n} stations`,
+    writtenOn: (d) => `Written ${d}`,
+    railNav: "Secondary navigation",
+  },
+}
+export const strFor = (f) => STR[langOf(f)]
+
+// giữ cho mã cũ: nhãn tiếng Việt
+export const TYPE_LABEL = STR.vi.type
+export const LEVEL_LABEL = STR.vi.level
 
 /** Đường dẫn tương đối từ trang `from` tới trang `to` (theo quy ước slug của Quartz). */
 export function pathToRoot(slug) {
@@ -34,10 +186,10 @@ export function pageDate(f) {
 export const fmtDay = (d) => (d ? `${pad(d.getDate())}.${pad(d.getMonth() + 1)}` : "")
 export const fmtFull = (d) => (d ? `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}` : "")
 
-export const isIndex = (f) => f.slug === "index"
+export const isIndex = (f) => f.slug === "index" || f.slug === "en/index"
 const isFolderIndex = (f) => typeof f.slug === "string" && f.slug.endsWith("/index")
-export const isPost = (f) => typeof f.slug === "string" && f.slug.startsWith("posts/") && !isFolderIndex(f)
-export const isConcept = (f) => typeof f.slug === "string" && f.slug.startsWith("concepts/") && !isFolderIndex(f)
+export const isPost = (f) => typeof f.slug === "string" && baseSlug(f).startsWith("posts/") && !isFolderIndex(f)
+export const isConcept = (f) => typeof f.slug === "string" && baseSlug(f).startsWith("concepts/") && !isFolderIndex(f)
 export const isHub = (f) => Array.isArray(fm(f).stations) && !!fm(f).series
 // draft đã bị Quartz loại khỏi build (trừ khi drafts.publish bật để xem trước)
 export const isListed = (f) => f.unlisted !== true

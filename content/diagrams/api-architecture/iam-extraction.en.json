@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Design for splitting IAM out of flash-sale (not yet implemented)",
+    "output": "content/diagrams/api-architecture/iam-extraction.en.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Browser",
+      "sublabel": "sees only one address",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "ingress",
+      "type": "cloud",
+      "label": "Cluster entrance",
+      "sublabel": "Ingress NGINX: TLS, rate",
+      "pos": [
+        40,
+        195
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "main",
+      "type": "backend",
+      "label": "Main application",
+      "sublabel": "Main: REST, accepts /auth",
+      "tag": "verifies passes itself with the public key",
+      "pos": [
+        250,
+        190
+      ],
+      "size": [
+        170,
+        74
+      ]
+    },
+    {
+      "id": "iam",
+      "type": "security",
+      "label": "Login service",
+      "sublabel": "iam-service: signs passes",
+      "pos": [
+        510,
+        190
+      ],
+      "size": [
+        170,
+        74
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Blocked pass list",
+      "sublabel": "Redis: blocklist:sid",
+      "pos": [
+        390,
+        40
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "maindb",
+      "type": "database",
+      "label": "Sales DB",
+      "sublabel": "products, orders, payments",
+      "pos": [
+        250,
+        365
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "iamdb",
+      "type": "database",
+      "label": "Users DB",
+      "sublabel": "iam_db: users, permissions",
+      "pos": [
+        510,
+        365
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "https",
+      "from": "browser",
+      "to": "ingress",
+      "label": "HTTPS",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "http",
+      "from": "ingress",
+      "to": "main",
+      "label": "HTTP"
+    },
+    {
+      "id": "grpc",
+      "from": "main",
+      "to": "iam",
+      "label": "gRPC",
+      "variant": "emphasis"
+    },
+    {
+      "id": "main-sql",
+      "from": "main",
+      "to": "maindb",
+      "label": "SQL"
+    },
+    {
+      "id": "iam-sql",
+      "from": "iam",
+      "to": "iamdb",
+      "label": "SQL"
+    },
+    {
+      "id": "read-bl",
+      "from": "main",
+      "to": "redis",
+      "label": "lookup",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "write-bl",
+      "from": "iam",
+      "to": "redis",
+      "label": "write",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "right"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "The hot path skips IAM",
+      "items": [
+        "Each request: Main verifies the pass signature itself",
+        "Revocation: check the blocklist in the shared Redis",
+        "If IAM dies, shopping still works; only new logins fail"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "gRPC between Main and IAM",
+      "items": [
+        "Login, pass refresh, logout",
+        "Fetch many users at once (GetUsersByIds) instead of JOIN",
+        "Change role when approving a seller (SetUserRole, not atomic yet)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The price",
+      "items": [
+        "The DB no longer checks that the user exists (soft FK)",
+        "No more JOIN; batch calls to avoid N+1",
+        "A dedicated gateway is left for a later phase"
+      ]
+    }
+  ]
+}

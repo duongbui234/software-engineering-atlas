@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Placing an order: three statements, one transaction",
+    "output": "content/diagrams/transactions-acid/order-tx.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "Order server",
+      "sublabel": "CheckoutService"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "one session, one transaction"
+    },
+    {
+      "id": "wal",
+      "type": "database",
+      "label": "Log on disk",
+      "sublabel": "WAL: pg_wal/"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 400,
+      "label": "Error midway: ROLLBACK"
+    },
+    {
+      "from": 425,
+      "to": 710,
+      "label": "All steps done: COMMIT"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "app",
+      "to": "pg",
+      "y": 170,
+      "label": "begin",
+      "variant": "default",
+      "note": "BEGIN"
+    },
+    {
+      "id": "a2",
+      "from": "app",
+      "to": "pg",
+      "y": 215,
+      "label": "reserve 1 unit",
+      "variant": "default",
+      "note": "UPDATE inventories … AND total >= reserved + 1"
+    },
+    {
+      "id": "a3",
+      "from": "app",
+      "to": "pg",
+      "y": 275,
+      "label": "create PENDING order",
+      "variant": "default",
+      "note": "INSERT INTO orders"
+    },
+    {
+      "id": "a4",
+      "from": "app",
+      "to": "pg",
+      "y": 325,
+      "label": "crash before writing the stock ledger",
+      "variant": "security",
+      "note": "lost connection, bug, killed pod"
+    },
+    {
+      "id": "a5",
+      "from": "pg",
+      "to": "app",
+      "y": 375,
+      "label": "discard it all, as if never done",
+      "variant": "return",
+      "note": "ROLLBACK: 0 units, 0 orders"
+    },
+    {
+      "id": "b1",
+      "from": "app",
+      "to": "pg",
+      "y": 445,
+      "label": "start again, three steps",
+      "variant": "default",
+      "note": "BEGIN; UPDATE; INSERT; INSERT ledger"
+    },
+    {
+      "id": "b2",
+      "from": "app",
+      "to": "pg",
+      "y": 500,
+      "label": "done, commit",
+      "variant": "emphasis",
+      "note": "COMMIT"
+    },
+    {
+      "id": "b3",
+      "from": "pg",
+      "to": "wal",
+      "y": 550,
+      "label": "write the log first",
+      "variant": "emphasis",
+      "note": "WAL record + fsync"
+    },
+    {
+      "id": "b4",
+      "from": "wal",
+      "to": "pg",
+      "y": 600,
+      "label": "now on disk",
+      "variant": "return"
+    },
+    {
+      "id": "b5",
+      "from": "pg",
+      "to": "app",
+      "y": 650,
+      "label": "OK, survives a power cut",
+      "variant": "return",
+      "note": "synchronous_commit = on"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Atomicity",
+      "items": [
+        "Three statements become one block",
+        "An error anywhere rolls back the block",
+        "No more orphaned orders"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "MVCC",
+      "items": [
+        "UPDATE creates a new row version",
+        "Readers see the committed version",
+        "Readers don't wait for writers"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Durability",
+      "items": [
+        "COMMIT replies after the WAL hits disk",
+        "On a crash, replay the WAL",
+        "Table written later, log written first"
+      ]
+    }
+  ]
+}

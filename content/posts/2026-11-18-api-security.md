@@ -17,11 +17,11 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[authentication|Authentication]] trả lời "bạn là ai" (`401`), [[authorization|authorization]] trả lời "bạn được làm gì" (`403`). Hai bước, hai guard, hai mã lỗi.
-> - [[jwt|JWT]] chỉ được **ký**, không được mã hóa: ai cũng đọc được payload. Chữ ký chỉ chống *sửa*, không chống *đọc*.
+> - [[concepts/authentication|Authentication]] trả lời "bạn là ai" (`401`), [[concepts/authorization|authorization]] trả lời "bạn được làm gì" (`403`). Hai bước, hai guard, hai mã lỗi.
+> - [[concepts/jwt|JWT]] chỉ được **ký**, không được mã hóa: ai cũng đọc được payload. Chữ ký chỉ chống *sửa*, không chống *đọc*.
 > - Access token ngắn (15 phút) + refresh token dài (7 ngày) được **xoay vòng**: dùng một lần là hết; dùng lại token cũ nghĩa là có kẻ gian, thu hồi cả phiên.
-> - [[api-keys|API key]] định danh *ứng dụng*, [[oauth-2|OAuth 2.0]] cho phép *ủy quyền* truy cập thay người dùng mà không đưa mật khẩu.
-> - [[https-tls|HTTPS]] bảo vệ đường truyền; [[cors|CORS]] là luật của *trình duyệt*, không phải tường lửa của server.
+> - [[concepts/api-keys|API key]] định danh *ứng dụng*, [[concepts/oauth-2|OAuth 2.0]] cho phép *ủy quyền* truy cập thay người dùng mà không đưa mật khẩu.
+> - [[concepts/https-tls|HTTPS]] bảo vệ đường truyền; [[concepts/cors|CORS]] là luật của *trình duyệt*, không phải tường lửa của server.
 
 > [!info] Bối cảnh
 > Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết (backend NestJS, dữ liệu phiên đăng nhập để trong Redis). Bạn không cần đọc code dự án. Bài kể lại cách nó đăng nhập, cấp "thẻ" cho người dùng và phát hiện thẻ bị đánh cắp.
@@ -44,13 +44,13 @@ Bảo mật API có rất nhiều thuật ngữ, nhưng gần như khái niệm 
 
 | Ở tòa nhà | Trong API | Khái niệm |
 |---|---|---|
-| Lễ tân kiểm tra căn cước: "anh là ai?" | Kiểm email và mật khẩu | [[authentication\|Authentication]] |
-| Thẻ khách có dấu mộc của tòa nhà, ghi tên và tầng được vào. Ai nhìn cũng đọc được, nhưng không làm giả được dấu mộc | Token chứa `{ sub, role }` kèm chữ ký | [[jwt\|JWT]] |
-| Thẻ chỉ quẹt mở được tầng 3. Vào tầng 3 rồi cũng chỉ mở được phòng của mình | Kiểm role, rồi kiểm "đơn hàng này có phải của bạn không" | [[authorization\|Authorization]] |
-| Thẻ nhà thầu cấp cho *công ty* dịch vụ vệ sinh, không ghi tên người | Chuỗi bí mật gắn với một ứng dụng | [[api-keys\|API Keys]] |
-| Đưa chìa khóa "valet" cho nhân viên giữ xe: nổ máy được, mở cốp thì không | Cho ứng dụng khác quyền hạn chế, không đưa mật khẩu | [[oauth-2\|OAuth 2.0]] |
-| Xe chở tiền bọc thép, không ai nhìn vào được | Mã hóa đường truyền | [[https-tls\|HTTPS và TLS]] |
-| Phụ huynh dặn con: "chỉ nhận đồ từ người quen". Người lạ vẫn tới gõ cửa được, chỉ là đứa trẻ không nhận | Trình duyệt chặn trang lạ đọc response | [[cors\|CORS]] |
+| Lễ tân kiểm tra căn cước: "anh là ai?" | Kiểm email và mật khẩu | [[concepts/authentication\|Authentication]] |
+| Thẻ khách có dấu mộc của tòa nhà, ghi tên và tầng được vào. Ai nhìn cũng đọc được, nhưng không làm giả được dấu mộc | Token chứa `{ sub, role }` kèm chữ ký | [[concepts/jwt\|JWT]] |
+| Thẻ chỉ quẹt mở được tầng 3. Vào tầng 3 rồi cũng chỉ mở được phòng của mình | Kiểm role, rồi kiểm "đơn hàng này có phải của bạn không" | [[concepts/authorization\|Authorization]] |
+| Thẻ nhà thầu cấp cho *công ty* dịch vụ vệ sinh, không ghi tên người | Chuỗi bí mật gắn với một ứng dụng | [[concepts/api-keys\|API Keys]] |
+| Đưa chìa khóa "valet" cho nhân viên giữ xe: nổ máy được, mở cốp thì không | Cho ứng dụng khác quyền hạn chế, không đưa mật khẩu | [[concepts/oauth-2\|OAuth 2.0]] |
+| Xe chở tiền bọc thép, không ai nhìn vào được | Mã hóa đường truyền | [[concepts/https-tls\|HTTPS và TLS]] |
+| Phụ huynh dặn con: "chỉ nhận đồ từ người quen". Người lạ vẫn tới gõ cửa được, chỉ là đứa trẻ không nhận | Trình duyệt chặn trang lạ đọc response | [[concepts/cors\|CORS]] |
 
 Hai bước quan trọng nhất luôn đi theo thứ tự này:
 
@@ -87,7 +87,7 @@ Tóm tắt bằng lời: đăng nhập xong, bạn nhận **hai** thẻ. *Thẻ 
 
 ## Authentication: chứng minh mình là ai
 
-[[authentication|Authentication]] là bước đổi một bằng chứng (mật khẩu, mã OTP, chứng chỉ, token) lấy danh tính. Hàm `login` của flash-sale có ba chi tiết mình thấy rất đáng học:
+[[concepts/authentication|Authentication]] là bước đổi một bằng chứng (mật khẩu, mã OTP, chứng chỉ, token) lấy danh tính. Hàm `login` của flash-sale có ba chi tiết mình thấy rất đáng học:
 
 ```ts
 // rút gọn từ auth.service.ts
@@ -113,7 +113,7 @@ Sau bước này, server đã biết người gọi là ai. Nhưng HTTP là stat
 
 ## JSON Web Token: tấm thẻ có chữ ký
 
-Một [[jwt|JWT]] (RFC 7519) gồm ba phần base64url nối bằng dấu chấm: `header.payload.signature`. Server ký `header.payload` bằng secret; ai sửa một ký tự trong payload thì chữ ký không còn khớp.
+Một [[concepts/jwt|JWT]] (RFC 7519) gồm ba phần base64url nối bằng dấu chấm: `header.payload.signature`. Server ký `header.payload` bằng secret; ai sửa một ký tự trong payload thì chữ ký không còn khớp.
 
 Ví dụ ở cuối bài cho thấy ba điều mình từng hiểu sai:
 
@@ -158,7 +158,7 @@ Hai chi tiết nhỏ: server chỉ lưu **hash** của refresh token (lộ Redis
 
 ## Authorization: được phép làm gì
 
-[[authorization|Authorization]] chạy *sau* authentication. Flash-sale có hai lớp:
+[[concepts/authorization|Authorization]] chạy *sau* authentication. Flash-sale có hai lớp:
 
 - **Theo vai trò (RBAC)**: `@RequirePermissions('order:create')` + `PoliciesGuard`. Quyền của mỗi role được cache trong Redis set `perms:{role}` một giờ; kiểm tra là một lệnh `SISMEMBER`. Admin đổi quyền thì gọi `invalidateCache(role)` xóa cache (kể cả role cha trong cây kế thừa).
 - **Theo sở hữu**: `OwnershipGuard` kiểm tra đơn hàng, shop… có thuộc về người gọi không.
@@ -167,7 +167,7 @@ Lớp thứ hai là thứ hay bị quên nhất. Có quyền `order:read` không
 
 ## API Keys: định danh ứng dụng, không phải người
 
-[[api-keys|API key]] là một chuỗi bí mật dài hạn gắn với *ứng dụng* hoặc *tài khoản tích hợp*, gửi qua header (thường là `Authorization: Bearer sk_...` hoặc `X-API-Key`). Flash-sale chỉ dùng API key theo chiều *đi ra*: gọi SendGrid để gửi email. Nó không cấp API key cho ai, vì chưa có đối tác nào tích hợp vào.
+[[concepts/api-keys|API key]] là một chuỗi bí mật dài hạn gắn với *ứng dụng* hoặc *tài khoản tích hợp*, gửi qua header (thường là `Authorization: Bearer sk_...` hoặc `X-API-Key`). Flash-sale chỉ dùng API key theo chiều *đi ra*: gọi SendGrid để gửi email. Nó không cấp API key cho ai, vì chưa có đối tác nào tích hợp vào.
 
 Nếu một ngày cần cấp API key cho seller tự động hóa đơn hàng, các nguyên tắc mình rút ra từ tài liệu của Stripe và GitHub:
 
@@ -178,7 +178,7 @@ Nếu một ngày cần cấp API key cho seller tự động hóa đơn hàng, 
 
 ## OAuth 2.0: ủy quyền mà không đưa mật khẩu
 
-[[oauth-2|OAuth 2.0]] (RFC 6749) giải bài toán: ứng dụng X muốn truy cập dữ liệu của bạn ở dịch vụ Y, nhưng bạn không muốn đưa mật khẩu Y cho X. Flash-sale chưa có "Đăng nhập bằng Google", nên phần này mình học từ tài liệu.
+[[concepts/oauth-2|OAuth 2.0]] (RFC 6749) giải bài toán: ứng dụng X muốn truy cập dữ liệu của bạn ở dịch vụ Y, nhưng bạn không muốn đưa mật khẩu Y cho X. Flash-sale chưa có "Đăng nhập bằng Google", nên phần này mình học từ tài liệu.
 
 Luồng nên dùng hiện nay là **Authorization Code + PKCE**:
 
@@ -206,7 +206,7 @@ Hai điều mình từng hiểu sai:
 
 ## HTTPS và TLS: đường truyền không ai đọc trộm
 
-Mọi thứ ở trên vô nghĩa nếu token đi qua mạng dưới dạng chữ thường. [[https-tls|HTTPS]] là HTTP chạy trên TLS. TLS 1.3 (RFC 8446) cung cấp ba thứ: **mã hóa** (không ai đọc được), **toàn vẹn** (không ai sửa được), **xác thực server** (chứng chỉ chứng minh đúng là `api.example.com`, không phải kẻ giả mạo ở giữa).
+Mọi thứ ở trên vô nghĩa nếu token đi qua mạng dưới dạng chữ thường. [[concepts/https-tls|HTTPS]] là HTTP chạy trên TLS. TLS 1.3 (RFC 8446) cung cấp ba thứ: **mã hóa** (không ai đọc được), **toàn vẹn** (không ai sửa được), **xác thực server** (chứng chỉ chứng minh đúng là `api.example.com`, không phải kẻ giả mạo ở giữa).
 
 Trong flash-sale, TLS được xử lý ở rìa:
 
@@ -217,7 +217,7 @@ Trong flash-sale, TLS được xử lý ở rìa:
 
 ## CORS: luật của trình duyệt
 
-Đây là khái niệm mình hiểu sai lâu nhất. Mình từng nghĩ CORS *bảo vệ server*. Nhớ lại hình ảnh phụ huynh và đứa trẻ ở đầu bài: người lạ vẫn tới gõ cửa được, chỉ là đứa trẻ (JavaScript trong trình duyệt) không được nhận đồ. Thật ra **[[cors|CORS]] bảo vệ người dùng trong trình duyệt**, và nó là một cách *nới lỏng* Same-Origin Policy chứ không phải siết thêm.
+Đây là khái niệm mình hiểu sai lâu nhất. Mình từng nghĩ CORS *bảo vệ server*. Nhớ lại hình ảnh phụ huynh và đứa trẻ ở đầu bài: người lạ vẫn tới gõ cửa được, chỉ là đứa trẻ (JavaScript trong trình duyệt) không được nhận đồ. Thật ra **[[concepts/cors|CORS]] bảo vệ người dùng trong trình duyệt**, và nó là một cách *nới lỏng* Same-Origin Policy chứ không phải siết thêm.
 
 Mặc định, JavaScript trên `https://evil.example` không được đọc response từ `https://api.example.com` (khác origin). CORS là cách server nói "origin này được phép đọc":
 

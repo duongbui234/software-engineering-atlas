@@ -19,20 +19,20 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[cross-site-websocket-hijacking|Cross-Site WebSocket Hijacking]]: WebSocket không chịu CORS. Trang lạ mở được kết nối tới server của bạn, trình duyệt tự gửi cookie. Option `cors` của Socket.IO **không chặn** chuyện này; phải kiểm `Origin` hoặc không xác thực bằng cookie.
-> - [[handshake-authentication|Xác thực lúc bắt tay]]: token trong `auth` của Socket.IO (không nằm trong URL), kiểm cả chữ ký lẫn việc phiên còn sống.
-> - [[long-lived-token|Token sống lâu hơn hạn]]: token được kiểm một lần, kết nối sống hàng giờ. Trong ví dụ, token hết hạn 1 giây rồi mà kết nối vẫn nhận tin. Hẹn giờ ngắt đúng `exp`, và ngắt socket khi người dùng đăng xuất.
-> - [[backpressure|Backpressure]]: `send()` không chặn; client đọc chậm làm server giữ 18 MB cho một kết nối trong ví dụ. Kiểm `bufferedAmount`, bỏ tin cũ. [[message-size-limit|Giới hạn kích thước tin]]: Socket.IO mặc định 1 MB, `ws` mặc định 100 MiB.
-> - Cuối bài: [[realtime-checklist|danh sách kiểm tra]] và cách chọn giữa SSE, WebSocket thuần, Socket.IO.
+> - [[concepts/cross-site-websocket-hijacking|Cross-Site WebSocket Hijacking]]: WebSocket không chịu CORS. Trang lạ mở được kết nối tới server của bạn, trình duyệt tự gửi cookie. Option `cors` của Socket.IO **không chặn** chuyện này; phải kiểm `Origin` hoặc không xác thực bằng cookie.
+> - [[concepts/handshake-authentication|Xác thực lúc bắt tay]]: token trong `auth` của Socket.IO (không nằm trong URL), kiểm cả chữ ký lẫn việc phiên còn sống.
+> - [[concepts/long-lived-token|Token sống lâu hơn hạn]]: token được kiểm một lần, kết nối sống hàng giờ. Trong ví dụ, token hết hạn 1 giây rồi mà kết nối vẫn nhận tin. Hẹn giờ ngắt đúng `exp`, và ngắt socket khi người dùng đăng xuất.
+> - [[concepts/backpressure|Backpressure]]: `send()` không chặn; client đọc chậm làm server giữ 18 MB cho một kết nối trong ví dụ. Kiểm `bufferedAmount`, bỏ tin cũ. [[concepts/message-size-limit|Giới hạn kích thước tin]]: Socket.IO mặc định 1 MB, `ws` mặc định 100 MiB.
+> - Cuối bài: [[concepts/realtime-checklist|danh sách kiểm tra]] và cách chọn giữa SSE, WebSocket thuần, Socket.IO.
 
 > [!info] Bối cảnh
 > Ga 6, ga cuối của **tuyến WebSocket và Socket.IO**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: kết nối realtime đẩy lượt thanh toán và kết quả đơn, tức thông tin của riêng từng người, và có thể mở suốt buổi tối. Frontend và API nằm trên hai tên miền khác nhau. Bạn không cần biết NestJS.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Handshake, `Origin`, close code**: xem [[2026-11-22-websocket-protocol|ga 2]]. **Gói CONNECT, `auth`**: [[2026-11-22-websocket-socketio|ga 3]]. **Room `user:<id>`**: [[2026-11-22-websocket-rooms|ga 4]].
-> - **Same-Origin Policy, CORS**: luật của trình duyệt ngăn JavaScript của trang này đọc response từ tên miền khác, trừ khi server cho phép bằng header CORS. Xem [[cors|CORS]].
+> - **Handshake, `Origin`, close code**: xem [[posts/2026-11-22-websocket-protocol|ga 2]]. **Gói CONNECT, `auth`**: [[posts/2026-11-22-websocket-socketio|ga 3]]. **Room `user:<id>`**: [[posts/2026-11-22-websocket-rooms|ga 4]].
+> - **Same-Origin Policy, CORS**: luật của trình duyệt ngăn JavaScript của trang này đọc response từ tên miền khác, trừ khi server cho phép bằng header CORS. Xem [[concepts/cors|CORS]].
 > - **Cookie, SameSite**: cookie là dữ liệu trình duyệt tự gửi kèm request tới tên miền đã đặt nó; `SameSite` quyết định có gửi khi request xuất phát từ trang khác không.
-> - **JWT, `exp`, phiên (`sid`)**: token đã ký có hạn dùng `exp`; flash-sale gắn mỗi token với một phiên đăng nhập lưu trong Redis. Xem [[2026-11-18-api-security|Bảo mật API]].
+> - **JWT, `exp`, phiên (`sid`)**: token đã ký có hạn dùng `exp`; flash-sale gắn mỗi token với một phiên đăng nhập lưu trong Redis. Xem [[posts/2026-11-18-api-security|Bảo mật API]].
 > - **Middleware**: hàm chạy trước handler, ở đây là trước khi kết nối được chấp nhận.
 > - **Bộ đệm (buffer)**: vùng RAM giữ dữ liệu đã gửi nhưng chưa đi được xuống mạng.
 
@@ -42,12 +42,12 @@ Kết nối realtime giống một đường dây nóng giữa khách và ngân 
 
 | Đời thường | Khái niệm |
 |---|---|
-| Kẻ lạ bấm số từ máy của bạn; tổng đài nhận ra số máy quen nên cho vào, không hỏi ai đang cầm máy | [[cross-site-websocket-hijacking\|Cross-Site WebSocket Hijacking]] |
-| Lúc nhấc máy, đọc mã khách hàng và tổng đài tra xem mã còn hiệu lực không | [[handshake-authentication\|Handshake authentication]] |
-| Thẻ ra vào hết hạn lúc 21:15, nhưng người đã vào phòng lúc 21:00 thì vẫn ngồi đó | [[long-lived-token\|Long-lived token]] |
-| Người nghe chép chậm, người đọc phải chờ hoặc bỏ bớt, không thì giấy nháp chất đống | [[backpressure\|Backpressure]] |
-| Không nhận fax dài quá 10 trang | [[message-size-limit\|Message size limit]] |
-| Danh sách kiểm tra trước khi mở đường dây cho khách | [[realtime-checklist\|Realtime checklist]] |
+| Kẻ lạ bấm số từ máy của bạn; tổng đài nhận ra số máy quen nên cho vào, không hỏi ai đang cầm máy | [[concepts/cross-site-websocket-hijacking\|Cross-Site WebSocket Hijacking]] |
+| Lúc nhấc máy, đọc mã khách hàng và tổng đài tra xem mã còn hiệu lực không | [[concepts/handshake-authentication\|Handshake authentication]] |
+| Thẻ ra vào hết hạn lúc 21:15, nhưng người đã vào phòng lúc 21:00 thì vẫn ngồi đó | [[concepts/long-lived-token\|Long-lived token]] |
+| Người nghe chép chậm, người đọc phải chờ hoặc bỏ bớt, không thì giấy nháp chất đống | [[concepts/backpressure\|Backpressure]] |
+| Không nhận fax dài quá 10 trang | [[concepts/message-size-limit\|Message size limit]] |
+| Danh sách kiểm tra trước khi mở đường dây cho khách | [[concepts/realtime-checklist\|Realtime checklist]] |
 
 ```mermaid
 flowchart TB
@@ -74,7 +74,7 @@ Mình từng nghĩ bảo mật cho WebSocket giống REST: có CORS, có guard J
 
 Với `fetch`, trình duyệt áp Same-Origin Policy: trang `evil.example` gửi được request tới `shop.example` nhưng **không đọc được response** nếu server không trả header CORS cho phép. WebSocket thì khác: chuẩn không áp Same-Origin Policy cho nó. Trang nào cũng mở được `new WebSocket('wss://api.shop.example')`, đọc được mọi tin server gửi xuống và gửi lên bất cứ gì. Thứ duy nhất trình duyệt làm là gửi kèm header `Origin: https://evil.example` để server tự quyết.
 
-Nếu server xác thực bằng **cookie**, trình duyệt có thể tự đính kèm cookie của nạn nhân vào request bắt tay. Server thấy cookie hợp lệ, cho vào, và trang lạ giờ nghe được đơn hàng, thông báo, thậm chí gửi lệnh mua thay nạn nhân. Đó là **[[cross-site-websocket-hijacking|Cross-Site WebSocket Hijacking]]** (CSWSH), được Christian Schneider mô tả năm 2013; về bản chất là CSRF nhưng đọc được cả câu trả lời.
+Nếu server xác thực bằng **cookie**, trình duyệt có thể tự đính kèm cookie của nạn nhân vào request bắt tay. Server thấy cookie hợp lệ, cho vào, và trang lạ giờ nghe được đơn hàng, thông báo, thậm chí gửi lệnh mua thay nạn nhân. Đó là **[[concepts/cross-site-websocket-hijacking|Cross-Site WebSocket Hijacking]]** (CSWSH), được Christian Schneider mô tả năm 2013; về bản chất là CSRF nhưng đọc được cả câu trả lời.
 
 Hai điều hay bị hiểu sai:
 
@@ -90,7 +90,7 @@ flash-sale rơi vào trường hợp 2: cả hai gateway đọc token từ `hand
 
 ### Handshake authentication: kiểm gì, ở đâu
 
-**[[handshake-authentication|Xác thực lúc bắt tay]]** là kiểm danh tính một lần khi kết nối mở, rồi gắn nó vào socket (`socket.data.userId`) cho mọi tin sau. Ba lựa chọn về *chỗ đặt* token:
+**[[concepts/handshake-authentication|Xác thực lúc bắt tay]]** là kiểm danh tính một lần khi kết nối mở, rồi gắn nó vào socket (`socket.data.userId`) cho mọi tin sau. Ba lựa chọn về *chỗ đặt* token:
 
 | Chỗ đặt | Vấn đề |
 |---|---|
@@ -103,7 +103,7 @@ flash-sale rơi vào trường hợp 2: cả hai gateway đọc token từ `hand
 
 ### Long-lived token: thẻ hết hạn, người vẫn trong phòng
 
-Access token của flash-sale sống 15 phút. Một kết nối Socket.IO mở lúc 21:00 sống tới khi người dùng đóng tab, có thể là 23:00. Server chỉ kiểm token lúc 21:00. Từ 21:15 tới 23:00, kết nối được tin bằng một token đã hết hạn, kể cả khi trong lúc đó tài khoản bị khóa hay quyền bị đổi. Đó là **[[long-lived-token|token sống lâu hơn hạn của nó]]**.
+Access token của flash-sale sống 15 phút. Một kết nối Socket.IO mở lúc 21:00 sống tới khi người dùng đóng tab, có thể là 23:00. Server chỉ kiểm token lúc 21:00. Từ 21:15 tới 23:00, kết nối được tin bằng một token đã hết hạn, kể cả khi trong lúc đó tài khoản bị khóa hay quyền bị đổi. Đó là **[[concepts/long-lived-token|token sống lâu hơn hạn của nó]]**.
 
 Phía client của flash-sale đã làm một nửa: effect của `SocketProvider` phụ thuộc vào `accessToken`, nên mỗi lần token được làm mới, client đóng kết nối cũ và mở kết nối mới với token mới. Nhưng đó là thiện chí của client; một client sửa đổi thì không làm. Phía server cần tự bảo vệ:
 
@@ -116,7 +116,7 @@ Phía client của flash-sale đã làm một nửa: effect của `SocketProvide
 
 `socket.send()` của WebSocket **không bao giờ chặn**. Nếu client đọc chậm (mạng 3G yếu, tab ở chế độ nền bị trình duyệt hạn chế, máy yếu), dữ liệu dồn lại: đầu tiên trong bộ đệm TCP của hệ điều hành, sau đó trong RAM của tiến trình server. Trong ví dụ, server gửi 20.000 tin 1 KB cho một client đã ngừng đọc, và cuối cùng giữ **khoảng 18 MB** trong RAM chỉ cho một kết nối đó. Nhân với vài nghìn người xem chiến dịch trên mạng di động lúc 21:00, pod hết RAM và bị giết, kéo theo reconnect storm của ga 5.
 
-**[[backpressure|Backpressure]]** là cơ chế để bên nhận chậm làm bên gửi chậm lại. WebSocket chuẩn chỉ cho bạn một con số: `bufferedAmount`, số byte đã gọi `send()` mà chưa xuống được mạng (có ở cả `ws` lẫn API trình duyệt). Cách dùng:
+**[[concepts/backpressure|Backpressure]]** là cơ chế để bên nhận chậm làm bên gửi chậm lại. WebSocket chuẩn chỉ cho bạn một con số: `bufferedAmount`, số byte đã gọi `send()` mà chưa xuống được mạng (có ở cả `ws` lẫn API trình duyệt). Cách dùng:
 
 - **Kiểm trước khi gửi**: vượt ngưỡng thì bỏ tin, như ví dụ (đệm quá 1 MB thì bỏ). Hợp với dữ liệu mà chỉ bản mới nhất có nghĩa: tồn kho, vị trí hàng chờ.
 - **Gộp tin**: thay vì gửi mỗi thay đổi, giữ bản mới nhất cho mỗi khóa (mỗi SKU) và gửi theo nhịp. Client chậm tự nhiên nhận ít tin hơn.
@@ -126,7 +126,7 @@ Socket.IO không có backpressure tự động. Nó có `socket.volatile.emit()`
 
 ### Message size limit: không nhận fax 100 trang
 
-Bên nhận phải đệm **trọn một tin** trước khi giao cho handler. Không giới hạn kích thước là mời người khác gửi một tin vài trăm MB để làm cạn RAM của server, chỉ với một kết nối. **[[message-size-limit|Giới hạn kích thước tin]]** mặc định khác nhau rất xa:
+Bên nhận phải đệm **trọn một tin** trước khi giao cho handler. Không giới hạn kích thước là mời người khác gửi một tin vài trăm MB để làm cạn RAM của server, chỉ với một kết nối. **[[concepts/message-size-limit|Giới hạn kích thước tin]]** mặc định khác nhau rất xa:
 
 | Thư viện | Option | Mặc định | Vượt thì |
 |---|---|---|---|
@@ -137,7 +137,7 @@ flash-sale dùng mặc định của Socket.IO, hợp lý: tin lớn nhất clie
 
 ### Realtime checklist
 
-**[[realtime-checklist|Danh sách kiểm tra]]** gom cả tuyến. Trước hết là chọn công cụ:
+**[[concepts/realtime-checklist|Danh sách kiểm tra]]** gom cả tuyến. Trước hết là chọn công cụ:
 
 | Nếu | Chọn |
 |---|---|

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Three ways for the browser to learn \"stock just changed\"",
+    "output": "content/diagrams/websocket-realtime-options/four-ways.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "br", "type": "frontend", "label": "Browser", "sublabel": "flash sale queue page" },
+    { "id": "srv", "type": "backend", "label": "Server", "sublabel": "NestJS: API + queue" },
+    { "id": "q", "type": "backend", "label": "Queue counter", "sublabel": "worker: stock, turns" }
+  ],
+  "segments": [
+    { "from": 150, "to": 330, "label": "Polling: ask every 2 seconds" },
+    { "from": 355, "to": 530, "label": "Long polling: ask, then wait" },
+    { "from": 540, "to": 790, "label": "WebSocket: open once, the server speaks" }
+  ],
+  "messages": [
+    { "id": "p1", "from": "br", "to": "srv", "y": 170, "label": "anything new?", "variant": "default", "note": "GET /poll?after=3" },
+    { "id": "p1r", "from": "srv", "to": "br", "y": 215, "label": "nothing yet", "variant": "return", "note": "200 []" },
+    { "id": "pe", "from": "q", "to": "srv", "y": 255, "label": "stock changed", "variant": "emphasis", "note": "the browser doesn't know yet" },
+    { "id": "p2r", "from": "br", "to": "srv", "y": 300, "label": "asks again only 2 seconds later", "variant": "dashed", "note": "up to 2 seconds late" },
+    { "id": "l1", "from": "br", "to": "srv", "y": 375, "label": "anything new? I'll wait", "variant": "default", "note": "GET /long-poll, server holds the request" },
+    { "id": "le", "from": "q", "to": "srv", "y": 430, "label": "stock changed", "variant": "emphasis" },
+    { "id": "l1r", "from": "srv", "to": "br", "y": 470, "label": "answer the hanging request now", "variant": "return", "note": "200 [ev]" },
+    { "id": "l2", "from": "br", "to": "srv", "y": 515, "label": "ask again right away", "variant": "dashed", "note": "every message costs a request" },
+    { "id": "w1", "from": "br", "to": "srv", "y": 575, "label": "ask to upgrade to WebSocket", "variant": "default", "note": "GET, Upgrade: websocket" },
+    { "id": "w1r", "from": "srv", "to": "br", "y": 625, "label": "agreed, switching protocols", "variant": "return", "note": "101 Switching Protocols" },
+    { "id": "we", "from": "q", "to": "srv", "y": 675, "label": "stock changed", "variant": "emphasis" },
+    { "id": "wp", "from": "srv", "to": "br", "y": 715, "label": "the server pushes on its own", "variant": "emphasis", "note": "text frame, a few header bytes" },
+    { "id": "wc", "from": "br", "to": "srv", "y": 765, "label": "client sends commands on the same line", "variant": "default", "note": "full-duplex" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Polling",
+      "items": ["Average latency is half a cycle", "Most requests come back empty", "Easy to build, passes every proxy"]
+    },
+    {
+      "dot": "amber",
+      "title": "Long polling and SSE",
+      "items": ["Almost instant over plain HTTP", "Long polling: one request per message", "SSE: one long-running response, one-way only"]
+    },
+    {
+      "dot": "emerald",
+      "title": "WebSocket",
+      "items": ["One HTTP request and that's it", "Two-way, at any time", "Reconnection and authentication are up to you"]
+    }
+  ]
+}

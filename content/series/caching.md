@@ -38,7 +38,7 @@ Mỗi ga mở đầu bằng **"Hình dung trước"** (khái niệm so với chu
 
 Không thể hiểu cache stampede nếu chưa biết TTL và cache-aside; không thể chọn eviction policy nếu chưa biết hit ratio phụ thuộc vào cái gì. Mỗi ga chỉ dùng từ vựng của các ga trước.
 
-Tuyến này nối tiếp ga [[2026-11-18-api-performance|Hiệu năng API]] của tuyến API (nơi cache xuất hiện lần đầu, cùng ví dụ khóa chống stampede) và dùng lại vài từ của [[rabbitmq|tuyến RabbitMQ]].
+Tuyến này nối tiếp ga [[posts/2026-11-18-api-performance|Hiệu năng API]] của tuyến API (nơi cache xuất hiện lần đầu, cùng ví dụ khóa chống stampede) và dùng lại vài từ của [[series/rabbitmq|tuyến RabbitMQ]].
 
 ## Phiên bản và nguồn
 

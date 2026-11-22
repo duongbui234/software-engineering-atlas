@@ -17,17 +17,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[cache-aside|Cache-aside]] là mẫu phổ biến nhất: ứng dụng tự hỏi cache, trượt thì đọc DB rồi ghi vào cache. Khi ghi: ghi DB trước, rồi **xóa** mục trong cache.
-> - [[read-through|Read-through]]: ứng dụng chỉ nói chuyện với cache; cache tự đi lấy từ DB khi trượt. Cùng ý tưởng, khác ai giữ code nạp dữ liệu.
-> - [[write-through|Write-through]] ghi DB và cache cùng lúc: đọc ngay sau khi ghi luôn trúng, đổi lại mỗi lần ghi chậm hơn.
-> - [[write-behind|Write-behind]] chỉ ghi cache rồi trả lời ngay, DB được ghi sau. Nhanh nhất và gộp được nhiều lần ghi, nhưng **sập trước khi kịp ghi là mất dữ liệu**.
-> - [[write-around|Write-around]] ghi thẳng DB, không đụng cache. [[refresh-ahead|Refresh-ahead]] làm mới mục sắp hết hạn ở nền, nên người đọc gần như không bao giờ phải chờ DB.
+> - [[concepts/cache-aside|Cache-aside]] là mẫu phổ biến nhất: ứng dụng tự hỏi cache, trượt thì đọc DB rồi ghi vào cache. Khi ghi: ghi DB trước, rồi **xóa** mục trong cache.
+> - [[concepts/read-through|Read-through]]: ứng dụng chỉ nói chuyện với cache; cache tự đi lấy từ DB khi trượt. Cùng ý tưởng, khác ai giữ code nạp dữ liệu.
+> - [[concepts/write-through|Write-through]] ghi DB và cache cùng lúc: đọc ngay sau khi ghi luôn trúng, đổi lại mỗi lần ghi chậm hơn.
+> - [[concepts/write-behind|Write-behind]] chỉ ghi cache rồi trả lời ngay, DB được ghi sau. Nhanh nhất và gộp được nhiều lần ghi, nhưng **sập trước khi kịp ghi là mất dữ liệu**.
+> - [[concepts/write-around|Write-around]] ghi thẳng DB, không đụng cache. [[concepts/refresh-ahead|Refresh-ahead]] làm mới mục sắp hết hạn ở nền, nên người đọc gần như không bao giờ phải chờ DB.
 
 > [!info] Bối cảnh
 > Ga 3 của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: trang thống kê của người bán đọc số đơn hàng hàng chục lần một phút, trong khi đơn mới vào liên tục. Ga này trả lời: khi dữ liệu có hai bản (cache và database), ai đọc bản nào, ai ghi bản nào, theo thứ tự nào. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Hit, miss, staleness, cache key**: xem [[2026-11-22-caching-why|ga 1]].
+> - **Hit, miss, staleness, cache key**: xem [[posts/2026-11-22-caching-why|ga 1]].
 > - **TTL (time to live)**: thời gian sống của một mục cache, hết thì tự biến mất. Ga 4 nói kỹ.
 > - **Redis `SET key value EX 60`**: ghi một key, tự hết hạn sau 60 giây. `GET` đọc, `DEL` xóa.
 > - **Đồng bộ / bất đồng bộ**: đồng bộ là chờ việc xong mới trả lời; bất đồng bộ là trả lời trước, việc làm sau.
@@ -40,12 +40,12 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Thủ thư tự nhìn giá, thiếu thì tự xuống kho lấy rồi đặt một bản lên giá | [[cache-aside\|Cache-aside]] |
-| Bạn đọc chỉ hỏi quầy; quầy có nhân viên riêng lo xuống kho khi thiếu | [[read-through\|Read-through]] |
-| Sửa thông tin sách: sửa sổ kho và nhãn trên giá cùng lúc | [[write-through\|Write-through]] |
-| Chỉ ghi lên bảng ở quầy, cuối ngày mới chép vào sổ kho | [[write-behind\|Write-behind]] |
-| Sách mới nhập thẳng vào kho, không đặt lên giá | [[write-around\|Write-around]] |
-| Sách sắp tới hạn trả mà vẫn được hỏi nhiều: gia hạn trước khi hết hạn | [[refresh-ahead\|Refresh-ahead]] |
+| Thủ thư tự nhìn giá, thiếu thì tự xuống kho lấy rồi đặt một bản lên giá | [[concepts/cache-aside\|Cache-aside]] |
+| Bạn đọc chỉ hỏi quầy; quầy có nhân viên riêng lo xuống kho khi thiếu | [[concepts/read-through\|Read-through]] |
+| Sửa thông tin sách: sửa sổ kho và nhãn trên giá cùng lúc | [[concepts/write-through\|Write-through]] |
+| Chỉ ghi lên bảng ở quầy, cuối ngày mới chép vào sổ kho | [[concepts/write-behind\|Write-behind]] |
+| Sách mới nhập thẳng vào kho, không đặt lên giá | [[concepts/write-around\|Write-around]] |
+| Sách sắp tới hạn trả mà vẫn được hỏi nhiều: gia hạn trước khi hết hạn | [[concepts/refresh-ahead\|Refresh-ahead]] |
 
 ```mermaid
 flowchart TB
@@ -73,7 +73,7 @@ Mỗi khi có cache là có hai bản của cùng một dữ liệu. Các mẫu 
 
 ### Cache-aside: ứng dụng tự lo mọi thứ
 
-**[[cache-aside|Cache-aside]]** (còn gọi là lazy loading) là mẫu mặc định ở hầu hết hệ thống, kể cả Facebook gọi memcache của họ là "demand-filled look-aside cache". Cache đứng *bên cạnh*, không đứng giữa: nó không biết database tồn tại.
+**[[concepts/cache-aside|Cache-aside]]** (còn gọi là lazy loading) là mẫu mặc định ở hầu hết hệ thống, kể cả Facebook gọi memcache của họ là "demand-filled look-aside cache". Cache đứng *bên cạnh*, không đứng giữa: nó không biết database tồn tại.
 
 Đọc:
 
@@ -105,7 +105,7 @@ Vì sao **xóa** chứ không **ghi giá trị mới vào cache**? Bài báo v�
 
 ### Read-through: cache tự đi lấy
 
-**[[read-through|Read-through]]** giống cache-aside khi nhìn từ database, nhưng khác ở chỗ ai giữ code nạp dữ liệu. Ứng dụng chỉ gọi `cache.get(key)`; cache được cấu hình sẵn một hàm nạp (loader) và tự gọi nó khi trượt.
+**[[concepts/read-through|Read-through]]** giống cache-aside khi nhìn từ database, nhưng khác ở chỗ ai giữ code nạp dữ liệu. Ứng dụng chỉ gọi `cache.get(key)`; cache được cấu hình sẵn một hàm nạp (loader) và tự gọi nó khi trượt.
 
 ```ts
 // minh họa, không chạy trực tiếp
@@ -117,7 +117,7 @@ Thư viện như Caffeine (Java) hay các sản phẩm như Hazelcast, NCache c�
 
 ### Write-through: ghi cả hai, đồng bộ
 
-**[[write-through|Write-through]]**: mỗi lần ghi, ghi database **và** ghi giá trị mới vào cache, trong cùng một lời gọi, rồi mới trả lời.
+**[[concepts/write-through|Write-through]]**: mỗi lần ghi, ghi database **và** ghi giá trị mới vào cache, trong cùng một lời gọi, rồi mới trả lời.
 
 - Ưu: đọc ngay sau khi ghi luôn trúng và đúng. Cache luôn "ấm" với dữ liệu vừa đổi.
 - Nhược: mỗi lần ghi chậm thêm một lần ghi cache. Cache đầy những thứ được ghi nhưng không ai đọc (cần TTL). Và vì là "ghi giá trị mới" chứ không phải "xóa", hai lần ghi đồng thời vẫn có thể để lại giá trị sai (ga 4).
@@ -126,7 +126,7 @@ Write-through thường đi với read-through: cả đọc và ghi đều qua c
 
 ### Write-behind: ghi cache, database sau
 
-**[[write-behind|Write-behind]]** (còn gọi là write-back): chỉ ghi cache rồi trả lời ngay. Một tiến trình nền gom các thay đổi lại và ghi xuống database sau, theo lô.
+**[[concepts/write-behind|Write-behind]]** (còn gọi là write-back): chỉ ghi cache rồi trả lời ngay. Một tiến trình nền gom các thay đổi lại và ghi xuống database sau, theo lô.
 
 - Ưu: ghi cực nhanh. **Gộp được** nhiều lần ghi cùng key: 100 lần cập nhật bộ đếm lượt xem chỉ thành 1 lần ghi DB.
 - Nhược nặng: trong khoảng thời gian chưa flush, **cache là nguồn sự thật duy nhất**. Tiến trình hoặc cache sập là mất dữ liệu. Lỗi ràng buộc của database (trùng khóa, vi phạm khóa ngoại) xảy ra *sau khi* đã trả lời "thành công" cho người dùng. Thứ tự ghi cũng phải được giữ cẩn thận.
@@ -135,15 +135,15 @@ Hợp với dữ liệu chịu được mất một ít: bộ đếm lượt xem
 
 ### Write-around: ghi thẳng database, không đụng cache
 
-**[[write-around|Write-around]]**: ghi database, cache để nguyên; cache chỉ được nạp khi có người đọc. Hợp với dữ liệu ghi một lần và hiếm khi đọc lại (log, lịch sử), vì không làm bẩn cache bằng những thứ không ai cần.
+**[[concepts/write-around|Write-around]]**: ghi database, cache để nguyên; cache chỉ được nạp khi có người đọc. Hợp với dữ liệu ghi một lần và hiếm khi đọc lại (log, lịch sử), vì không làm bẩn cache bằng những thứ không ai cần.
 
 Bẫy: nếu mục đó *đã* có trong cache từ trước, cache sẽ trả giá trị cũ cho tới khi hết TTL. Trong thực tế, "ghi DB rồi xóa cache" của cache-aside chính là write-around cộng thêm bước xóa để vá đúng chỗ này.
 
 ### Refresh-ahead: làm mới trước khi hết hạn
 
-**[[refresh-ahead|Refresh-ahead]]**: khi một mục được đọc lúc đã gần hết hạn (ví dụ còn dưới 20% TTL), trả giá trị hiện có ngay, đồng thời nạp bản mới ở nền. Mục đang được đọc nhiều sẽ không bao giờ hết hạn thật, nên người đọc không phải chờ database; mục ít ai đọc thì cứ để hết hạn.
+**[[concepts/refresh-ahead|Refresh-ahead]]**: khi một mục được đọc lúc đã gần hết hạn (ví dụ còn dưới 20% TTL), trả giá trị hiện có ngay, đồng thời nạp bản mới ở nền. Mục đang được đọc nhiều sẽ không bao giờ hết hạn thật, nên người đọc không phải chờ database; mục ít ai đọc thì cứ để hết hạn.
 
-Đây là cùng ý tưởng với `stale-while-revalidate` ở [[2026-11-22-caching-http|ga 2]], chỉ khác là làm *trước* khi hết hạn thay vì sau. Cái giá: một ít query DB "thừa" cho các mục được làm mới mà sau đó không ai đọc. Ga 5 có một phiên bản theo xác suất được chứng minh là tối ưu.
+Đây là cùng ý tưởng với `stale-while-revalidate` ở [[posts/2026-11-22-caching-http|ga 2]], chỉ khác là làm *trước* khi hết hạn thay vì sau. Cái giá: một ít query DB "thừa" cho các mục được làm mới mà sau đó không ai đọc. Ga 5 có một phiên bản theo xác suất được chứng minh là tối ưu.
 
 ### So sánh và chọn
 
@@ -227,7 +227,7 @@ $ node read-write-patterns.ts
 
 - **"Ghi DB xong thì cập nhật cache luôn cho đỡ một lần trượt."** Hai request ghi đồng thời có thể cập nhật cache sai thứ tự, để lại giá trị cũ vô thời hạn (tới TTL). Xóa thì không có vấn đề thứ tự. Ga 4 chạy lại tình huống này.
 - **"Xóa cache trước rồi mới ghi DB."** Giữa hai bước, một request đọc sẽ trượt, đọc DB *cũ* và nạp lại vào cache. Thứ tự đúng là ghi DB trước, xóa sau, và chỉ xóa sau khi transaction đã commit.
-- **"Write-behind cho đơn hàng để chịu tải giờ cao điểm."** Đơn hàng là thứ không được mất. Muốn hấp thụ đợt ghi, dùng hàng đợi bền (như RabbitMQ với confirm, xem [[2026-11-21-rabbitmq-ack-confirm|tuyến RabbitMQ]]) chứ không phải cache.
+- **"Write-behind cho đơn hàng để chịu tải giờ cao điểm."** Đơn hàng là thứ không được mất. Muốn hấp thụ đợt ghi, dùng hàng đợi bền (như RabbitMQ với confirm, xem [[posts/2026-11-21-rabbitmq-ack-confirm|tuyến RabbitMQ]]) chứ không phải cache.
 - **"Read-through tự giải quyết dữ liệu cũ."** Không. Read-through chỉ đổi ai đi nạp dữ liệu; invalidation vẫn là việc của bạn.
 - **"Xóa cache thất bại thì ném lỗi cho người dùng."** DB đã ghi xong rồi. Thường chỉ cần log và dựa vào TTL làm lưới an toàn; flash-sale ghi rõ điều này trong comment: xóa thất bại thì cache tự hết hạn sau TTL.
 

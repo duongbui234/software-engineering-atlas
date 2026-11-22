@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "No loss, no duplicates: outbox on the sending side, processed ledger on the receiving side",
+    "output": "content/diagrams/rabbitmq-delivery-guarantees/outbox-inbox.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Order counter",
+      "sublabel": "cancel-order API"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Ledgers",
+      "sublabel": "Postgres: orders, outbox, processed"
+    },
+    {
+      "id": "relay",
+      "type": "backend",
+      "label": "Courier",
+      "sublabel": "outbox relay, every second"
+    },
+    {
+      "id": "broker",
+      "type": "messagebus",
+      "label": "Post office",
+      "sublabel": "exchange orders.events"
+    },
+    {
+      "id": "consumer",
+      "type": "backend",
+      "label": "Stock clerk",
+      "sublabel": "restock consumer"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 232,
+      "label": "Write together"
+    },
+    {
+      "from": 248,
+      "to": 427,
+      "label": "Publish from the outbox"
+    },
+    {
+      "from": 442,
+      "to": 632,
+      "label": "Receive and dedupe"
+    }
+  ],
+  "messages": [
+    {
+      "id": "tx",
+      "from": "api",
+      "to": "db",
+      "y": 165,
+      "label": "cancel order + write outbox slip",
+      "variant": "emphasis",
+      "note": "1 transaction: UPDATE order + INSERT outbox"
+    },
+    {
+      "id": "commit",
+      "from": "db",
+      "to": "api",
+      "y": 222,
+      "label": "commit both or nothing",
+      "variant": "return"
+    },
+    {
+      "id": "poll",
+      "from": "relay",
+      "to": "db",
+      "y": 262,
+      "label": "take unsent slips",
+      "variant": "default",
+      "note": "FOR UPDATE SKIP LOCKED"
+    },
+    {
+      "id": "publish",
+      "from": "relay",
+      "to": "broker",
+      "y": 312,
+      "label": "publish event, wait for receipt",
+      "variant": "emphasis",
+      "note": "persistent, message_id = evt-7"
+    },
+    {
+      "id": "confirm",
+      "from": "broker",
+      "to": "relay",
+      "y": 362,
+      "label": "receipt",
+      "variant": "return"
+    },
+    {
+      "id": "mark",
+      "from": "relay",
+      "to": "db",
+      "y": 397,
+      "label": "mark slip as sent",
+      "variant": "dashed",
+      "note": "dies before this step: evt-7 is republished next time"
+    },
+    {
+      "id": "deliver",
+      "from": "broker",
+      "to": "consumer",
+      "y": 457,
+      "label": "deliver order.cancelled",
+      "variant": "default",
+      "note": "may arrive twice"
+    },
+    {
+      "id": "dedup",
+      "from": "consumer",
+      "to": "db",
+      "y": 507,
+      "label": "evt-7 not processed yet: restock",
+      "variant": "emphasis",
+      "note": "1 tx: INSERT processed ON CONFLICT DO NOTHING + add stock"
+    },
+    {
+      "id": "result",
+      "from": "db",
+      "to": "consumer",
+      "y": 562,
+      "label": "first time: done; later: skipped",
+      "variant": "return"
+    },
+    {
+      "id": "ack",
+      "from": "consumer",
+      "to": "broker",
+      "y": 602,
+      "label": "sign for it",
+      "variant": "return",
+      "note": "ack"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "db",
+      "from": 165,
+      "to": 222,
+      "type": "database"
+    },
+    {
+      "participant": "relay",
+      "from": 262,
+      "to": 402,
+      "type": "backend"
+    },
+    {
+      "participant": "broker",
+      "from": 312,
+      "to": 362,
+      "type": "messagebus"
+    },
+    {
+      "participant": "consumer",
+      "from": 457,
+      "to": 602,
+      "type": "backend"
+    },
+    {
+      "participant": "db",
+      "from": 507,
+      "to": 562,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Sending side: no loss",
+      "items": [
+        "The order and the outgoing slip share one transaction",
+        "The relay republishes until it gets a receipt",
+        "The price: possible duplicates"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Receiving side: never twice",
+      "items": [
+        "Write the event ID to the ledger in the same transaction as the main work",
+        "Seeing an old ID again: skip, but still ack",
+        "Each consumer keeps its own ledger"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Traps",
+      "items": [
+        "Ledger in a separate transaction: a failure midway means loss or duplicates",
+        "Deduping with the redelivered flag: not enough"
+      ]
+    }
+  ]
+}

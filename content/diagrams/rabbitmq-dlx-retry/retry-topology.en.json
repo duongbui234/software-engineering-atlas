@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Delayed retry with a dead letter exchange and TTL",
+    "output": "content/diagrams/rabbitmq-dlx-retry/retry-topology.en.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "producer",
+      "type": "backend",
+      "label": "Sender",
+      "sublabel": "producer",
+      "pos": [
+        40,
+        200
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "work-x",
+      "type": "messagebus",
+      "label": "Main sorting desk",
+      "sublabel": "exchange work.x",
+      "pos": [
+        280,
+        200
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "work-q",
+      "type": "database",
+      "label": "Work slot",
+      "sublabel": "work.q, DLX = retry.x",
+      "pos": [
+        540,
+        200
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "consumer",
+      "type": "backend",
+      "label": "Clerk",
+      "sublabel": "consumer calling the payment gateway",
+      "pos": [
+        800,
+        200
+      ],
+      "size": [
+        180,
+        64
+      ]
+    },
+    {
+      "id": "retry-x",
+      "type": "messagebus",
+      "label": "Waiting-mail desk",
+      "sublabel": "exchange retry.x",
+      "pos": [
+        540,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "retry-q",
+      "type": "database",
+      "label": "5-second waiting slot",
+      "sublabel": "retry.q, TTL 5s, DLX = work.x",
+      "pos": [
+        280,
+        420
+      ],
+      "size": [
+        190,
+        64
+      ]
+    },
+    {
+      "id": "parking-q",
+      "type": "database",
+      "label": "Parking lot",
+      "sublabel": "parking.q, human review",
+      "pos": [
+        800,
+        420
+      ],
+      "size": [
+        180,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "send",
+      "from": "producer",
+      "to": "work-x",
+      "label": "publish, label pay",
+      "variant": "emphasis"
+    },
+    {
+      "id": "bind-work",
+      "from": "work-x",
+      "to": "work-q",
+      "label": "binding pay"
+    },
+    {
+      "id": "deliver",
+      "from": "work-q",
+      "to": "consumer",
+      "label": "deliver"
+    },
+    {
+      "id": "to-retry",
+      "from": "work-q",
+      "to": "retry-x",
+      "label": "error: nack, no requeue",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "bind-retry",
+      "from": "retry-x",
+      "to": "retry-q",
+      "label": "binding pay"
+    },
+    {
+      "id": "back",
+      "from": "retry-q",
+      "to": "work-x",
+      "label": "expired: go back",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "park",
+      "from": "consumer",
+      "to": "parking-q",
+      "label": "3rd attempt still fails",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "The retry loop",
+      "items": [
+        "On error, nack without requeue: the letter goes to the waiting slot",
+        "Nobody reads the waiting slot; the letter sits 5 seconds, then expires",
+        "On expiry, it is dead-lettered back to the main sorting desk"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Counting attempts",
+      "items": [
+        "The x-death header records each time the letter is dead-lettered",
+        "count for the work slot with reason rejected = number of failures",
+        "After 3 attempts, move it to the parking lot, then ack"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Traps",
+      "items": [
+        "A DLX with no bound queue: dead letters vanish silently",
+        "Waiting 5s, 30s and 5 minutes needs three waiting slots"
+      ]
+    }
+  ]
+}

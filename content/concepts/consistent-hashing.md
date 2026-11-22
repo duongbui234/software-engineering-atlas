@@ -8,4 +8,4 @@ region: Vùng Cache
 
 **Consistent hashing** (Karger và cộng sự, 1997) đặt node và key lên vòng tròn, key thuộc node đầu tiên theo chiều kim đồng hồ; virtual node giúp chia đều. Thêm node thứ 5: `hash % N` làm 80% key đổi node, consistent hashing khoảng 20%.
 
-Đọc thêm trong bài [[2026-11-22-caching-distributed|Nhiều tầng, nhiều máy]].
+Đọc thêm trong bài [[posts/2026-11-22-caching-distributed|Nhiều tầng, nhiều máy]].

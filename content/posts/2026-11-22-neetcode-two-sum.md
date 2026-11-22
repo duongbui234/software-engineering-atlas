@@ -18,16 +18,16 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Đề: tìm **chỉ số** của hai phần tử có tổng bằng `target`. Luôn có đúng một đáp án, và không được dùng một phần tử hai lần.
-> - [[complement-lookup|Tra phần bù]]: với mỗi `x`, số cần tìm là `target - x`. Câu hỏi "có cặp nào?" biến thành "đã gặp `target - x` chưa?", một câu hash map trả lời được trong O(1).
-> - [[one-pass-hash-map|Hash map một lượt]]: **hỏi trước, ghi sau**. Ghi trước thì `[3, 2, 4]`, target 6 trả về `[0, 0]`: ghép số 3 với chính nó.
-> - [[two-pointers|Hai con trỏ]] trên mảng đã sắp xếp cũng chạy được, O(n log n), nhưng phải sắp xếp **chỉ số** để không mất vị trí gốc. Trong JS, `sort()` mặc định làm hai con trỏ bỏ sót đáp án.
-> - Hash map là O(1) **trung bình** và [[amortized-o1|khấu hao]]. Khi mọi khóa [[hash-collision|va chạm]] vào cùng một ô, Java vẫn trụ được nhờ biến ô đó thành cây, nhưng chỉ khi khóa so sánh được thứ tự.
+> - [[concepts/complement-lookup|Tra phần bù]]: với mỗi `x`, số cần tìm là `target - x`. Câu hỏi "có cặp nào?" biến thành "đã gặp `target - x` chưa?", một câu hash map trả lời được trong O(1).
+> - [[concepts/one-pass-hash-map|Hash map một lượt]]: **hỏi trước, ghi sau**. Ghi trước thì `[3, 2, 4]`, target 6 trả về `[0, 0]`: ghép số 3 với chính nó.
+> - [[concepts/two-pointers|Hai con trỏ]] trên mảng đã sắp xếp cũng chạy được, O(n log n), nhưng phải sắp xếp **chỉ số** để không mất vị trí gốc. Trong JS, `sort()` mặc định làm hai con trỏ bỏ sót đáp án.
+> - Hash map là O(1) **trung bình** và [[concepts/amortized-o1|khấu hao]]. Khi mọi khóa [[concepts/hash-collision|va chạm]] vào cùng một ô, Java vẫn trụ được nhờ biến ô đó thành cây, nhưng chỉ khi khóa so sánh được thứ tự.
 
 > [!info] Bối cảnh
 > Ga 3 của **tuyến NeetCode 150: Arrays & Hashing**. Ga 1 nhớ "đã thấy chưa", ga 2 nhớ "bao nhiêu lần"; ga này nhớ "**ở vị trí nào**" và hỏi về một số *chưa* thấy. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Big-O, Set, hash**: xem [[2026-11-22-neetcode-contains-duplicate|ga 1]]. **Map**: xem [[2026-11-22-neetcode-valid-anagram|ga 2]].
+> - **Big-O, Set, hash**: xem [[posts/2026-11-22-neetcode-contains-duplicate|ga 1]]. **Map**: xem [[posts/2026-11-22-neetcode-valid-anagram|ga 2]].
 > - **Chỉ số (index)**: vị trí của phần tử trong mảng, bắt đầu từ 0. Đề bài đòi chỉ số, không đòi giá trị.
 > - **Ô (bucket)**: hash table là một mảng các ô; hash của khóa quyết định khóa nằm ở ô nào.
 > - **Load factor (hệ số tải)**: số khóa chia cho số ô. Vượt ngưỡng thì bảng nới rộng (thường gấp đôi) và chuyển mọi khóa sang bảng mới.
@@ -40,11 +40,11 @@ Bạn có đúng 9 nghìn và muốn mua **đúng hai món** tiêu hết số ti
 | Đời thường | Khái niệm |
 |---|---|
 | Với mỗi món, quay lại xem từng món phía sau xem có cộng đủ 9 không | Vét cạn, O(n²) |
-| Đứng trước món giá 2, nghĩ "mình cần một món giá **7**" | [[complement-lookup\|Tra phần bù]] |
-| Ghi vào sổ "giá → vị trí kệ" mọi món đã đi qua; tới món mới thì tra sổ tìm giá còn thiếu | [[one-pass-hash-map\|Hash map một lượt]] |
-| Xếp hàng hóa theo giá, một người đứng đầu rẻ nhất, một người đứng cuối đắt nhất, cùng đi vào giữa | [[two-pointers\|Hai con trỏ]] |
-| Cuốn sổ có mục lục theo giá; nhiều giá rơi vào cùng một trang mục lục thì phải dò lâu hơn | [[hash-collision\|Va chạm hash]] |
-| Sổ đầy thì chép sang cuốn dày gấp đôi; tốn công, nhưng hiếm khi phải làm | [[amortized-o1\|O(1) khấu hao]] |
+| Đứng trước món giá 2, nghĩ "mình cần một món giá **7**" | [[concepts/complement-lookup\|Tra phần bù]] |
+| Ghi vào sổ "giá → vị trí kệ" mọi món đã đi qua; tới món mới thì tra sổ tìm giá còn thiếu | [[concepts/one-pass-hash-map\|Hash map một lượt]] |
+| Xếp hàng hóa theo giá, một người đứng đầu rẻ nhất, một người đứng cuối đắt nhất, cùng đi vào giữa | [[concepts/two-pointers\|Hai con trỏ]] |
+| Cuốn sổ có mục lục theo giá; nhiều giá rơi vào cùng một trang mục lục thì phải dò lâu hơn | [[concepts/hash-collision\|Va chạm hash]] |
+| Sổ đầy thì chép sang cuốn dày gấp đôi; tốn công, nhưng hiếm khi phải làm | [[concepts/amortized-o1\|O(1) khấu hao]] |
 
 ```mermaid
 flowchart TB
@@ -78,7 +78,7 @@ Hai ca cuối là nơi lời giải sai lộ ra: `[3, 2, 4]` bẫy những ai gh
 
 ### Tra phần bù
 
-Vét cạn hỏi "cặp (i, j) này có cộng ra target không?" cho mọi cặp, O(n²). Mẹo [[complement-lookup|tra phần bù]] lật câu hỏi lại: khi đứng ở `x`, chỉ có **đúng một** giá trị ghép được với nó, là `target - x`. Câu hỏi "có cặp nào chứa x?" thành "đã thấy giá trị `target - x` chưa?", và đó chính là câu hỏi của ga 1. Chỉ khác là lần này cần nhớ thêm vị trí, nên dùng Map `giá trị → chỉ số` thay cho Set.
+Vét cạn hỏi "cặp (i, j) này có cộng ra target không?" cho mọi cặp, O(n²). Mẹo [[concepts/complement-lookup|tra phần bù]] lật câu hỏi lại: khi đứng ở `x`, chỉ có **đúng một** giá trị ghép được với nó, là `target - x`. Câu hỏi "có cặp nào chứa x?" thành "đã thấy giá trị `target - x` chưa?", và đó chính là câu hỏi của ga 1. Chỉ khác là lần này cần nhớ thêm vị trí, nên dùng Map `giá trị → chỉ số` thay cho Set.
 
 Mẹo này đi xa hơn Two Sum rất nhiều: "đếm số đoạn con có tổng bằng k" dùng phần bù trên tổng tiền tố, và "4Sum II" chia đôi rồi tra phần bù.
 
@@ -87,7 +87,7 @@ Mẹo này đi xa hơn Two Sum rất nhiều: "đếm số đoạn con có tổn
 Có hai cách dựng sổ:
 
 - **Hai lượt**: lượt 1 ghi mọi số vào map, lượt 2 tra phần bù và kiểm tra `j !== i`.
-- **[[one-pass-hash-map|Một lượt]]**: vừa duyệt vừa tra, rồi mới ghi. Sổ chỉ chứa các số **đứng trước** i, nên không bao giờ tìm thấy chính i. Với `[3, 3]`, số 3 thứ hai tìm thấy số 3 thứ nhất ở vị trí 0, đúng.
+- **[[concepts/one-pass-hash-map|Một lượt]]**: vừa duyệt vừa tra, rồi mới ghi. Sổ chỉ chứa các số **đứng trước** i, nên không bao giờ tìm thấy chính i. Với `[3, 3]`, số 3 thứ hai tìm thấy số 3 thứ nhất ở vị trí 0, đúng.
 
 Nếu đảo thứ tự (ghi trước rồi mới hỏi), số 3 trong `[3, 2, 4]` tìm thấy chính nó, trả về `[0, 0]`. Mình gặp lỗi này ở lần viết đầu tiên.
 
@@ -95,13 +95,13 @@ Còn trùng khóa thì sao? Với `[3, 3]` và một target khác 6, số 3 th�
 
 ### Hai con trỏ: khi mảng đã sắp xếp
 
-Nếu mảng đã tăng dần, đặt một [[two-pointers|con trỏ]] ở đầu (nhỏ nhất) và một ở cuối (lớn nhất). Tổng nhỏ hơn target thì dời con trỏ trái sang phải để tăng tổng; lớn hơn thì dời con trỏ phải sang trái. Mỗi bước loại đúng một phần tử khỏi mọi đáp án có thể, nên tổng cộng O(n) bước và O(1) bộ nhớ.
+Nếu mảng đã tăng dần, đặt một [[concepts/two-pointers|con trỏ]] ở đầu (nhỏ nhất) và một ở cuối (lớn nhất). Tổng nhỏ hơn target thì dời con trỏ trái sang phải để tăng tổng; lớn hơn thì dời con trỏ phải sang trái. Mỗi bước loại đúng một phần tử khỏi mọi đáp án có thể, nên tổng cộng O(n) bước và O(1) bộ nhớ.
 
 Bài này không cho mảng đã sắp xếp. Sắp xếp tốn O(n log n), và làm mất vị trí gốc, nên phải sắp xếp một mảng **chỉ số** theo giá trị. Bài "Two Sum II" (bài thứ hai của nhóm Two Pointers trong NeetCode 150) cho sẵn mảng đã sắp xếp, và ở đó hai con trỏ là lời giải tối ưu.
 
 ### Bên trong hash table: vì sao O(1) chỉ là trung bình
 
-Hash map là một mảng các ô. `hash(khóa)` chọn ô; hai khóa khác nhau rơi vào cùng ô là một [[hash-collision|va chạm]]. Va chạm là chuyện bình thường: với bảng có m ô, chỉ khoảng 1,2·√m khóa là đã có 50% khả năng có hai khóa trùng ô (bài toán ngày sinh). Mọi hash table đều có cách xử lý:
+Hash map là một mảng các ô. `hash(khóa)` chọn ô; hai khóa khác nhau rơi vào cùng ô là một [[concepts/hash-collision|va chạm]]. Va chạm là chuyện bình thường: với bảng có m ô, chỉ khoảng 1,2·√m khóa là đã có 50% khả năng có hai khóa trùng ô (bài toán ngày sinh). Mọi hash table đều có cách xử lý:
 
 | | Cách xử lý va chạm | Nới bảng |
 |---|---|---|
@@ -113,7 +113,7 @@ Hash map là một mảng các ô. `hash(khóa)` chọn ô; hai khóa khác nhau
 Hai cơ chế làm "O(1)" đúng trong thực tế:
 
 - **Hash tốt rải khóa đều**, nên mỗi ô trung bình có một khóa. Kẻ tấn công biết hàm hash có thể cố ý gửi hàng nghìn khóa cùng hash, biến mỗi lần tra thành O(n): đây là tấn công hash flooding (oCERT 2011). Python đáp lại bằng cách ngẫu nhiên hóa hash của chuỗi mỗi lần chạy (`PYTHONHASHSEED`); Java đáp lại bằng cây trong từng ô.
-- **Nới bảng [[amortized-o1|khấu hao]]**: thỉnh thoảng một lần `set` phải chép cả bảng, O(n). Nhưng nếu mỗi lần nới gấp đôi, tổng công chép sau n lần ghi chỉ cỡ 2n, tức trung bình O(1) mỗi lần. Từng lần riêng lẻ có thể chậm; tổng thì không.
+- **Nới bảng [[concepts/amortized-o1|khấu hao]]**: thỉnh thoảng một lần `set` phải chép cả bảng, O(n). Nhưng nếu mỗi lần nới gấp đôi, tổng công chép sau n lần ghi chỉ cỡ 2n, tức trung bình O(1) mỗi lần. Từng lần riêng lẻ có thể chậm; tổng thì không.
 
 ## Ví dụ chạy được
 

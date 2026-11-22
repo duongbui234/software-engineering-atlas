@@ -18,17 +18,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[cache-stampede|Cache stampede]]: key hot vừa hết hạn, hàng trăm request cùng trượt và cùng đi hỏi database. Trong ví dụ: 500 request thành 500 query.
-> - [[request-coalescing|Gom request]] (singleflight, khóa): chỉ một request đi lấy, những request khác chờ kết quả của nó. 500 query còn 1.
-> - [[probabilistic-early-expiration|Làm mới sớm theo xác suất]] (XFetch): càng gần hạn, càng có khả năng một request tự làm mới trước. Với lưu lượng đều, số query giảm từ 127 xuống 50, thêm gom request thì còn 6.
-> - [[ttl-jitter|TTL jitter]]: cộng trừ ngẫu nhiên vào TTL để hàng nghìn key nạp cùng lúc không hết hạn cùng lúc. Đỉnh tải giảm từ 2.000 xuống 526 query mỗi 100 ms.
-> - [[cache-penetration|Cache penetration]]: hỏi thứ không tồn tại thì cache không bao giờ trúng. Chữa bằng negative cache, hoặc [[bloom-filter|Bloom filter]] (12 KB cho 10.000 id, sai 1%). [[hot-key|Hot key]] là một key nóng tới mức một node không chịu nổi.
+> - [[concepts/cache-stampede|Cache stampede]]: key hot vừa hết hạn, hàng trăm request cùng trượt và cùng đi hỏi database. Trong ví dụ: 500 request thành 500 query.
+> - [[concepts/request-coalescing|Gom request]] (singleflight, khóa): chỉ một request đi lấy, những request khác chờ kết quả của nó. 500 query còn 1.
+> - [[concepts/probabilistic-early-expiration|Làm mới sớm theo xác suất]] (XFetch): càng gần hạn, càng có khả năng một request tự làm mới trước. Với lưu lượng đều, số query giảm từ 127 xuống 50, thêm gom request thì còn 6.
+> - [[concepts/ttl-jitter|TTL jitter]]: cộng trừ ngẫu nhiên vào TTL để hàng nghìn key nạp cùng lúc không hết hạn cùng lúc. Đỉnh tải giảm từ 2.000 xuống 526 query mỗi 100 ms.
+> - [[concepts/cache-penetration|Cache penetration]]: hỏi thứ không tồn tại thì cache không bao giờ trúng. Chữa bằng negative cache, hoặc [[concepts/bloom-filter|Bloom filter]] (12 KB cho 10.000 id, sai 1%). [[concepts/hot-key|Hot key]] là một key nóng tới mức một node không chịu nổi.
 
 > [!info] Bối cảnh
 > Ga 5 của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: 21:00, hàng nghìn người cùng mở *một* trang sản phẩm và cùng gõ *một* từ khóa. Đây là lúc cache quan trọng nhất, và cũng là lúc những khe hở nhỏ của nó biến thành sự cố. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **TTL, negative caching, lease**: xem [[2026-11-22-caching-invalidation|ga 4]].
+> - **TTL, negative caching, lease**: xem [[posts/2026-11-22-caching-invalidation|ga 4]].
 > - **Đồng thời (concurrent)**: nhiều request đang được xử lý cùng một lúc.
 > - **Promise**: trong JavaScript, một "giấy hẹn" cho kết quả sẽ có sau. Nhiều chỗ có thể cùng chờ một promise.
 > - **Hàm băm (hash)**: biến một chuỗi bất kỳ thành một con số trông như ngẫu nhiên, cùng đầu vào thì cùng đầu ra.
@@ -42,13 +42,13 @@ Mùa thi, cả trăm sinh viên cùng chạy tới quầy hỏi đúng một cu�
 
 | Đời thường | Khái niệm |
 |---|---|
-| Trăm người cùng hỏi một cuốn vừa bị trả kho, trăm thủ thư cùng chạy xuống | [[cache-stampede\|Cache stampede]] |
-| Một thủ thư xuống kho, những người khác đứng chờ cuốn đó | [[request-coalescing\|Request coalescing]] |
-| Sách sắp hết hạn: thỉnh thoảng một thủ thư tranh thủ đổi bản mới trước | [[probabilistic-early-expiration\|Làm mới sớm theo xác suất]] |
-| Hẹn trả lệch nhau vài ngày, để cả lớp không trả cùng một buổi sáng | [[ttl-jitter\|TTL jitter]] |
-| Người cứ hỏi những cuốn thư viện không hề có | [[cache-penetration\|Cache penetration]] |
-| Danh mục bỏ túi: "chắc chắn không có" hoặc "có thể có" | [[bloom-filter\|Bloom filter]] |
-| Một cuốn được hỏi nhiều tới mức một quầy không phục vụ xuể | [[hot-key\|Hot key]] |
+| Trăm người cùng hỏi một cuốn vừa bị trả kho, trăm thủ thư cùng chạy xuống | [[concepts/cache-stampede\|Cache stampede]] |
+| Một thủ thư xuống kho, những người khác đứng chờ cuốn đó | [[concepts/request-coalescing\|Request coalescing]] |
+| Sách sắp hết hạn: thỉnh thoảng một thủ thư tranh thủ đổi bản mới trước | [[concepts/probabilistic-early-expiration\|Làm mới sớm theo xác suất]] |
+| Hẹn trả lệch nhau vài ngày, để cả lớp không trả cùng một buổi sáng | [[concepts/ttl-jitter\|TTL jitter]] |
+| Người cứ hỏi những cuốn thư viện không hề có | [[concepts/cache-penetration\|Cache penetration]] |
+| Danh mục bỏ túi: "chắc chắn không có" hoặc "có thể có" | [[concepts/bloom-filter\|Bloom filter]] |
+| Một cuốn được hỏi nhiều tới mức một quầy không phục vụ xuể | [[concepts/hot-key\|Hot key]] |
 
 ```mermaid
 flowchart TB
@@ -75,11 +75,11 @@ Ga này đi qua bốn kiểu thủng, mỗi kiểu một cách vá, đều đư�
 
 ### Cache stampede: một key, hàng trăm lần trượt
 
-**[[cache-stampede|Cache stampede]]** (còn gọi là dogpile hay thundering herd): key hot hết hạn, và trong khoảng thời gian một request đi lấy dữ liệu mới (ví dụ 100 ms), *mọi* request tới key đó đều thấy cache trống và cũng đi lấy. Ở 5.000 request/giây, 100 ms là 500 query giống hệt nhau. Nếu database chậm đi vì tải, khoảng 100 ms đó dài ra, càng nhiều request trượt: một vòng xoáy.
+**[[concepts/cache-stampede|Cache stampede]]** (còn gọi là dogpile hay thundering herd): key hot hết hạn, và trong khoảng thời gian một request đi lấy dữ liệu mới (ví dụ 100 ms), *mọi* request tới key đó đều thấy cache trống và cũng đi lấy. Ở 5.000 request/giây, 100 ms là 500 query giống hệt nhau. Nếu database chậm đi vì tải, khoảng 100 ms đó dài ra, càng nhiều request trượt: một vòng xoáy.
 
 ### Gom request: chỉ một người đi lấy
 
-**[[request-coalescing|Request coalescing]]** (gom request): khi đã có một request đang đi lấy key X, những request sau không đi nữa mà chờ chung kết quả. Có hai phạm vi:
+**[[concepts/request-coalescing|Request coalescing]]** (gom request): khi đã có một request đang đi lấy key X, những request sau không đi nữa mà chờ chung kết quả. Có hai phạm vi:
 
 **Trong một tiến trình (singleflight).** Giữ một bảng "key → promise đang chạy". Request tới sau lấy promise sẵn có thay vì tạo mới. Thư viện Go có sẵn `singleflight`; trong Node chỉ vài dòng:
 
@@ -117,13 +117,13 @@ finally {
 - **Token ngẫu nhiên và nhả khóa bằng Lua so token**: nếu người giữ khóa chậm quá 5 giây, khóa hết hạn và người khác giành được; lúc người cũ xong việc, nó không được xóa nhầm khóa của người mới.
 - **Chờ có giới hạn**: sau 750 ms vẫn chưa có thì tự đi lấy. Thà tốn thêm vài query còn hơn treo request.
 
-Ở tầng CDN, nginx làm cùng việc bằng `proxy_cache_lock` ([[2026-11-22-caching-http|ga 2]]: 200 request thành 1). Lease của Facebook ([[2026-11-22-caching-invalidation|ga 4]]) cũng vậy: memcache chỉ phát token cho một key mỗi 10 giây, người không có token chờ một chút rồi thử lại. Bài báo của họ ghi tải đỉnh của database giảm từ 17.000 xuống 1.300 query/giây nhờ cơ chế này.
+Ở tầng CDN, nginx làm cùng việc bằng `proxy_cache_lock` ([[posts/2026-11-22-caching-http|ga 2]]: 200 request thành 1). Lease của Facebook ([[posts/2026-11-22-caching-invalidation|ga 4]]) cũng vậy: memcache chỉ phát token cho một key mỗi 10 giây, người không có token chờ một chút rồi thử lại. Bài báo của họ ghi tải đỉnh của database giảm từ 17.000 xuống 1.300 query/giây nhờ cơ chế này.
 
 ### Làm mới sớm theo xác suất: không để key hết hạn
 
 Gom request vẫn để *một* request phải chờ database mỗi lần hết hạn, và tất cả những request đến cùng lúc phải chờ theo. Cách tốt hơn là làm mới **trước** khi hết hạn. Nhưng nếu ai cũng làm mới khi còn 1 giây thì lại thành stampede sớm hơn 1 giây.
 
-**[[probabilistic-early-expiration|XFetch]]** (Vattani, Chierichetti và Lowenstein, VLDB 2015) để mỗi request *tự tung đồng xu*. Mỗi mục lưu kèm `delta` (lần tính trước mất bao lâu) và `expiry`. Request tính lại nếu:
+**[[concepts/probabilistic-early-expiration|XFetch]]** (Vattani, Chierichetti và Lowenstein, VLDB 2015) để mỗi request *tự tung đồng xu*. Mỗi mục lưu kèm `delta` (lần tính trước mất bao lâu) và `expiry`. Request tính lại nếu:
 
 ```text
 now − delta × beta × ln(rand()) ≥ expiry
@@ -137,7 +137,7 @@ Trong ví dụ (500 request/giây, TTL 1 giây, database 100 ms): TTL thường 
 
 Đầu giờ flash sale, hệ thống nạp 2.000 sản phẩm vào cache cùng lúc với cùng TTL 60 giây. Đúng 60 giây sau, cả 2.000 key hết hạn trong cùng một khoảnh khắc. Hiện tượng này đôi khi được gọi là cache avalanche (tuyết lở). Nó cũng xảy ra sau khi khởi động lại hoặc làm nóng cache (ga 7).
 
-**[[ttl-jitter|TTL jitter]]** cộng một phần ngẫu nhiên vào TTL, ví dụ 60 giây ± 20%. Các lần hết hạn trải ra trong 24 giây thay vì dồn vào một khoảnh khắc. Một dòng code:
+**[[concepts/ttl-jitter|TTL jitter]]** cộng một phần ngẫu nhiên vào TTL, ví dụ 60 giây ± 20%. Các lần hết hạn trải ra trong 24 giây thay vì dồn vào một khoảnh khắc. Một dòng code:
 
 ```ts
 const ttl = Math.round(60 * (0.8 + 0.4 * Math.random()));   // 48–72 giây
@@ -147,12 +147,12 @@ Trong ví dụ, đỉnh tải giảm từ 2.000 xuống 526 query mỗi 100 ms. 
 
 ### Cache penetration: hỏi thứ không tồn tại
 
-**[[cache-penetration|Cache penetration]]** (thủng cache): request hỏi những key không có trong database. Cache-aside không lưu gì khi DB trả rỗng, nên request nào cũng trượt và đi thẳng xuống DB. Có thể do lỗi (link hỏng, id cũ) hoặc cố ý: bot quét `/products/1` tới `/products/1000000` để vượt qua cache và đánh thẳng vào DB.
+**[[concepts/cache-penetration|Cache penetration]]** (thủng cache): request hỏi những key không có trong database. Cache-aside không lưu gì khi DB trả rỗng, nên request nào cũng trượt và đi thẳng xuống DB. Có thể do lỗi (link hỏng, id cũ) hoặc cố ý: bot quét `/products/1` tới `/products/1000000` để vượt qua cache và đánh thẳng vào DB.
 
 Hai cách vá, thường dùng cùng nhau:
 
-1. **Negative caching** ([[2026-11-22-caching-invalidation|ga 4]]): lưu luôn "không có" với TTL ngắn. 1.000 request vào 200 id giả còn 200 query. Nhưng nếu kẻ tấn công dùng id *mới* mỗi lần thì negative cache không giúp được gì, mà còn bị lấp đầy bởi rác.
-2. **[[bloom-filter|Bloom filter]]** đứng trước cache: một cấu trúc nhỏ biết "id này chắc chắn không tồn tại" hay "có thể tồn tại". Id chắc chắn không có thì trả 404 ngay, không ai phải hỏi.
+1. **Negative caching** ([[posts/2026-11-22-caching-invalidation|ga 4]]): lưu luôn "không có" với TTL ngắn. 1.000 request vào 200 id giả còn 200 query. Nhưng nếu kẻ tấn công dùng id *mới* mỗi lần thì negative cache không giúp được gì, mà còn bị lấp đầy bởi rác.
+2. **[[concepts/bloom-filter|Bloom filter]]** đứng trước cache: một cấu trúc nhỏ biết "id này chắc chắn không tồn tại" hay "có thể tồn tại". Id chắc chắn không có thì trả 404 ngay, không ai phải hỏi.
 
 ### Bloom filter: biết chắc "không có" bằng vài KB
 
@@ -167,7 +167,7 @@ Hạn chế: không xóa được phần tử (tắt bit có thể làm hỏng p
 
 ### Hot key: một key, một node, quá tải
 
-**[[hot-key|Hot key]]** khác stampede: key không hết hạn, cache vẫn trúng, nhưng **một key nhận quá nhiều request** đến mức node giữ nó quá tải. Khi Redis chạy thành cụm nhiều node (ga 7), mỗi key chỉ nằm ở một node; sản phẩm đang flash sale có thể nhận 100.000 lượt đọc mỗi giây trong khi các node khác ngồi chơi. Giá trị càng lớn thì càng nhanh nghẽn băng thông mạng của node đó.
+**[[concepts/hot-key|Hot key]]** khác stampede: key không hết hạn, cache vẫn trúng, nhưng **một key nhận quá nhiều request** đến mức node giữ nó quá tải. Khi Redis chạy thành cụm nhiều node (ga 7), mỗi key chỉ nằm ở một node; sản phẩm đang flash sale có thể nhận 100.000 lượt đọc mỗi giây trong khi các node khác ngồi chơi. Giá trị càng lớn thì càng nhanh nghẽn băng thông mạng của node đó.
 
 Cách vá:
 

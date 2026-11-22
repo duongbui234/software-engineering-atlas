@@ -17,10 +17,10 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[microservices|Microservices]] đổi độ phức tạp *trong code* lấy độ phức tạp *trên mạng*: mỗi JOIN cũ thành một lời gọi mạng, mỗi transaction cũ thành một saga. Nên bắt đầu bằng modular monolith và chỉ tách khi có lý do.
-> - [[api-gateway|API Gateway]] là cửa vào chung trước các service: định tuyến, xác thực, giới hạn tốc độ, gộp response. Đừng để logic nghiệp vụ lọt vào đó.
-> - [[api-versioning|API versioning]]: thay đổi *thêm vào* thì không cần version mới; thay đổi *phá vỡ* thì cần, và cách tốt nhất là để code lõi chỉ biết bản mới, còn rìa chuyển đổi cho client cũ.
-> - [[openapi|OpenAPI]] là hợp đồng máy đọc được: sinh tài liệu, sinh client, kiểm tra request và test hợp đồng từ cùng một nguồn.
+> - [[concepts/microservices|Microservices]] đổi độ phức tạp *trong code* lấy độ phức tạp *trên mạng*: mỗi JOIN cũ thành một lời gọi mạng, mỗi transaction cũ thành một saga. Nên bắt đầu bằng modular monolith và chỉ tách khi có lý do.
+> - [[concepts/api-gateway|API Gateway]] là cửa vào chung trước các service: định tuyến, xác thực, giới hạn tốc độ, gộp response. Đừng để logic nghiệp vụ lọt vào đó.
+> - [[concepts/api-versioning|API versioning]]: thay đổi *thêm vào* thì không cần version mới; thay đổi *phá vỡ* thì cần, và cách tốt nhất là để code lõi chỉ biết bản mới, còn rìa chuyển đổi cho client cũ.
+> - [[concepts/openapi|OpenAPI]] là hợp đồng máy đọc được: sinh tài liệu, sinh client, kiểm tra request và test hợp đồng từ cùng một nguồn.
 
 > [!info] Bối cảnh
 > Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết. Hiện nó là **một** ứng dụng (mình gọi là *Main*). Trong repo có một bản thiết kế, chưa làm, để tách phần đăng nhập và phân quyền (gọi là **IAM**, Identity and Access Management) ra thành ứng dụng riêng. Bạn không cần đọc code dự án. Bài dùng bản thiết kế này như một ví dụ thực tế cho cả bốn khái niệm.
@@ -29,7 +29,7 @@ sources:
 > - **Monolith**: toàn bộ hệ thống là một ứng dụng, deploy một lần.
 > - **Modular monolith**: vẫn là một ứng dụng, nhưng code chia thành các khu có ranh giới rõ (đơn hàng, thanh toán, sản phẩm…).
 > - **Service**: một ứng dụng chạy riêng, có database riêng, nói chuyện với các service khác qua mạng.
-> - **gRPC**: cách gọi hàm giữa các service qua mạng, gọn và nhanh (xem [[2026-11-18-api-styles|ga 2]]).
+> - **gRPC**: cách gọi hàm giữa các service qua mạng, gọn và nhanh (xem [[posts/2026-11-18-api-styles|ga 2]]).
 > - **JOIN**: câu SQL ghép dữ liệu từ hai bảng, ví dụ đơn hàng kèm tên người mua.
 > - **Transaction**: nhóm thao tác database "hoặc thành công hết, hoặc không có gì xảy ra".
 > - **Saga**: cách làm thay transaction khi các bước nằm ở nhiều service. Bước sau lỗi thì chạy bước "hoàn tác" cho các bước trước.
@@ -43,10 +43,10 @@ sources:
 |---|---|
 | Một siêu thị lớn: một kho, một hệ thống thu ngân, một ông quản lý | Monolith |
 | Vẫn một siêu thị, nhưng chia khu rõ ràng: khu điện tử không lấy hàng từ kệ khu thực phẩm | Modular monolith (flash-sale hiện tại) |
-| Trung tâm thương mại: mỗi cửa hàng tự có kho và nhân viên, tự mở cửa đóng cửa. Muốn hỏi hàng của cửa hàng khác thì phải gọi điện | [[microservices\|Microservices]] |
-| Cửa chính có quầy thông tin và bảo vệ: kiểm vé, chỉ đường tới đúng cửa hàng | [[api-gateway\|API Gateway]] |
-| Đổi sang ổ cắm điện kiểu mới nhưng phát **adapter** cho thiết bị cũ, để ai cũng còn cắm được | [[api-versioning\|API Versioning]] |
-| Bản đồ và danh bạ in sẵn ở cửa: cửa hàng nào ở đâu, bán gì, giờ mở cửa | [[openapi\|OpenAPI]] |
+| Trung tâm thương mại: mỗi cửa hàng tự có kho và nhân viên, tự mở cửa đóng cửa. Muốn hỏi hàng của cửa hàng khác thì phải gọi điện | [[concepts/microservices\|Microservices]] |
+| Cửa chính có quầy thông tin và bảo vệ: kiểm vé, chỉ đường tới đúng cửa hàng | [[concepts/api-gateway\|API Gateway]] |
+| Đổi sang ổ cắm điện kiểu mới nhưng phát **adapter** cho thiết bị cũ, để ai cũng còn cắm được | [[concepts/api-versioning\|API Versioning]] |
+| Bản đồ và danh bạ in sẵn ở cửa: cửa hàng nào ở đâu, bán gì, giờ mở cửa | [[concepts/openapi\|OpenAPI]] |
 
 Chỗ cần để ý nhất là câu "muốn hỏi thì phải gọi điện". Trong siêu thị, nhân viên chỉ cần quay sang kệ bên cạnh. Ở trung tâm thương mại, mỗi câu hỏi là một cuộc gọi: có độ trễ, có thể không ai nghe máy, và hai cửa hàng không thể cùng "tính tiền chung một hóa đơn". Toàn bộ cái giá của microservices nằm ở câu đó.
 
@@ -74,7 +74,7 @@ Flash-sale đang ở đúng thời điểm đó. Nó là một **modular monolit
 
 ## Microservices: tách để được gì, mất gì
 
-[[microservices|Microservices]] là kiểu kiến trúc mà mỗi service sở hữu một năng lực nghiệp vụ, **sở hữu dữ liệu riêng**, triển khai độc lập, nói chuyện với nhau qua mạng. Lợi ích thật nằm ở *tổ chức*: team A deploy service của mình mà không phải chờ team B, mỗi service scale theo tải riêng, một service sập không kéo theo tất cả.
+[[concepts/microservices|Microservices]] là kiểu kiến trúc mà mỗi service sở hữu một năng lực nghiệp vụ, **sở hữu dữ liệu riêng**, triển khai độc lập, nói chuyện với nhau qua mạng. Lợi ích thật nằm ở *tổ chức*: team A deploy service của mình mà không phải chờ team B, mỗi service scale theo tải riêng, một service sập không kéo theo tất cả.
 
 Bản thiết kế tách IAM liệt kê thẳng thắn những thứ phải trả:
 
@@ -98,7 +98,7 @@ Martin Fowler có một bài tên *MonolithFirst*: hầu hết hệ thống micr
 
 ## API Gateway: một cửa vào cho nhiều service
 
-Khi có nhiều service, client không nên phải biết `catalog` ở đâu, `order` ở đâu, mỗi cái xác thực ra sao. [[api-gateway|API Gateway]] là một tầng đứng trước, làm những việc chung:
+Khi có nhiều service, client không nên phải biết `catalog` ở đâu, `order` ở đâu, mỗi cái xác thực ra sao. [[concepts/api-gateway|API Gateway]] là một tầng đứng trước, làm những việc chung:
 
 - **Định tuyến**: `/api/v1/products/*` → catalog, `/api/v1/orders/*` → order.
 - **Xác thực ở rìa**: kiểm token một lần, chuyển danh tính vào trong (header nội bộ), service phía sau không phải tự làm lại.
@@ -115,7 +115,7 @@ Bẫy lớn nhất của gateway là nó dần dần chứa logic nghiệp vụ 
 
 ## API Versioning: đổi hợp đồng mà không làm hỏng ai
 
-Client cũ (app mobile chưa cập nhật, script của đối tác) vẫn sẽ gọi API của mình nhiều tháng sau khi mình đổi nó. [[api-versioning|Versioning]] là cách cho phép thay đổi mà không phá vỡ họ.
+Client cũ (app mobile chưa cập nhật, script của đối tác) vẫn sẽ gọi API của mình nhiều tháng sau khi mình đổi nó. [[concepts/api-versioning|Versioning]] là cách cho phép thay đổi mà không phá vỡ họ.
 
 Hình dung app trên điện thoại của bạn: bạn chưa cập nhật app sáu tháng, nó vẫn gọi API theo cách sáu tháng trước. Nếu backend đổi tên field `total` thành `amount`, app của bạn hỏng ngay, dù bạn chẳng làm gì sai.
 
@@ -140,9 +140,9 @@ Phần lớn thay đổi trong thực tế thuộc cột trái, và không cần
 
 ## OpenAPI: hợp đồng mà máy đọc được
 
-Ở [[2026-11-18-api-foundations|ga 1]], backend gửi lỗi trong field `msg`, frontend lại đọc `message`. Hai bên "thỏa thuận bằng miệng" và hiểu khác nhau. OpenAPI là bản hợp đồng **viết ra giấy**, và cả người lẫn máy đều đọc được.
+Ở [[posts/2026-11-18-api-foundations|ga 1]], backend gửi lỗi trong field `msg`, frontend lại đọc `message`. Hai bên "thỏa thuận bằng miệng" và hiểu khác nhau. OpenAPI là bản hợp đồng **viết ra giấy**, và cả người lẫn máy đều đọc được.
 
-[[openapi|OpenAPI]] (trước gọi là Swagger) là một định dạng YAML/JSON mô tả API: endpoint, tham số, header, schema request và response, các status code, cách xác thực. Bản 3.1 dùng thẳng JSON Schema 2020-12 cho phần schema.
+[[concepts/openapi|OpenAPI]] (trước gọi là Swagger) là một định dạng YAML/JSON mô tả API: endpoint, tham số, header, schema request và response, các status code, cách xác thực. Bản 3.1 dùng thẳng JSON Schema 2020-12 cho phần schema.
 
 Flash-sale theo hướng *code-first*: viết decorator trong controller, `@nestjs/swagger` sinh ra spec và trang tài liệu ở `/api/docs`:
 

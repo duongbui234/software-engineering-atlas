@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "The stale set race, and a lease rejecting the old value",
+    "output": "content/diagrams/caching-invalidation/stale-set-lease.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "reader",
+      "type": "backend",
+      "label": "Reader",
+      "sublabel": "price request, delayed"
+    },
+    {
+      "id": "cache",
+      "type": "database",
+      "label": "Cache",
+      "sublabel": "Redis: price:42, lease:price:42"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Database",
+      "sublabel": "PostgreSQL: source of truth"
+    },
+    {
+      "id": "writer",
+      "type": "backend",
+      "label": "Writer",
+      "sublabel": "seller changes the price"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 330,
+      "label": "Miss, get a ticket, read old price"
+    },
+    {
+      "from": 355,
+      "to": 500,
+      "label": "Write DB, delete cache and ticket"
+    },
+    {
+      "from": 525,
+      "to": 680,
+      "label": "Late write rejected"
+    }
+  ],
+  "messages": [
+    {
+      "id": "get",
+      "from": "reader",
+      "to": "cache",
+      "y": 170,
+      "label": "is the price of product 42 here?",
+      "variant": "default",
+      "note": "GET price:42 → empty"
+    },
+    {
+      "id": "lease",
+      "from": "reader",
+      "to": "cache",
+      "y": 225,
+      "label": "ask for a ticket to write",
+      "variant": "emphasis",
+      "note": "SET lease:price:42 <token> PX 10000"
+    },
+    {
+      "id": "read",
+      "from": "reader",
+      "to": "db",
+      "y": 280,
+      "label": "read price: 100",
+      "variant": "default"
+    },
+    {
+      "id": "upd",
+      "from": "writer",
+      "to": "db",
+      "y": 380,
+      "label": "change price to 200, commit",
+      "variant": "emphasis",
+      "note": "UPDATE ... version = 2"
+    },
+    {
+      "id": "del",
+      "from": "writer",
+      "to": "cache",
+      "y": 440,
+      "label": "delete old price, cancel ticket",
+      "variant": "security",
+      "note": "DEL price:42 lease:price:42"
+    },
+    {
+      "id": "set",
+      "from": "reader",
+      "to": "cache",
+      "y": 555,
+      "label": "wakes up: write price 100 with ticket",
+      "variant": "dashed",
+      "note": "EVAL set-if-lease <token> 100"
+    },
+    {
+      "id": "reject",
+      "from": "cache",
+      "to": "reader",
+      "y": 615,
+      "label": "ticket canceled: rejected",
+      "variant": "return",
+      "note": "returns 0, cache stays empty"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "reader",
+      "from": 170,
+      "to": 615,
+      "type": "backend"
+    },
+    {
+      "participant": "writer",
+      "from": 380,
+      "to": 440,
+      "type": "backend"
+    },
+    {
+      "participant": "cache",
+      "from": 555,
+      "to": 615,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Without a ticket",
+      "items": [
+        "The writer's delete happens before the late write",
+        "The cache holds price 100 while the DB has 200",
+        "Wrong until the TTL ends, for example 60 seconds"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Two ways to close the gap",
+      "items": [
+        "Lease: only the holder of a valid ticket may write",
+        "Version: accept only a value newer than the one in the cache",
+        "The check and the write run atomically in one Lua script"
+      ]
+    }
+  ]
+}

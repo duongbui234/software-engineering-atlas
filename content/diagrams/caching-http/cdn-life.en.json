@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A product page through a CDN: miss, hit, serve stale, revalidate with an ETag",
+    "output": "content/diagrams/caching-http/cdn-life.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Browser",
+      "sublabel": "one person's private cache"
+    },
+    {
+      "id": "cdn",
+      "type": "cloud",
+      "label": "CDN near you",
+      "sublabel": "shared cache: nginx proxy_cache"
+    },
+    {
+      "id": "origin",
+      "type": "backend",
+      "label": "Origin server",
+      "sublabel": "origin: 300 ms per request"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 335,
+      "label": "First time: miss"
+    },
+    {
+      "from": 355,
+      "to": 445,
+      "label": "Within max-age"
+    },
+    {
+      "from": 470,
+      "to": 675,
+      "label": "Expired: serve stale, revalidate in background"
+    }
+  ],
+  "messages": [
+    {
+      "id": "req1",
+      "from": "browser",
+      "to": "cdn",
+      "y": 170,
+      "label": "request product page 42",
+      "variant": "emphasis",
+      "note": "GET /products/42"
+    },
+    {
+      "id": "fwd1",
+      "from": "cdn",
+      "to": "origin",
+      "y": 215,
+      "label": "no copy yet: ask the origin",
+      "variant": "default",
+      "note": "X-Cache-Status: MISS"
+    },
+    {
+      "id": "resp1",
+      "from": "origin",
+      "to": "cdn",
+      "y": 265,
+      "label": "page + cache rules + version tag",
+      "variant": "return",
+      "note": "max-age=5, swr=10, ETag W/\"v199000\""
+    },
+    {
+      "id": "back1",
+      "from": "cdn",
+      "to": "browser",
+      "y": 310,
+      "label": "return page, keep a copy",
+      "variant": "return"
+    },
+    {
+      "id": "req2",
+      "from": "browser",
+      "to": "cdn",
+      "y": 375,
+      "label": "someone else asks for the same page",
+      "variant": "default"
+    },
+    {
+      "id": "hit2",
+      "from": "cdn",
+      "to": "browser",
+      "y": 420,
+      "label": "still fresh: return now, 4 ms",
+      "variant": "return",
+      "note": "HIT, the origin knows nothing"
+    },
+    {
+      "id": "req3",
+      "from": "browser",
+      "to": "cdn",
+      "y": 495,
+      "label": "request the page at second 7",
+      "variant": "default"
+    },
+    {
+      "id": "stale3",
+      "from": "cdn",
+      "to": "browser",
+      "y": 540,
+      "label": "expired but serve stale copy now",
+      "variant": "return",
+      "note": "STALE, 5 ms"
+    },
+    {
+      "id": "reval",
+      "from": "cdn",
+      "to": "origin",
+      "y": 590,
+      "label": "in background: is this copy still valid?",
+      "variant": "dashed",
+      "note": "If-None-Match: W/\"v199000\""
+    },
+    {
+      "id": "nm",
+      "from": "origin",
+      "to": "cdn",
+      "y": 645,
+      "label": "unchanged, extend the lifetime",
+      "variant": "return",
+      "note": "304 Not Modified, no body"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "cdn",
+      "from": 170,
+      "to": 310,
+      "type": "cloud"
+    },
+    {
+      "participant": "origin",
+      "from": 215,
+      "to": 265,
+      "type": "backend"
+    },
+    {
+      "participant": "cdn",
+      "from": 495,
+      "to": 645,
+      "type": "cloud"
+    },
+    {
+      "participant": "origin",
+      "from": 590,
+      "to": 645,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "The rules live in the response",
+      "items": [
+        "max-age: reuse without asking",
+        "stale-while-revalidate: after expiry, still serve stale, fetch fresh in the background",
+        "ETag: cheap revalidation, only a 304 if unchanged"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "What a shared cache must not keep",
+      "items": [
+        "Private or no-store responses",
+        "Private data when the cache key is only the URL",
+        "Content that varies by a header but lacks Vary"
+      ]
+    }
+  ]
+}

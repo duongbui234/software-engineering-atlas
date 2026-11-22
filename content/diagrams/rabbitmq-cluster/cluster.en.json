@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "One cluster of three post offices and a post office in another city",
+    "output": "content/diagrams/rabbitmq-cluster/cluster.en.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "apps",
+      "type": "backend",
+      "label": "Services",
+      "sublabel": "producers and consumers",
+      "pos": [
+        40,
+        240
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "lb",
+      "type": "cloud",
+      "label": "Shared entrance",
+      "sublabel": "load balancer / DNS, port 5672",
+      "pos": [
+        250,
+        240
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "n1",
+      "type": "messagebus",
+      "label": "Post office 1",
+      "sublabel": "rabbit@node1",
+      "pos": [
+        510,
+        80
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "n2",
+      "type": "messagebus",
+      "label": "Post office 2",
+      "sublabel": "rabbit@node2",
+      "pos": [
+        510,
+        240
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "n3",
+      "type": "messagebus",
+      "label": "Post office 3",
+      "sublabel": "rabbit@node3",
+      "pos": [
+        510,
+        400
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "remote",
+      "type": "external",
+      "label": "Post office in another city",
+      "sublabel": "own cluster, own version",
+      "pos": [
+        820,
+        240
+      ],
+      "size": [
+        190,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Cluster: shared Erlang cookie, same LAN, odd node count",
+      "wraps": [
+        "n1",
+        "n2",
+        "n3"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "amqp",
+      "from": "apps",
+      "to": "lb",
+      "label": "AMQP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "to-n1",
+      "from": "lb",
+      "to": "n1",
+      "label": "any node works",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "to-n2",
+      "from": "lb",
+      "to": "n2"
+    },
+    {
+      "id": "to-n3",
+      "from": "lb",
+      "to": "n3",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "raft-12",
+      "from": "n1",
+      "to": "n2",
+      "label": "Raft: Khepri, quorum",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "raft-23",
+      "from": "n2",
+      "to": "n3",
+      "label": "port 25672",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "wan",
+      "from": "n2",
+      "to": "remote",
+      "label": "federation / shovel over WAN",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Inside one cluster",
+      "items": [
+        "Metadata (users, exchanges, queues, bindings) is on every node",
+        "Quorum queue and stream messages are replicated; classic ones are not",
+        "A majority of nodes must be up to change metadata (Khepri)"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Between clusters",
+      "items": [
+        "Don't stretch a cluster across a WAN",
+        "Federation: the remote cluster fetches messages when someone needs them",
+        "Shovel: pumps messages one way from A to B"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Traps",
+      "items": [
+        "2-node cluster: if the network breaks, neither side has a majority",
+        "Old articles: pause_minority and RAM nodes have been removed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Grouping eat, tea, tan, ate, nat, bat by key",
+    "output": "content/diagrams/neetcode-group-anagrams/canonical-key.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Loop",
+      "sublabel": "reads each word"
+    },
+    {
+      "id": "key",
+      "type": "backend",
+      "label": "Compute key",
+      "sublabel": "sort the letters"
+    },
+    {
+      "id": "map",
+      "type": "database",
+      "label": "Slots",
+      "sublabel": "Map key → list"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 412,
+      "label": "First three words: two new keys"
+    },
+    {
+      "from": 422,
+      "to": 705,
+      "label": "Last three words: existing slots, except bat"
+    }
+  ],
+  "messages": [
+    {
+      "id": "e1",
+      "from": "loop",
+      "to": "key",
+      "y": 170,
+      "label": "eat",
+      "variant": "default",
+      "note": "key: aet"
+    },
+    {
+      "id": "e2",
+      "from": "key",
+      "to": "map",
+      "y": 215,
+      "label": "new slot aet",
+      "variant": "default",
+      "note": "[eat]"
+    },
+    {
+      "id": "t1",
+      "from": "loop",
+      "to": "key",
+      "y": 265,
+      "label": "tea",
+      "variant": "default"
+    },
+    {
+      "id": "t2",
+      "from": "key",
+      "to": "map",
+      "y": 310,
+      "label": "into slot aet",
+      "variant": "default",
+      "note": "[eat, tea]"
+    },
+    {
+      "id": "n1",
+      "from": "loop",
+      "to": "key",
+      "y": 355,
+      "label": "tan",
+      "variant": "default",
+      "note": "key: ant"
+    },
+    {
+      "id": "n2",
+      "from": "key",
+      "to": "map",
+      "y": 395,
+      "label": "new slot ant",
+      "variant": "default"
+    },
+    {
+      "id": "a1",
+      "from": "loop",
+      "to": "key",
+      "y": 435,
+      "label": "ate",
+      "variant": "default"
+    },
+    {
+      "id": "a2",
+      "from": "key",
+      "to": "map",
+      "y": 480,
+      "label": "into slot aet",
+      "variant": "default",
+      "note": "[eat, tea, ate]"
+    },
+    {
+      "id": "n3",
+      "from": "loop",
+      "to": "key",
+      "y": 530,
+      "label": "nat",
+      "variant": "default"
+    },
+    {
+      "id": "n4",
+      "from": "key",
+      "to": "map",
+      "y": 575,
+      "label": "into slot ant",
+      "variant": "default",
+      "note": "[tan, nat]"
+    },
+    {
+      "id": "b1",
+      "from": "loop",
+      "to": "key",
+      "y": 625,
+      "label": "bat",
+      "variant": "default",
+      "note": "key: abt"
+    },
+    {
+      "id": "b2",
+      "from": "key",
+      "to": "map",
+      "y": 670,
+      "label": "new slot abt",
+      "variant": "emphasis",
+      "note": "3 slots = 3 groups"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Sorted key",
+      "items": [
+        "eat → aet",
+        "O(k log k) per word",
+        "Faster for short words"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Count key",
+      "items": [
+        "Table of 26 numbers",
+        "O(k) per word",
+        "47 times faster at k = 1000"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Key serialization",
+      "items": [
+        "1,11 and 11,1 → 111",
+        "Needs a separator",
+        "The bug passes every sample test"
+      ]
+    }
+  ]
+}

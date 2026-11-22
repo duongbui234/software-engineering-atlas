@@ -19,8 +19,12 @@ import {
   readingMinutes,
   hasMargin,
   conceptBySlugTitle,
-  TYPE_LABEL,
-  LEVEL_LABEL,
+  langOf,
+  forLang,
+  strFor,
+  homeSlug,
+  slugIn,
+  STR,
 } from "./shared.js"
 import { KnowledgeMap, sheetIndex } from "./map.js"
 
@@ -170,16 +174,33 @@ document.addEventListener("themechange", atlasRenderMermaid);
 export const AtlasBrand = (opts = {}) => {
   const Component = ({ fileData, cfg, allFiles }) => {
     const slug = fileData.slug
-    const firstHub = hubs(allFiles)[0]
+    const L = langOf(fileData)
+    const S = STR[L]
+    const other = L === "en" ? "vi" : "en"
+    const firstHub = hubs(forLang(allFiles, L))[0]
+    // trang tương ứng ở ngôn ngữ kia; chưa dịch thì về trang chủ ngôn ngữ kia
+    const twinSlug = slugIn(fileData, other)
+    const twin = allFiles.some((f) => f.slug === twinSlug)
     return h("div", { class: "atlas-brand" }, [
-      h("a", { class: "brand", href: rel(slug, "index") }, [
+      h("a", { class: "brand", href: rel(slug, homeSlug(L)) }, [
         cfg.pageTitle,
-        h("small", null, opts.tagline || "Sổ tay học kỹ thuật phần mềm"),
+        h("small", null, (L === "vi" && opts.tagline) || S.tagline),
       ]),
-      firstHub &&
-        h("nav", { class: "brand-nav", "aria-label": "Điều hướng chính" }, [
-          h("a", { href: rel(slug, firstHub.slug), class: "internal" }, "Lộ trình"),
-        ]),
+      h("nav", { class: "brand-nav", "aria-label": S.mainNav }, [
+        firstHub && h("a", { href: rel(slug, firstHub.slug), class: "internal" }, S.route),
+        h(
+          "a",
+          {
+            class: "lang-switch",
+            href: rel(slug, twin ? twinSlug : homeSlug(other)),
+            hreflang: other,
+            lang: other,
+            title: twin ? S.otherLangTitle : S.otherLangMissing,
+            "data-router-ignore": "true",
+          },
+          [h("span", { "aria-hidden": "true" }, S.otherLangShort), h("span", { class: "sr" }, S.otherLang)],
+        ),
+      ]),
     ])
   }
   return Component
@@ -189,13 +210,15 @@ export const AtlasBrand = (opts = {}) => {
 export const AtlasHomeHead = () => {
   const Component = ({ fileData, allFiles }) => {
     if (!isIndex(fileData)) return null
+    const S = strFor(fileData)
+    allFiles = forLang(allFiles, langOf(fileData))
     const posts = allFiles.filter((f) => isPost(f) && isListed(f)).length
     const span = Math.max(20, Math.ceil(posts / 10) * 10)
     const at = Math.min(100, (posts / span) * 100)
     return h("section", { class: "atlas-intro" }, [
       h("h1", null, fm(fileData).headline || fm(fileData).title),
-      h("div", { class: "scalebar", "aria-label": `Thước tỉ lệ: đã viết ${posts} bài` }, [
-        h("span", null, `Đã đi ${posts} bài`),
+      h("div", { class: "scalebar", "aria-label": S.scaleAria(posts) }, [
+        h("span", null, S.walked(posts)),
         h("span", { class: "bar", "aria-hidden": "true", style: `--at: ${at}%` }, [
           h("i"),
           h("i"),
@@ -220,6 +243,9 @@ export const AtlasHome = (opts = {}) => {
   const Component = ({ fileData, allFiles }) => {
     if (!isIndex(fileData)) return null
     const slug = fileData.slug
+    const L = langOf(fileData)
+    const S = STR[L]
+    allFiles = forLang(allFiles, L)
     const posts = allFiles
       .filter((f) => isPost(f) && isListed(f))
       .sort((a, b) => (pageDate(b) || 0) - (pageDate(a) || 0) || (Number(fm(b).part) || 0) - (Number(fm(a).part) || 0))
@@ -228,16 +254,16 @@ export const AtlasHome = (opts = {}) => {
       .filter((x) => x.state.latest)
       .sort((a, b) => (pageDate(b.state.latest) || 0) - (pageDate(a.state.latest) || 0))[0]
 
-    const map = KnowledgeMap({ slug, allFiles })
+    const map = KnowledgeMap({ slug, allFiles, S })
     return h("div", { class: "atlas-home" }, [
       map &&
         h("figure", { class: "atlas-map" }, [
           ...map,
           h("figcaption", { class: "map-foot" }, [
             h("ul", { class: "legend" }, [
-              h("li", null, [sym("learn"), "Bài học"]),
-              h("li", null, [sym("code"), "Đọc code dự án"]),
-              h("li", null, [sym("note"), "Ghi chú ngắn"]),
+              h("li", null, [sym("learn"), S.legendLearn]),
+              h("li", null, [sym("code"), S.legendCode]),
+              h("li", null, [sym("note"), S.legendNote]),
             ]),
           ]),
         ]),
@@ -247,23 +273,26 @@ export const AtlasHome = (opts = {}) => {
           return h("section", { class: "current", "aria-labelledby": "cur-h" }, [
             h("span", { class: "pin", "aria-hidden": "true" }),
             h("div", null, [
-              h("h2", { id: "cur-h" }, `Đang đi ${fm(current.hub).title}`),
+              h("h2", { id: "cur-h" }, S.currentLine(fm(current.hub).title)),
               h(
                 "p",
                 null,
-                `Đã qua ${current.state.visited} ga, đang ở ga ${here ? here.n : "?"} trên ${current.state.stations.length}${
-                  here && here.concepts.length ? `: ${here.concepts.join(", ")}` : ""
-                }.`,
+                S.currentState(
+                  current.state.visited,
+                  here ? here.n : "?",
+                  current.state.stations.length,
+                  here && here.concepts.length ? here.concepts.join(", ") : "",
+                ),
               ),
             ]),
-            h("a", { class: "go internal", href: rel(slug, current.hub.slug) }, "Xem lộ trình"),
+            h("a", { class: "go internal", href: rel(slug, current.hub.slug) }, S.seeRoute),
           ])
         })(),
-      sheetIndex({ slug, allFiles, fmtDay }),
+      sheetIndex({ slug, allFiles, fmtDay, S }),
       h("section", { class: "gazetteer", "aria-labelledby": "gz-h" }, [
-        h("h2", { id: "gz-h" }, "Bài mới"),
+        h("h2", { id: "gz-h" }, S.newPosts),
         posts.length === 0
-          ? h("p", { class: "empty" }, "Chưa có bài nào. Bài đầu tiên sẽ xuất hiện ở đây.")
+          ? h("p", { class: "empty" }, S.noPosts)
           : h(
               "ul",
               { class: "gz" },
@@ -274,7 +303,7 @@ export const AtlasHome = (opts = {}) => {
                   null,
                   h("a", { class: "row internal", href: rel(slug, p.slug) }, [
                     h("span", { class: "coord" }, coordOf(allFiles, p) || ""),
-                    sym(m.type, TYPE_LABEL[m.type] || TYPE_LABEL.learn),
+                    sym(m.type, S.type[m.type] || S.type.learn),
                     h("span", { class: "t" }, m.title),
                     h("span", { class: "date" }, fmtDay(pageDate(p))),
                     m.description && h("span", { class: "d" }, m.description),
@@ -284,8 +313,8 @@ export const AtlasHome = (opts = {}) => {
             ),
         posts.length > limit &&
           h("p", { class: "gz-all" }, [
-            h("a", { class: "internal", href: rel(slug, "posts/") }, `Xem tất cả ${posts.length} bài`),
-            ` · đang hiện ${limit} bài mới nhất`,
+            h("a", { class: "internal", href: rel(slug, L === "en" ? "en/posts/" : "posts/") }, S.allPosts(posts.length)),
+            S.showing(limit),
           ]),
       ]),
     ])
@@ -297,21 +326,23 @@ export const AtlasHome = (opts = {}) => {
 export const PostMargin = () => {
   const Component = ({ fileData, allFiles }) => {
     if (!hasMargin(fileData)) return null
+    const S = strFor(fileData)
+    allFiles = forLang(allFiles, langOf(fileData))
     const m = fm(fileData)
     const slug = fileData.slug
     const code = coordOf(allFiles, fileData)
-    const type = m.type || (fileData.slug.startsWith("concepts/") ? "note" : "learn")
+    const type = m.type || (fileData.slug.replace(/^en\//, "").startsWith("concepts/") ? "note" : "learn")
     const tags = Array.isArray(m.tags) ? m.tags : []
     const row = (dt, dd, cls) => h("div", null, [h("dt", null, dt), h("dd", cls ? { class: cls } : null, dd)])
-    return h("dl", { class: "post-margin", "aria-label": "Thông tin bài" }, [
-      code && row("Tọa độ", code, "big"),
-      row("Loại", [sym(type), TYPE_LABEL[type] || type], "kind"),
-      pageDate(fileData) && row("Ngày viết", fmtFull(pageDate(fileData))),
-      row("Đọc", `${readingMinutes(fileData)} phút`),
-      m.level && row("Mức", LEVEL_LABEL[m.level] || m.level),
+    return h("dl", { class: "post-margin", "aria-label": S.postInfo }, [
+      code && row(S.coord, code, "big"),
+      row(S.kind, [sym(type), S.type[type] || type], "kind"),
+      pageDate(fileData) && row(S.written, fmtFull(pageDate(fileData))),
+      row(S.read, S.minutes(readingMinutes(fileData))),
+      m.level && row(S.levelLabel, S.level[m.level] || m.level),
       tags.length > 0 &&
         row(
-          "Thẻ",
+          S.tags,
           tags.map((t, i) => [
             i ? " " : "",
             h("a", { class: "internal", href: rel(slug, `tags/${t}`) }, `#${t}`),
@@ -337,6 +368,8 @@ export const SeriesLine = () => {
   const Component = ({ fileData, allFiles }) => {
     const m = fm(fileData)
     if (!m.series || !m.part || isHub(fileData)) return null
+    const S = strFor(fileData)
+    allFiles = forLang(allFiles, langOf(fileData))
     const hub = hubFor(allFiles, m.series)
     if (!hub) return null
     const state = lineState(allFiles, hub)
@@ -360,9 +393,9 @@ export const SeriesLine = () => {
       ),
       h("div", { class: "line-cap" }, [
         prev
-          ? h("a", { class: "internal", href: rel(slug, prev.post.slug) }, `Ga trước: ${prev.name}`)
-          : h("span", null, "Ga đầu tiên"),
-        h("a", { class: "internal", href: rel(slug, hub.slug) }, `Cả tuyến (${state.visited}/${n})`),
+          ? h("a", { class: "internal", href: rel(slug, prev.post.slug) }, S.prevStation(prev.name))
+          : h("span", null, S.firstStation),
+        h("a", { class: "internal", href: rel(slug, hub.slug) }, S.wholeLine(state.visited, n)),
       ]),
     ])
   }
@@ -373,6 +406,8 @@ export const SeriesLine = () => {
 export const SeriesHub = () => {
   const Component = ({ fileData, allFiles }) => {
     if (!isHub(fileData)) return null
+    const S = strFor(fileData)
+    allFiles = forLang(allFiles, langOf(fileData))
     const slug = fileData.slug
     const state = lineState(allFiles, fileData)
     const concepts = conceptBySlugTitle(allFiles)
@@ -383,15 +418,15 @@ export const SeriesHub = () => {
     const fact = (dt, dd) => h("div", null, [h("dt", null, dt), h("dd", null, dd)])
     return h("div", { class: "series-hub" }, [
       h("dl", { class: "facts" }, [
-        fact("Đã đi", `${state.visited} / ${state.stations.length} ga`),
-        total > 0 && fact("Khái niệm", `${learned} / ${total}`),
-        fact("Ga tiếp theo", next ? next.name : "Đã hết tuyến"),
+        fact(S.walkedLabel, S.walkedStations(state.visited, state.stations.length)),
+        total > 0 && fact(S.concepts, `${learned} / ${total}`),
+        fact(S.nextStation, next ? next.name : S.lineDone),
       ]),
       h(
         "nav",
         {
           class: state.stations.length >= 8 ? "metro long" : "metro",
-          "aria-label": `Các ga trên ${fm(fileData).title}`,
+          "aria-label": S.stationsOf(fm(fileData).title),
           style: `--n: ${state.stations.length}; --done: ${Math.max(doneUpTo - 1, 0)}`,
         },
         h(
@@ -400,10 +435,10 @@ export const SeriesHub = () => {
           state.stations.map((s) => {
             const status =
               s.state === "now"
-                ? "Bạn đang ở đây"
+                ? S.youAreHere
                 : s.state === "done"
-                  ? `Đã đi${s.post && pageDate(s.post) ? ` ngày ${fmtDay(pageDate(s.post))}` : ""}`
-                  : "Chưa đi"
+                  ? S.visitedOn(s.post && pageDate(s.post) ? fmtDay(pageDate(s.post)) : "")
+                  : S.ahead
             return h("li", { class: `stop ${s.state}`, ...(s.state === "now" ? { "aria-current": "step" } : {}) }, [
               h("span", { class: "dot", "aria-hidden": "true" }, String(s.n)),
               h(

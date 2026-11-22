@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cross-Site WebSocket Hijacking: a foreign page borrows your cookies",
+    "output": "content/diagrams/websocket-security/cswsh.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "evil", "type": "external", "label": "Foreign page", "sublabel": "evil.example, runs JavaScript" },
+    { "id": "br", "type": "frontend", "label": "Your browser", "sublabel": "logged in to shop.example" },
+    { "id": "srv", "type": "backend", "label": "Realtime server", "sublabel": "WebSocket / Socket.IO" }
+  ],
+  "segments": [
+    { "from": 150, "to": 370, "label": "Cookie authentication, no Origin check" },
+    { "from": 395, "to": 640, "label": "Two ways to block it" }
+  ],
+  "messages": [
+    { "id": "e1", "from": "evil", "to": "br", "y": 170, "label": "open a WebSocket to the shop", "variant": "security", "note": "new WebSocket('wss://shop.example')" },
+    { "id": "e2", "from": "br", "to": "srv", "y": 225, "label": "handshake, cookie attached automatically", "variant": "security", "note": "Origin: evil.example, Cookie: session=…" },
+    { "id": "e3", "from": "srv", "to": "br", "y": 280, "label": "101: valid cookie, come in", "variant": "return", "note": "CORS doesn't apply to WebSocket" },
+    { "id": "e4", "from": "br", "to": "evil", "y": 335, "label": "the foreign page reads and sends as you", "variant": "security", "note": "orders, notifications, buy commands" },
+    { "id": "f1", "from": "br", "to": "srv", "y": 420, "label": "handshake from the foreign page", "variant": "default", "note": "Origin: evil.example" },
+    { "id": "f2", "from": "srv", "to": "br", "y": 475, "label": "Origin not on the allowlist: rejected", "variant": "return", "note": "allowRequest / verifyClient → 403" },
+    { "id": "f3", "from": "br", "to": "srv", "y": 545, "label": "or: authenticate with an explicit token", "variant": "default", "note": "Socket.IO auth: { token }" },
+    { "id": "f4", "from": "srv", "to": "br", "y": 600, "label": "the foreign page has no token: rejected", "variant": "return", "note": "connect_error UNAUTHORIZED" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Why it happens",
+      "items": ["WebSocket isn't subject to the Same-Origin Policy", "The cors option only covers HTTP polling requests", "Cookies go along if SameSite allows it"]
+    },
+    {
+      "dot": "emerald",
+      "title": "How to block it",
+      "items": ["Check Origin at the handshake", "A token in auth instead of cookies", "SameSite=Lax or Strict cookies as an extra layer"]
+    }
+  ]
+}

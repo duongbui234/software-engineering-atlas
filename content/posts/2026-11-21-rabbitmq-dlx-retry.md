@@ -20,21 +20,21 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[dead-letter-exchange|Dead letter exchange]] (DLX) là exchange nhận các tin "chết": bị từ chối không requeue, hết hạn, bị đẩy ra vì queue đầy, hoặc vượt số lần giao. DLX không có queue nào bind thì tin chết **mất im lặng**.
-> - [[message-ttl|TTL]] đặt thời hạn sống cho tin (theo queue hoặc từng tin). Tin hết hạn chỉ bị xóa khi lên **đầu** hàng.
-> - [[queue-length-limit|Giới hạn độ dài]] chặn queue phình vô hạn: bỏ tin cũ nhất (`drop-head`) hoặc từ chối tin mới (`reject-publish`).
-> - [[delayed-retry|Retry có độ trễ]] = nack không requeue → DLX → queue chờ có TTL → hết hạn quay về queue chính; đếm số lần bằng header `x-death`. [[poison-message|Tin độc]] thử mãi không được thì chuyển sang "bãi đỗ".
-> - [[delayed-message|Hẹn giờ giao tin]]: plugin delayed message đã ngừng bảo trì. RabbitMQ 4.4 làm sẵn trên quorum queue. [[priority-queue|Priority queue]] cho tin quan trọng chen lên trước khi hàng đang tồn.
+> - [[concepts/dead-letter-exchange|Dead letter exchange]] (DLX) là exchange nhận các tin "chết": bị từ chối không requeue, hết hạn, bị đẩy ra vì queue đầy, hoặc vượt số lần giao. DLX không có queue nào bind thì tin chết **mất im lặng**.
+> - [[concepts/message-ttl|TTL]] đặt thời hạn sống cho tin (theo queue hoặc từng tin). Tin hết hạn chỉ bị xóa khi lên **đầu** hàng.
+> - [[concepts/queue-length-limit|Giới hạn độ dài]] chặn queue phình vô hạn: bỏ tin cũ nhất (`drop-head`) hoặc từ chối tin mới (`reject-publish`).
+> - [[concepts/delayed-retry|Retry có độ trễ]] = nack không requeue → DLX → queue chờ có TTL → hết hạn quay về queue chính; đếm số lần bằng header `x-death`. [[concepts/poison-message|Tin độc]] thử mãi không được thì chuyển sang "bãi đỗ".
+> - [[concepts/delayed-message|Hẹn giờ giao tin]]: plugin delayed message đã ngừng bảo trì. RabbitMQ 4.4 làm sẵn trên quorum queue. [[concepts/priority-queue|Priority queue]] cho tin quan trọng chen lên trước khi hàng đang tồn.
 
 > [!info] Bối cảnh
 > Ga 6 của **tuyến RabbitMQ**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: một consumer gọi cổng thanh toán, và cổng thanh toán thỉnh thoảng lỗi tạm thời. Lại có những tin lỗi *vĩnh viễn*, như sự kiện cho một đơn hàng đã bị xóa. Ga này phân biệt hai loại đó và cho mỗi loại một lối ra. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Ack, nack, reject, requeue**: xem [[2026-11-21-rabbitmq-ack-confirm|ga 4]]. Tóm tắt: `nack`/`reject` với `requeue = false` nghĩa là "tin này tôi không xử lý được, đừng trả lại hàng".
-> - **Exchange, binding, routing key, header**: xem [[2026-11-21-rabbitmq-amqp-model|ga 2]] và [[2026-11-21-rabbitmq-exchanges|ga 3]].
+> - **Ack, nack, reject, requeue**: xem [[posts/2026-11-21-rabbitmq-ack-confirm|ga 4]]. Tóm tắt: `nack`/`reject` với `requeue = false` nghĩa là "tin này tôi không xử lý được, đừng trả lại hàng".
+> - **Exchange, binding, routing key, header**: xem [[posts/2026-11-21-rabbitmq-amqp-model|ga 2]] và [[posts/2026-11-21-rabbitmq-exchanges|ga 3]].
 > - **Lỗi tạm thời / vĩnh viễn**: tạm thời là lỗi tự hết nếu chờ (mạng chập, dịch vụ khác đang khởi động lại); vĩnh viễn là thử bao nhiêu lần cũng lỗi (dữ liệu hỏng, đơn không tồn tại).
-> - **Backoff**: chờ lâu dần giữa các lần thử. Xem [[retries-with-backoff|Retry with Backoff]] ở tuyến API.
-> - **Policy**: cấu hình áp cho nhiều queue/exchange theo mẫu tên, đổi được lúc đang chạy. Chi tiết ở [[2026-11-21-rabbitmq-operations|ga 9]].
+> - **Backoff**: chờ lâu dần giữa các lần thử. Xem [[concepts/retries-with-backoff|Retry with Backoff]] ở tuyến API.
+> - **Policy**: cấu hình áp cho nhiều queue/exchange theo mẫu tên, đổi được lúc đang chạy. Chi tiết ở [[posts/2026-11-21-rabbitmq-operations|ga 9]].
 > - **Epoch milliseconds**: thời điểm tính bằng số mili giây từ 1/1/1970, cách máy tính hay lưu thời gian.
 
 ## Hình dung trước: phòng thư lỗi của bưu điện
@@ -43,13 +43,13 @@ Bưu điện nào cũng có những lá thư không phát được. Bưu điện
 
 | Đời thường | Khái niệm |
 |---|---|
-| Phòng "thư không phát được": mọi thư trả về đều chuyển tới đây | [[dead-letter-exchange\|Dead letter exchange]] |
-| Thư ghi "quá ngày 15 thì hủy" | [[message-ttl\|Message TTL]] |
-| Hộc thư chỉ chứa 100 lá; đầy thì bỏ lá cũ nhất hoặc từ chối nhận thêm | [[queue-length-limit\|Queue length limit]] |
-| Nhà vắng chủ: để thư vào kệ "phát lại sau 5 phút", tối đa 3 lần | [[delayed-retry\|Delayed retry]] |
-| Thư ghi địa chỉ không tồn tại: phát bao nhiêu lần cũng thất bại | [[poison-message\|Poison message]] |
-| Thư hẹn "giao đúng sáng mùng 1" | [[delayed-message\|Delayed message]] |
-| Thư hỏa tốc được xếp lên trước đống thư thường đang chờ | [[priority-queue\|Priority queue]] |
+| Phòng "thư không phát được": mọi thư trả về đều chuyển tới đây | [[concepts/dead-letter-exchange\|Dead letter exchange]] |
+| Thư ghi "quá ngày 15 thì hủy" | [[concepts/message-ttl\|Message TTL]] |
+| Hộc thư chỉ chứa 100 lá; đầy thì bỏ lá cũ nhất hoặc từ chối nhận thêm | [[concepts/queue-length-limit\|Queue length limit]] |
+| Nhà vắng chủ: để thư vào kệ "phát lại sau 5 phút", tối đa 3 lần | [[concepts/delayed-retry\|Delayed retry]] |
+| Thư ghi địa chỉ không tồn tại: phát bao nhiêu lần cũng thất bại | [[concepts/poison-message\|Poison message]] |
+| Thư hẹn "giao đúng sáng mùng 1" | [[concepts/delayed-message\|Delayed message]] |
+| Thư hỏa tốc được xếp lên trước đống thư thường đang chờ | [[concepts/priority-queue\|Priority queue]] |
 
 ```mermaid
 flowchart TB
@@ -81,12 +81,12 @@ Ngược lại, `requeue = false` mà không cấu hình gì thêm thì tin bị
 
 ### Dead letter exchange: phòng thư không phát được
 
-[[dead-letter-exchange|Dead letter exchange]] không phải một loại exchange đặc biệt. Nó là một exchange bình thường (thường là fanout, topic hoặc direct) được **chỉ định** làm nơi nhận tin chết của một queue. Một tin bị "dead-letter" khi:
+[[concepts/dead-letter-exchange|Dead letter exchange]] không phải một loại exchange đặc biệt. Nó là một exchange bình thường (thường là fanout, topic hoặc direct) được **chỉ định** làm nơi nhận tin chết của một queue. Một tin bị "dead-letter" khi:
 
 1. Consumer `reject` hoặc `nack` với `requeue = false`.
 2. Tin hết hạn TTL.
 3. Tin bị đẩy ra vì queue vượt giới hạn độ dài (`drop-head`, hoặc `reject-publish-dlx`).
-4. Tin vượt số lần giao tối đa (delivery limit, chỉ quorum queue, [[2026-11-21-rabbitmq-queue-types|ga 7]]).
+4. Tin vượt số lần giao tối đa (delivery limit, chỉ quorum queue, [[posts/2026-11-21-rabbitmq-queue-types|ga 7]]).
 
 Cấu hình bằng tham số của queue (`x-dead-letter-exchange`, tùy chọn `x-dead-letter-routing-key`) hoặc, nên hơn, bằng **policy** `dead-letter-exchange` để đổi được mà không khai báo lại queue. Nếu cả hai cùng có, tham số trên queue thắng. Không đặt routing key riêng thì tin chết giữ routing key gốc.
 
@@ -111,7 +111,7 @@ Broker phát hiện vòng lặp dead-letter (tin chết quay về đúng queue c
 
 ### TTL: thời hạn sống của tin
 
-[[message-ttl|Message TTL]] có hai cách đặt:
+[[concepts/message-ttl|Message TTL]] có hai cách đặt:
 
 - **Theo queue**: tham số `x-message-ttl` hoặc policy `message-ttl`, mili giây. Mọi tin vào queue đó cùng hạn.
 - **Theo từng tin**: property `expiration` lúc gửi, là **chuỗi** mili giây (`'5000'`, không phải số).
@@ -124,7 +124,7 @@ Có một loại TTL thứ ba áp cho **chính queue**: `x-expires`. Queue khôn
 
 ### Giới hạn độ dài: hộc thư có sức chứa
 
-[[queue-length-limit|Queue length limit]] đặt bằng `x-max-length` (số tin) hoặc `x-max-length-bytes` (tổng dung lượng body), hoặc policy `max-length` / `max-length-bytes`. Chỉ tin **ready** (đang chờ) tính vào giới hạn, tin đã giao chưa ack thì không. Khi đầy, tham số `x-overflow` quyết định:
+[[concepts/queue-length-limit|Queue length limit]] đặt bằng `x-max-length` (số tin) hoặc `x-max-length-bytes` (tổng dung lượng body), hoặc policy `max-length` / `max-length-bytes`. Chỉ tin **ready** (đang chờ) tính vào giới hạn, tin đã giao chưa ack thì không. Khi đầy, tham số `x-overflow` quyết định:
 
 | `x-overflow` | Chuyện gì xảy ra | Publisher biết không? |
 |---|---|---|
@@ -132,11 +132,11 @@ Có một loại TTL thứ ba áp cho **chính queue**: `x-expires`. Queue khôn
 | `reject-publish` | từ chối tin **mới** | có, nhận `basic.nack` nếu dùng confirm |
 | `reject-publish-dlx` | từ chối tin mới **và** dead-letter nó | có; không có trên quorum queue |
 
-Chọn theo ý nghĩa của dữ liệu. Tin "giá mới nhất" thì `drop-head` hợp lý: tin cũ đã vô nghĩa. Đơn hàng thì `reject-publish`, để producer biết mà xử lý (ví dụ ga 4 có queue tối đa 3 tin, tin thứ 4 và 5 bị nack). Đặt giới hạn là cách rẻ nhất để một consumer chết không kéo cả broker vào cảnh báo bộ nhớ ([[2026-11-21-rabbitmq-operations|ga 9]]).
+Chọn theo ý nghĩa của dữ liệu. Tin "giá mới nhất" thì `drop-head` hợp lý: tin cũ đã vô nghĩa. Đơn hàng thì `reject-publish`, để producer biết mà xử lý (ví dụ ga 4 có queue tối đa 3 tin, tin thứ 4 và 5 bị nack). Đặt giới hạn là cách rẻ nhất để một consumer chết không kéo cả broker vào cảnh báo bộ nhớ ([[posts/2026-11-21-rabbitmq-operations|ga 9]]).
 
 ### Retry có độ trễ: vòng qua hộc chờ
 
-[[delayed-retry|Delayed retry]] kiểu cổ điển ghép ba thứ ở trên lại, chạy được trên mọi phiên bản RabbitMQ (hình 1):
+[[concepts/delayed-retry|Delayed retry]] kiểu cổ điển ghép ba thứ ở trên lại, chạy được trên mọi phiên bản RabbitMQ (hình 1):
 
 1. Queue việc `work.q` có DLX là `retry.x`.
 2. Consumer lỗi tạm thời: `nack(msg, false, false)`. Tin chết, sang `retry.x`, vào `retry.q`.
@@ -152,7 +152,7 @@ Một cách nữa là retry ngay trong consumer (chờ rồi thử lại trướ
 
 ### Tin độc: biết lúc nào thì dừng
 
-[[poison-message|Poison message]] là tin làm consumer lỗi mỗi lần xử lý: JSON hỏng, trường bắt buộc bị thiếu, tham chiếu tới thứ không còn tồn tại. Retry chỉ phí tài nguyên. Ba lớp phòng thủ:
+[[concepts/poison-message|Poison message]] là tin làm consumer lỗi mỗi lần xử lý: JSON hỏng, trường bắt buộc bị thiếu, tham chiếu tới thứ không còn tồn tại. Retry chỉ phí tài nguyên. Ba lớp phòng thủ:
 
 - **Phân loại lỗi trong consumer**: lỗi kiểm tra dữ liệu thì chuyển thẳng bãi đỗ, không retry. Chỉ retry lỗi mạng, timeout, lỗi 5xx của dịch vụ khác.
 - **Đếm lần thử** bằng `x-death` như trên.
@@ -162,7 +162,7 @@ Flash-sale chọn cách đơn giản nhất: mọi lỗi đều `nack` không re
 
 ### Tin hẹn giờ
 
-[[delayed-message|Delayed message]] là tin chỉ được giao sau một thời điểm, ví dụ "nhắc thanh toán sau 15 phút nếu đơn chưa trả tiền". Có ba cách, và cách phổ biến nhất trên mạng giờ là cách không nên dùng:
+[[concepts/delayed-message|Delayed message]] là tin chỉ được giao sau một thời điểm, ví dụ "nhắc thanh toán sau 15 phút nếu đơn chưa trả tiền". Có ba cách, và cách phổ biến nhất trên mạng giờ là cách không nên dùng:
 
 1. **Plugin delayed message exchange** (`x-delayed-message`, header `x-delay`). Plugin lưu tin chờ trên **một node** trong Mnesia, không hợp với lượng tin chờ lớn, không hỗ trợ `mandatory`. Đội RabbitMQ đã **ngừng bảo trì và lưu trữ (archive) repo** vì Mnesia bị gỡ khỏi RabbitMQ 4.3. Đừng dùng cho dự án mới.
 2. **Queue chờ có TTL + DLX** như retry ở trên: được, nhưng mỗi khoảng chờ cần một queue.
@@ -170,7 +170,7 @@ Flash-sale chọn cách đơn giản nhất: mọi lỗi đều `nack` không re
 
 ### Priority queue: thư hỏa tốc
 
-[[priority-queue|Priority queue]] cho tin có `priority` cao được giao trước tin ưu tiên thấp **đang chờ trong cùng queue**:
+[[concepts/priority-queue|Priority queue]] cho tin có `priority` cao được giao trước tin ưu tiên thấp **đang chờ trong cùng queue**:
 
 - Classic queue: khai báo `x-max-priority` (1 đến 255; tài liệu khuyên dưới 10, mỗi mức thêm một hàng con và tốn thêm tài nguyên). Không khai báo thì queue không ưu tiên gì cả. Chỉ đặt được lúc khai báo, không đặt bằng policy.
 - Quorum queue từ 4.3: luôn có 32 mức (0–31), **ưu tiên tuyệt đối**: còn tin ưu tiên cao là tin thấp phải chờ, có thể chờ mãi. Tin không đặt priority được coi là mức 4.

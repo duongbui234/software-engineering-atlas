@@ -29,7 +29,13 @@ import {
   gazItem,
   feedCursor,
   FEED_PAGE,
+  isProblem,
+  isProblemSet,
+  problemEntry,
+  problemsByLc,
+  seriesParts,
 } from "./shared.js"
+import { CATALOG, LINES, lcCode } from "./neetcode.js"
 import { KnowledgeMap, sheetIndex } from "./map.js"
 
 const sym = (type, label) =>
@@ -540,9 +546,29 @@ export const PostMargin = () => {
     const type = m.type || (fileData.slug.replace(/^en\//, "").startsWith("concepts/") ? "note" : "learn")
     const tags = Array.isArray(m.tags) ? m.tags : []
     const row = (dt, dd, cls) => h("div", null, [h("dt", null, dt), h("dd", cls ? { class: cls } : null, dd)])
+    const entry = problemEntry(fileData)
+    const hub = entry && hubFor(allFiles, entry.line)
+    const station = entry && hub && (fm(hub).stations || [])[entry.station - 1]
+    const stationPost = entry && seriesParts(allFiles, entry.line).find((p) => Number(fm(p).part) === entry.station)
+    const stationText = entry && [
+      hub ? `${fm(hub).code} · ` : "",
+      S.stationN(entry.station),
+      station ? `: ${typeof station === "string" ? station : station.name}` : "",
+    ].join("")
     return h("dl", { class: "post-margin", "aria-label": S.postInfo }, [
       code && row(S.coord, code, "big"),
       row(S.kind, [sym(type), S.type[type] || type], "kind"),
+      entry && row(S.difficultyLabel, h("span", { class: `diff ${entry.difficulty}` }, S.difficulty[entry.difficulty])),
+      entry &&
+        row(
+          S.stationLabel,
+          stationPost
+            ? h("a", { class: "internal", href: rel(slug, stationPost.slug) }, stationText)
+            : hub
+              ? h("a", { class: "internal", href: rel(slug, hub.slug) }, stationText)
+              : stationText,
+        ),
+      entry && row("LeetCode", h("a", { class: "external", href: entry.url, rel: "noopener" }, `${entry.lc}. ${entry.title} ↗`)),
       pageDate(fileData) && row(S.written, fmtFull(pageDate(fileData))),
       row(S.read, S.minutes(readingMinutes(fileData))),
       m.level && row(S.levelLabel, S.level[m.level] || m.level),
@@ -608,6 +634,152 @@ export const SeriesLine = () => {
   return Component
 }
 
+// ── NeetCode: bảng các bài của một ga (cuối post pattern và cuối trang bài) ───────────
+// Lấy từ danh mục neetcode.js: mọi bài của ga, bài chưa viết hiện mờ và dẫn tới đề gốc LeetCode.
+const problemRow = (slug, entry, page, S, current) =>
+  h("tr", { class: page ? (current ? "is-current" : "") : "is-ahead", ...(current ? { "aria-current": "page" } : {}) }, [
+    h("td", { class: "lc" }, lcCode(entry.lc)),
+    h("td", { class: "t" }, [
+      page && !current ? h("a", { class: "internal", href: rel(slug, page.slug) }, entry.title) : entry.title,
+      !page && h("span", { class: "ahead-note" }, ` · ${S.notWritten}`),
+    ]),
+    h("td", { class: `diff ${entry.difficulty}` }, S.difficulty[entry.difficulty]),
+    h("td", { class: "src" }, h("a", { class: "external", href: entry.url, rel: "noopener", "aria-label": `${S.leetcode}: ${entry.title}` }, "LeetCode ↗")),
+  ])
+
+export const StationProblems = () => {
+  const Component = ({ fileData, allFiles }) => {
+    const m = fm(fileData)
+    let line, station
+    const entry = problemEntry(fileData)
+    if (entry) [line, station] = [entry.line, entry.station]
+    else if (m.series && m.part && LINES.includes(m.series) && !isHub(fileData)) [line, station] = [m.series, Number(m.part)]
+    else return null
+    const S = strFor(fileData)
+    const L = langOf(fileData)
+    allFiles = forLang(allFiles, L)
+    const slug = fileData.slug
+    const pages = problemsByLc(allFiles)
+    const rows = CATALOG.filter((p) => p.line === line && p.station === station)
+    const written = rows.filter((p) => pages.has(p.lc)).length
+    const hub = hubFor(allFiles, line)
+    const st = hub && (fm(hub).stations || [])[station - 1]
+    const stName = st ? (typeof st === "string" ? st : st.name) : ""
+    return h("section", { class: "station-problems", "aria-labelledby": "sp-h" }, [
+      h("h2", { id: "sp-h" }, entry ? `${S.stationN(station)}${stName ? `: ${stName}` : ""}` : S.stationProblems),
+      h("p", { class: "sp-lede" }, [
+        S.stationProblemsLede(written, rows.length),
+        " ",
+        h("a", { class: "internal", href: rel(slug, `${L === "en" ? "en/" : ""}problems/index`) }, `${S.problemSet} →`),
+      ]),
+      h("table", { class: "problem-table" }, [
+        h("tbody", null, rows.map((p) => problemRow(slug, p, pages.get(p.lc), S, entry && p.lc === entry.lc))),
+      ]),
+    ])
+  }
+  return Component
+}
+
+// ── NeetCode: trang kho problems/ (đủ 150 dòng, lọc theo tuyến và độ khó) ─────────────
+export const CATALOG_SCRIPT = `
+function atlasSetupCatalog() {
+  var box = document.querySelector(".problem-set");
+  if (!box) return;
+  var form = box.querySelector(".ps-filter");
+  var rows = box.querySelectorAll("tbody tr");
+  var out = box.querySelector(".ps-shown");
+  form.hidden = false;
+  function apply() {
+    var line = form.line.value, diff = form.diff.value, k = 0;
+    rows.forEach(function (r) {
+      var on = (!line || r.dataset.line === line) && (!diff || r.dataset.diff === diff);
+      r.hidden = !on;
+      if (on) k++;
+    });
+    out.textContent = out.dataset.tpl.replace("{k}", k);
+  }
+  form.addEventListener("change", apply);
+  apply();
+}
+document.addEventListener("nav", atlasSetupCatalog);
+`
+
+export const ProblemSet = () => {
+  const Component = ({ fileData, allFiles }) => {
+    if (!isProblemSet(fileData)) return null
+    const S = strFor(fileData)
+    const L = langOf(fileData)
+    allFiles = forLang(allFiles, L)
+    const slug = fileData.slug
+    const pages = problemsByLc(allFiles)
+    const written = CATALOG.filter((p) => pages.has(p.lc)).length
+    const lineInfo = new Map(
+      LINES.map((id) => {
+        const hub = hubFor(allFiles, id)
+        return [id, { hub, code: hub ? fm(hub).code : id, stations: hub ? fm(hub).stations || [] : [], posts: seriesParts(allFiles, id) }]
+      }),
+    )
+    const total = CATALOG.length
+    const select = (name, label, options) =>
+      h("label", null, [
+        h("span", null, label),
+        h("select", { name }, [h("option", { value: "" }, S.filterAll), ...options.map(([v, t]) => h("option", { value: v }, t))]),
+      ])
+    return h("section", { class: "problem-set" }, [
+      h("div", { class: "ps-progress" }, [
+        h("span", { class: "big" }, `${written}/${total}`),
+        h("span", { class: "bar", "aria-hidden": "true", style: `--at: ${(written / total) * 100}%` }, h("b")),
+        h("span", { class: "lbl" }, S.problemsWritten(written, total)),
+      ]),
+      h("form", { class: "ps-filter", hidden: true }, [
+        select(
+          "line",
+          S.filterLine,
+          LINES.map((id) => {
+            const i = lineInfo.get(id)
+            return [id, i.hub ? `${i.code} · ${S.lineTitleShort(fm(i.hub).title)}` : id]
+          }),
+        ),
+        select("diff", S.filterDiff, ["easy", "medium", "hard"].map((d) => [d, S.difficulty[d]])),
+        h("output", { class: "ps-shown", "data-tpl": S.filterShown("{k}", total), "aria-live": "polite" }),
+      ]),
+      h("div", { class: "ps-scroll" }, h("table", { class: "problem-table full" }, [
+        h("thead", null, h("tr", null, [
+          h("th", { scope: "col" }, S.colCode),
+          h("th", { scope: "col" }, S.colTitle),
+          h("th", { scope: "col" }, S.difficultyLabel),
+          h("th", { scope: "col" }, S.colStation),
+          h("th", { scope: "col" }, S.colGroup),
+        ])),
+        h(
+          "tbody",
+          null,
+          CATALOG.map((p) => {
+            const page = pages.get(p.lc)
+            const i = lineInfo.get(p.line)
+            const st = i.stations[p.station - 1]
+            const stName = st ? (typeof st === "string" ? st : st.name) : ""
+            const stPost = i.posts.find((x) => Number(fm(x).part) === p.station)
+            const stLabel = [`${i.code}-${pad(p.station)}`, stName && h("span", { class: "st-name" }, ` ${stName}`)]
+            return h("tr", { class: page ? "" : "is-ahead", "data-line": p.line, "data-diff": p.difficulty }, [
+              h("td", { class: "lc" }, lcCode(p.lc)),
+              h("td", { class: "t" }, [
+                page ? h("a", { class: "internal", href: rel(slug, page.slug) }, p.title) : p.title,
+                " ",
+                h("a", { class: "external src", href: p.url, rel: "noopener", "aria-label": `${S.leetcode}: ${p.title}` }, "↗"),
+              ]),
+              h("td", { class: `diff ${p.difficulty}` }, S.difficulty[p.difficulty]),
+              h("td", { class: "st" }, stPost ? h("a", { class: "internal", href: rel(slug, stPost.slug) }, stLabel) : i.hub ? h("a", { class: "internal", href: rel(slug, i.hub.slug) }, stLabel) : stLabel),
+              h("td", { class: "grp" }, p.group),
+            ])
+          }),
+        ),
+      ])),
+    ])
+  }
+  return Component
+}
+
 // ── Hub series: số liệu + bản đồ metro ──────────────────────────────────────
 export const SeriesHub = () => {
   const Component = ({ fileData, allFiles }) => {
@@ -627,6 +799,15 @@ export const SeriesHub = () => {
         fact(S.walkedLabel, S.walkedStations(state.visited, state.stations.length)),
         total > 0 && fact(S.concepts, `${learned} / ${total}`),
         fact(S.nextStation, next ? next.name : S.lineDone),
+        LINES.includes(state.id) &&
+          (() => {
+            const pages = problemsByLc(allFiles)
+            const mine = CATALOG.filter((p) => p.line === state.id)
+            return fact(
+              S.problemSetShort,
+              h("a", { class: "internal", href: rel(slug, `${langOf(fileData) === "en" ? "en/" : ""}problems/index`) }, `${mine.filter((p) => pages.has(p.lc)).length} / ${mine.length}`),
+            )
+          })(),
       ]),
       h(
         "nav",

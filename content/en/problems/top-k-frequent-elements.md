@@ -3,10 +3,9 @@ title: "Top K Frequent Elements: heaps, bucket sort, quickselect and when O(n) i
 description: "After counting you still have to rank: this post solves top k most frequent elements in four ways (sorting, a k-element min-heap, bucket sort, quickselect), measures them on a million numbers, and finds that O(n) bucket sort is the slowest when there are few distinct values, while quickselect collapses when too many frequencies are equal."
 date: 2026-11-22T21:05:00+07:00
 tags: [algorithms, neetcode, hashing, heap]
-type: learn
+type: problem
+lc: 347
 level: intermediate
-series: neetcode-arrays-hashing
-part: 5
 draft: false
 lang: en
 sources:
@@ -15,20 +14,21 @@ sources:
   - https://github.com/python/cpython/blob/main/Lib/collections/__init__.py
   - https://pkg.go.dev/container/heap
   - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html
+aliases: [en/posts/2026-11-22-neetcode-top-k-frequent]
 ---
 
 > [!tldr] Quick read
-> - The problem: return the k values that appear most often. Step 1 is always counting (station 2), O(n). The hard part is step 2: picking the k largest out of m frequencies.
+> - The problem: return the k values that appear most often. Step 1 is always counting (Valid Anagram), O(n). The hard part is step 2: picking the k largest out of m frequencies.
 > - Sort the m (value, frequency) pairs: O(m log m). A [[en/concepts/heap|min-heap]] holding exactly k elements: O(m log k). Python ships `Counter.most_common(k)`, which uses a heap underneath.
 > - [[en/concepts/bucket-sort|Bucket sort]] by frequency: frequencies only range from 1 to n, so there are n buckets and the whole thing is O(n). It gets past the [[en/concepts/sorting-lower-bound|O(n log n) bound]] of every comparison-based sorting algorithm.
 > - [[en/concepts/quickselect|Quickselect]]: partition like quicksort but descend into only one half, O(n) **on average**, O(n²) in the worst case.
 > - Measured on a million numbers: the **counting** step takes most of the time. "O(n)" bucket sort is the slowest when there are few distinct values (it has to allocate a million buckets). Quickselect takes 798 ms when most frequencies are equal, 3.5 times slower than sorting.
 
 > [!info] Context
-> Station 5 of **the NeetCode 150 line: Arrays & Hashing**. Counting was station 2's job; this station asks the next question: once you have counted, how do you get the **top k** quickly? This is also the line's first encounter with the heap, a structure that gets a whole group of its own later in NeetCode 150. The solutions come in TypeScript, JavaScript, Python, Go and Java.
+> LeetCode problem 347, part of [[en/posts/2026-11-22-neetcode-counting-keys|station 2: Canonical Keys and Counting]] on **the NeetCode line: Arrays and Strings**. Counting was Valid Anagram's job; this problem asks the next question: once you have counted, how do you get the **top k** quickly? This is also the first encounter with the heap, a structure that gets a whole group of its own later in NeetCode 150. The solutions come in TypeScript, JavaScript, Python, Go and Java.
 
 > [!abstract]- Quick glossary for this post (click to open)
-> - **Frequency counting, Map**: see [[en/posts/2026-11-22-neetcode-valid-anagram|station 2]]. **Big-O**: see [[en/posts/2026-11-22-neetcode-contains-duplicate|station 1]].
+> - **Frequency counting, Map**: see [[en/problems/valid-anagram|Valid Anagram]]. **Big-O**: see [[en/problems/contains-duplicate|Contains Duplicate]].
 > - **m**: the number of *distinct* values in the array. Always m ≤ n.
 > - **Heap**: a binary tree stored in an array, where a parent is always smaller (min-heap) or larger (max-heap) than its children. The smallest element is always at the top.
 > - **Priority queue**: a data type for "take out the highest-priority element". A heap is the most common implementation.
@@ -41,7 +41,7 @@ A vote receives a million ballots for a few tens of thousands of songs. The orga
 
 | Everyday life | Concept |
 |---|---|
-| Tallying: one line per song, one tick per ballot | Frequency counting (station 2) |
+| Tallying: one line per song, one tick per ballot | Frequency counting (Valid Anagram) |
 | Rank **every** song by votes, then take the first 10 | Sorting, O(m log m) |
 | A podium with 10 spots; the weakest song on the podium stands right at the edge. A stronger new song pushes it off | k-element [[en/concepts/heap\|min-heap]] |
 | Boxes numbered "1 vote", "2 votes", … "1 million votes"; drop each song into the box for its vote count, then walk down from the biggest box | [[en/concepts/bucket-sort\|Bucket sort]] |

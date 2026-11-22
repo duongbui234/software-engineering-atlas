@@ -3,10 +3,9 @@ title: "Valid Anagram: frequency counting, a 26-slot array, hash maps and the Un
 description: "Two strings are anagrams when they have exactly the same letters the same number of times; this post goes from sorting to counting with a 26-slot array (O(n), 60 times faster), then opens the problem's follow-up question: with Unicode characters, JavaScript and Java both wrongly declare two different emoji strings anagrams."
 date: 2026-11-22T21:02:00+07:00
 tags: [algorithms, neetcode, hashing, unicode]
-type: learn
+type: problem
+lc: 242
 level: beginner
-series: neetcode-arrays-hashing
-part: 2
 draft: false
 lang: en
 sources:
@@ -14,6 +13,7 @@ sources:
   - https://unicode.org/reports/tr15/
   - https://tc39.es/ecma262/2025/
   - https://go.dev/ref/spec
+aliases: [en/posts/2026-11-22-neetcode-valid-anagram]
 ---
 
 > [!tldr] Quick read
@@ -24,10 +24,10 @@ sources:
 > - The trap: `split('')` in JS and `char[]` in Java split by UTF-16 units, so they treat "😀🌃" and "🜃🈀" as anagrams. Python and Go do not make this mistake.
 
 > [!info] Context
-> Station 2 of **the NeetCode 150 line: Arrays & Hashing**. Station 1 asked "have I seen it?"; this station asks "seen it **how many times**?". The solutions come in TypeScript, JavaScript, Python, Go and Java. All you need to know is loops and arrays.
+> LeetCode problem 242, part of [[en/posts/2026-11-22-neetcode-counting-keys|station 2: Canonical Keys and Counting]] on **the NeetCode line: Arrays and Strings**. Contains Duplicate asked "have I seen it?"; this problem asks "seen it **how many times**?". The solutions come in TypeScript, JavaScript, Python, Go and Java. All you need to know is loops and arrays.
 
 > [!abstract]- Quick glossary for this post (click to open)
-> - **Big-O, hash, Set**: see [[en/posts/2026-11-22-neetcode-contains-duplicate|station 1]].
+> - **Big-O, hash, Set**: see [[en/problems/contains-duplicate|Contains Duplicate]].
 > - **Character code**: every character is stored as a number. `'a'` is 97, `'b'` is 98… so `code - 97` gives the position 0..25 in the alphabet.
 > - **Code point**: the Unicode number assigned to a character, for example `é` is U+00E9, `😀` is U+1F600.
 > - **UTF-16, code unit**: the way JS and Java store strings, 16 bits per unit. A character whose code point is above U+FFFF (such as an emoji) needs **two** code units, called a surrogate pair.
@@ -66,7 +66,7 @@ flowchart TB
 
 Constraints: each string is up to **50,000** characters long and contains only lowercase `a`–`z`. The problem adds a follow-up question: if the strings contain Unicode characters, how would you adapt the solution?
 
-The `aacc` / `ccac` case is why "same set of letters" is not enough. A Set (station 1) only remembers "present", not "how many".
+The `aacc` / `ccac` case is why "same set of letters" is not enough. A Set (Contains Duplicate) only remembers "present", not "how many".
 
 ## How it works
 
@@ -77,7 +77,7 @@ The `aacc` / `ccac` case is why "same set of letters" is not enough. A Set (stat
 
 ### Approach 1, sort then compare: O(n log n)
 
-Two anagrams become **the same string** once their letters are sorted. This is the shortest approach to write (Python: `sorted(s) == sorted(t)`), and the idea of "reduce to a canonical form" comes back at station 4. The cost is two sorts.
+Two anagrams become **the same string** once their letters are sorted. This is the shortest approach to write (Python: `sorted(s) == sorted(t)`), and the idea of "reduce to a canonical form" comes back in Group Anagrams. The cost is two sorts.
 
 ### Approach 2, count with a 26-slot array: O(n) time, O(1) space
 
@@ -249,7 +249,7 @@ Reading the results:
 
 ## Self-check questions
 
-> [!question]- Why is a Set (as in station 1) not enough to check for an anagram?
+> [!question]- Why is a Set (as in Contains Duplicate) not enough to check for an anagram?
 > A Set only remembers whether a letter appears, not how many times. `aacc` and `ccac` have the same Set `{a, c}` but are not anagrams.
 
 > [!question]- The 26-slot counting array is called O(1) space. Why, even though it is an array?

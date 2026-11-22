@@ -3,30 +3,30 @@ title: "Group Anagrams: khóa chuẩn, khóa đếm và cái bẫy khi nối kh�
 description: "Gom các từ là anagram của nhau thành nhóm bằng cách đưa mỗi từ về một khóa chuẩn rồi dùng khóa đó làm khóa hash map; bài này so khóa sắp xếp với khóa đếm (đổi chỗ thắng thua theo độ dài từ), và tái hiện một lỗi qua được mọi test: nối bảng đếm không có dấu phân cách."
 date: 2026-11-22T21:04:00+07:00
 tags: [algorithms, neetcode, hashing]
-type: learn
+type: problem
+lc: 49
 level: intermediate
-series: neetcode-arrays-hashing
-part: 4
 draft: false
 sources:
   - https://leetcode.com/problems/group-anagrams/
   - https://go.dev/ref/spec
   - https://docs.python.org/3/glossary.html#term-hashable
   - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html
+aliases: [posts/2026-11-22-neetcode-group-anagrams]
 ---
 
 > [!tldr] Đọc nhanh
 > - Đề: cho danh sách từ, gom các từ là anagram của nhau vào cùng một nhóm.
 > - [[concepts/canonical-key|Khóa chuẩn]]: biến mỗi từ thành một giá trị mà mọi anagram đều cho ra **cùng** một giá trị, rồi [[concepts/group-by|gom nhóm]] bằng hash map `khóa → danh sách từ`.
-> - Khóa sắp xếp (`"eat"` → `"aet"`): O(k log k) mỗi từ. [[concepts/count-key|Khóa đếm]] (bảng 26 số của ga 2): O(k) mỗi từ. Khóa đếm thắng 47 lần khi từ dài 1000 chữ, nhưng **thua** khi từ chỉ dài 5 chữ.
+> - Khóa sắp xếp (`"eat"` → `"aet"`): O(k log k) mỗi từ. [[concepts/count-key|Khóa đếm]] (bảng 26 số của bài Valid Anagram): O(k) mỗi từ. Khóa đếm thắng 47 lần khi từ dài 1000 chữ, nhưng **thua** khi từ chỉ dài 5 chữ.
 > - [[concepts/key-serialization|Nối khóa thành chuỗi]] phải có dấu phân cách. Bảng đếm `[1, 11, …]` và `[11, 1, …]` nối không phân cách đều thành `"1110…"`, nên hai từ không phải anagram bị gom chung. Lỗi này vẫn qua cả 4 ca test.
 > - Mỗi ngôn ngữ có một luật riêng về thứ gì làm khóa được: Go cho mảng cố định làm khóa, Python cần tuple, JS và Java so mảng theo **danh tính** nên phải đổi sang chuỗi.
 
 > [!info] Bối cảnh
-> Ga 4 của **tuyến NeetCode 150: Arrays & Hashing**, bài Medium đầu tiên. Nó ghép ga 2 (anagram, bảng đếm) với hash map của ga 3, nhưng lần này bảng đếm không phải đáp án mà là **khóa**. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
+> Bài LeetCode 49, thuộc [[posts/2026-11-22-neetcode-counting-keys|ga 2: Khóa chuẩn và đếm tần suất]] trên **tuyến NeetCode: Mảng và chuỗi**. Nó ghép bài Valid Anagram (anagram, bảng đếm) với hash map của bài Two Sum, nhưng lần này bảng đếm không phải đáp án mà là **khóa**. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Anagram, bảng đếm 26 ô**: xem [[posts/2026-11-22-neetcode-valid-anagram|ga 2]]. **Hash map, va chạm**: xem [[posts/2026-11-22-neetcode-two-sum|ga 3]].
+> - **Anagram, bảng đếm 26 ô**: xem [[problems/valid-anagram|Valid Anagram]]. **Hash map, va chạm**: xem [[problems/two-sum|Two Sum]].
 > - **k**: độ dài của một từ. **n**: số từ. Độ phức tạp bài này phụ thuộc cả hai.
 > - **Khóa (key)**: giá trị dùng để tra trong map. Hai khóa "bằng nhau" thì trỏ tới cùng một ô.
 > - **Danh tính (identity)**: hai object là "một" chỉ khi chúng là cùng một vùng nhớ. Hai mảng `[1, 2]` tạo riêng có cùng nội dung nhưng khác danh tính.
@@ -66,7 +66,7 @@ flowchart TB
 
 Giới hạn: tới **10 000** chuỗi, mỗi chuỗi dài tới **100** ký tự, chỉ gồm chữ thường.
 
-Cách ngây thơ: so từng cặp từ bằng hàm anagram của ga 2. Với n từ là O(n²·k), khoảng 5·10⁹ bước ở giới hạn trên. Cần một cách để mỗi từ chỉ phải "nhìn" một lần.
+Cách ngây thơ: so từng cặp từ bằng hàm anagram của bài Valid Anagram. Với n từ là O(n²·k), khoảng 5·10⁹ bước ở giới hạn trên. Cần một cách để mỗi từ chỉ phải "nhìn" một lần.
 
 ## Cơ chế
 
@@ -86,11 +86,11 @@ Cách ngây thơ: so từng cặp từ bằng hàm anagram của ga 2. Với n t
 
 ### Khóa sắp xếp: O(n · k log k)
 
-Sắp xếp các chữ của từ: `"eat"`, `"tea"`, `"ate"` đều thành `"aet"`. Đây chính là cách 1 của ga 2, dùng làm khóa. Đơn giản, đúng với mọi bảng chữ cái, kể cả Unicode nếu tách đúng theo code point.
+Sắp xếp các chữ của từ: `"eat"`, `"tea"`, `"ate"` đều thành `"aet"`. Đây chính là cách 1 của bài Valid Anagram, dùng làm khóa. Đơn giản, đúng với mọi bảng chữ cái, kể cả Unicode nếu tách đúng theo code point.
 
 ### Khóa đếm: O(n · k)
 
-Bảng đếm 26 ô của ga 2 cũng là một khóa chuẩn: anagram thì cùng bảng đếm. Tạo bảng tốn O(k), không cần sắp xếp. Nhưng bảng đếm là một **mảng**, và hầu hết ngôn ngữ không cho mảng làm khóa hash map một cách trực tiếp. Phải [[concepts/key-serialization|biến nó thành một giá trị làm khóa được]]:
+Bảng đếm 26 ô của bài Valid Anagram cũng là một khóa chuẩn: anagram thì cùng bảng đếm. Tạo bảng tốn O(k), không cần sắp xếp. Nhưng bảng đếm là một **mảng**, và hầu hết ngôn ngữ không cho mảng làm khóa hash map một cách trực tiếp. Phải [[concepts/key-serialization|biến nó thành một giá trị làm khóa được]]:
 
 | | Mảng làm khóa map? | Cách làm |
 |---|---|---|

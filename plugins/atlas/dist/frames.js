@@ -1,7 +1,7 @@
 // Frame "atlas": khung neatline + masthead + lưới lề | bài | rail.
 // Toàn bộ CSS của theme nằm ở đây (Quartz chèn frame.css vào mọi trang dùng frame này).
 import { h, Fragment } from "preact"
-import { fm, isIndex, isHub, hasMargin, coordOf, hubFor, pageDate, fmtFull, langOf, forLang, STR } from "./shared.js"
+import { fm, isIndex, isHub, hasMargin, coordOf, hubFor, pageDate, fmtFull, langOf, forLang, STR, problemEntry, isProblemSet } from "./shared.js"
 import {
   AtlasBrand,
   AtlasHomeHead,
@@ -14,11 +14,16 @@ import {
   MERMAID_SCRIPT,
   FEED_SCRIPT,
   CODETABS_SCRIPT,
+  CATALOG_SCRIPT,
+  StationProblems,
+  ProblemSet,
 } from "./components.js"
 
 const Brand = AtlasBrand()
 const HomeHead = AtlasHomeHead()
 const Home = AtlasHome()
+const Problems = StationProblems()
+const PSet = ProblemSet()
 const Margin = PostMargin()
 const Stand = Standfirst()
 const Line = SeriesLine()
@@ -97,7 +102,7 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 }
 .atlas-brand .brand-nav .lang-switch:hover { text-decoration: none; background: var(--ink); color: var(--paper); }
 /* en/index là trang thư mục với Quartz: ẩn danh sách file, trang chủ đã có danh mục riêng */
-.atlas-sheet.is-home .page-listing { display: none; }
+.atlas-sheet.is-home .page-listing, .atlas-sheet.is-catalog .page-listing { display: none; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .atlas-masthead .search { min-width: 12rem; }
 
@@ -148,6 +153,42 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 .code-tabs > figure[data-rehype-pretty-code-figure] { margin: 0; }
 .code-tabs > figure[data-rehype-pretty-code-figure] > pre { margin: 0; }
 .code-tabs > figure[hidden] { display: none; }
+/* NeetCode: bảng bài của ga (StationProblems) và trang kho problems/ (ProblemSet) */
+.station-problems, .problem-set { max-width: 46rem; margin: 3rem 0 0; }
+.station-problems h2 { margin-top: 0; }
+.sp-lede { color: var(--ink-2); font-size: .9375rem; }
+.problem-table { width: 100%; border-collapse: collapse; font-size: .9375rem; margin: .75rem 0 0; }
+.problem-table th { text-align: left; font: 600 .6875rem/1.2 var(--codeFont); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); padding: .4rem .5rem; border-bottom: 1px solid var(--ink); }
+.problem-table td { padding: .45rem .5rem; border-bottom: 1px solid var(--contour); vertical-align: baseline; }
+.problem-table td.lc { font: 500 .8125rem/1.2 var(--codeFont); color: var(--ink-2); white-space: nowrap; }
+.problem-table td.diff { font-size: .8125rem; white-space: nowrap; }
+.problem-table td.diff.easy::before, .problem-table td.diff.medium::before, .problem-table td.diff.hard::before,
+.post-margin .diff::before { content: ""; display: inline-block; width: .5rem; height: .5rem; margin-right: .4rem; border: 1px solid var(--ink); }
+.problem-table td.diff.medium::before, .post-margin .diff.medium::before { background: linear-gradient(to top, var(--ink) 50%, transparent 50%); }
+.problem-table td.diff.hard::before, .post-margin .diff.hard::before { background: var(--ink); }
+.problem-table td.src { text-align: right; white-space: nowrap; font-size: .8125rem; }
+.problem-table td.st, .problem-table td.grp { font-size: .8125rem; color: var(--ink-2); }
+.problem-table tr.is-ahead td.t { color: var(--ink-2); }
+.problem-table .ahead-note { font-size: .8125rem; font-style: italic; }
+.problem-table tr.is-current td { background: var(--code-bg); }
+.problem-table tr.is-current td.t { font-weight: 700; }
+.problem-table tr[hidden] { display: none; }
+.ps-progress { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; align-items: center; margin-bottom: 1.25rem; }
+.ps-progress .big { font: 600 1.75rem/1 var(--headerFont); grid-row: span 2; }
+.ps-progress .bar { position: relative; height: .5rem; border: 1px solid var(--ink); }
+.ps-progress .bar b { position: absolute; inset: 0 auto 0 0; width: var(--at); background: var(--ink); }
+.ps-progress .lbl { font-size: .875rem; color: var(--ink-2); }
+.ps-filter { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: end; margin-bottom: .5rem; }
+.ps-filter[hidden] { display: none; }
+.ps-filter label { display: grid; gap: .25rem; font: 600 .6875rem/1.2 var(--codeFont); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.ps-filter select { font: 400 .9375rem/1.2 var(--bodyFont); color: var(--ink); background: var(--paper); border: 1px solid var(--ink); border-radius: 0; padding: .35rem .5rem; max-width: 100%; }
+.ps-filter output { font-size: .875rem; color: var(--ink-2); }
+.ps-scroll { overflow-x: auto; }
+@media (max-width: 720px) {
+  .problem-table.full td.grp, .problem-table.full th:nth-child(5) { display: none; }
+  .problem-table td.st { font-size: .75rem; white-space: nowrap; }
+  .problem-table td.st .st-name { display: none; }
+}
 /* Sơ đồ Mermaid (MERMAID_SCRIPT render): cùng khung với khối code */
 .atlas-mermaid {
   max-width: 46rem; margin: 1.5rem 0; padding: 1rem; overflow-x: auto; text-align: center;
@@ -184,6 +225,7 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 .sym { display: inline-block; width: .7rem; height: .7rem; flex: none; }
 .sym.learn { border-radius: 50%; background: var(--water); }
 .sym.code { background: var(--contour); }
+.sym.problem { width: .6rem; height: .6rem; margin: .05rem; transform: rotate(45deg); border: 2px solid var(--water); }
 .sym.note { width: 0; height: 0; border-left: .38rem solid transparent; border-right: .38rem solid transparent; border-bottom: .68rem solid var(--ink-2); }
 .legend { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; font-size: .875rem; color: var(--ink-2); margin: 0; padding: 0; list-style: none; }
 .legend li { display: inline-flex; align-items: center; gap: .5rem; margin: 0; }
@@ -447,7 +489,9 @@ function cornerText(fileData, allFiles, S) {
   if (isIndex(fileData)) return [S.updated(fmtFull(new Date())), S.drawnWith]
   if (isHub(fileData)) return [S.hubCorner(m.title, (m.stations || []).length), m.region || ""]
   const code = coordOf(allFiles, fileData)
-  const hub = m.series ? hubFor(allFiles, m.series) : undefined
+  const entry = problemEntry(fileData)
+  const line = m.series || (entry && entry.line)
+  const hub = line ? hubFor(allFiles, line) : undefined
   const tl = [code, hub && fm(hub).region, hub && fm(hub).title].filter(Boolean).join(", ")
   const d = pageDate(fileData)
   return [tl, d ? S.writtenOn(fmtFull(d)) : ""]
@@ -475,7 +519,8 @@ export const AtlasFrame = {
       h("script", { dangerouslySetInnerHTML: { __html: MERMAID_SCRIPT } }),
       h("script", { dangerouslySetInnerHTML: { __html: FEED_SCRIPT } }),
       h("script", { dangerouslySetInnerHTML: { __html: CODETABS_SCRIPT } }),
-      h("div", { class: isIndex(fileData) ? "atlas-sheet is-home" : "atlas-sheet", "data-lang": L, lang: L }, [
+      h("script", { dangerouslySetInnerHTML: { __html: CATALOG_SCRIPT } }),
+      h("div", { class: ["atlas-sheet", isIndex(fileData) && "is-home", isProblemSet(fileData) && "is-catalog"].filter(Boolean).join(" "), "data-lang": L, lang: L }, [
         tl && h("span", { class: "corner tl" }, tl),
         br && h("span", { class: "corner br" }, br),
         h("div", { class: "atlas-inner" }, [
@@ -497,6 +542,8 @@ export const AtlasFrame = {
                 ]),
               ),
               h(Content, componentData),
+              render(PSet),
+              render(Problems),
               h("div", { class: "page-footer" }, [render(Home), ...afterBody.map(render)]),
             ]),
             showRail &&

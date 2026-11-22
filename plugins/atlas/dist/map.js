@@ -1,6 +1,7 @@
 // Bản đồ kiến thức (trang chủ): vùng = series/region, địa danh = ghi chú khái niệm, tuyến = series.
 import { h } from "preact"
-import { fm, rel, hubs, lineState, isConcept, isListed, hash, pageDate, STR } from "./shared.js"
+import { fm, rel, hubs, lineState, isConcept, isListed, hash, pageDate, STR, problemsByLc, langOf } from "./shared.js"
+import { CATALOG, LINES } from "./neetcode.js"
 
 const W = 960
 const H = 400
@@ -342,6 +343,25 @@ export function sheetIndex({ slug, allFiles, fmtDay, S = STR.vi }) {
         ]),
       }
     }),
+    // kho bài NeetCode 150: một mảnh riêng, xếp theo ngày của trang bài mới nhất
+    ...(() => {
+      if (!lines.some((l) => LINES.includes(l.state.id))) return []
+      const pages = [...problemsByLc(allFiles).values()]
+      const last = pages.reduce((a, p) => Math.max(a, (pageDate(p) || new Date(0)).getTime()), 0)
+      const region = fm(lines.find((l) => LINES.includes(l.state.id)).hub).region || ""
+      return [
+        {
+          lastDate: last - 2,
+          node: h("li", { class: "sheet" }, [
+            h("a", { class: "internal sheet-link", href: rel(slug, `${langOf(slug) === "en" ? "en/" : ""}problems/index`) }, [
+              h("span", { class: "sheet-head" }, [h("span", { class: "sheet-code" }, "LC"), h("span", { class: "sheet-region" }, region)]),
+              h("span", { class: "sheet-t" }, S.problemSet),
+              h("span", { class: "sheet-meta" }, S.problemsWritten(pages.length, CATALOG.length)),
+            ]),
+          ]),
+        },
+      ]
+    })(),
     ...[...loose].map(([name, list]) => {
       list.sort((a, b) => (pageDate(b) || 0) - (pageDate(a) || 0))
       const lastDate = list.length ? (pageDate(list[0]) || new Date(0)).getTime() : 0

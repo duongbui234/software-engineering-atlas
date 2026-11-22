@@ -10,6 +10,7 @@ The Vietnamese site is the source. The English site is a parallel tree under `co
 | `content/posts/<file>.md` | `content/en/posts/<file>.md` |
 | `content/concepts/<file>.md` | `content/en/concepts/<file>.md` (same file name, even when the name is Vietnamese, e.g. `commit-va-rollback.md`) |
 | `content/series/<file>.md` | `content/en/series/<file>.md` |
+| `content/problems/<file>.md` (NeetCode problem pages and `index.md`) | `content/en/problems/<file>.md` |
 | `content/diagrams/<dir>/<name>.json` + `.html` | `content/diagrams/<dir>/<name>.en.json` + `<name>.en.html` (same folder) |
 | `content/code/**` | **not translated**: English posts link to the same files |
 
@@ -22,7 +23,8 @@ Never edit a Vietnamese file while translating.
   - translate each station `name` on a hub;
   - translate `region` (table below).
 - Add `lang: en`.
-- `date`, `series`, `part`, `code`, `type`, `level`, `tags`, `sources` and `draft` stay identical. The theme pairs pages by series and part.
+- `date`, `series`, `part`, `code`, `type`, `level`, `tags`, `sources`, `lc` and `draft` stay identical.
+- `aliases` (old URLs that redirect) get the `en/` prefix: `aliases: [en/posts/<old file>]`. The theme pairs pages by series and part.
 - Quote any `title` or `description` that contains a colon.
 - On a hub, the `concepts:` lists must use the English concept titles: the same as Vietnamese for English titles, mapped for the 12 below.
 
@@ -107,7 +109,14 @@ The site is drawn as a map and its series as metro lines. Keep the metaphor in E
 | Tuyến RabbitMQ | The RabbitMQ Line |
 | Tuyến WebSocket và Socket.IO | The WebSocket and Socket.IO Line |
 | Tuyến Transaction và khóa | The Transactions and Locking Line |
-| Tuyến NeetCode 150: Arrays & Hashing | The NeetCode 150 Line: Arrays & Hashing |
+| Tuyến NeetCode: Mảng và chuỗi | The NeetCode Line: Arrays and Strings |
+| Tuyến NeetCode: Tìm kiếm và heap | The NeetCode Line: Search and Heaps |
+| Tuyến NeetCode: Cấu trúc liên kết | The NeetCode Line: Linked Structures |
+| Tuyến NeetCode: Đồ thị | The NeetCode Line: Graphs |
+| Tuyến NeetCode: Quy hoạch động | The NeetCode Line: Dynamic Programming |
+| Tuyến NeetCode: Kỹ thuật tổng hợp | The NeetCode Line: Mixed Techniques |
+
+NeetCode station names are in the hubs (`content/en/series/neetcode-*.md`); reuse them verbatim when a post names a station.
 
 Mention another line as "the Caching line", "the RabbitMQ line" and so on in running text.
 
@@ -213,6 +222,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | vun lên / vun xuống (heap) | sift up / sift down |
 | phân hoạch ba nhánh | three-way partition |
 | dạng dựng sẵn / dạng tách (Unicode) | precomposed / decomposed form |
+| bài luyện, trang bài (NeetCode) | problem, problem page |
+| kho bài | problem set |
+| bài neo (của một ga) | anchor problem |
+| khuôn (giải) | template |
+| đầu dãy (Longest Consecutive Sequence) | run start |
+| xô (bucket sort) | bucket |
+| dấu phân cách | delimiter |
+| hỏi trước, ghi sau | ask first, write later |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

@@ -40,6 +40,9 @@ function listPages(dir, rel = '') {
       if (!rel && SKIP_DIRS.has(e.name)) continue;
       out.push(...listPages(path.join(dir, e.name), rel + e.name + '/'));
     } else if (e.name.endsWith('.html') && e.name !== '404.html') {
+      // trang chuyển hướng của `aliases` (URL cũ): chỉ có meta refresh, không có gì để kiểm tra
+      const head = fs.readFileSync(path.join(dir, e.name), 'utf8').slice(0, 600);
+      if (head.includes('http-equiv="refresh"')) continue;
       out.push(rel + e.name);
     }
   }

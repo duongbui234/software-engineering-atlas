@@ -3,10 +3,9 @@ title: "Contains Duplicate: Big-O, vét cạn, hash set và cái giá của bộ
 description: "Bài đầu tiên của NeetCode 150 hỏi một câu tưởng tầm thường (mảng có số nào lặp lại không), nhưng đủ để học cách đo thuật toán bằng Big-O, đo lại bằng đồng hồ thật, và thấy Set của năm ngôn ngữ khác nhau ở đâu."
 date: 2026-11-22T21:01:00+07:00
 tags: [algorithms, neetcode, hashing]
-type: learn
+type: problem
+lc: 217
 level: beginner
-series: neetcode-arrays-hashing
-part: 1
 draft: false
 sources:
   - https://leetcode.com/problems/contains-duplicate/
@@ -14,6 +13,7 @@ sources:
   - https://v8.dev/blog/array-sort
   - https://go.dev/doc/go1.19
   - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Arrays.html
+aliases: [posts/2026-11-22-neetcode-contains-duplicate]
 ---
 
 > [!tldr] Đọc nhanh
@@ -24,7 +24,7 @@ sources:
 > - Đổi thời gian lấy bộ nhớ là một [[concepts/space-time-tradeoff|đánh đổi]], không phải bữa trưa miễn phí: Set tốn O(n) bộ nhớ, sắp xếp tại chỗ thì gần như không.
 
 > [!info] Bối cảnh
-> Ga 1 của **tuyến NeetCode 150: Arrays & Hashing**. NeetCode 150 là danh sách 150 bài LeetCode xếp theo mẫu giải; đây là bài đầu tiên của cả danh sách. Mỗi ga có lời giải chạy được bằng TypeScript, JavaScript, Python, Go và Java. Bạn chỉ cần biết viết vòng lặp và hàm trong một ngôn ngữ bất kỳ.
+> Bài LeetCode 217, thuộc [[posts/2026-11-22-neetcode-hash-lookup|ga 1: Tra cứu bằng hash]] trên **tuyến NeetCode: Mảng và chuỗi**. NeetCode 150 là danh sách 150 bài LeetCode xếp theo mẫu giải; đây là bài đầu tiên của cả danh sách. Mỗi bài có lời giải chạy được bằng TypeScript, JavaScript, Python, Go và Java. Bạn chỉ cần biết viết vòng lặp và hàm trong một ngôn ngữ bất kỳ.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Mảng (array)**: dãy phần tử đánh số từ 0. Đọc phần tử thứ i mất thời gian như nhau, dù i lớn hay nhỏ.
@@ -77,7 +77,7 @@ Giá trị lên tới 10⁹ cũng loại luôn mẹo "tạo một mảng đánh 
 
 ### Big-O: đo hình dạng, không đo giây
 
-[[concepts/big-o-notation|Big-O]] mô tả số bước tăng thế nào khi n tăng, bỏ qua hằng số và các số hạng nhỏ hơn. "O(n²)" nghĩa là n tăng gấp 10 thì số bước tăng khoảng gấp 100. Big-O không nói thuật toán chạy mất bao nhiêu mili giây; nó nói đường cong cong cỡ nào. Hai thuật toán cùng O(n) có thể chênh nhau 10 lần, và một thuật toán O(n) có thể chậm hơn một thuật toán O(n log n) ở mọi kích thước bạn gặp thật (ga 5 có ví dụ).
+[[concepts/big-o-notation|Big-O]] mô tả số bước tăng thế nào khi n tăng, bỏ qua hằng số và các số hạng nhỏ hơn. "O(n²)" nghĩa là n tăng gấp 10 thì số bước tăng khoảng gấp 100. Big-O không nói thuật toán chạy mất bao nhiêu mili giây; nó nói đường cong cong cỡ nào. Hai thuật toán cùng O(n) có thể chênh nhau 10 lần, và một thuật toán O(n) có thể chậm hơn một thuật toán O(n log n) ở mọi kích thước bạn gặp thật (bài Top K Frequent Elements có ví dụ).
 
 Có hai thứ để đo: **thời gian** (số bước) và **bộ nhớ phụ** (bộ nhớ dùng thêm ngoài input). Khi nói "O(1) bộ nhớ", người ta thường không tính chính mảng input.
 
@@ -214,10 +214,10 @@ trùng ở vị trí 0 và 1, n = 1 000 000: sắp xếp 206.11 ms, hash set 0.0
 
 ## Hiểu lầm và bẫy hay gặp
 
-- **"Thuật toán nào có Big-O nhỏ hơn thì luôn nhanh hơn."** Big-O bỏ hằng số. Ở đây thứ tự khớp với Big-O, nhưng ga 5 có ca O(n) chậm hơn O(n log n).
-- **Gọi `sort()` không có hàm so sánh trong JS.** `[10, 9, 1, 100].sort()` cho ra `[1, 10, 100, 9]`, vì đặc tả đổi từng số thành chuỗi rồi mới so. Ở bài này, may mắn là các số bằng nhau vẫn đứng cạnh nhau nên kết quả vẫn đúng. Ở ga 3, cùng lỗi đó làm sai hẳn đáp án.
+- **"Thuật toán nào có Big-O nhỏ hơn thì luôn nhanh hơn."** Big-O bỏ hằng số. Ở đây thứ tự khớp với Big-O, nhưng bài Top K Frequent Elements có ca O(n) chậm hơn O(n log n).
+- **Gọi `sort()` không có hàm so sánh trong JS.** `[10, 9, 1, 100].sort()` cho ra `[1, 10, 100, 9]`, vì đặc tả đổi từng số thành chuỗi rồi mới so. Ở bài này, may mắn là các số bằng nhau vẫn đứng cạnh nhau nên kết quả vẫn đúng. Ở bài Two Sum, cùng lỗi đó làm sai hẳn đáp án.
 - **Sắp xếp đè lên mảng của người gọi.** `nums.sort()` trong JS, `list.sort()` trong Python, `Arrays.sort(nums)` trong Java và `slices.Sort(nums)` trong Go đều sửa thẳng input. Sao chép trước nếu người gọi còn dùng mảng đó.
-- **"Hash set luôn O(1)."** Đó là trung bình. Ga 3 cho thấy khi mọi khóa rơi vào cùng một ô, một `HashMap` của Java chậm tới mức O(n) cho mỗi lần tra.
+- **"Hash set luôn O(1)."** Đó là trung bình. Bài Two Sum cho thấy khi mọi khóa rơi vào cùng một ô, một `HashMap` của Java chậm tới mức O(n) cho mỗi lần tra.
 - **Quên rằng "một dòng" không dừng sớm.** `len(set(nums)) != len(nums)` gọn và hay, nhưng luôn tốn O(n) thời gian và O(n) bộ nhớ, kể cả khi hai số đầu đã trùng.
 - **Java: tưởng `HashSet<Integer>` rẻ như mảng `int`.** Mỗi phần tử là một object `Integer` riêng, cộng thêm một nút trong bảng. Với vài triệu phần tử, sắp xếp `int[]` có thể tốn ít bộ nhớ hơn hẳn.
 

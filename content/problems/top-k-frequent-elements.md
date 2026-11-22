@@ -3,10 +3,9 @@ title: "Top K Frequent Elements: heap, bucket sort, quickselect và khi O(n) ch�
 description: "Đếm xong còn phải xếp hạng: bài này giải top k phần tử phổ biến nhất bằng bốn cách (sắp xếp, min-heap k phần tử, bucket sort, quickselect), đo trên một triệu số, và thấy bucket sort O(n) chậm nhất khi ít giá trị khác nhau, còn quickselect sụp đổ khi quá nhiều tần suất bằng nhau."
 date: 2026-11-22T21:05:00+07:00
 tags: [algorithms, neetcode, hashing, heap]
-type: learn
+type: problem
+lc: 347
 level: intermediate
-series: neetcode-arrays-hashing
-part: 5
 draft: false
 sources:
   - https://leetcode.com/problems/top-k-frequent-elements/
@@ -14,20 +13,21 @@ sources:
   - https://github.com/python/cpython/blob/main/Lib/collections/__init__.py
   - https://pkg.go.dev/container/heap
   - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html
+aliases: [posts/2026-11-22-neetcode-top-k-frequent]
 ---
 
 > [!tldr] Đọc nhanh
-> - Đề: trả về k giá trị xuất hiện nhiều nhất. Bước 1 luôn là đếm (ga 2), O(n). Cái khó nằm ở bước 2: chọn k giá trị lớn nhất trong m tần suất.
+> - Đề: trả về k giá trị xuất hiện nhiều nhất. Bước 1 luôn là đếm (bài Valid Anagram), O(n). Cái khó nằm ở bước 2: chọn k giá trị lớn nhất trong m tần suất.
 > - Sắp xếp m cặp (giá trị, tần suất): O(m log m). [[concepts/heap|Min-heap]] giữ đúng k phần tử: O(m log k). Python có sẵn `Counter.most_common(k)`, bên dưới dùng chính heap.
 > - [[concepts/bucket-sort|Bucket sort]] theo tần suất: tần suất chỉ từ 1 tới n, nên có n ô và cả bài là O(n). Nó vượt được [[concepts/sorting-lower-bound|giới hạn O(n log n)]] của mọi thuật toán sắp xếp dựa trên so sánh.
 > - [[concepts/quickselect|Quickselect]]: phân hoạch như quicksort nhưng chỉ đi vào một nửa, O(n) **trung bình**, O(n²) tệ nhất.
 > - Đo trên một triệu số: bước **đếm** chiếm phần lớn thời gian. Bucket sort "O(n)" chậm nhất khi ít giá trị khác nhau (phải cấp phát một triệu ô). Quickselect mất 798 ms khi hầu hết tần suất bằng nhau, chậm gấp 3,5 lần sắp xếp.
 
 > [!info] Bối cảnh
-> Ga 5 của **tuyến NeetCode 150: Arrays & Hashing**. Đếm là việc của ga 2; ga này hỏi tiếp: đếm xong, lấy **top k** thế nào cho nhanh. Đây cũng là lần đầu tuyến gặp heap, cấu trúc sẽ có cả một nhóm riêng về sau trong NeetCode 150. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
+> Bài LeetCode 347, thuộc [[posts/2026-11-22-neetcode-counting-keys|ga 2: Khóa chuẩn và đếm tần suất]] trên **tuyến NeetCode: Mảng và chuỗi**. Đếm là việc của bài Valid Anagram; bài này hỏi tiếp: đếm xong, lấy **top k** thế nào cho nhanh. Đây cũng là lần đầu gặp heap, cấu trúc sẽ có cả một nhóm riêng về sau trong NeetCode 150. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Đếm tần suất, Map**: xem [[posts/2026-11-22-neetcode-valid-anagram|ga 2]]. **Big-O**: xem [[posts/2026-11-22-neetcode-contains-duplicate|ga 1]].
+> - **Đếm tần suất, Map**: xem [[problems/valid-anagram|Valid Anagram]]. **Big-O**: xem [[problems/contains-duplicate|Contains Duplicate]].
 > - **m**: số giá trị *khác nhau* trong mảng. Luôn có m ≤ n.
 > - **Heap (đống)**: cây nhị phân lưu trong một mảng, trong đó cha luôn nhỏ hơn (min-heap) hoặc lớn hơn (max-heap) các con. Phần tử nhỏ nhất luôn ở đỉnh.
 > - **Priority queue (hàng đợi ưu tiên)**: kiểu dữ liệu "lấy ra phần tử ưu tiên nhất". Heap là cách cài phổ biến nhất.
@@ -40,7 +40,7 @@ Một cuộc bình chọn nhận một triệu phiếu cho vài chục nghìn b�
 
 | Đời thường | Khái niệm |
 |---|---|
-| Kiểm phiếu: mỗi bài một dòng, mỗi phiếu thêm một gạch | Đếm tần suất (ga 2) |
+| Kiểm phiếu: mỗi bài một dòng, mỗi phiếu thêm một gạch | Đếm tần suất (bài Valid Anagram) |
 | Xếp hạng **mọi** bài theo số phiếu rồi lấy 10 bài đầu | Sắp xếp, O(m log m) |
 | Một bục 10 chỗ; bài yếu nhất trên bục đứng ngay mép. Bài mới mạnh hơn thì đẩy nó xuống | [[concepts/heap\|Min-heap]] k phần tử |
 | Các hộp đánh số "1 phiếu", "2 phiếu", … "1 triệu phiếu"; bỏ mỗi bài vào hộp đúng số phiếu, rồi đi từ hộp lớn nhất xuống | [[concepts/bucket-sort\|Bucket sort]] |

@@ -136,59 +136,55 @@ function sortThenScan(nums: number[]): boolean {
 }
 ```
 
-> [!example]- JavaScript
-> ```js
-> function containsDuplicate(nums) {
->   const seen = new Set();
->   for (const x of nums) {
->     if (seen.has(x)) return true;
->     seen.add(x);
->   }
->   return false;
-> }
-> ```
+```python
+def contains_duplicate(nums: list[int]) -> bool:
+    seen: set[int] = set()
+    for x in nums:
+        if x in seen:  # tra trong set: O(1) trung bình
+            return True
+        seen.add(x)
+    return False
 
-> [!example]- Python
-> ```python
-> def contains_duplicate(nums: list[int]) -> bool:
->     seen: set[int] = set()
->     for x in nums:
->         if x in seen:  # tra trong set: O(1) trung bình
->             return True
->         seen.add(x)
->     return False
->
-> # một dòng: gọn, nhưng luôn dựng cả set, không dừng sớm
-> def contains_duplicate_oneliner(nums: list[int]) -> bool:
->     return len(set(nums)) != len(nums)
-> ```
+# một dòng: gọn, nhưng luôn dựng cả set, không dừng sớm
+def contains_duplicate_oneliner(nums: list[int]) -> bool:
+    return len(set(nums)) != len(nums)
+```
 
-> [!example]- Go
-> ```go
-> // map[int]struct{} là cách viết "set" trong Go: struct{} không chiếm byte nào.
-> func containsDuplicate(nums []int) bool {
-> 	seen := make(map[int]struct{}, len(nums)) // cấp sẵn chỗ, tránh nới bảng nhiều lần
-> 	for _, x := range nums {
-> 		if _, ok := seen[x]; ok {
-> 			return true
-> 		}
-> 		seen[x] = struct{}{}
-> 	}
-> 	return false
-> }
-> ```
+```go
+// map[int]struct{} là cách viết "set" trong Go: struct{} không chiếm byte nào.
+func containsDuplicate(nums []int) bool {
+	seen := make(map[int]struct{}, len(nums)) // cấp sẵn chỗ, tránh nới bảng nhiều lần
+	for _, x := range nums {
+		if _, ok := seen[x]; ok {
+			return true
+		}
+		seen[x] = struct{}{}
+	}
+	return false
+}
+```
 
-> [!example]- Java
-> ```java
-> // HashSet.add trả về false nếu phần tử đã có: một lần tra thay cho contains + add.
-> static boolean containsDuplicate(int[] nums) {
->     Set<Integer> seen = new HashSet<>(nums.length * 2);
->     for (int x : nums) {
->         if (!seen.add(x)) return true;
->     }
->     return false;
-> }
-> ```
+```java
+// HashSet.add trả về false nếu phần tử đã có: một lần tra thay cho contains + add.
+static boolean containsDuplicate(int[] nums) {
+    Set<Integer> seen = new HashSet<>(nums.length * 2);
+    for (int x : nums) {
+        if (!seen.add(x)) return true;
+    }
+    return false;
+}
+```
+
+```js
+function containsDuplicate(nums) {
+  const seen = new Set();
+  for (const x of nums) {
+    if (seen.has(x)) return true;
+    seen.add(x);
+  }
+  return false;
+}
+```
 
 File TypeScript chạy test cho cả bốn cách, rồi đo trên mảng **không có số trùng** (ca tệ nhất, không cách nào dừng sớm được):
 

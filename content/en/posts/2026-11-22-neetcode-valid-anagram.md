@@ -139,64 +139,60 @@ function byMap(s: string, t: string): boolean {
 }
 ```
 
-> [!example]- JavaScript
-> ```js
-> function isAnagram(s, t) {
->   if (s.length !== t.length) return false;
->   const count = new Int32Array(26); // fixed-size integer array, initialized to 0
->   for (let i = 0; i < s.length; i++) {
->     count[s.charCodeAt(i) - 97]++;
->     count[t.charCodeAt(i) - 97]--;
->   }
->   return count.every((c) => c === 0);
-> }
-> ```
+```python
+def is_anagram(s: str, t: str) -> bool:
+    if len(s) != len(t):
+        return False
+    count = [0] * 26
+    for a, b in zip(s, t):
+        count[ord(a) - ord("a")] += 1
+        count[ord(b) - ord("a")] -= 1
+    return all(c == 0 for c in count)
 
-> [!example]- Python
-> ```python
-> def is_anagram(s: str, t: str) -> bool:
->     if len(s) != len(t):
->         return False
->     count = [0] * 26
->     for a, b in zip(s, t):
->         count[ord(a) - ord("a")] += 1
->         count[ord(b) - ord("a")] -= 1
->     return all(c == 0 for c in count)
->
-> # Unicode: Counter counts by code point; normalization is still needed
-> def is_anagram_counter(s: str, t: str) -> bool:
->     nfc = lambda x: unicodedata.normalize("NFC", x)
->     return Counter(nfc(s)) == Counter(nfc(t))
-> ```
+# Unicode: Counter counts by code point; normalization is still needed
+def is_anagram_counter(s: str, t: str) -> bool:
+    nfc = lambda x: unicodedata.normalize("NFC", x)
+    return Counter(nfc(s)) == Counter(nfc(t))
+```
 
-> [!example]- Go
-> ```go
-> func isAnagram(s, t string) bool {
-> 	if len(s) != len(t) {
-> 		return false
-> 	}
-> 	var count [26]int // fixed-size array, already zero
-> 	for i := 0; i < len(s); i++ {
-> 		count[s[i]-'a']++
-> 		count[t[i]-'a']--
-> 	}
-> 	return count == [26]int{} // Go arrays are comparable with ==
-> }
-> ```
+```go
+func isAnagram(s, t string) bool {
+	if len(s) != len(t) {
+		return false
+	}
+	var count [26]int // fixed-size array, already zero
+	for i := 0; i < len(s); i++ {
+		count[s[i]-'a']++
+		count[t[i]-'a']--
+	}
+	return count == [26]int{} // Go arrays are comparable with ==
+}
+```
 
-> [!example]- Java
-> ```java
-> static boolean isAnagram(String s, String t) {
->     if (s.length() != t.length()) return false;
->     int[] count = new int[26];
->     for (int i = 0; i < s.length(); i++) {
->         count[s.charAt(i) - 'a']++;
->         count[t.charAt(i) - 'a']--;
->     }
->     for (int c : count) if (c != 0) return false;
->     return true;
-> }
-> ```
+```java
+static boolean isAnagram(String s, String t) {
+    if (s.length() != t.length()) return false;
+    int[] count = new int[26];
+    for (int i = 0; i < s.length(); i++) {
+        count[s.charAt(i) - 'a']++;
+        count[t.charAt(i) - 'a']--;
+    }
+    for (int c : count) if (c != 0) return false;
+    return true;
+}
+```
+
+```js
+function isAnagram(s, t) {
+  if (s.length !== t.length) return false;
+  const count = new Int32Array(26); // fixed-size integer array, initialized to 0
+  for (let i = 0; i < s.length; i++) {
+    count[s.charCodeAt(i) - 97]++;
+    count[t.charCodeAt(i) - 97]--;
+  }
+  return count.every((c) => c === 0);
+}
+```
 
 ```text
 $ node valid-anagram.ts

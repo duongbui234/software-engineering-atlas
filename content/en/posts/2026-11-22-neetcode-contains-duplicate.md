@@ -137,59 +137,55 @@ function sortThenScan(nums: number[]): boolean {
 }
 ```
 
-> [!example]- JavaScript
-> ```js
-> function containsDuplicate(nums) {
->   const seen = new Set();
->   for (const x of nums) {
->     if (seen.has(x)) return true;
->     seen.add(x);
->   }
->   return false;
-> }
-> ```
+```python
+def contains_duplicate(nums: list[int]) -> bool:
+    seen: set[int] = set()
+    for x in nums:
+        if x in seen:  # set lookup: O(1) on average
+            return True
+        seen.add(x)
+    return False
 
-> [!example]- Python
-> ```python
-> def contains_duplicate(nums: list[int]) -> bool:
->     seen: set[int] = set()
->     for x in nums:
->         if x in seen:  # set lookup: O(1) on average
->             return True
->         seen.add(x)
->     return False
->
-> # one-liner: compact, but always builds the whole set, no early exit
-> def contains_duplicate_oneliner(nums: list[int]) -> bool:
->     return len(set(nums)) != len(nums)
-> ```
+# one-liner: compact, but always builds the whole set, no early exit
+def contains_duplicate_oneliner(nums: list[int]) -> bool:
+    return len(set(nums)) != len(nums)
+```
 
-> [!example]- Go
-> ```go
-> // map[int]struct{} is how you write a "set" in Go: struct{} takes no bytes.
-> func containsDuplicate(nums []int) bool {
-> 	seen := make(map[int]struct{}, len(nums)) // preallocate to avoid growing the table many times
-> 	for _, x := range nums {
-> 		if _, ok := seen[x]; ok {
-> 			return true
-> 		}
-> 		seen[x] = struct{}{}
-> 	}
-> 	return false
-> }
-> ```
+```go
+// map[int]struct{} is how you write a "set" in Go: struct{} takes no bytes.
+func containsDuplicate(nums []int) bool {
+	seen := make(map[int]struct{}, len(nums)) // preallocate to avoid growing the table many times
+	for _, x := range nums {
+		if _, ok := seen[x]; ok {
+			return true
+		}
+		seen[x] = struct{}{}
+	}
+	return false
+}
+```
 
-> [!example]- Java
-> ```java
-> // HashSet.add returns false if the element is already present: one lookup instead of contains + add.
-> static boolean containsDuplicate(int[] nums) {
->     Set<Integer> seen = new HashSet<>(nums.length * 2);
->     for (int x : nums) {
->         if (!seen.add(x)) return true;
->     }
->     return false;
-> }
-> ```
+```java
+// HashSet.add returns false if the element is already present: one lookup instead of contains + add.
+static boolean containsDuplicate(int[] nums) {
+    Set<Integer> seen = new HashSet<>(nums.length * 2);
+    for (int x : nums) {
+        if (!seen.add(x)) return true;
+    }
+    return false;
+}
+```
+
+```js
+function containsDuplicate(nums) {
+  const seen = new Set();
+  for (const x of nums) {
+    if (seen.has(x)) return true;
+    seen.add(x);
+  }
+  return false;
+}
+```
 
 The TypeScript file runs the tests for all four approaches, then measures on an array **with no duplicates** (the worst case, where no approach can exit early):
 

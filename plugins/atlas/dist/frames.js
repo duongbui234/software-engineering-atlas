@@ -13,6 +13,7 @@ import {
   ARCHIFY_SCRIPT,
   MERMAID_SCRIPT,
   FEED_SCRIPT,
+  CODETABS_SCRIPT,
 } from "./components.js"
 
 const Brand = AtlasBrand()
@@ -128,6 +129,25 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 .page[data-frame="atlas"] pre {
   max-width: 46rem; border: 0; border-left: 3px solid var(--contour); border-radius: 0; background: var(--code-bg);
 }
+/* Tab code (CODETABS_SCRIPT): thanh tab ngang dính liền khối code, góc vuông */
+.code-tabs { max-width: 46rem; margin: 1.5rem 0; }
+.code-tabs-bar {
+  display: flex; overflow-x: auto; scrollbar-width: thin; border-bottom: 1px solid var(--contour);
+}
+.code-tabs-bar [role=tab] {
+  flex: none; margin: 0 0 -1px; padding: .55rem 1rem .5rem; cursor: pointer;
+  font: 500 .8125rem/1.2 var(--codeFont); letter-spacing: .01em; color: var(--ink-2);
+  background: transparent; border: 1px solid transparent; border-top-width: 3px; border-radius: 0;
+}
+.code-tabs-bar [role=tab]:hover { color: var(--ink); }
+.code-tabs-bar [role=tab][aria-selected=true] {
+  color: var(--ink); font-weight: 700; background: var(--code-bg);
+  border-color: var(--ink) var(--contour) var(--code-bg) var(--contour);
+}
+.code-tabs-bar [role=tab]:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+.code-tabs > figure[data-rehype-pretty-code-figure] { margin: 0; }
+.code-tabs > figure[data-rehype-pretty-code-figure] > pre { margin: 0; }
+.code-tabs > figure[hidden] { display: none; }
 /* Sơ đồ Mermaid (MERMAID_SCRIPT render): cùng khung với khối code */
 .atlas-mermaid {
   max-width: 46rem; margin: 1.5rem 0; padding: 1rem; overflow-x: auto; text-align: center;
@@ -454,6 +474,7 @@ export const AtlasFrame = {
       h("script", { dangerouslySetInnerHTML: { __html: ARCHIFY_SCRIPT } }),
       h("script", { dangerouslySetInnerHTML: { __html: MERMAID_SCRIPT } }),
       h("script", { dangerouslySetInnerHTML: { __html: FEED_SCRIPT } }),
+      h("script", { dangerouslySetInnerHTML: { __html: CODETABS_SCRIPT } }),
       h("div", { class: isIndex(fileData) ? "atlas-sheet is-home" : "atlas-sheet", "data-lang": L, lang: L }, [
         tl && h("span", { class: "corner tl" }, tl),
         br && h("span", { class: "corner br" }, br),

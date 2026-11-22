@@ -145,56 +145,52 @@ function twoPointers(nums: number[], target: number): [number, number] | null {
 }
 ```
 
-> [!example]- JavaScript
-> ```js
-> function twoSum(nums, target) {
->   const seen = new Map(); // use a Map, not {}: object keys are always converted to strings
->   for (let i = 0; i < nums.length; i++) {
->     const need = target - nums[i];
->     if (seen.has(need)) return [seen.get(need), i];
->     seen.set(nums[i], i);
->   }
->   return [];
-> }
-> ```
+```python
+def two_sum(nums: list[int], target: int) -> list[int]:
+    seen: dict[int, int] = {}  # value → index
+    for i, x in enumerate(nums):
+        if (need := target - x) in seen:  # ask before storing
+            return [seen[need], i]
+        seen[x] = i
+    return []
+```
 
-> [!example]- Python
-> ```python
-> def two_sum(nums: list[int], target: int) -> list[int]:
->     seen: dict[int, int] = {}  # value → index
->     for i, x in enumerate(nums):
->         if (need := target - x) in seen:  # ask before storing
->             return [seen[need], i]
->         seen[x] = i
->     return []
-> ```
+```go
+func twoSum(nums []int, target int) []int {
+	seen := make(map[int]int, len(nums)) // value → index
+	for i, x := range nums {
+		if j, ok := seen[target-x]; ok { // "comma ok": tells "absent" apart from "present, value 0"
+			return []int{j, i}
+		}
+		seen[x] = i
+	}
+	return nil
+}
+```
 
-> [!example]- Go
-> ```go
-> func twoSum(nums []int, target int) []int {
-> 	seen := make(map[int]int, len(nums)) // value → index
-> 	for i, x := range nums {
-> 		if j, ok := seen[target-x]; ok { // "comma ok": tells "absent" apart from "present, value 0"
-> 			return []int{j, i}
-> 		}
-> 		seen[x] = i
-> 	}
-> 	return nil
-> }
-> ```
+```java
+static int[] twoSum(int[] nums, int target) {
+    Map<Integer, Integer> seen = new HashMap<>(); // value → index
+    for (int i = 0; i < nums.length; i++) {
+        Integer j = seen.get(target - nums[i]);
+        if (j != null) return new int[] {j, i};
+        seen.put(nums[i], i);
+    }
+    return new int[0];
+}
+```
 
-> [!example]- Java
-> ```java
-> static int[] twoSum(int[] nums, int target) {
->     Map<Integer, Integer> seen = new HashMap<>(); // value → index
->     for (int i = 0; i < nums.length; i++) {
->         Integer j = seen.get(target - nums[i]);
->         if (j != null) return new int[] {j, i};
->         seen.put(nums[i], i);
->     }
->     return new int[0];
-> }
-> ```
+```js
+function twoSum(nums, target) {
+  const seen = new Map(); // use a Map, not {}: object keys are always converted to strings
+  for (let i = 0; i < nums.length; i++) {
+    const need = target - nums[i];
+    if (seen.has(need)) return [seen.get(need), i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}
+```
 
 ```text
 $ node two-sum.ts

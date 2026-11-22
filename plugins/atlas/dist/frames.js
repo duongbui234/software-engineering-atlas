@@ -172,6 +172,7 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 .problem-table .ahead-note { font-size: .8125rem; font-style: italic; }
 .problem-table tr.is-current td { background: var(--code-bg); }
 .problem-table tr.is-current td.t { font-weight: 700; }
+.problem-table td.t { overflow-wrap: anywhere; }
 .problem-table tr[hidden] { display: none; }
 .ps-progress { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; align-items: center; margin-bottom: 1.25rem; }
 .ps-progress .big { font: 600 1.75rem/1 var(--headerFont); grid-row: span 2; }
@@ -218,7 +219,7 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 .post-margin { margin: 0; display: grid; gap: .75rem; font-size: .875rem; }
 .post-margin dt { color: var(--ink-2); font-size: .75rem; }
 .post-margin dd { margin: 0; }
-.post-margin .big { font: 600 1.75rem/1 var(--codeFont); color: var(--ink); letter-spacing: -.02em; }
+.post-margin .big { font: 600 1.75rem/1 var(--codeFont); color: var(--ink); letter-spacing: -.02em; white-space: nowrap; }
 .post-margin .kind { display: inline-flex; gap: .45rem; align-items: center; }
 
 /* ── Ký hiệu loại bài ─────────────────────────────────────── */

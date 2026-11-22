@@ -16,8 +16,9 @@ stations:
   - name: "Hai con trỏ"
     concepts: [Search Space Pruning, k-Sum Reduction, Duplicate Skipping, Prefix Maximum]
   - name: "Cửa sổ trượt"
-    concepts: [Sliding Window, Window Invariant, Last-seen Index, Running Minimum, Fixed-size Window, Monotonic Deque]
+    concepts: [Sliding Window, Window Invariant, Last-seen Index, Running Minimum, Fixed-size Window, Monotonic Deque, Non-shrinking Window]
   - name: "Ngăn xếp"
+    concepts: [Stack, Bracket Matching, Auxiliary Min Stack, Reverse Polish Notation, Backtracking]
   - name: "Ngăn xếp đơn điệu"
 ---
 

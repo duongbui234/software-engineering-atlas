@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Ngăn xếp kiểm ngoặc: \"{[]}\" hợp lệ, \"([)]\" thì không",
+    "output": "content/diagrams/neetcode-stack/matching.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "loop", "type": "frontend", "label": "Vòng đọc chuỗi", "sublabel": "từng ký tự, trái sang phải" },
+    { "id": "st", "type": "database", "label": "Ngăn xếp", "sublabel": "ngoặc mở chưa đóng, mới nhất trên đỉnh" }
+  ],
+  "segments": [
+    { "from": 150, "to": 430, "label": "\"{[]}\": khớp hết" },
+    { "from": 460, "to": 680, "label": "\"([)]\": đóng sai thứ tự" }
+  ],
+  "messages": [
+    { "id": "a1", "from": "loop", "to": "st", "y": 175, "label": "đẩy {", "variant": "default", "note": "ngăn xếp: {" },
+    { "id": "a2", "from": "loop", "to": "st", "y": 225, "label": "đẩy [", "variant": "default", "note": "ngăn xếp: { [" },
+    { "id": "a3", "from": "st", "to": "loop", "y": 280, "label": "gặp ]: lấy đỉnh [, khớp", "variant": "return", "note": "ngăn xếp: {" },
+    { "id": "a4", "from": "st", "to": "loop", "y": 335, "label": "gặp }: lấy đỉnh {, khớp", "variant": "return" },
+    { "id": "a5", "from": "st", "to": "loop", "y": 390, "label": "hết chuỗi, ngăn xếp rỗng", "variant": "emphasis", "note": "hợp lệ" },
+    { "id": "b1", "from": "loop", "to": "st", "y": 485, "label": "đẩy (", "variant": "default" },
+    { "id": "b2", "from": "loop", "to": "st", "y": 535, "label": "đẩy [", "variant": "default", "note": "ngăn xếp: ( [" },
+    { "id": "b3", "from": "st", "to": "loop", "y": 595, "label": "gặp ): đỉnh là [, không khớp", "variant": "emphasis", "note": "sai ngay, không cần đọc tiếp" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Vào sau, ra trước", "items": ["Ngoặc đóng khớp ngoặc mở gần nhất", "Gần nhất = đỉnh ngăn xếp", "push, pop đều O(1)"] },
+    { "dot": "amber", "title": "Đếm thôi là chưa đủ", "items": ["Một bộ đếm: \"(]\" lọt", "Ba bộ đếm: \"([)]\" lọt", "Phải nhớ thứ tự mở"] },
+    { "dot": "rose", "title": "Hai chỗ hay quên", "items": ["Lấy từ ngăn xếp rỗng", "Còn ngoặc mở ở cuối", "\"((\" không hợp lệ"] }
+  ]
+}

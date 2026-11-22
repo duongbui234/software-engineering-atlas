@@ -253,6 +253,22 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | cửa sổ cố định, co giãn | fixed-size, variable-size window |
 | hàng đợi đơn điệu | monotonic deque |
 | đoạn con, dãy con | substring, subsequence |
+| cửa sổ không co | non-shrinking window |
+| hoán vị | permutation |
+| bộ đếm số ô khớp | matching-cell counter |
+| cửa sổ đủ | complete window |
+| bảng còn thiếu | still-missing table |
+| hàng đợi hai đầu | deque (double-ended queue) |
+| xóa lười | lazy deletion |
+| ngăn xếp | stack |
+| đỉnh (ngăn xếp) | top (of the stack) |
+| khớp cặp (ngoặc) | bracket matching |
+| ngoặc mở, ngoặc đóng | opener, closer |
+| ngăn xếp phụ cho min | auxiliary min stack |
+| ký pháp Ba Lan ngược | reverse Polish notation |
+| quay lui | backtracking |
+| làm tròn về 0, làm tròn xuống | truncate toward 0, floor |
+| ngăn xếp gọi hàm | call stack |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

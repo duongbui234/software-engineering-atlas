@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cross-Site WebSocket Hijacking: trang lạ mượn cookie của bạn",
+    "output": "content/diagrams/websocket-security/cswsh.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "evil", "type": "external", "label": "Trang lạ", "sublabel": "evil.example, chạy JavaScript" },
+    { "id": "br", "type": "frontend", "label": "Trình duyệt của bạn", "sublabel": "đang đăng nhập shop.example" },
+    { "id": "srv", "type": "backend", "label": "Server realtime", "sublabel": "WebSocket / Socket.IO" }
+  ],
+  "segments": [
+    { "from": 150, "to": 370, "label": "Xác thực bằng cookie, không kiểm Origin" },
+    { "from": 395, "to": 640, "label": "Hai cách chặn" }
+  ],
+  "messages": [
+    { "id": "e1", "from": "evil", "to": "br", "y": 170, "label": "mở WebSocket tới shop", "variant": "security", "note": "new WebSocket('wss://shop.example')" },
+    { "id": "e2", "from": "br", "to": "srv", "y": 225, "label": "bắt tay, tự đính kèm cookie", "variant": "security", "note": "Origin: evil.example, Cookie: session=…" },
+    { "id": "e3", "from": "srv", "to": "br", "y": 280, "label": "101: cookie hợp lệ, cho vào", "variant": "return", "note": "CORS không áp dụng cho WebSocket" },
+    { "id": "e4", "from": "br", "to": "evil", "y": 335, "label": "trang lạ đọc và gửi tin thay bạn", "variant": "security", "note": "đơn hàng, thông báo, lệnh mua" },
+    { "id": "f1", "from": "br", "to": "srv", "y": 420, "label": "bắt tay từ trang lạ", "variant": "default", "note": "Origin: evil.example" },
+    { "id": "f2", "from": "srv", "to": "br", "y": 475, "label": "Origin không nằm trong danh sách: từ chối", "variant": "return", "note": "allowRequest / verifyClient → 403" },
+    { "id": "f3", "from": "br", "to": "srv", "y": 545, "label": "hoặc: xác thực bằng token tường minh", "variant": "default", "note": "Socket.IO auth: { token }" },
+    { "id": "f4", "from": "srv", "to": "br", "y": 600, "label": "trang lạ không có token: từ chối", "variant": "return", "note": "connect_error UNAUTHORIZED" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Vì sao bị",
+      "items": ["WebSocket không chịu Same-Origin Policy", "Option cors chỉ áp cho request HTTP polling", "Cookie đi theo nếu SameSite cho phép"]
+    },
+    {
+      "dot": "emerald",
+      "title": "Cách chặn",
+      "items": ["Kiểm Origin lúc bắt tay", "Token trong auth thay cho cookie", "Cookie SameSite=Lax hoặc Strict làm lớp phụ"]
+    }
+  ]
+}

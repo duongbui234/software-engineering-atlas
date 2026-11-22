@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Ba cách để trình duyệt biết \"tồn kho vừa đổi\"",
+    "output": "content/diagrams/websocket-realtime-options/four-ways.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "br", "type": "frontend", "label": "Trình duyệt", "sublabel": "trang hàng chờ flash sale" },
+    { "id": "srv", "type": "backend", "label": "Server", "sublabel": "NestJS: API + hàng chờ" },
+    { "id": "q", "type": "backend", "label": "Bộ đếm hàng chờ", "sublabel": "worker: tồn kho, lượt" }
+  ],
+  "segments": [
+    { "from": 150, "to": 330, "label": "Polling: hỏi mỗi 2 giây" },
+    { "from": 355, "to": 530, "label": "Long polling: hỏi rồi chờ" },
+    { "from": 540, "to": 790, "label": "WebSocket: mở một lần, server tự nói" }
+  ],
+  "messages": [
+    { "id": "p1", "from": "br", "to": "srv", "y": 170, "label": "có gì mới không?", "variant": "default", "note": "GET /poll?after=3" },
+    { "id": "p1r", "from": "srv", "to": "br", "y": 215, "label": "chưa có gì", "variant": "return", "note": "200 []" },
+    { "id": "pe", "from": "q", "to": "srv", "y": 255, "label": "tồn kho đổi", "variant": "emphasis", "note": "trình duyệt chưa biết" },
+    { "id": "p2r", "from": "br", "to": "srv", "y": 300, "label": "2 giây sau mới hỏi lại", "variant": "dashed", "note": "trễ tới 2 giây" },
+    { "id": "l1", "from": "br", "to": "srv", "y": 375, "label": "có gì mới không? tôi chờ", "variant": "default", "note": "GET /long-poll, server giữ request" },
+    { "id": "le", "from": "q", "to": "srv", "y": 430, "label": "tồn kho đổi", "variant": "emphasis" },
+    { "id": "l1r", "from": "srv", "to": "br", "y": 470, "label": "trả lời ngay request đang treo", "variant": "return", "note": "200 [ev]" },
+    { "id": "l2", "from": "br", "to": "srv", "y": 515, "label": "hỏi tiếp ngay", "variant": "dashed", "note": "mỗi tin tốn một request" },
+    { "id": "w1", "from": "br", "to": "srv", "y": 575, "label": "xin nâng cấp lên WebSocket", "variant": "default", "note": "GET, Upgrade: websocket" },
+    { "id": "w1r", "from": "srv", "to": "br", "y": 625, "label": "đồng ý, đổi giao thức", "variant": "return", "note": "101 Switching Protocols" },
+    { "id": "we", "from": "q", "to": "srv", "y": 675, "label": "tồn kho đổi", "variant": "emphasis" },
+    { "id": "wp", "from": "srv", "to": "br", "y": 715, "label": "server tự đẩy tin", "variant": "emphasis", "note": "frame text, vài byte header" },
+    { "id": "wc", "from": "br", "to": "srv", "y": 765, "label": "client gửi lệnh trên cùng đường", "variant": "default", "note": "full-duplex" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Polling",
+      "items": ["Trễ trung bình bằng nửa chu kỳ", "Phần lớn request trả về rỗng", "Dễ làm, qua được mọi proxy"]
+    },
+    {
+      "dot": "amber",
+      "title": "Long polling và SSE",
+      "items": ["Gần như tức thì trên HTTP thường", "Long polling: một request cho mỗi tin", "SSE: một response kéo dài, chỉ một chiều"]
+    },
+    {
+      "dot": "emerald",
+      "title": "WebSocket",
+      "items": ["Một request HTTP rồi thôi", "Hai chiều, bất cứ lúc nào", "Phải tự lo kết nối lại, xác thực"]
+    }
+  ]
+}

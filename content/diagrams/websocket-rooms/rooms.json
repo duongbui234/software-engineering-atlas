@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Namespace và room: server phát tin cho nhóm, client không biết mình ở phòng nào",
+    "output": "content/diagrams/websocket-rooms/rooms.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "queue", "type": "backend", "label": "Hàng chờ", "sublabel": "worker cấp lượt thanh toán", "pos": [40, 60], "size": [190, 64] },
+    { "id": "stock", "type": "backend", "label": "Đếm tồn kho", "sublabel": "mỗi tick + sau mỗi đơn", "pos": [40, 260], "size": [190, 64] },
+    { "id": "notifier", "type": "backend", "label": "Bộ phát thông báo", "sublabel": "consumer RabbitMQ", "pos": [40, 460], "size": [190, 64] },
+    { "id": "ru1", "type": "messagebus", "label": "Phòng user:u1", "sublabel": "mọi tab của u1", "pos": [370, 60], "size": [200, 64] },
+    { "id": "rc", "type": "messagebus", "label": "Phòng campaign:c-21h", "sublabel": "ai đang xem chiến dịch", "pos": [370, 260], "size": [200, 64] },
+    { "id": "rn", "type": "messagebus", "label": "Phòng user:u2", "sublabel": "thông báo của u2", "pos": [370, 460], "size": [200, 64] },
+    { "id": "tabA", "type": "frontend", "label": "u1, tab 1", "sublabel": "đang ở trang hàng chờ", "pos": [720, 60], "size": [190, 64] },
+    { "id": "tabB", "type": "frontend", "label": "u1, tab 2", "sublabel": "cũng xem chiến dịch", "pos": [720, 200], "size": [190, 64] },
+    { "id": "tabC", "type": "frontend", "label": "u2", "sublabel": "xem chiến dịch, nhận thông báo", "pos": [720, 380], "size": [190, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Namespace /flash-sale", "wraps": ["ru1", "rc"] },
+    { "kind": "region", "label": "Namespace /notifications", "wraps": ["rn"] }
+  ],
+  "connections": [
+    { "id": "q1", "from": "queue", "to": "ru1", "label": "checkout_ready", "variant": "emphasis" },
+    { "id": "s1", "from": "stock", "to": "rc", "label": "stock_update", "variant": "emphasis" },
+    { "id": "n1", "from": "notifier", "to": "rn", "label": "notification:new", "variant": "emphasis" },
+    { "id": "a1", "from": "ru1", "to": "tabA" },
+    { "id": "a2", "from": "ru1", "to": "tabB", "fromSide": "right", "toSide": "left" },
+    { "id": "c2", "from": "rc", "to": "tabB", "fromSide": "right", "toSide": "left" },
+    { "id": "c3", "from": "rc", "to": "tabC", "fromSide": "right", "toSide": "left" },
+    { "id": "n2", "from": "rn", "to": "tabC", "fromSide": "right", "toSide": "bottom", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Namespace",
+      "items": ["Kênh theo đường dẫn, middleware riêng", "Nhiều namespace đi chung một kết nối", "Option transports của io() thứ hai bị bỏ qua"]
+    },
+    {
+      "dot": "emerald",
+      "title": "Room",
+      "items": ["Chỉ server biết, client không thấy", "user:<id> gom mọi tab của một người", "Nhiều pod thì cần adapter (ga 5)"]
+    },
+    {
+      "dot": "rose",
+      "title": "Khi mất kết nối",
+      "items": ["Tin phát vào phòng lúc đó là mất", "Nối lại phải join phòng lại", "Recovery chỉ có với một số adapter"]
+    }
+  ]
+}

@@ -9,7 +9,7 @@ lang: en
 aliases: [en/series/neetcode-arrays-hashing]
 stations:
   - name: "Hash Lookup"
-    concepts: [Big-O Notation, Brute Force, Hash Set, Sort Then Scan, Space-Time Tradeoff, Complement Lookup, One-pass Hash Map, Two Pointers, Hash Collision, Amortized O(1)]
+    concepts: [Big-O Notation, Brute Force, Hash Set, Sort Then Scan, Space-Time Tradeoff, Complement Lookup, One-pass Hash Map, Two Pointers, Hash Collision, Amortized O(1), Aggregate Analysis]
   - name: "Canonical Keys and Counting"
     concepts: [Frequency Counting, Counting Array, Hash Map, Unicode Normalization, Canonical Key, Count Key, Key Serialization, Group By, Heap, Bucket Sort, Quickselect, Sorting Lower Bound]
   - name: "Prefix, Suffix and Encoding"

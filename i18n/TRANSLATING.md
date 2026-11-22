@@ -232,6 +232,27 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | hỏi trước, ghi sau | ask first, write later |
 | phân tích gộp | aggregate analysis |
 | dãy (số) liên tiếp | consecutive run |
+| ô 3×3 (Sudoku) | 3×3 box |
+| tiền tố, hậu tố | prefix, suffix |
+| tích tiền tố, tích hậu tố | prefix product, suffix product |
+| biến chạy | running variable |
+| dấu phân cách | delimiter |
+| thoát ký tự | escaping |
+| tiền tố độ dài | length prefix |
+| cắt không gian tìm kiếm | search space pruning |
+| bỏ trùng | duplicate skipping |
+| giảm k-Sum | k-Sum reduction |
+| max tiền tố, max hậu tố | prefix maximum, suffix maximum |
+| neo (3Sum) | anchor |
+| mực nước | water level |
+| ký tự chữ-số | alphanumeric character |
+| cửa sổ trượt | sliding window |
+| bất biến (của cửa sổ) | (window) invariant |
+| sổ vị trí gần nhất | last-seen index |
+| giá thấp nhất từ trước tới nay | running minimum |
+| cửa sổ cố định, co giãn | fixed-size, variable-size window |
+| hàng đợi đơn điệu | monotonic deque |
+| đoạn con, dãy con | substring, subsequence |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Hai con trỏ trên [1, 3, 4, 6, 8, 11], target 10",
+    "output": "content/diagrams/neetcode-two-pointers/converging.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "left", "type": "frontend", "label": "Con trỏ trái", "sublabel": "i: số nhỏ nhất còn lại" },
+    { "id": "arr", "type": "database", "label": "Mảng tăng dần", "sublabel": "[1, 3, 4, 6, 8, 11]" },
+    { "id": "right", "type": "frontend", "label": "Con trỏ phải", "sublabel": "j: số lớn nhất còn lại" }
+  ],
+  "segments": [
+    { "from": 150, "to": 290, "label": "bước 1–2" },
+    { "from": 310, "to": 450, "label": "bước 3–4" },
+    { "from": 470, "to": 560, "label": "bước 5: tìm thấy" }
+  ],
+  "messages": [
+    { "id": "s1", "from": "right", "to": "arr", "y": 175, "label": "1 + 11 = 12: thừa, bỏ 11", "variant": "return", "note": "11 cộng số nhỏ nhất vẫn thừa" },
+    { "id": "s2", "from": "left", "to": "arr", "y": 245, "label": "1 + 8 = 9: thiếu, bỏ 1", "variant": "default", "note": "1 cộng số lớn nhất vẫn thiếu" },
+    { "id": "s3", "from": "right", "to": "arr", "y": 335, "label": "3 + 8 = 11: thừa, bỏ 8", "variant": "return" },
+    { "id": "s4", "from": "left", "to": "arr", "y": 405, "label": "3 + 6 = 9: thiếu, bỏ 3", "variant": "default" },
+    { "id": "s5", "from": "left", "to": "arr", "y": 500, "label": "4 + 6 = 10: đúng target", "variant": "emphasis", "note": "trả [3, 4], đếm từ 1" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Mỗi bước bỏ một số", "items": ["Thiếu: tăng i", "Thừa: giảm j", "Tối đa n − 1 bước, O(1) bộ nhớ"] },
+    { "dot": "amber", "title": "Vì sao bỏ được", "items": ["Mảng đã sắp xếp", "Số bị bỏ không ghép được với ai", "Không sót cặp nào"] },
+    { "dot": "rose", "title": "Cùng khuôn, khác luật dời", "items": ["Palindrome: hai đầu phải khớp", "Bể nước: dời cột thấp", "Mưa: dời bên có max nhỏ"] }
+  ]
+}

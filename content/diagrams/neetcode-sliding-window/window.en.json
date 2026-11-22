@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A window with no repeated character on \"pwwkew\"",
+    "output": "content/diagrams/neetcode-sliding-window/window.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "right",
+      "type": "frontend",
+      "label": "Right end",
+      "sublabel": "right: reads s[right], always moves forward"
+    },
+    {
+      "id": "book",
+      "type": "database",
+      "label": "Last-seen book",
+      "sublabel": "Map: character → position"
+    },
+    {
+      "id": "left",
+      "type": "frontend",
+      "label": "Left end",
+      "sublabel": "left: start of the window, only moves forward"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 315,
+      "label": "expand: \"pw\""
+    },
+    {
+      "from": 345,
+      "to": 510,
+      "label": "repeated w: left jumps"
+    },
+    {
+      "from": 535,
+      "to": 770,
+      "label": "expand, then jump again"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "right",
+      "to": "book",
+      "y": 175,
+      "label": "seen p anywhere?",
+      "variant": "default",
+      "note": "right = 0"
+    },
+    {
+      "id": "a2",
+      "from": "book",
+      "to": "right",
+      "y": 225,
+      "label": "no: record p → 0",
+      "variant": "return",
+      "note": "window \"p\", length 1"
+    },
+    {
+      "id": "a3",
+      "from": "right",
+      "to": "book",
+      "y": 275,
+      "label": "w: no, record w → 1",
+      "variant": "default",
+      "note": "\"pw\", length 2"
+    },
+    {
+      "id": "b1",
+      "from": "right",
+      "to": "book",
+      "y": 375,
+      "label": "seen w anywhere?",
+      "variant": "default",
+      "note": "right = 2"
+    },
+    {
+      "id": "b2",
+      "from": "book",
+      "to": "right",
+      "y": 425,
+      "label": "yes, at 1 (inside the window)",
+      "variant": "return"
+    },
+    {
+      "id": "b3",
+      "from": "right",
+      "to": "left",
+      "y": 475,
+      "label": "jump left to 1 + 1 = 2",
+      "variant": "emphasis",
+      "note": "the window is now \"w\""
+    },
+    {
+      "id": "c1",
+      "from": "right",
+      "to": "book",
+      "y": 565,
+      "label": "k, e: not seen",
+      "variant": "default",
+      "note": "\"wke\", length 3 = record"
+    },
+    {
+      "id": "c2",
+      "from": "right",
+      "to": "book",
+      "y": 620,
+      "label": "seen w anywhere?",
+      "variant": "default",
+      "note": "right = 5"
+    },
+    {
+      "id": "c3",
+      "from": "book",
+      "to": "right",
+      "y": 670,
+      "label": "yes, at 2 (≥ left = 2)",
+      "variant": "return"
+    },
+    {
+      "id": "c4",
+      "from": "right",
+      "to": "left",
+      "y": 725,
+      "label": "jump left to 3",
+      "variant": "emphasis",
+      "note": "\"kew\", length 3; answer 3"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Invariant",
+      "items": [
+        "No repeated character in the window",
+        "Right end adds, left end removes",
+        "Each end only moves forward: O(n)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Two ways to shrink",
+      "items": [
+        "Set: drop left characters one by one",
+        "Last-seen book: jump once",
+        "Both O(n)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The \"abba\" trap",
+      "items": [
+        "The previous sighting may be outside the window",
+        "Jumping there drags left backwards",
+        "Check prev ≥ left"
+      ]
+    }
+  ]
+}

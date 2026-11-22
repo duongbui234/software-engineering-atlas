@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Prefix and suffix products on [1, 2, 3, 4]",
+    "output": "content/diagrams/neetcode-prefix-suffix-encoding/prefix-suffix.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "left",
+      "type": "frontend",
+      "label": "Left → right pass",
+      "sublabel": "variable left: product to the left"
+    },
+    {
+      "id": "out",
+      "type": "database",
+      "label": "Result array",
+      "sublabel": "out[i], all 1 at the start"
+    },
+    {
+      "id": "right",
+      "type": "frontend",
+      "label": "Right → left pass",
+      "sublabel": "variable right: product to the right"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 400,
+      "label": "pass 1: write prefix products"
+    },
+    {
+      "from": 430,
+      "to": 690,
+      "label": "pass 2: multiply suffix products"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a0",
+      "from": "left",
+      "to": "out",
+      "y": 175,
+      "label": "out[0] = 1",
+      "variant": "default",
+      "note": "nothing to the left of the 1 yet"
+    },
+    {
+      "id": "a1",
+      "from": "left",
+      "to": "out",
+      "y": 230,
+      "label": "out[1] = 1",
+      "variant": "default",
+      "note": "left = 1 after multiplying nums[0]"
+    },
+    {
+      "id": "a2",
+      "from": "left",
+      "to": "out",
+      "y": 285,
+      "label": "out[2] = 1·2 = 2",
+      "variant": "default"
+    },
+    {
+      "id": "a3",
+      "from": "left",
+      "to": "out",
+      "y": 340,
+      "label": "out[3] = 1·2·3 = 6",
+      "variant": "default",
+      "note": "out = [1, 1, 2, 6]"
+    },
+    {
+      "id": "b3",
+      "from": "right",
+      "to": "out",
+      "y": 455,
+      "label": "out[3] ×= 1 → 6",
+      "variant": "return",
+      "note": "nothing to the right of the 4 yet"
+    },
+    {
+      "id": "b2",
+      "from": "right",
+      "to": "out",
+      "y": 510,
+      "label": "out[2] ×= 4 → 8",
+      "variant": "return"
+    },
+    {
+      "id": "b1",
+      "from": "right",
+      "to": "out",
+      "y": 565,
+      "label": "out[1] ×= 4·3 → 12",
+      "variant": "return"
+    },
+    {
+      "id": "b0",
+      "from": "right",
+      "to": "out",
+      "y": 620,
+      "label": "out[0] ×= 4·3·2 → 24",
+      "variant": "emphasis",
+      "note": "out = [24, 12, 8, 6]"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Split the question in two",
+      "items": [
+        "Product except i = left(i) × right(i)",
+        "Each half is a running product",
+        "Two passes, O(n)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "No division",
+      "items": [
+        "A zero breaks division",
+        "The problem forbids division",
+        "Running products need no division"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Same idea: encoding strings",
+      "items": [
+        "Write the length before the content",
+        "The reader knows where to cut",
+        "No delimiter to guess"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tích tiền tố và hậu tố trên [1, 2, 3, 4]",
+    "output": "content/diagrams/neetcode-prefix-suffix-encoding/prefix-suffix.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "left", "type": "frontend", "label": "Lượt trái → phải", "sublabel": "biến left: tích bên trái" },
+    { "id": "out", "type": "database", "label": "Mảng kết quả", "sublabel": "out[i], khởi đầu toàn 1" },
+    { "id": "right", "type": "frontend", "label": "Lượt phải → trái", "sublabel": "biến right: tích bên phải" }
+  ],
+  "segments": [
+    { "from": 150, "to": 400, "label": "lượt 1: ghi tích tiền tố" },
+    { "from": 430, "to": 690, "label": "lượt 2: nhân tích hậu tố" }
+  ],
+  "messages": [
+    { "id": "a0", "from": "left", "to": "out", "y": 175, "label": "out[0] = 1", "variant": "default", "note": "bên trái số 1 chưa có gì" },
+    { "id": "a1", "from": "left", "to": "out", "y": 230, "label": "out[1] = 1", "variant": "default", "note": "left = 1 sau khi nhân nums[0]" },
+    { "id": "a2", "from": "left", "to": "out", "y": 285, "label": "out[2] = 1·2 = 2", "variant": "default" },
+    { "id": "a3", "from": "left", "to": "out", "y": 340, "label": "out[3] = 1·2·3 = 6", "variant": "default", "note": "out = [1, 1, 2, 6]" },
+    { "id": "b3", "from": "right", "to": "out", "y": 455, "label": "out[3] ×= 1 → 6", "variant": "return", "note": "bên phải số 4 chưa có gì" },
+    { "id": "b2", "from": "right", "to": "out", "y": 510, "label": "out[2] ×= 4 → 8", "variant": "return" },
+    { "id": "b1", "from": "right", "to": "out", "y": 565, "label": "out[1] ×= 4·3 → 12", "variant": "return" },
+    { "id": "b0", "from": "right", "to": "out", "y": 620, "label": "out[0] ×= 4·3·2 → 24", "variant": "emphasis", "note": "out = [24, 12, 8, 6]" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Tách đôi câu hỏi", "items": ["Tích trừ i = trái(i) × phải(i)", "Mỗi nửa là một tích chạy", "Hai lượt, O(n)"] },
+    { "dot": "amber", "title": "Không chia", "items": ["Số 0 làm phép chia hỏng", "Đề cấm phép chia", "Tích chạy không cần chia"] },
+    { "dot": "rose", "title": "Cùng ý: mã hóa chuỗi", "items": ["Ghi độ dài trước nội dung", "Người đọc biết cắt ở đâu", "Không cần đoán dấu phân cách"] }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cửa sổ không lặp ký tự trên \"pwwkew\"",
+    "output": "content/diagrams/neetcode-sliding-window/window.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "right",
+      "type": "frontend",
+      "label": "Đầu phải",
+      "sublabel": "right: đọc s[right], luôn tiến"
+    },
+    {
+      "id": "book",
+      "type": "database",
+      "label": "Sổ vị trí gần nhất",
+      "sublabel": "Map: ký tự → vị trí"
+    },
+    {
+      "id": "left",
+      "type": "frontend",
+      "label": "Đầu trái",
+      "sublabel": "left: đầu cửa sổ, chỉ tiến"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 315,
+      "label": "mở rộng: \"pw\""
+    },
+    {
+      "from": 345,
+      "to": 510,
+      "label": "trùng w: nhảy trái"
+    },
+    {
+      "from": 535,
+      "to": 770,
+      "label": "mở rộng rồi nhảy lần nữa"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "right",
+      "to": "book",
+      "y": 175,
+      "label": "p gặp ở đâu chưa?",
+      "variant": "default",
+      "note": "right = 0"
+    },
+    {
+      "id": "a2",
+      "from": "book",
+      "to": "right",
+      "y": 225,
+      "label": "chưa: ghi p → 0",
+      "variant": "return",
+      "note": "cửa sổ \"p\", dài 1"
+    },
+    {
+      "id": "a3",
+      "from": "right",
+      "to": "book",
+      "y": 275,
+      "label": "w: chưa, ghi w → 1",
+      "variant": "default",
+      "note": "\"pw\", dài 2"
+    },
+    {
+      "id": "b1",
+      "from": "right",
+      "to": "book",
+      "y": 375,
+      "label": "w gặp ở đâu chưa?",
+      "variant": "default",
+      "note": "right = 2"
+    },
+    {
+      "id": "b2",
+      "from": "book",
+      "to": "right",
+      "y": 425,
+      "label": "có, ở 1 (trong cửa sổ)",
+      "variant": "return"
+    },
+    {
+      "id": "b3",
+      "from": "right",
+      "to": "left",
+      "y": 475,
+      "label": "nhảy left tới 1 + 1 = 2",
+      "variant": "emphasis",
+      "note": "cửa sổ còn \"w\""
+    },
+    {
+      "id": "c1",
+      "from": "right",
+      "to": "book",
+      "y": 565,
+      "label": "k, e: chưa gặp",
+      "variant": "default",
+      "note": "\"wke\", dài 3 = kỷ lục"
+    },
+    {
+      "id": "c2",
+      "from": "right",
+      "to": "book",
+      "y": 620,
+      "label": "w gặp ở đâu chưa?",
+      "variant": "default",
+      "note": "right = 5"
+    },
+    {
+      "id": "c3",
+      "from": "book",
+      "to": "right",
+      "y": 670,
+      "label": "có, ở 2 (≥ left = 2)",
+      "variant": "return"
+    },
+    {
+      "id": "c4",
+      "from": "right",
+      "to": "left",
+      "y": 725,
+      "label": "nhảy left tới 3",
+      "variant": "emphasis",
+      "note": "\"kew\", dài 3; đáp án 3"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Bất biến",
+      "items": [
+        "Cửa sổ không có ký tự lặp",
+        "Đầu phải thêm, đầu trái bớt",
+        "Mỗi đầu chỉ tiến: O(n)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Hai cách co",
+      "items": [
+        "Set: bỏ từng ký tự bên trái",
+        "Sổ vị trí: nhảy một lần",
+        "Cả hai O(n)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Bẫy \"abba\"",
+      "items": [
+        "Lần gặp trước có thể ngoài cửa sổ",
+        "Nhảy tới đó là kéo left lùi",
+        "Phải kiểm prev ≥ left"
+      ]
+    }
+  ]
+}

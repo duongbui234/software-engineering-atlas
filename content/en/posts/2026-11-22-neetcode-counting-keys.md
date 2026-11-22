@@ -87,11 +87,11 @@ A hash table finds a key by its hash, then checks it with the language's notion 
 | [[en/problems/valid-anagram\|Valid Anagram]] | a letter (26-slot array) | add for `s`, subtract for `t`; anagrams when every slot returns to 0 |
 | [[en/problems/group-anagrams\|Group Anagrams]] | the whole word's 26-slot count table | return the groups |
 | [[en/problems/top-k-frequent-elements\|Top K Frequent Elements]] | the value | flip it around: the **count** becomes an index into a bucket array, read from the highest bucket down |
-| Valid Sudoku | (row, digit), (column, digit), (3×3 box, digit) | use station 1's template: meeting a key a second time means invalid |
+| [[en/problems/valid-sudoku\|Valid Sudoku]] | (row, digit), (column, digit), (3×3 box, digit) | use station 1's template: meeting a key a second time means invalid |
 
 In Top K Frequent Elements, counts fall within `1..n`, so an array of n + 1 buckets orders every value by count in O(n), without an O(n log n) sort. This is where counting turns into [[en/concepts/bucket-sort|bucket sort]].
 
-In Valid Sudoku, the 3×3 box key is the canonical index `⌊r/3⌋·3 + ⌊c/3⌋`: all nine cells in one 3×3 block yield the same number from 0 to 8.
+In Valid Sudoku, the 3×3 box key is the canonical index `⌊r/3⌋·3 + ⌊c/3⌋`: all nine cells in one 3×3 block yield the same number from 0 to 8. The [[en/problems/valid-sudoku|Valid Sudoku]] page compares three implementations and measures a [[en/concepts/bitmask|bitmask]] about 10 times faster than Sets.
 
 ## Runnable example
 

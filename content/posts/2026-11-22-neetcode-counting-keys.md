@@ -86,11 +86,11 @@ Bảng băm tìm khóa bằng hash rồi so bằng phép "bằng nhau" của ng�
 | [[problems/valid-anagram\|Valid Anagram]] | chữ cái (mảng 26 ô) | cộng cho `s`, trừ cho `t`; anagram khi mọi ô về 0 |
 | [[problems/group-anagrams\|Group Anagrams]] | bảng đếm 26 ô của cả từ | trả các nhóm |
 | [[problems/top-k-frequent-elements\|Top K Frequent Elements]] | giá trị | đổi chiều: **số lần** thành chỉ số của mảng xô, đọc từ xô cao nhất xuống |
-| Valid Sudoku | (hàng, số), (cột, số), (ô 3×3, số) | dùng khuôn của ga 1: gặp khóa lần thứ hai là sai |
+| [[problems/valid-sudoku\|Valid Sudoku]] | (hàng, số), (cột, số), (ô 3×3, số) | dùng khuôn của ga 1: gặp khóa lần thứ hai là sai |
 
 Ở Top K Frequent Elements, số lần xuất hiện nằm trong `1..n`, nên một mảng n + 1 xô xếp được mọi giá trị theo số lần trong O(n), không cần sắp xếp O(n log n). Đây là chỗ đếm biến thành [[concepts/bucket-sort|bucket sort]].
 
-Ở Valid Sudoku, khóa của ô 3×3 là chỉ số chuẩn `⌊r/3⌋·3 + ⌊c/3⌋`: chín ô trong cùng một khối 3×3 đều ra cùng một số từ 0 tới 8.
+Ở Valid Sudoku, khóa của ô 3×3 là chỉ số chuẩn `⌊r/3⌋·3 + ⌊c/3⌋`: chín ô trong cùng một khối 3×3 đều ra cùng một số từ 0 tới 8. Trang [[problems/valid-sudoku|Valid Sudoku]] so ba cách cài đặt và đo [[concepts/bitmask|bitmask]] nhanh hơn Set khoảng 10 lần.
 
 ## Ví dụ chạy được
 

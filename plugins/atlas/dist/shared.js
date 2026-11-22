@@ -81,6 +81,13 @@ export const STR = {
     hubCorner: (t, n) => `${t}, ${n} ga`,
     writtenOn: (d) => `Viết ${d}`,
     railNav: "Điều hướng phụ",
+    loadMore: "Tải thêm bài",
+    loading: "Đang tải thêm bài…",
+    loadError: "Không tải được, bấm để thử lại",
+    allShown: (n) => `Đã hiện đủ ${n} bài.`,
+    tagIndex: "Mục lục thẻ",
+    tagCount: (n) => `${n} trang có thẻ này.`,
+    tagTotal: (n) => `${n} thẻ.`,
   },
   en: {
     locale: "en-US",
@@ -150,6 +157,13 @@ export const STR = {
     hubCorner: (t, n) => `${t}, ${n} stations`,
     writtenOn: (d) => `Written ${d}`,
     railNav: "Secondary navigation",
+    loadMore: "Load more posts",
+    loading: "Loading more posts…",
+    loadError: "Could not load; click to try again",
+    allShown: (n) => `All ${n} posts shown.`,
+    tagIndex: "Tag index",
+    tagCount: (n) => `${n} ${n === 1 ? "page has" : "pages have"} this tag.`,
+    tagTotal: (n) => `${n} ${n === 1 ? "tag" : "tags"}.`,
   },
 }
 export const strFor = (f) => STR[langOf(f)]
@@ -286,3 +300,28 @@ export function hash(str) {
   }
   return (h >>> 0) / 4294967295
 }
+
+// ── Danh mục bài (gazetteer) và phân trang bằng con trỏ ───────────────────────
+export const FEED_PAGE = 20
+/** Bài của một ngôn ngữ, mới nhất trước (cùng thứ tự ở HTML trang chủ và ở file feed JSON). */
+export function postsNewestFirst(allFiles) {
+  return allFiles
+    .filter((f) => isPost(f) && isListed(f))
+    .sort((a, b) => (pageDate(b) || 0) - (pageDate(a) || 0) || (Number(fm(b).part) || 0) - (Number(fm(a).part) || 0))
+}
+/** Dữ liệu một dòng danh mục, đã tính sẵn: trang chủ render từ đây, feed JSON cũng ghi đúng các trường này. */
+export function gazItem(allFiles, p, fromSlug, S) {
+  const m = fm(p)
+  const type = m.type || "learn"
+  return {
+    href: rel(fromSlug, p.slug),
+    coord: coordOf(allFiles, p) || "",
+    type,
+    typeLabel: S.type[type] || S.type.learn,
+    title: String(m.title || ""),
+    date: fmtDay(pageDate(p)),
+    desc: m.description ? String(m.description) : "",
+  }
+}
+/** Con trỏ = tên file của bài cuối cùng đã hiện; file feed kế tiếp là after-<con trỏ>.json. */
+export const feedCursor = (p) => `after-${baseSlug(p).split("/").pop()}.json`

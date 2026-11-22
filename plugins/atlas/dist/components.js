@@ -25,6 +25,10 @@ import {
   homeSlug,
   slugIn,
   STR,
+  postsNewestFirst,
+  gazItem,
+  feedCursor,
+  FEED_PAGE,
 } from "./shared.js"
 import { KnowledgeMap, sheetIndex } from "./map.js"
 
@@ -170,9 +174,80 @@ document.addEventListener("nav", atlasRenderMermaid);
 document.addEventListener("themechange", atlasRenderMermaid);
 `
 
+// ── Danh mục bài: tải thêm theo con trỏ khi cuộn tới cuối ─────────────────────
+// Mỗi file feed/<lang>/after-<slug>.json = { items: [...], next: "after-….json" | null }.
+// IntersectionObserver gọi tải khi ô .gz-more gần vào khung nhìn; nút bấm là đường dự phòng
+// (bàn phím, trình đọc màn hình, trình duyệt không có IntersectionObserver).
+export const FEED_SCRIPT = `
+function atlasFeedRow(it) {
+  const li = document.createElement("li");
+  const a = document.createElement("a");
+  a.className = "row internal";
+  a.href = it.href;
+  const span = (cls, text) => { const e = document.createElement("span"); e.className = cls; e.textContent = text; return e; };
+  const sym = document.createElement("span");
+  sym.className = "sym " + (it.type || "learn");
+  sym.setAttribute("role", "img");
+  sym.setAttribute("aria-label", it.typeLabel || "");
+  a.append(span("coord", it.coord || ""), sym, span("t", it.title || ""), span("date", it.date || ""));
+  if (it.desc) a.append(span("d", it.desc));
+  li.append(a);
+  return li;
+}
+function atlasSetupFeed() {
+  const box = document.querySelector(".gazetteer .gz-more[data-next]");
+  const list = document.querySelector(".gazetteer ul.gz");
+  if (!box || !list) return;
+  const btn = box.querySelector(".gz-load");
+  const status = box.querySelector(".gz-status");
+  const d = box.dataset;
+  let loading = false;
+  let io;
+  async function more() {
+    if (loading || !d.next) return;
+    loading = true;
+    btn.disabled = true;
+    btn.textContent = d.lLoading;
+    try {
+      const res = await fetch(new URL(d.feed + d.next, location.href));
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const page = await res.json();
+      for (const it of page.items || []) list.append(atlasFeedRow(it));
+      if (page.next) {
+        d.next = page.next;
+        btn.textContent = d.lMore;
+        btn.disabled = false;
+      } else {
+        delete d.next;
+        if (io) io.disconnect();
+        btn.remove();
+        status.textContent = d.lDone;
+      }
+    } catch (err) {
+      console.error("Atlas feed:", err);
+      btn.textContent = d.lError;
+      btn.disabled = false;
+      if (io) io.disconnect(); // lỗi thì chờ người bấm, không tự thử lại liên tục
+    } finally {
+      loading = false;
+    }
+  }
+  btn.addEventListener("click", more);
+  if ("IntersectionObserver" in window) {
+    io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) more();
+    }, { rootMargin: "0px 0px 400px 0px" });
+    io.observe(box);
+    if (window.addCleanup) window.addCleanup(() => io.disconnect());
+  }
+}
+document.addEventListener("nav", atlasSetupFeed);
+`
+
 // ── Masthead brand ────────────────────────────────────────────────────────────
 export const AtlasBrand = (opts = {}) => {
-  const Component = ({ fileData, cfg, allFiles }) => {
+  const Component = ({ fileData, cfg, allFiles, atlasAllFiles }) => {
+    allFiles = atlasAllFiles || allFiles
     const slug = fileData.slug
     const L = langOf(fileData)
     const S = STR[L]
@@ -238,17 +313,29 @@ export const AtlasHomeHead = () => {
 }
 
 // ── Trang chủ: bản đồ + tuyến đang đi + danh mục bài ────────────────────────
+// Một dòng danh mục; FEED_SCRIPT dựng đúng cấu trúc này cho các bài tải thêm.
+const gazRow = (it) =>
+  h(
+    "li",
+    null,
+    h("a", { class: "row internal", href: it.href }, [
+      h("span", { class: "coord" }, it.coord),
+      sym(it.type, it.typeLabel),
+      h("span", { class: "t" }, it.title),
+      h("span", { class: "date" }, it.date),
+      it.desc && h("span", { class: "d" }, it.desc),
+    ]),
+  )
+
 export const AtlasHome = (opts = {}) => {
-  const limit = opts.limit || 20
+  const limit = opts.limit || FEED_PAGE
   const Component = ({ fileData, allFiles }) => {
     if (!isIndex(fileData)) return null
     const slug = fileData.slug
     const L = langOf(fileData)
     const S = STR[L]
     allFiles = forLang(allFiles, L)
-    const posts = allFiles
-      .filter((f) => isPost(f) && isListed(f))
-      .sort((a, b) => (pageDate(b) || 0) - (pageDate(a) || 0) || (Number(fm(b).part) || 0) - (Number(fm(a).part) || 0))
+    const posts = postsNewestFirst(allFiles)
     const current = hubs(allFiles)
       .map((hub) => ({ hub, state: lineState(allFiles, hub) }))
       .filter((x) => x.state.latest)
@@ -290,31 +377,34 @@ export const AtlasHome = (opts = {}) => {
         })(),
       sheetIndex({ slug, allFiles, fmtDay, S }),
       h("section", { class: "gazetteer", "aria-labelledby": "gz-h" }, [
-        h("h2", { id: "gz-h" }, S.newPosts),
+        h("div", { class: "gz-head" }, [
+          h("h2", { id: "gz-h" }, S.newPosts),
+          posts.length > limit &&
+            h("a", { class: "internal gz-all-link", href: rel(slug, L === "en" ? "en/posts/" : "posts/") }, S.allPosts(posts.length)),
+        ]),
         posts.length === 0
           ? h("p", { class: "empty" }, S.noPosts)
           : h(
               "ul",
               { class: "gz" },
-              posts.slice(0, limit).map((p) => {
-                const m = fm(p)
-                return h(
-                  "li",
-                  null,
-                  h("a", { class: "row internal", href: rel(slug, p.slug) }, [
-                    h("span", { class: "coord" }, coordOf(allFiles, p) || ""),
-                    sym(m.type, S.type[m.type] || S.type.learn),
-                    h("span", { class: "t" }, m.title),
-                    h("span", { class: "date" }, fmtDay(pageDate(p))),
-                    m.description && h("span", { class: "d" }, m.description),
-                  ]),
-                )
-              }),
+              posts.slice(0, limit).map((p) => gazRow(gazItem(allFiles, p, slug, S))),
             ),
+        // Phân trang bằng con trỏ: trang chỉ chứa `limit` bài đầu; phần còn lại nằm trong
+        // feed/<lang>/after-<bài cuối>.json (emitter trong index.js), FEED_SCRIPT tải khi
+        // cuộn tới cuối danh sách hoặc khi bấm nút.
         posts.length > limit &&
-          h("p", { class: "gz-all" }, [
-            h("a", { class: "internal", href: rel(slug, L === "en" ? "en/posts/" : "posts/") }, S.allPosts(posts.length)),
-            S.showing(limit),
+          h("div", {
+            class: "gz-more",
+            "data-feed": rel(slug, `feed/${L}/`),
+            "data-next": feedCursor(posts[limit - 1]),
+            "data-total": String(posts.length),
+            "data-l-more": S.loadMore,
+            "data-l-loading": S.loading,
+            "data-l-error": S.loadError,
+            "data-l-done": S.allShown(posts.length),
+          }, [
+            h("button", { type: "button", class: "gz-load" }, S.loadMore),
+            h("p", { class: "gz-status", role: "status", "aria-live": "polite" }),
           ]),
       ]),
     ])
@@ -345,7 +435,7 @@ export const PostMargin = () => {
           S.tags,
           tags.map((t, i) => [
             i ? " " : "",
-            h("a", { class: "internal", href: rel(slug, `tags/${t}`) }, `#${t}`),
+            h("a", { class: "internal", href: rel(slug, `${langOf(fileData) === "en" ? "en/" : ""}tags/${t}`) }, `#${t}`),
           ]),
         ),
     ])

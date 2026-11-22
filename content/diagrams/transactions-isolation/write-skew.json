@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Giới hạn 2 suất mỗi người: Snapshot Isolation không chặn, Serializable chặn",
+    "output": "content/diagrams/transactions-isolation/write-skew.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "t1",
+      "type": "frontend",
+      "label": "Tab 1",
+      "sublabel": "user 7, đã có 1 đơn"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "orders"
+    },
+    {
+      "id": "t2",
+      "type": "frontend",
+      "label": "Tab 2",
+      "sublabel": "cùng user 7"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 430,
+      "label": "REPEATABLE READ: cả hai qua"
+    },
+    {
+      "from": 455,
+      "to": 730,
+      "label": "SERIALIZABLE: một bên bị hủy"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "t1",
+      "to": "pg",
+      "y": 170,
+      "label": "tôi có mấy đơn?",
+      "variant": "default",
+      "note": "SELECT count(*) → 1 (snapshot)"
+    },
+    {
+      "id": "a2",
+      "from": "t2",
+      "to": "pg",
+      "y": 220,
+      "label": "tôi có mấy đơn?",
+      "variant": "default",
+      "note": "SELECT count(*) → 1 (snapshot)"
+    },
+    {
+      "id": "a3",
+      "from": "t1",
+      "to": "pg",
+      "y": 275,
+      "label": "1 < 2, thêm đơn",
+      "variant": "emphasis",
+      "note": "INSERT orders (buyer 7)"
+    },
+    {
+      "id": "a4",
+      "from": "t2",
+      "to": "pg",
+      "y": 325,
+      "label": "1 < 2, thêm đơn",
+      "variant": "emphasis",
+      "note": "INSERT dòng khác: không xung đột ghi"
+    },
+    {
+      "id": "a5",
+      "from": "pg",
+      "to": "t2",
+      "y": 385,
+      "label": "cả hai COMMIT: user 7 có 3 đơn",
+      "variant": "security",
+      "note": "write skew"
+    },
+    {
+      "id": "b1",
+      "from": "t1",
+      "to": "pg",
+      "y": 475,
+      "label": "đếm, rồi thêm",
+      "variant": "default",
+      "note": "SELECT count → 1; INSERT"
+    },
+    {
+      "id": "b2",
+      "from": "t2",
+      "to": "pg",
+      "y": 525,
+      "label": "đếm, rồi thêm",
+      "variant": "default",
+      "note": "SELECT count → 1; INSERT"
+    },
+    {
+      "id": "b3",
+      "from": "pg",
+      "to": "t1",
+      "y": 580,
+      "label": "COMMIT được",
+      "variant": "return"
+    },
+    {
+      "id": "b4",
+      "from": "pg",
+      "to": "t2",
+      "y": 635,
+      "label": "không xếp được thành tuần tự",
+      "variant": "security",
+      "note": "40001 could not serialize access"
+    },
+    {
+      "id": "b5",
+      "from": "t2",
+      "to": "pg",
+      "y": 690,
+      "label": "thử lại: đếm thấy 2, từ chối",
+      "variant": "dashed",
+      "note": "retry toàn bộ transaction"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Snapshot Isolation",
+      "items": [
+        "Postgres gọi là Repeatable Read",
+        "Chặn lost update trên cùng dòng",
+        "Không chặn write skew"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Serializable (SSI)",
+      "items": [
+        "Theo dõi ai đọc gì, ai ghi gì",
+        "Không chặn chờ, mà hủy một bên",
+        "App bắt buộc phải retry 40001"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Read Committed",
+      "items": [
+        "Mặc định của Postgres và Prisma",
+        "Mỗi câu một snapshot mới",
+        "Cho phép cả lost update"
+      ]
+    }
+  ]
+}

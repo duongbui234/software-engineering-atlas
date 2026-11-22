@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Hai giỏ hàng khóa hai SKU theo thứ tự ngược nhau",
+    "output": "content/diagrams/transactions-deadlock/deadlock.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "x",
+      "type": "backend",
+      "label": "Giỏ X",
+      "sublabel": "[A, B]"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "inventories A, B"
+    },
+    {
+      "id": "y",
+      "type": "backend",
+      "label": "Giỏ Y",
+      "sublabel": "[B, A]"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 470,
+      "label": "Không sắp xếp: vòng chờ"
+    },
+    {
+      "from": 495,
+      "to": 700,
+      "label": "Sắp xếp tăng dần: xếp hàng"
+    }
+  ],
+  "messages": [
+    {
+      "id": "x1",
+      "from": "x",
+      "to": "pg",
+      "y": 170,
+      "label": "giữ hàng SKU A",
+      "variant": "default",
+      "note": "UPDATE … WHERE sku = 'A'"
+    },
+    {
+      "id": "y1",
+      "from": "y",
+      "to": "pg",
+      "y": 220,
+      "label": "giữ hàng SKU B",
+      "variant": "default",
+      "note": "UPDATE … WHERE sku = 'B'"
+    },
+    {
+      "id": "x2",
+      "from": "x",
+      "to": "pg",
+      "y": 270,
+      "label": "giờ tới B: chờ Y",
+      "variant": "dashed",
+      "note": "B đang bị Y khóa"
+    },
+    {
+      "id": "y2",
+      "from": "y",
+      "to": "pg",
+      "y": 320,
+      "label": "giờ tới A: chờ X",
+      "variant": "dashed",
+      "note": "vòng chờ khép kín"
+    },
+    {
+      "id": "d1",
+      "from": "pg",
+      "to": "x",
+      "y": 375,
+      "label": "sau 1 giây: hủy X",
+      "variant": "security",
+      "note": "40P01 deadlock detected"
+    },
+    {
+      "id": "d2",
+      "from": "pg",
+      "to": "y",
+      "y": 425,
+      "label": "Y lấy được A, COMMIT",
+      "variant": "return",
+      "note": "deadlock_timeout = 1s"
+    },
+    {
+      "id": "s1",
+      "from": "x",
+      "to": "pg",
+      "y": 515,
+      "label": "sắp xếp: A trước",
+      "variant": "emphasis",
+      "note": "sort(skuIds)"
+    },
+    {
+      "id": "s2",
+      "from": "y",
+      "to": "pg",
+      "y": 565,
+      "label": "sắp xếp: cũng A trước",
+      "variant": "default",
+      "note": "chờ X ở ngay khóa đầu tiên"
+    },
+    {
+      "id": "s3",
+      "from": "x",
+      "to": "pg",
+      "y": 615,
+      "label": "lấy B, COMMIT",
+      "variant": "return"
+    },
+    {
+      "id": "s4",
+      "from": "pg",
+      "to": "y",
+      "y": 665,
+      "label": "tới lượt Y, không ai bị hủy",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Deadlock",
+      "items": [
+        "Mỗi bên giữ thứ bên kia cần",
+        "Postgres kiểm tra sau deadlock_timeout",
+        "Hủy một bên, không đoán được bên nào"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Khóa theo thứ tự",
+      "items": [
+        "Mọi code khóa nhiều dòng theo cùng thứ tự",
+        "flash-sale sắp xếp skuId tăng dần",
+        "20/20 giỏ xong, 0 lỗi"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Giữ khóa ngắn",
+      "items": [
+        "Không gọi API ngoài trong transaction",
+        "lock_timeout để fail nhanh",
+        "Retry 40P01 có jitter, nhưng chỉ là lưới"
+      ]
+    }
+  ]
+}

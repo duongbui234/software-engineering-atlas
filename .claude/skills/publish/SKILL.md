@@ -1,6 +1,6 @@
 ---
 name: publish
-description: Biến nhật ký học (.learn/<slug>.md) thành bài blog kèm sơ đồ archify, ghi chú khái niệm và code đã chạy, rồi mở PR để duyệt.
+description: Biến nhật ký học (.learn/<slug>.md) thành bài blog kèm sơ đồ archify, ghi chú khái niệm, code đã chạy và bản tiếng Anh, rồi mở PR để duyệt.
 disable-model-invocation: true
 argument-hint: "[slug]"
 ---
@@ -13,6 +13,7 @@ The rules for content live in `CLAUDE.md` and are not repeated here. Apply them 
 - **Content model:** paths, frontmatter, series hubs, coordinate codes.
 - **Writing conventions:** voice, the `learn` skeleton, sources, private code.
 - **archify embedding contract:** file layout, embed snippet, size budget.
+- **Bilingual site:** every post ships in Vietnamese and English in the same PR. The English edition follows `i18n/TRANSLATING.md` (step 7).
 
 `content/posts/2026-11-18-api-reliability.md` is the reference post. Match its shape and tone.
 
@@ -82,10 +83,37 @@ For every concept touched, create or update `content/concepts/<term>.md`. Each n
 
 For an existing note, add the backlink and sharpen the definition. Keep what is already there.
 
-## 7. Verify
+## 7. English edition
+
+Read `i18n/TRANSLATING.md` in full first. It is the contract: file locations, frontmatter, link rules, fixed section names, map vocabulary, hub and region titles, concept-title mappings and the glossary. Translate after the Vietnamese post, notes and diagram are final, so the two editions match.
+
+Translate everything this PR adds or changes:
+- **Post:** `content/posts/<file>.md` → `content/en/posts/<file>.md`. Translate the whole post, not a summary: every callout, table, Mermaid label, code comment, output label and self-check question. Add `lang: en`. Keep `date`, `series`, `part`, `code`, `type`, `level`, `tags` and `draft` identical.
+- **Concept notes:** each new note → `content/en/concepts/<file>.md`. For an updated note, mirror the same change in its English version.
+- **Hub:** if this PR adds or changes a hub, update `content/en/series/<id>.md` the same way. Translate station names, and list the English concept titles (TRANSLATING.md maps the 12 Vietnamese ones).
+- **Diagram:** copy `<name>.json` to `<name>.en.json` beside it, translate every authored string, and set `meta.output` to `<name>.en.html`. Then run:
+  ```bash
+  node ~/.agents/skills/archify/bin/archify.mjs finalize <diagram_type> content/diagrams/<slug>/<name>.en.json content/diagrams/<slug>/<name>.en.html --quality showcase --json
+  ```
+  The run must report `"status": "pass"`. English labels are sometimes wider than Vietnamese ones, so shorten a label that overflows instead of shipping a failure. Embed it in the English post with `data-archify="../../diagrams/…/<name>.en.html"`, and caption it "Figure 1." with the link text "Open full screen".
+- **Links:** wikilinks take the `en/` prefix (`[[en/concepts/x|…]]`, `[[en/posts/<file>|…]]`). Markdown and `href` links stay `../code/…` and `../diagrams/…`, because Quartz resolves `../` from the site root. Only `data-archify` gets `../../`.
+- **Code files** are shared, never translated. Program strings and printed output stay Vietnamese; give their meaning in the prose.
+
+Then run the checker on every English file this PR touches:
+
+```bash
+python3 i18n/check-translation.py content/en/posts/<file>.md content/en/concepts/<new-or-changed>.md [content/en/series/<id>.md]
+```
+
+Fix every problem. A warning is acceptable only for Vietnamese that is quoted on purpose (a string a program prints or processes). Add any new term you had to choose to the glossary in `TRANSLATING.md`, so the next post uses the same word.
+
+Done when every Vietnamese file this PR adds or changes has an English counterpart, each English diagram finalizes with `pass`, and the checker reports 0 problems.
+
+## 8. Verify
 
 Every check below must pass:
 
+0. `python3 i18n/check-translation.py` (no arguments: the whole `content/en` tree) reports 0 problems. Run it **before** the build.
 1. `CI=true npx quartz build` finishes with no error. CI mode fails on broken plugins.
 2. The **render check** passes on that build: `npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs`. It opens every page at 390px and 1440px and fails on horizontal page scroll, a broken Mermaid block, an "Unsupported markdown" label, or a diagram shrunk below 75%. CI runs the same check, so a red local run means a red PR. Each failure names the page and, for overflow, the element that starts it. Fix the post (or the theme) and rerun until it prints `✓`.
 3. Preview with `npx quartz build --serve`. Screenshot the post at 1440px and 390px, in both light and dark, plus the home page (see Commands in `CLAUDE.md`). Look at each screenshot and confirm:
@@ -96,17 +124,23 @@ Every check below must pass:
    - every Mermaid block reads well: the render check proves it renders and is not shrunk, the screenshot proves the layout makes sense;
    - the code block matches the file;
    - concept notes link both ways.
-4. `public/diagrams/<slug>/` and `public/code/<slug>/` contain the files with their real names and extensions.
+
+   Repeat the screenshots for the English edition: `/en/posts/<file>` at 1440px and 390px, plus `/en/`. Confirm:
+   - the post appears in "Latest posts" with the same coordinate code;
+   - the margin, series line and English diagram (`.en.html`) render;
+   - the VI/EN button on each edition points at the other one.
+4. `public/diagrams/<slug>/` and `public/code/<slug>/` contain the files with their real names and extensions, including `<name>.en.html`.
 
 Fix and repeat until every check passes. A failure you can't resolve goes into the PR body, marked as an open issue.
 
-## 8. Open the PR
+## 9. Open the PR
 
 Commit with a message naming the post and its coordinate code, push the branch, and open a PR with `gh pr create`. The PR body lists:
 - the post title, code and one-line summary;
 - new or updated concept notes;
+- the English edition: files, diagram status and checker result;
 - the diagram, the examples and their run commands;
 - any hub change;
-- a review checklist for the owner: accuracy, voice, nothing private leaked.
+- a review checklist for the owner: accuracy, voice, terminology in the English edition, nothing private leaked.
 
 Done when the PR is open and its CI build is green (`gh pr checks --watch`). Give the owner the PR link and the local preview command. Then move the log to `.learn/published/<slug>.md`.

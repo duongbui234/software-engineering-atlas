@@ -18,7 +18,7 @@ VI_LEFTOVERS = re.compile(
 )
 VI_CHARS = re.compile(r"[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]", re.I)
 WARN = []
-KEEP_SAME = ("date", "series", "part", "code", "type", "level", "tags", "draft")
+KEEP_SAME = ("date", "series", "part", "code", "type", "level", "tags", "draft", "lc")
 
 
 def split_fm(text):

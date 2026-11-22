@@ -3,10 +3,9 @@ title: "Two Sum: tra phần bù bằng hash map một lượt, hai con trỏ, v�
 description: "Bài LeetCode số 1 dạy mẹo quan trọng nhất của nhóm Arrays & Hashing: thay vì tìm cặp, hỏi xem số còn thiếu đã gặp chưa; bài này cũng mở hash table ra xem vì sao O(1) chỉ là trung bình, với 20 000 khóa trùng hashCode làm HashMap của Java chậm tới 2,7 giây."
 date: 2026-11-22T21:03:00+07:00
 tags: [algorithms, neetcode, hashing]
-type: learn
+type: problem
+lc: 1
 level: beginner
-series: neetcode-arrays-hashing
-part: 3
 draft: false
 sources:
   - https://leetcode.com/problems/two-sum/
@@ -14,6 +13,7 @@ sources:
   - https://docs.python.org/3/reference/datamodel.html#object.__hash__
   - https://go.dev/doc/go1.24
   - https://ocert.org/advisories/ocert-2011-003.html
+aliases: [posts/2026-11-22-neetcode-two-sum]
 ---
 
 > [!tldr] Đọc nhanh
@@ -24,10 +24,10 @@ sources:
 > - Hash map là O(1) **trung bình** và [[concepts/amortized-o1|khấu hao]]. Khi mọi khóa [[concepts/hash-collision|va chạm]] vào cùng một ô, Java vẫn trụ được nhờ biến ô đó thành cây, nhưng chỉ khi khóa so sánh được thứ tự.
 
 > [!info] Bối cảnh
-> Ga 3 của **tuyến NeetCode 150: Arrays & Hashing**. Ga 1 nhớ "đã thấy chưa", ga 2 nhớ "bao nhiêu lần"; ga này nhớ "**ở vị trí nào**" và hỏi về một số *chưa* thấy. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
+> Bài LeetCode 1, thuộc [[posts/2026-11-22-neetcode-hash-lookup|ga 1: Tra cứu bằng hash]] trên **tuyến NeetCode: Mảng và chuỗi**. Bài Contains Duplicate nhớ "đã thấy chưa", bài Valid Anagram nhớ "bao nhiêu lần"; bài này nhớ "**ở vị trí nào**" và hỏi về một số *chưa* thấy. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Big-O, Set, hash**: xem [[posts/2026-11-22-neetcode-contains-duplicate|ga 1]]. **Map**: xem [[posts/2026-11-22-neetcode-valid-anagram|ga 2]].
+> - **Big-O, Set, hash**: xem [[problems/contains-duplicate|Contains Duplicate]]. **Map**: xem [[problems/valid-anagram|Valid Anagram]].
 > - **Chỉ số (index)**: vị trí của phần tử trong mảng, bắt đầu từ 0. Đề bài đòi chỉ số, không đòi giá trị.
 > - **Ô (bucket)**: hash table là một mảng các ô; hash của khóa quyết định khóa nằm ở ô nào.
 > - **Load factor (hệ số tải)**: số khóa chia cho số ô. Vượt ngưỡng thì bảng nới rộng (thường gấp đôi) và chuyển mọi khóa sang bảng mới.
@@ -78,7 +78,7 @@ Hai ca cuối là nơi lời giải sai lộ ra: `[3, 2, 4]` bẫy những ai gh
 
 ### Tra phần bù
 
-Vét cạn hỏi "cặp (i, j) này có cộng ra target không?" cho mọi cặp, O(n²). Mẹo [[concepts/complement-lookup|tra phần bù]] lật câu hỏi lại: khi đứng ở `x`, chỉ có **đúng một** giá trị ghép được với nó, là `target - x`. Câu hỏi "có cặp nào chứa x?" thành "đã thấy giá trị `target - x` chưa?", và đó chính là câu hỏi của ga 1. Chỉ khác là lần này cần nhớ thêm vị trí, nên dùng Map `giá trị → chỉ số` thay cho Set.
+Vét cạn hỏi "cặp (i, j) này có cộng ra target không?" cho mọi cặp, O(n²). Mẹo [[concepts/complement-lookup|tra phần bù]] lật câu hỏi lại: khi đứng ở `x`, chỉ có **đúng một** giá trị ghép được với nó, là `target - x`. Câu hỏi "có cặp nào chứa x?" thành "đã thấy giá trị `target - x` chưa?", và đó chính là câu hỏi của bài Contains Duplicate. Chỉ khác là lần này cần nhớ thêm vị trí, nên dùng Map `giá trị → chỉ số` thay cho Set.
 
 Mẹo này đi xa hơn Two Sum rất nhiều: "đếm số đoạn con có tổng bằng k" dùng phần bù trên tổng tiền tố, và "4Sum II" chia đôi rồi tra phần bù.
 

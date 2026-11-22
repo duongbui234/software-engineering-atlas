@@ -8,4 +8,4 @@ region: Vùng Thuật toán
 
 **Tra phần bù**: ở phần tử x, giá trị duy nhất ghép được để ra target là `target − x`. Câu hỏi "có cặp nào?" (O(n²)) thành "đã thấy target − x chưa?" (một lần tra map, O(1)). Mẹo này dùng lại cho đếm đoạn con có tổng k (phần bù trên tổng tiền tố), 4Sum II và nhiều bài khác.
 
-Đọc thêm trong bài [[posts/2026-11-22-neetcode-two-sum|Two Sum]].
+Đọc thêm trong bài [[problems/two-sum|Two Sum]].

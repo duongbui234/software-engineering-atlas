@@ -3,10 +3,9 @@ title: "Contains Duplicate: Big-O, brute force, hash sets and the price of memor
 description: "The first NeetCode 150 problem asks a seemingly trivial question (does an array contain a repeated number?), but it is enough to learn how to measure an algorithm with Big-O, measure it again with a real clock, and see where the Sets of five languages differ."
 date: 2026-11-22T21:01:00+07:00
 tags: [algorithms, neetcode, hashing]
-type: learn
+type: problem
+lc: 217
 level: beginner
-series: neetcode-arrays-hashing
-part: 1
 draft: false
 lang: en
 sources:
@@ -15,6 +14,7 @@ sources:
   - https://v8.dev/blog/array-sort
   - https://go.dev/doc/go1.19
   - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Arrays.html
+aliases: [en/posts/2026-11-22-neetcode-contains-duplicate]
 ---
 
 > [!tldr] Quick read
@@ -25,7 +25,7 @@ sources:
 > - Trading memory for time is a [[en/concepts/space-time-tradeoff|tradeoff]], not a free lunch: the Set costs O(n) memory, while sorting in place costs almost none.
 
 > [!info] Context
-> Station 1 of **the NeetCode 150 line: Arrays & Hashing**. NeetCode 150 is a list of 150 LeetCode problems ordered by solution pattern; this is the very first problem on the list. Every station has runnable solutions in TypeScript, JavaScript, Python, Go and Java. All you need is to be able to write a loop and a function in any language.
+> LeetCode problem 217, part of [[en/posts/2026-11-22-neetcode-hash-lookup|station 1: Hash Lookup]] on **the NeetCode line: Arrays and Strings**. NeetCode 150 is a list of 150 LeetCode problems ordered by solution pattern; this is the very first problem on the list. Every problem page has runnable solutions in TypeScript, JavaScript, Python, Go and Java. All you need is to be able to write a loop and a function in any language.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Array**: a sequence of elements numbered from 0. Reading element i takes the same time whether i is large or small.
@@ -78,7 +78,7 @@ Values up to 10⁹ also rule out the trick of "make a marker array with 10⁹ sl
 
 ### Big-O: measuring shape, not seconds
 
-[[en/concepts/big-o-notation|Big-O]] describes how the number of steps grows as n grows, ignoring constants and lower-order terms. "O(n²)" means that when n grows 10 times, the number of steps grows about 100 times. Big-O does not say how many milliseconds an algorithm takes; it says how steeply the curve bends. Two O(n) algorithms can differ by a factor of 10, and an O(n) algorithm can be slower than an O(n log n) algorithm at every size you will actually meet (station 5 has an example).
+[[en/concepts/big-o-notation|Big-O]] describes how the number of steps grows as n grows, ignoring constants and lower-order terms. "O(n²)" means that when n grows 10 times, the number of steps grows about 100 times. Big-O does not say how many milliseconds an algorithm takes; it says how steeply the curve bends. Two O(n) algorithms can differ by a factor of 10, and an O(n) algorithm can be slower than an O(n log n) algorithm at every size you will actually meet (Top K Frequent Elements has an example).
 
 There are two things to measure: **time** (number of steps) and **auxiliary space** (memory used beyond the input). When people say "O(1) space", they usually do not count the input array itself.
 
@@ -217,10 +217,10 @@ Reading the results:
 
 ## Misconceptions and common traps
 
-- **"The algorithm with the smaller Big-O is always faster."** Big-O drops constants. Here the order matches Big-O, but station 5 has a case where O(n) is slower than O(n log n).
-- **Calling `sort()` without a comparator in JS.** `[10, 9, 1, 100].sort()` gives `[1, 10, 100, 9]`, because the spec converts each number to a string before comparing. In this problem, luckily, equal numbers still end up next to each other, so the result is still correct. At station 3, the same mistake makes the answer flat-out wrong.
+- **"The algorithm with the smaller Big-O is always faster."** Big-O drops constants. Here the order matches Big-O, but Top K Frequent Elements has a case where O(n) is slower than O(n log n).
+- **Calling `sort()` without a comparator in JS.** `[10, 9, 1, 100].sort()` gives `[1, 10, 100, 9]`, because the spec converts each number to a string before comparing. In this problem, luckily, equal numbers still end up next to each other, so the result is still correct. In Two Sum, the same mistake makes the answer flat-out wrong.
 - **Sorting the caller's array in place.** `nums.sort()` in JS, `list.sort()` in Python, `Arrays.sort(nums)` in Java and `slices.Sort(nums)` in Go all modify the input directly. Copy it first if the caller still uses that array.
-- **"A hash set is always O(1)."** That is the average. Station 3 shows that when every key lands in the same bucket, a Java `HashMap` slows down to O(n) per lookup.
+- **"A hash set is always O(1)."** That is the average. Two Sum shows that when every key lands in the same bucket, a Java `HashMap` slows down to O(n) per lookup.
 - **Forgetting that the "one-liner" has no early exit.** `len(set(nums)) != len(nums)` is neat and compact, but it always costs O(n) time and O(n) memory, even when the first two numbers are already equal.
 - **Java: assuming `HashSet<Integer>` is as cheap as an `int` array.** Each element is a separate `Integer` object, plus a node in the table. With a few million elements, sorting an `int[]` can use far less memory.
 

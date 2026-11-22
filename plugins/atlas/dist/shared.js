@@ -1,6 +1,8 @@
 // Helpers dùng chung cho component và frame của theme Atlas.
 // Viết bằng ESM thuần (không cần bước build) để Quartz nạp trực tiếp như plugin cục bộ.
 
+import { catalogEntry, lcCode } from "./neetcode.js"
+
 export const fm = (f) => (f && f.frontmatter) || {}
 
 // ── Song ngữ ─────────────────────────────────────────────────────────────────
@@ -27,7 +29,27 @@ export const STR = {
     otherLangShort: "EN",
     otherLangTitle: "Read this page in English",
     otherLangMissing: "Trang này chưa có bản tiếng Anh, mở trang chủ tiếng Anh",
-    type: { learn: "Bài học", code: "Đọc code dự án", note: "Ghi chú ngắn" },
+    type: { learn: "Bài học", code: "Đọc code dự án", note: "Ghi chú ngắn", problem: "Bài luyện" },
+    difficulty: { easy: "Dễ", medium: "Trung bình", hard: "Khó" },
+    difficultyLabel: "Độ khó",
+    stationLabel: "Ga",
+    stationN: (n) => `Ga ${n}`,
+    leetcode: "Đề trên LeetCode",
+    stationProblems: "Các bài trong ga này",
+    stationProblemsLede: (w, n) => `${w}/${n} bài đã viết. Bài mờ là bài chưa viết; link dẫn tới đề gốc trên LeetCode.`,
+    notWritten: "chưa viết",
+    problemSet: "Kho bài NeetCode 150",
+    problemSetShort: "Kho bài",
+    problemSetLink: (w, n) => `Kho bài luyện: ${w}/${n} bài đã viết`,
+    problemsWritten: (w, n) => `Đã viết ${w}/${n} bài`,
+    filterLine: "Tuyến",
+    filterDiff: "Độ khó",
+    filterAll: "Tất cả",
+    filterShown: (k, n) => `Đang hiện ${k}/${n} bài.`,
+    colCode: "Mã",
+    colTitle: "Bài",
+    colGroup: "Nhóm NeetCode",
+    colStation: "Ga",
     level: { beginner: "Cơ bản", intermediate: "Trung bình", advanced: "Nâng cao" },
     walked: (n) => `Đã đi ${n} bài`,
     scaleAria: (n) => `Thước tỉ lệ: đã viết ${n} bài`,
@@ -99,7 +121,27 @@ export const STR = {
     otherLangShort: "VI",
     otherLangTitle: "Đọc trang này bằng tiếng Việt",
     otherLangMissing: "This page has no Vietnamese version; open the Vietnamese home page",
-    type: { learn: "Lesson", code: "Code walkthrough", note: "Short note" },
+    type: { learn: "Lesson", code: "Code walkthrough", note: "Short note", problem: "Practice problem" },
+    difficulty: { easy: "Easy", medium: "Medium", hard: "Hard" },
+    difficultyLabel: "Difficulty",
+    stationLabel: "Station",
+    stationN: (n) => `Station ${n}`,
+    leetcode: "Problem on LeetCode",
+    stationProblems: "Problems at this station",
+    stationProblemsLede: (w, n) => `${w}/${n} written. Greyed rows are not written yet; their link goes to the original problem on LeetCode.`,
+    notWritten: "not written yet",
+    problemSet: "NeetCode 150 Problem Set",
+    problemSetShort: "Problem set",
+    problemSetLink: (w, n) => `Problem set: ${w}/${n} written`,
+    problemsWritten: (w, n) => `${w}/${n} problems written`,
+    filterLine: "Line",
+    filterDiff: "Difficulty",
+    filterAll: "All",
+    filterShown: (k, n) => `Showing ${k}/${n} problems.`,
+    colCode: "Code",
+    colTitle: "Problem",
+    colGroup: "NeetCode group",
+    colStation: "Station",
     level: { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" },
     walked: (n) => `${n} posts walked`,
     scaleAria: (n) => `Scale bar: ${n} posts written`,
@@ -204,6 +246,16 @@ export const isIndex = (f) => f.slug === "index" || f.slug === "en/index"
 const isFolderIndex = (f) => typeof f.slug === "string" && f.slug.endsWith("/index")
 export const isPost = (f) => typeof f.slug === "string" && baseSlug(f).startsWith("posts/") && !isFolderIndex(f)
 export const isConcept = (f) => typeof f.slug === "string" && baseSlug(f).startsWith("concepts/") && !isFolderIndex(f)
+export const isProblem = (f) => typeof f.slug === "string" && baseSlug(f).startsWith("problems/") && !isFolderIndex(f)
+export const isProblemSet = (f) => baseSlug(f) === "problems/index"
+/** Mục danh mục NeetCode của một trang bài (theo `lc`), hoặc undefined. */
+export const problemEntry = (f) => (isProblem(f) && fm(f).lc ? catalogEntry(fm(f).lc) : undefined)
+/** Trang bài đã viết, theo số LeetCode. */
+export function problemsByLc(allFiles) {
+  const map = new Map()
+  for (const f of allFiles) if (isProblem(f) && isListed(f) && fm(f).lc) map.set(Number(fm(f).lc), f)
+  return map
+}
 export const isHub = (f) => Array.isArray(fm(f).stations) && !!fm(f).series
 // draft đã bị Quartz loại khỏi build (trừ khi drafts.publish bật để xem trước)
 export const isListed = (f) => f.unlisted !== true
@@ -263,6 +315,7 @@ export function lineState(allFiles, hub) {
 /** Mã tọa độ: <SERIES>-<NN> cho bài series, ngược lại lấy `code` trong frontmatter. */
 export function coordOf(allFiles, f) {
   const m = fm(f)
+  if (m.lc) return lcCode(m.lc)
   if (m.series && m.part) {
     const hub = hubFor(allFiles, m.series)
     const code = hub ? fm(hub).code || String(m.series).toUpperCase() : String(m.series).toUpperCase()

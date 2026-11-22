@@ -3,16 +3,16 @@ title: "Valid Anagram: đếm tần suất, mảng 26 ô, hash map và cái bẫ
 description: "Hai chuỗi là anagram khi chúng có đúng cùng các chữ cái với cùng số lần; bài này đi từ sắp xếp sang đếm bằng mảng 26 ô (O(n), nhanh gấp 60 lần), rồi mở câu hỏi mở rộng của đề: với chữ Unicode thì JavaScript và Java cùng tuyên bố sai hai emoji khác nhau là anagram."
 date: 2026-11-22T21:02:00+07:00
 tags: [algorithms, neetcode, hashing, unicode]
-type: learn
+type: problem
+lc: 242
 level: beginner
-series: neetcode-arrays-hashing
-part: 2
 draft: false
 sources:
   - https://leetcode.com/problems/valid-anagram/
   - https://unicode.org/reports/tr15/
   - https://tc39.es/ecma262/2025/
   - https://go.dev/ref/spec
+aliases: [posts/2026-11-22-neetcode-valid-anagram]
 ---
 
 > [!tldr] Đọc nhanh
@@ -23,10 +23,10 @@ sources:
 > - Bẫy: `split('')` trong JS và `char[]` trong Java tách theo đơn vị UTF-16, nên coi "😀🌃" và "🜃🈀" là anagram. Python và Go không mắc lỗi này.
 
 > [!info] Bối cảnh
-> Ga 2 của **tuyến NeetCode 150: Arrays & Hashing**. Ga 1 hỏi "đã thấy chưa?"; ga này hỏi "thấy **bao nhiêu lần**?". Lời giải có đủ TypeScript, JavaScript, Python, Go và Java. Bạn chỉ cần biết vòng lặp và mảng.
+> Bài LeetCode 242, thuộc [[posts/2026-11-22-neetcode-counting-keys|ga 2: Khóa chuẩn và đếm tần suất]] trên **tuyến NeetCode: Mảng và chuỗi**. Bài Contains Duplicate hỏi "đã thấy chưa?"; bài này hỏi "thấy **bao nhiêu lần**?". Lời giải có đủ TypeScript, JavaScript, Python, Go và Java. Bạn chỉ cần biết vòng lặp và mảng.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Big-O, hash, Set**: xem [[posts/2026-11-22-neetcode-contains-duplicate|ga 1]].
+> - **Big-O, hash, Set**: xem [[problems/contains-duplicate|Contains Duplicate]].
 > - **Mã ký tự**: mỗi ký tự được lưu bằng một con số. Chữ `'a'` là 97, `'b'` là 98… nên `mã - 97` cho ra vị trí 0..25 trong bảng chữ cái.
 > - **Code point**: con số Unicode gán cho một ký tự, ví dụ `é` là U+00E9, `😀` là U+1F600.
 > - **UTF-16, code unit**: cách JS và Java lưu chuỗi, mỗi đơn vị 16 bit. Ký tự có code point lớn hơn U+FFFF (như emoji) cần **hai** code unit, gọi là một cặp surrogate.
@@ -65,7 +65,7 @@ flowchart TB
 
 Giới hạn: mỗi chuỗi dài tới **50 000** ký tự, chỉ gồm chữ thường `a`–`z`. Đề có thêm câu hỏi mở rộng: nếu chuỗi chứa ký tự Unicode thì sửa lời giải thế nào?
 
-Ca `aacc` / `ccac` là lý do "cùng tập chữ" chưa đủ. Một Set (ga 1) chỉ nhớ "có", không nhớ "bao nhiêu".
+Ca `aacc` / `ccac` là lý do "cùng tập chữ" chưa đủ. Một Set (bài Contains Duplicate) chỉ nhớ "có", không nhớ "bao nhiêu".
 
 ## Cơ chế
 
@@ -76,7 +76,7 @@ Ca `aacc` / `ccac` là lý do "cùng tập chữ" chưa đủ. Một Set (ga 1) 
 
 ### Cách 1, sắp xếp rồi so: O(n log n)
 
-Hai anagram sau khi sắp xếp chữ cái thì thành **cùng một chuỗi**. Đây là cách ngắn nhất để viết (Python: `sorted(s) == sorted(t)`), và ý tưởng "đưa về một dạng chuẩn" sẽ quay lại ở ga 4. Chi phí là hai lần sắp xếp.
+Hai anagram sau khi sắp xếp chữ cái thì thành **cùng một chuỗi**. Đây là cách ngắn nhất để viết (Python: `sorted(s) == sorted(t)`), và ý tưởng "đưa về một dạng chuẩn" sẽ quay lại ở bài Group Anagrams. Chi phí là hai lần sắp xếp.
 
 ### Cách 2, đếm bằng mảng 26 ô: O(n) thời gian, O(1) bộ nhớ
 
@@ -246,7 +246,7 @@ café vs éfac: false | NFC: true
 
 ## Câu hỏi tự kiểm tra
 
-> [!question]- Vì sao một Set (như ga 1) không đủ để kiểm tra anagram?
+> [!question]- Vì sao một Set (như bài Contains Duplicate) không đủ để kiểm tra anagram?
 > Set chỉ nhớ một chữ có xuất hiện hay không, không nhớ bao nhiêu lần. `aacc` và `ccac` có cùng Set `{a, c}` nhưng không phải anagram.
 
 > [!question]- Mảng đếm 26 ô được gọi là O(1) bộ nhớ. Vì sao, dù nó là một mảng?

@@ -3,10 +3,9 @@ title: "Two Sum: complement lookup with a one-pass hash map, two pointers, and t
 description: "LeetCode problem 1 teaches the most important trick of the Arrays & Hashing group: instead of searching for a pair, ask whether the missing number has been seen yet; this post also opens up the hash table to see why O(1) is only an average, with 20,000 keys sharing one hashCode slowing Java's HashMap to 2.7 seconds."
 date: 2026-11-22T21:03:00+07:00
 tags: [algorithms, neetcode, hashing]
-type: learn
+type: problem
+lc: 1
 level: beginner
-series: neetcode-arrays-hashing
-part: 3
 draft: false
 lang: en
 sources:
@@ -15,6 +14,7 @@ sources:
   - https://docs.python.org/3/reference/datamodel.html#object.__hash__
   - https://go.dev/doc/go1.24
   - https://ocert.org/advisories/ocert-2011-003.html
+aliases: [en/posts/2026-11-22-neetcode-two-sum]
 ---
 
 > [!tldr] Quick read
@@ -25,10 +25,10 @@ sources:
 > - A hash map is O(1) **on average** and [[en/concepts/amortized-o1|amortized]]. When every key [[en/concepts/hash-collision|collides]] into the same bucket, Java still holds up by turning that bucket into a tree, but only when the keys can be ordered.
 
 > [!info] Context
-> Station 3 of **the NeetCode 150 line: Arrays & Hashing**. Station 1 remembered "seen it or not", station 2 remembered "how many times"; this station remembers "**at which position**" and asks about a number *not yet* seen. The solutions come in TypeScript, JavaScript, Python, Go and Java.
+> LeetCode problem 1, part of [[en/posts/2026-11-22-neetcode-hash-lookup|station 1: Hash Lookup]] on **the NeetCode line: Arrays and Strings**. Contains Duplicate remembered "seen it or not", Valid Anagram remembered "how many times"; this problem remembers "**at which position**" and asks about a number *not yet* seen. The solutions come in TypeScript, JavaScript, Python, Go and Java.
 
 > [!abstract]- Quick glossary for this post (click to open)
-> - **Big-O, Set, hash**: see [[en/posts/2026-11-22-neetcode-contains-duplicate|station 1]]. **Map**: see [[en/posts/2026-11-22-neetcode-valid-anagram|station 2]].
+> - **Big-O, Set, hash**: see [[en/problems/contains-duplicate|Contains Duplicate]]. **Map**: see [[en/problems/valid-anagram|Valid Anagram]].
 > - **Index**: the position of an element in an array, starting from 0. The problem asks for indices, not values.
 > - **Bucket**: a hash table is an array of buckets; the key's hash decides which bucket the key goes into.
 > - **Load factor**: the number of keys divided by the number of buckets. Past a threshold, the table grows (usually doubling) and moves every key into the new table.
@@ -79,7 +79,7 @@ The last two cases are where wrong solutions show up: `[3, 2, 4]` traps anyone w
 
 ### Complement lookup
 
-Brute force asks "does this pair (i, j) add up to target?" for every pair, O(n²). The [[en/concepts/complement-lookup|complement lookup]] trick flips the question: standing at `x`, there is **exactly one** value that pairs with it, namely `target - x`. The question "is there a pair containing x?" becomes "have I seen the value `target - x` yet?", and that is exactly station 1's question. The only difference is that this time you also need to remember the position, so you use a `value → index` Map instead of a Set.
+Brute force asks "does this pair (i, j) add up to target?" for every pair, O(n²). The [[en/concepts/complement-lookup|complement lookup]] trick flips the question: standing at `x`, there is **exactly one** value that pairs with it, namely `target - x`. The question "is there a pair containing x?" becomes "have I seen the value `target - x` yet?", and that is exactly Contains Duplicate's question. The only difference is that this time you also need to remember the position, so you use a `value → index` Map instead of a Set.
 
 This trick goes much further than Two Sum: "count the subarrays whose sum is k" uses the complement over prefix sums, and "4Sum II" splits in half and then looks up complements.
 

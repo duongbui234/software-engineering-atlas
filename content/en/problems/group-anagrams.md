@@ -3,10 +3,9 @@ title: "Group Anagrams: canonical keys, count keys and the trap of joining a key
 description: "Group words that are anagrams of each other by reducing each word to a canonical key and using that key as a hash map key; this post compares sorted keys with count keys (which one wins flips with word length), and reproduces a bug that passes every test: joining the count table without a separator."
 date: 2026-11-22T21:04:00+07:00
 tags: [algorithms, neetcode, hashing]
-type: learn
+type: problem
+lc: 49
 level: intermediate
-series: neetcode-arrays-hashing
-part: 4
 draft: false
 lang: en
 sources:
@@ -14,20 +13,21 @@ sources:
   - https://go.dev/ref/spec
   - https://docs.python.org/3/glossary.html#term-hashable
   - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html
+aliases: [en/posts/2026-11-22-neetcode-group-anagrams]
 ---
 
 > [!tldr] Quick read
 > - The problem: given a list of words, put the words that are anagrams of each other into the same group.
 > - [[en/concepts/canonical-key|Canonical key]]: turn each word into a value such that every anagram yields **the same** value, then [[en/concepts/group-by|group by]] it with a `key → list of words` hash map.
-> - Sorted key (`"eat"` → `"aet"`): O(k log k) per word. [[en/concepts/count-key|Count key]] (station 2's table of 26 numbers): O(k) per word. The count key wins by 47 times when words are 1000 letters long, but **loses** when words are only 5 letters long.
+> - Sorted key (`"eat"` → `"aet"`): O(k log k) per word. [[en/concepts/count-key|Count key]] (Valid Anagram's table of 26 numbers): O(k) per word. The count key wins by 47 times when words are 1000 letters long, but **loses** when words are only 5 letters long.
 > - [[en/concepts/key-serialization|Joining a key into a string]] needs a separator. The count tables `[1, 11, …]` and `[11, 1, …]` joined without a separator both become `"1110…"`, so two words that are not anagrams get grouped together. This bug still passes all 4 test cases.
 > - Each language has its own rule about what can be a key: Go allows fixed-size arrays as keys, Python needs a tuple, and JS and Java compare arrays by **identity**, so you must convert to a string.
 
 > [!info] Context
-> Station 4 of **the NeetCode 150 line: Arrays & Hashing**, the first Medium problem. It combines station 2 (anagrams, count table) with station 3's hash map, but this time the count table is not the answer but the **key**. The solutions come in TypeScript, JavaScript, Python, Go and Java.
+> LeetCode problem 49, part of [[en/posts/2026-11-22-neetcode-counting-keys|station 2: Canonical Keys and Counting]] on **the NeetCode line: Arrays and Strings**. It combines Valid Anagram (anagrams, count table) with Two Sum's hash map, but this time the count table is not the answer but the **key**. The solutions come in TypeScript, JavaScript, Python, Go and Java.
 
 > [!abstract]- Quick glossary for this post (click to open)
-> - **Anagram, 26-slot count table**: see [[en/posts/2026-11-22-neetcode-valid-anagram|station 2]]. **Hash map, collision**: see [[en/posts/2026-11-22-neetcode-two-sum|station 3]].
+> - **Anagram, 26-slot count table**: see [[en/problems/valid-anagram|Valid Anagram]]. **Hash map, collision**: see [[en/problems/two-sum|Two Sum]].
 > - **k**: the length of one word. **n**: the number of words. The complexity of this problem depends on both.
 > - **Key**: the value used to look things up in a map. Two "equal" keys point to the same slot.
 > - **Identity**: two objects are "the same" only when they are the same memory location. Two separately created `[1, 2]` arrays have the same contents but different identities.
@@ -67,7 +67,7 @@ flowchart TB
 
 Constraints: up to **10,000** strings, each up to **100** characters long, lowercase letters only.
 
-The naive approach: compare every pair of words with station 2's anagram function. With n words that is O(n²·k), about 5·10⁹ steps at the upper limit. We need a way for each word to be "looked at" only once.
+The naive approach: compare every pair of words with Valid Anagram's anagram function. With n words that is O(n²·k), about 5·10⁹ steps at the upper limit. We need a way for each word to be "looked at" only once.
 
 ## How it works
 
@@ -87,11 +87,11 @@ The central idea is a [[en/concepts/canonical-key|canonical key]]: a function `k
 
 ### Sorted key: O(n · k log k)
 
-Sort the letters of the word: `"eat"`, `"tea"` and `"ate"` all become `"aet"`. This is exactly station 2's approach 1, used as a key. It is simple and correct for any alphabet, Unicode included, as long as you split correctly by code point.
+Sort the letters of the word: `"eat"`, `"tea"` and `"ate"` all become `"aet"`. This is exactly Valid Anagram's approach 1, used as a key. It is simple and correct for any alphabet, Unicode included, as long as you split correctly by code point.
 
 ### Count key: O(n · k)
 
-Station 2's 26-slot count table is also a canonical key: anagrams have the same count table. Building the table costs O(k), with no sorting. But the count table is an **array**, and most languages do not let an array be a hash map key directly. You have to [[en/concepts/key-serialization|turn it into a value that can be a key]]:
+Valid Anagram's 26-slot count table is also a canonical key: anagrams have the same count table. Building the table costs O(k), with no sorting. But the count table is an **array**, and most languages do not let an array be a hash map key directly. You have to [[en/concepts/key-serialization|turn it into a value that can be a key]]:
 
 | | Array as a map key? | How to do it |
 |---|---|---|

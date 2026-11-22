@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Socket.IO trên dây: Engine.IO mở phiên, nâng cấp, rồi mới tới sự kiện",
+    "output": "content/diagrams/websocket-socketio/engineio-wire.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "cl", "type": "frontend", "label": "Client Socket.IO", "sublabel": "socket.io-client: io('/flash-sale')" },
+    { "id": "eio", "type": "backend", "label": "Tầng vận chuyển", "sublabel": "Engine.IO: sid, polling, WebSocket" },
+    { "id": "gw", "type": "backend", "label": "Bàn xử lý sự kiện", "sublabel": "Socket.IO namespace /flash-sale" }
+  ],
+  "segments": [
+    { "from": 150, "to": 250, "label": "Mở phiên bằng long polling" },
+    { "from": 270, "to": 470, "label": "Thử WebSocket rồi chuyển hẳn" },
+    { "from": 490, "to": 800, "label": "Gói Socket.IO bên trong gói 4" }
+  ],
+  "messages": [
+    { "id": "o1", "from": "cl", "to": "eio", "y": 170, "label": "mở phiên", "variant": "default", "note": "GET /socket.io/?EIO=4&transport=polling" },
+    { "id": "o2", "from": "eio", "to": "cl", "y": 220, "label": "cấp mã phiên", "variant": "return", "note": "0{\"sid\":…,\"upgrades\":[\"websocket\"]}" },
+    { "id": "u1", "from": "cl", "to": "eio", "y": 290, "label": "mở WebSocket cùng sid, thử đường", "variant": "default", "note": "transport=websocket&sid=…, gửi 2probe" },
+    { "id": "u2", "from": "eio", "to": "cl", "y": 345, "label": "đường mới dùng được", "variant": "return", "note": "3probe" },
+    { "id": "u3", "from": "eio", "to": "cl", "y": 395, "label": "polling: nghỉ đi", "variant": "dashed", "note": "6 (noop) trả cho request đang treo" },
+    { "id": "u4", "from": "cl", "to": "eio", "y": 445, "label": "từ giờ chỉ WebSocket", "variant": "emphasis", "note": "5 (upgrade)" },
+    { "id": "c1", "from": "cl", "to": "gw", "y": 510, "label": "vào namespace, kèm token", "variant": "security", "note": "40/flash-sale,{\"token\":…}" },
+    { "id": "c2", "from": "gw", "to": "cl", "y": 565, "label": "đã vào, đây là id của bạn", "variant": "return", "note": "40/flash-sale,{\"sid\":…}" },
+    { "id": "e1", "from": "cl", "to": "gw", "y": 620, "label": "emit có ack số 7", "variant": "default", "note": "42/flash-sale,7[\"subscribe_campaign\",…]" },
+    { "id": "e2", "from": "gw", "to": "cl", "y": 675, "label": "trả lời đúng lần emit số 7", "variant": "return", "note": "43/flash-sale,7[{\"event\":\"subscribed\"}]" },
+    { "id": "e3", "from": "gw", "to": "cl", "y": 725, "label": "server đẩy tồn kho", "variant": "emphasis", "note": "42/flash-sale,[\"stock_update\",…]" },
+    { "id": "e4", "from": "eio", "to": "cl", "y": 775, "label": "mỗi 25 giây: còn đó không?", "variant": "dashed", "note": "2 (ping), client trả 3 trong 20 giây" }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Hai lớp gói tin",
+      "items": ["Số đầu: Engine.IO (0 open, 2 ping, 4 message…)", "Số thứ hai: Socket.IO (0 connect, 2 event, 3 ack)", "\"42\" = message chứa một event"]
+    },
+    {
+      "dot": "rose",
+      "title": "Vì sao không lẫn với WebSocket thuần",
+      "items": ["Client ws thuần không biết gửi 40, 42", "Client Socket.IO chờ gói 0{sid} mãi không có", "Hai bên cùng dùng WebSocket nhưng khác thứ tiếng"]
+    }
+  ]
+}

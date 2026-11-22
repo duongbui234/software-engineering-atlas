@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Socket.IO trên ba pod: sticky session lo đường vào, Redis adapter lo phát tin",
+    "output": "content/diagrams/websocket-scaling/pods.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "a",
+      "type": "frontend",
+      "label": "Người mua A",
+      "sublabel": "đang ở pod 1",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "b",
+      "type": "frontend",
+      "label": "Người mua B",
+      "sublabel": "đang ở pod 2",
+      "pos": [
+        40,
+        300
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "lb",
+      "type": "cloud",
+      "label": "Cửa vào",
+      "sublabel": "ingress-nginx: idle 30 s",
+      "pos": [
+        250,
+        180
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "p1",
+      "type": "backend",
+      "label": "Pod 1",
+      "sublabel": "socket của A + worker hàng chờ",
+      "pos": [
+        540,
+        40
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "p2",
+      "type": "backend",
+      "label": "Pod 2",
+      "sublabel": "socket của B",
+      "pos": [
+        540,
+        180
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "p3",
+      "type": "backend",
+      "label": "Pod 3",
+      "sublabel": "socket của người khác",
+      "pos": [
+        540,
+        320
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Kênh phát chung",
+      "sublabel": "Redis Pub/Sub",
+      "pos": [
+        820,
+        180
+      ],
+      "size": [
+        210,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Mỗi pod chỉ biết socket trong RAM của mình",
+      "wraps": [
+        "p1",
+        "p2",
+        "p3"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ca",
+      "from": "a",
+      "to": "lb",
+      "label": "WebSocket"
+    },
+    {
+      "id": "cb",
+      "from": "b",
+      "to": "lb",
+      "label": "WebSocket"
+    },
+    {
+      "id": "l1",
+      "from": "lb",
+      "to": "p1",
+      "label": "cùng pod suốt phiên",
+      "fromSide": "top",
+      "toSide": "left",
+      "variant": "security"
+    },
+    {
+      "id": "l2",
+      "from": "lb",
+      "to": "p2"
+    },
+    {
+      "id": "l3",
+      "from": "lb",
+      "to": "p3",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "pub",
+      "from": "p1",
+      "to": "redis",
+      "label": "PUBLISH stock_update",
+      "fromSide": "right",
+      "toSide": "top",
+      "variant": "emphasis"
+    },
+    {
+      "id": "s2",
+      "from": "redis",
+      "to": "p2",
+      "label": "pod 2 gửi cho B",
+      "variant": "emphasis"
+    },
+    {
+      "id": "s3",
+      "from": "redis",
+      "to": "p3",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Sticky session",
+      "items": [
+        "Bắt buộc khi còn long polling",
+        "Tới nhầm pod: 400 Session ID unknown",
+        "Chỉ WebSocket thì không cần"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Adapter",
+      "items": [
+        "Không có: chỉ người ở pod 1 nhận tin",
+        "Redis adapter: mọi pod cùng gửi",
+        "Mỗi pod hai kết nối Redis: pub và sub"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Khi pod tắt",
+      "items": [
+        "Mọi client của pod đứt cùng lúc",
+        "Jitter rải lượt nối lại ra",
+        "Giới hạn số lần thử thì client có thể bỏ cuộc"
+      ]
+    }
+  ]
+}

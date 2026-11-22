@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Một kết nối WebSocket từ lúc nhấc máy tới lúc cúp máy",
+    "output": "content/diagrams/websocket-protocol/ws-life.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "br", "type": "frontend", "label": "Trình duyệt", "sublabel": "new WebSocket(url, ['stock.v2'])" },
+    { "id": "px", "type": "cloud", "label": "Cửa vào", "sublabel": "nginx: chuyển tiếp Upgrade" },
+    { "id": "srv", "type": "backend", "label": "Server", "sublabel": "ws / NestJS gateway" }
+  ],
+  "segments": [
+    { "from": 150, "to": 300, "label": "Bắt tay: vẫn là HTTP" },
+    { "from": 325, "to": 520, "label": "Frame: không còn HTTP" },
+    { "from": 545, "to": 700, "label": "Đóng có lý do" }
+  ],
+  "messages": [
+    { "id": "h1", "from": "br", "to": "px", "y": 170, "label": "xin nâng cấp", "variant": "default", "note": "GET, Upgrade: websocket, Sec-WebSocket-Key" },
+    { "id": "h2", "from": "px", "to": "srv", "y": 220, "label": "chuyển tiếp cả Upgrade", "variant": "default", "note": "proxy_http_version 1.1" },
+    { "id": "h3", "from": "srv", "to": "br", "y": 275, "label": "101, kèm bằng chứng đã đọc key", "variant": "return", "note": "Sec-WebSocket-Accept = base64(SHA1(key+GUID))" },
+    { "id": "f1", "from": "br", "to": "srv", "y": 345, "label": "gửi \"mua\", payload đã che", "variant": "emphasis", "note": "81 83 + mask key 4 byte" },
+    { "id": "f2", "from": "srv", "to": "br", "y": 400, "label": "đẩy tồn kho, không che", "variant": "return", "note": "opcode 1 text, MASK=0" },
+    { "id": "f3", "from": "srv", "to": "br", "y": 450, "label": "còn nghe không?", "variant": "dashed", "note": "ping, opcode 9" },
+    { "id": "f4", "from": "br", "to": "srv", "y": 495, "label": "còn, trình duyệt tự trả", "variant": "dashed", "note": "pong, opcode 10, cùng payload" },
+    { "id": "c1", "from": "srv", "to": "br", "y": 565, "label": "cúp máy: token hết hạn", "variant": "security", "note": "close 1008 + lý do UTF-8" },
+    { "id": "c2", "from": "br", "to": "srv", "y": 620, "label": "đồng ý cúp", "variant": "return", "note": "close 1008 đáp lại" },
+    { "id": "c3", "from": "srv", "to": "br", "y": 670, "label": "server đóng TCP trước", "variant": "dashed", "note": "onclose wasClean=true" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Frame",
+      "items": ["2 tới 14 byte đầu, rồi payload", "Text, binary, ping, pong, close", "Tin lớn được cắt thành nhiều frame"]
+    },
+    {
+      "dot": "amber",
+      "title": "Masking",
+      "items": ["Client luôn che, server không bao giờ", "Không phải mã hóa: key nằm ngay trong frame", "Để proxy cũ không bị lừa đầu độc cache"]
+    },
+    {
+      "dot": "rose",
+      "title": "Đứt không báo",
+      "items": ["Không có frame close: client tự gán 1006", "1006 không bao giờ đi trên dây", "Ping/pong mới phát hiện được kết nối chết lặng"]
+    }
+  ]
+}

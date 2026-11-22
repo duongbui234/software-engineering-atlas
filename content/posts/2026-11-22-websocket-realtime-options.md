@@ -1,6 +1,6 @@
 ---
-title: "Bốn cách để server báo tin: polling, long polling, Server-Sent Events và WebSocket"
-description: HTTP chỉ cho server trả lời khi được hỏi; bài này đo bốn cách để server báo "tới lượt bạn" cho trình duyệt (polling, long polling, SSE, WebSocket) và chỉ ra khi nào cái đơn giản là đủ.
+title: "Bốn cách để server báo tin: polling, long polling, Server-Sent Events, WebSocket, và vì sao webhooks khác hẳn"
+description: HTTP chỉ cho server trả lời khi được hỏi; bài này đo bốn cách để server báo "tới lượt bạn" cho trình duyệt (polling, long polling, SSE, WebSocket) chỉ ra khi nào cái đơn giản là đủ, và vì sao webhooks (thường được xếp chung bảng) là chuyện server gọi server.
 date: 2026-11-22
 tags: [realtime, websocket, http]
 type: learn
@@ -14,6 +14,8 @@ sources:
   - https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
   - https://www.rfc-editor.org/rfc/rfc6202
   - https://socket.io/docs/v4/how-it-works/
+  - https://docs.stripe.com/webhooks
+  - https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks
 ---
 
 > [!tldr] Đọc nhanh
@@ -22,6 +24,7 @@ sources:
 > - [[long-polling|Long polling]]: server giữ request lại tới khi có tin. Gần như tức thì, nhưng mỗi tin tốn một request mới.
 > - [[server-sent-events|Server-Sent Events]]: một response HTTP không bao giờ kết thúc, server ghi từng sự kiện. Một chiều, có sẵn tự nối lại. Thường là đủ khi chỉ server cần nói.
 > - WebSocket mở một kết nối [[full-duplex|full-duplex]] bằng một request HTTP duy nhất. Socket.IO là một **thư viện** dùng long polling và WebSocket bên dưới, không phải tên khác của WebSocket (ga 3).
+> - [[webhooks|Webhooks]] hay được xếp chung bảng nhưng khác loại: đó là **server của bên khác gọi HTTP vào server của bạn** (MoMo báo "đã thanh toán"). Trình duyệt không nhận webhook được; server nhận xong phải chuyển tiếp xuống trình duyệt bằng một trong bốn cách trên.
 
 > [!info] Bối cảnh
 > Ga 1 của **tuyến WebSocket và Socket.IO**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: đúng 21:00, hàng nghìn người cùng vào trang của một chiến dịch chỉ có vài trăm sản phẩm. Ai vào trước được xếp hàng chờ; khi tới lượt, server phải báo ngay "bạn có 5 phút để thanh toán", đồng thời cập nhật số hàng còn lại cho mọi người đang xem. Bạn không cần biết NestJS hay code của dự án.
@@ -33,10 +36,13 @@ sources:
 > - **Độ trễ (latency)**: thời gian từ lúc sự kiện xảy ra ở server tới lúc trình duyệt biết.
 > - **Proxy**: máy đứng giữa trình duyệt và server, chuyển tiếp request (nginx, load balancer, proxy công ty).
 > - **HTTP/2**: phiên bản HTTP chở nhiều request song song trên một kết nối TCP.
+> - **Cổng thanh toán, IPN**: dịch vụ nhận tiền thay bạn (MoMo, VNPay, Stripe). IPN là tên các cổng Việt Nam đặt cho webhook báo kết quả thanh toán.
+> - **URL công khai**: địa chỉ mà máy bất kỳ trên Internet gọi tới được. Server có; trình duyệt của người dùng thì không.
+> - **RabbitMQ**: hệ thống hàng đợi tin nhắn giữa các phần của backend. Xem [[series/rabbitmq|tuyến RabbitMQ]].
 
 ## Hình dung trước: chờ đồ ở quán cà phê
 
-Bạn gọi món ở một quán đông khách và muốn biết ngay khi đồ xong. Có bốn cách:
+Bạn gọi món ở một quán đông khách và muốn biết ngay khi đồ xong. Có bốn cách để *bạn* biết, cộng một cách mà quán biết chuyện từ người khác:
 
 | Đời thường | Khái niệm |
 |---|---|
@@ -45,6 +51,7 @@ Bạn gọi món ở một quán đông khách và muốn biết ngay khi đồ 
 | Ra quầy hỏi rồi **đứng chờ ở đó**, nhân viên trả lời khi đồ xong (hoặc sau 30 giây bảo "chưa, hỏi lại đi") | [[long-polling\|Long polling]] |
 | Quán có **loa gọi số**: quán nói, khách chỉ nghe, không nói lại được | [[server-sent-events\|Server-Sent Events]] |
 | Quán đưa bạn một **chiếc điện thoại**: hai bên nói lúc nào cũng được, cùng lúc cũng được | WebSocket, [[full-duplex\|full-duplex]] |
+| Bạn trả tiền qua ví; **ví gọi điện cho quán** (không phải cho bạn) báo "khách bàn 5 đã trả". Quán nghe xong mới báo lại bạn bằng loa hay điện thoại | [[webhooks\|Webhooks]] |
 
 ```mermaid
 flowchart TB
@@ -139,16 +146,44 @@ Cái giá của WebSocket là bạn **tự lo những gì HTTP và SSE cho sẵn
 
 Socket.IO **không phải là một cách thứ năm** ngang hàng với bốn cách trên. Nó là một thư viện (server Node.js và client cho nhiều nền tảng) dùng **long polling và WebSocket bên dưới**, rồi thêm lên trên tên sự kiện, xác nhận, phòng, tự kết nối lại. Nó có **giao thức riêng**, nên client WebSocket thuần không nói chuyện được với server Socket.IO. flash-sale dùng Socket.IO cho cả hàng chờ lẫn thông báo. Ga 3 và 4 là về nó.
 
+### Còn webhooks?
+
+Nhiều bài so sánh xếp **[[webhooks|webhooks]]** thành cột thứ năm cạnh polling, long polling, SSE và WebSocket. Xếp vậy dễ làm hiểu sai, vì webhook trả lời một câu hỏi khác. Bốn cách trên trả lời "**trình duyệt** biết tin mới bằng cách nào?". Webhook trả lời "**server của mình** biết chuyện xảy ra ở **hệ thống của người khác** bằng cách nào?".
+
+Webhook là một request HTTP bình thường, chỉ đổi chiều: bạn đăng ký trước một URL với bên kia (cổng thanh toán, GitHub, nhà vận chuyển), và khi có sự kiện, **server của họ gửi `POST` tới URL đó**. Ở flash-sale, người mua trả tiền trên trang MoMo; server flash-sale không biết lúc nào xong, nên MoMo gọi `POST /webhooks/momo/ipn` kèm chữ ký.
+
+Vì sao trình duyệt không nhận webhook được? Vì bên gửi phải gọi tới một **URL công khai, luôn sẵn sàng**. Trình duyệt của người dùng không có địa chỉ như vậy: nó nằm sau NAT của nhà mạng, đổi IP liên tục, tắt khi đóng tab, và không chạy server HTTP nào. Nên webhook luôn dừng ở server, và server phải **chuyển tiếp** tin cho trình duyệt bằng một trong bốn cách trên. flash-sale làm đúng chuỗi này:
+
+```mermaid
+flowchart TB
+    M["MoMo (cổng thanh toán)"] -->|"POST /webhooks/momo/ipn<br/>kèm chữ ký"| S["Server flash-sale<br/>kiểm chữ ký, ghi thanh toán<br/>(idempotent), trả 2xx ngay"]
+    S -->|"sự kiện order.paid<br/>qua RabbitMQ"| N["Bộ phát thông báo"]
+    N -->|"Socket.IO /notifications<br/>notification:new"| B["Trình duyệt người mua"]
+```
+
+Nếu không có webhook, server phải tự **polling** bên kia: cứ vài giây gọi API "đơn này trả tiền chưa?" của MoMo. Đúng những nhược điểm của polling ở trên, chỉ là giữa hai server. Webhook là phiên bản server-với-server của "đừng hỏi, để tôi báo".
+
+Vì là HTTP từ Internet gọi vào, webhook có những luật riêng mà bốn cách kia không có:
+
+- **Ai cũng gọi được URL đó**, nên phải xác thực bằng chữ ký (HMAC) trên đúng chuỗi byte gốc của body, kèm mốc thời gian để chống phát lại. Stripe còn cho phép lọc theo danh sách IP.
+- **Bên gửi sẽ gửi lại** khi bạn trả lỗi hoặc trả lời chậm: Stripe thử lại tới 3 ngày, GitHub coi là thất bại nếu không có `2xx` trong 10 giây. Hệ quả: một sự kiện có thể tới **nhiều lần** và **không theo thứ tự**, nên xử lý phải idempotent (ghi lại id sự kiện đã xử lý).
+- **Trả `2xx` ngay**, việc nặng đẩy vào hàng đợi, như flash-sale đẩy `order.paid` qua RabbitMQ.
+- **Webhook có thể không bao giờ tới** (bên gửi hết lượt thử, endpoint của bạn sập lâu). Nên vẫn cần một job đối soát định kỳ hỏi lại API của bên kia, tức là quay về polling, nhưng làm lưới an toàn chứ không phải đường chính.
+
+Chi tiết cách flash-sale kiểm chữ ký và chống xử lý trùng (hai lớp idempotency) nằm ở ga [[2026-11-18-api-styles|Năm kiểu API]] của tuyến API.
+
 ### So sánh nhanh
 
-| | Polling | Long polling | SSE | WebSocket |
-|---|---|---|---|---|
-| Chiều | client hỏi | client hỏi | server → client | hai chiều |
-| Độ trễ | N/2 trung bình | gần 0 | gần 0 | gần 0 |
-| Request mỗi tin | (nhiều request rỗng) | 1 | 0 | 0 |
-| Tự nối lại, phát bù | không cần | tự làm | có sẵn (`Last-Event-ID`) | tự làm |
-| Dữ liệu | bất kỳ | bất kỳ | text | text và binary |
-| Qua proxy cũ | luôn | luôn | thường được | đôi khi bị chặn |
+| | Polling | Long polling | SSE | WebSocket | Webhook |
+|---|---|---|---|---|---|
+| Ai gọi ai | trình duyệt → server | trình duyệt → server | trình duyệt mở, server ghi | trình duyệt mở, hai bên gửi | server bên kia → server mình |
+| Chiều tin | client hỏi | client hỏi | server → client | hai chiều | bên ngoài → server |
+| Độ trễ | N/2 trung bình | gần 0 | gần 0 | gần 0 | gần 0 (khi tới được) |
+| Request mỗi tin | (nhiều request rỗng) | 1 | 0 | 0 | 1 |
+| Kết nối | ngắn | treo tới khi có tin | sống lâu | sống lâu | ngắn |
+| Tự nối lại, phát bù | không cần | tự làm | có sẵn (`Last-Event-ID`) | tự làm | bên gửi tự gửi lại |
+| Dữ liệu | bất kỳ | bất kỳ | text | text và binary | thường là JSON |
+| Qua proxy cũ | luôn | luôn | thường được | đôi khi bị chặn | không liên quan (server với server) |
 
 ## Ví dụ chạy được
 
@@ -198,6 +233,8 @@ WebSocket              1           5             4 ms           7 ms
 - **"HTTP/2 Server Push thay được WebSocket."** Đó là tính năng đẩy file tĩnh vào cache trình duyệt, JavaScript không đọc được, và đã bị Chrome bỏ.
 - **Mở SSE trên HTTP/1.1 ở nhiều tab** thì vượt giới hạn khoảng 6 kết nối mỗi tên miền và tab sau treo. Bật HTTP/2 hoặc gom về một kết nối dùng chung.
 - **"Long polling lỗi thời, bỏ đi."** Nó vẫn là đường lui khi mạng công ty chặn WebSocket; Socket.IO giữ nó vì lý do đó.
+- **"Dùng webhook để báo cho trình duyệt."** Không được: bên gửi webhook cần một URL công khai luôn sẵn sàng, trình duyệt không có. Webhook dừng ở server; server chuyển tiếp bằng SSE, WebSocket hay polling.
+- **"Webhook tới đúng một lần, đúng thứ tự."** Bên gửi thử lại khi bạn trả lời chậm hay lỗi, nên cùng một sự kiện có thể tới nhiều lần và lộn thứ tự. Xử lý idempotent, trả `2xx` nhanh, và giữ job đối soát phòng khi webhook không tới.
 
 ## Câu hỏi tự kiểm tra
 
@@ -216,6 +253,9 @@ WebSocket              1           5             4 ms           7 ms
 > [!question]- Khi nào bạn chọn WebSocket thay vì SSE cho flash-sale?
 > Khi client cũng phải gửi dữ liệu liên tục và nhanh trên cùng kênh (game, chat, kéo thả cộng tác), hoặc cần dữ liệu nhị phân. Nếu client chỉ thỉnh thoảng gửi lệnh, SSE cộng request HTTP thường là đủ.
 
+> [!question]- Người mua trả tiền trên MoMo. Vì sao MoMo không báo thẳng cho trình duyệt của họ, và tin "đã thanh toán" đi tới trình duyệt theo đường nào?
+> Webhook cần một URL công khai luôn sẵn sàng, còn trình duyệt nằm sau NAT, không có địa chỉ cố định và không chạy server HTTP. Nên MoMo gọi webhook vào server flash-sale; server kiểm chữ ký, ghi nhận thanh toán, đẩy sự kiện `order.paid` qua RabbitMQ, rồi bộ phát thông báo gửi `notification:new` xuống trình duyệt qua Socket.IO.
+
 ## Tham khảo
 
 - [RFC 6455: The WebSocket Protocol](https://www.rfc-editor.org/rfc/rfc6455)
@@ -223,3 +263,5 @@ WebSocket              1           5             4 ms           7 ms
 - [MDN: Using server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) (giới hạn 6 kết nối trên HTTP/1.1)
 - [RFC 6202: Known Issues and Best Practices for the Use of Long Polling and Streaming in Bidirectional HTTP](https://www.rfc-editor.org/rfc/rfc6202)
 - [Socket.IO: How it works](https://socket.io/docs/v4/how-it-works/)
+- [Stripe: Receive events in your webhook endpoint](https://docs.stripe.com/webhooks) (URL HTTPS công khai, chữ ký, gửi lại tới 3 ngày, không đảm bảo thứ tự, trùng lặp)
+- [GitHub: Best practices for using webhooks](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks) (trả `2xx` trong 10 giây)

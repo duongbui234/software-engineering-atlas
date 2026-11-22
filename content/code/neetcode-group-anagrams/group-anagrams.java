@@ -1,12 +1,12 @@
 // NC-04 Group Anagrams (LeetCode 49), Java 21.
-// Chạy: java GroupAnagrams.java
+// Chạy: java group-anagrams.java
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GroupAnagrams {
+class GroupAnagrams { // không public: tên file không cần trùng tên class
     static List<List<String>> groupAnagrams(String[] strs) {
         Map<String, List<String>> groups = new HashMap<>();
         for (String s : strs) {

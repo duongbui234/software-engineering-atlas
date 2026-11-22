@@ -1,12 +1,12 @@
 // NC-03 Two Sum (LeetCode 1), Java 21, kèm phép thử va chạm hash.
-// Chạy: java TwoSum.java
+// Chạy: java two-sum.java
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TwoSum {
+class TwoSum { // không public: tên file không cần trùng tên class
     static int[] twoSum(int[] nums, int target) {
         Map<Integer, Integer> seen = new HashMap<>(); // giá trị → chỉ số
         for (int i = 0; i < nums.length; i++) {

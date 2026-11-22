@@ -116,7 +116,7 @@ Map chứa mọi từ một lần, cộng một khóa cho mỗi nhóm: O(n·k) c
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-group-anagrams/group-anagrams.ts) · [JavaScript](../code/neetcode-group-anagrams/group-anagrams.js) · [Python](../code/neetcode-group-anagrams/group_anagrams.py) · [Go](../code/neetcode-group-anagrams/group_anagrams.go) · [Java](../code/neetcode-group-anagrams/GroupAnagrams.java)
+[TypeScript](../code/neetcode-group-anagrams/group-anagrams.ts) · [JavaScript](../code/neetcode-group-anagrams/group-anagrams.js) · [Python](../code/neetcode-group-anagrams/group_anagrams.py) · [Go](../code/neetcode-group-anagrams/group_anagrams.go) · [Java](../code/neetcode-group-anagrams/group-anagrams.java)
 
 ```ts
 // TypeScript: khóa đếm, nối có dấu phân cách
@@ -245,7 +245,7 @@ $ python3 group_anagrams.py
 [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]
 list làm khóa dict: unhashable type: 'list'
 
-$ java GroupAnagrams.java
+$ java group-anagrams.java
 [[tan, nat], [eat, tea, ate], [bat]]
 [[eat, tea, ate], [bat], [tan, nat]]
 int[] làm khóa: get(new int[]{1, 2}) = null

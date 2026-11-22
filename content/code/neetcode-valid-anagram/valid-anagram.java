@@ -1,11 +1,11 @@
 // NC-02 Valid Anagram (LeetCode 242), Java 21.
-// Chạy: java ValidAnagram.java
+// Chạy: java valid-anagram.java
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ValidAnagram {
+class ValidAnagram { // không public: tên file không cần trùng tên class
     static boolean isAnagram(String s, String t) {
         if (s.length() != t.length()) return false;
         int[] count = new int[26];

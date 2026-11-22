@@ -116,7 +116,7 @@ Một [[hash-set|hash set]] trả lời "có x chưa?" mà không phải duyệt
 
 ## Ví dụ chạy được
 
-Mỗi ngôn ngữ một file, tự chạy test của nó: [TypeScript](../code/neetcode-contains-duplicate/contains-duplicate.ts) · [JavaScript](../code/neetcode-contains-duplicate/contains-duplicate.js) · [Python](../code/neetcode-contains-duplicate/contains_duplicate.py) · [Go](../code/neetcode-contains-duplicate/contains_duplicate.go) · [Java](../code/neetcode-contains-duplicate/ContainsDuplicate.java).
+Mỗi ngôn ngữ một file, tự chạy test của nó: [TypeScript](../code/neetcode-contains-duplicate/contains-duplicate.ts) · [JavaScript](../code/neetcode-contains-duplicate/contains-duplicate.js) · [Python](../code/neetcode-contains-duplicate/contains_duplicate.py) · [Go](../code/neetcode-contains-duplicate/contains_duplicate.go) · [Java](../code/neetcode-contains-duplicate/contains-duplicate.java).
 
 ```ts
 // TypeScript: node contains-duplicate.ts

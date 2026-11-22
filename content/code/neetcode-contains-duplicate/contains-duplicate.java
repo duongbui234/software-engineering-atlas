@@ -1,10 +1,10 @@
 // NC-01 Contains Duplicate (LeetCode 217), Java 21.
-// Chạy: java ContainsDuplicate.java   (chạy thẳng file nguồn, không cần javac)
+// Chạy: java contains-duplicate.java   (chạy thẳng file nguồn, không cần javac)
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ContainsDuplicate {
+class ContainsDuplicate { // không public: tên file không cần trùng tên class
     // HashSet.add trả về false nếu phần tử đã có: một lần tra thay cho contains + add.
     static boolean containsDuplicate(int[] nums) {
         Set<Integer> seen = new HashSet<>(nums.length * 2); // mỗi int bị "đóng hộp" thành Integer

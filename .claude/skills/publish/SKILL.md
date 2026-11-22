@@ -1,6 +1,6 @@
 ---
 name: publish
-description: Biến nhật ký học (.learn/<slug>.md) thành bài blog kèm sơ đồ archify, ghi chú khái niệm, code đã chạy và bản tiếng Anh, rồi mở PR để duyệt.
+description: Biến nhật ký học (.learn/<slug>.md) thành bài blog kèm sơ đồ archify, ghi chú khái niệm, code đã chạy và bản tiếng Anh, rồi mở PR để duyệt. Với NeetCode, một lần publish là một ga: post pattern cùng trang bài của mọi bài trong ga.
 disable-model-invocation: true
 argument-hint: "[slug]"
 ---
@@ -14,6 +14,7 @@ The rules for content live in `CLAUDE.md` and are not repeated here. Apply them 
 - **Writing conventions:** voice, the `learn` skeleton, sources, private code.
 - **archify embedding contract:** file layout, embed snippet, size budget.
 - **Bilingual site:** every post ships in Vietnamese and English in the same PR. The English edition follows `i18n/TRANSLATING.md` (step 7).
+- **NeetCode 150:** one post per pattern, one page per problem. A NeetCode log follows **NeetCode stations** below on top of steps 2–8.
 
 `content/posts/2026-11-18-api-reliability.md` is the reference post. Match its shape and tone.
 
@@ -38,6 +39,68 @@ Create the branch from an up-to-date `main`:
 ```bash
 git switch main && git pull --ff-only && git switch -c post/<slug>
 ```
+
+## NeetCode stations
+
+A NeetCode run publishes **one station**: its station post plus a problem page for **every** problem on that station. Never write one post per problem. The model is in `CLAUDE.md` (NeetCode 150); `plugins/atlas/dist/neetcode.js` is the source of truth for which problems sit on which line and station.
+
+**Pick the station.** The argument names it (`ARR-03`, or a station name). `next` means, in line order ARR → SRCH → LINK → GRPH → DP → MISC:
+1. the first station whose post exists but some of whose problems have no page yet; finish it by writing only the missing problem pages and updating the station post if it mentions them;
+2. otherwise, the first station whose post does not exist yet.
+
+The `problems/` page shows both at a glance: greyed rows on a station that already has a post. List its problems:
+
+```bash
+node -e "import('./plugins/atlas/dist/neetcode.js').then(({CATALOG})=>console.table(CATALOG.filter(p=>p.line==='neetcode-arr'&&p.station===3)))"
+```
+
+A problem that clearly belongs to another station may be moved by editing its row in `neetcode.js`; say so in the PR body.
+
+**Files for station `<CODE>-<NN>` with problems P₁…Pₖ:**
+
+| File | Notes |
+|---|---|
+| `content/posts/<date>-neetcode-<pattern-slug>.md` | `series: neetcode-<line>`, `part: <NN>`, `type: learn`. The full `learn` skeleton. |
+| `content/problems/<leetcode-slug>.md` for every Pᵢ | `type: problem`, `lc: <number>`, no `series`/`part`. The slug is the LeetCode slug from the catalog. |
+| `content/code/neetcode-<pattern-slug>/` | the station's shared code: one file per language solving every problem of the station. |
+| `content/code/neetcode-<leetcode-slug>/` | one folder per problem: each language's file solves that problem in every approach the page discusses. |
+| `content/diagrams/neetcode-<pattern-slug>/` | at most **one** archify diagram, in the station post. |
+| hub `content/series/neetcode-<line>.md` | add the station's concepts to `stations[NN-1].concepts`. Don't rename stations. |
+| every file above under `content/en/` | per step 7. |
+
+**Station post.** It teaches the pattern, not the problems:
+- **Đọc nhanh** names the pattern and the few decisions that set the problems apart.
+- **Cơ chế** gives the shared template, then a table "bài | điểm khác" with one row per problem, linking `[[problems/<slug>|…]]`.
+- **Ví dụ chạy được** shows the station's shared code in the five tabs.
+- The theme appends the "Các bài trong ga này" table, so don't write one by hand.
+- Use the anchor problem (the one that shows the pattern most plainly) for the diagram.
+
+**Problem page.** The full `learn` skeleton, scoped to one problem:
+- **Bối cảnh:** "Bài LeetCode <n>, thuộc [[posts/<station post>|ga <NN>: <tên ga>]] trên **tuyến NeetCode: …**".
+- **Vấn đề:**
+  - restate the problem in your own words with its input limits;
+  - never copy LeetCode's statement or examples verbatim;
+  - link the original problem.
+- **Cơ chế:**
+  - every approach from brute force to optimal, with time and space complexity;
+  - a Mermaid diagram (no archify on problem pages, to keep the site under the size budget);
+  - a measurement whenever two approaches have a real-world difference worth showing.
+- **Ví dụ chạy được:** the five-language tabs (below).
+- **Hiểu lầm và bẫy**, including the traps specific to one language.
+- **Câu hỏi tự kiểm tra**.
+- **Tham khảo**, including the LeetCode link.
+
+The five existing pages (`problems/two-sum.md` …) are the reference.
+
+**Five languages, every problem.**
+- TypeScript, Python, Go, Java and JavaScript, as back-to-back fenced blocks in that order. No prose or callout between them; the theme turns them into tabs.
+- Every file runs standalone and checks its own cases:
+  - `node x.ts`, `python3 x.py`, `go run x.go`, `java x.java` (lowercase Java file names), `node x.js`;
+  - each prints `<ok>/<n> ca đúng`;
+  - paste the real output.
+- Re-run all five after any edit.
+
+Done when every catalog problem of the station has a VI and an EN page, all code runs, and the station table on the built post shows `k/k` written.
 
 ## 3. Write the post
 
@@ -88,6 +151,7 @@ For an existing note, add the backlink and sharpen the definition. Keep what is 
 Read `i18n/TRANSLATING.md` in full first. It is the contract: file locations, frontmatter, link rules, fixed section names, map vocabulary, hub and region titles, concept-title mappings and the glossary. Translate after the Vietnamese post, notes and diagram are final, so the two editions match.
 
 Translate everything this PR adds or changes:
+- **Problem pages:** `content/problems/<file>.md` → `content/en/problems/<file>.md`, same rules as a post; `lc` stays identical.
 - **Post:** `content/posts/<file>.md` → `content/en/posts/<file>.md`. Translate the whole post, not a summary: every callout, table, Mermaid label, code comment, output label and self-check question. Add `lang: en`. Keep `date`, `series`, `part`, `code`, `type`, `level`, `tags` and `draft` identical.
 - **Concept notes:** each new note → `content/en/concepts/<file>.md`. For an updated note, mirror the same change in its English version.
 - **Hub:** if this PR adds or changes a hub, update `content/en/series/<id>.md` the same way. Translate station names, and list the English concept titles (TRANSLATING.md maps the 12 Vietnamese ones).
@@ -123,7 +187,9 @@ Every check below must pass:
    - the archify iframe loads in the right theme and is not cut off;
    - every Mermaid block reads well: the render check proves it renders and is not shrunk, the screenshot proves the layout makes sense;
    - the code block matches the file;
-   - concept notes link both ways.
+   - concept notes link both ways;
+   - multi-language code shows as one tab bar (TS · Python · Go · Java · JS);
+   - NeetCode: the station table under the post lists every problem of the station as written, and each problem page's margin shows `LC-xxxx`, its difficulty and its station.
 
    Repeat the screenshots for the English edition: `/en/posts/<file>` at 1440px and 390px, plus `/en/`. Confirm:
    - the post appears in "Latest posts" with the same coordinate code;

@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "One flash-sale unit through flash-sale: four gaps",
+    "output": "content/diagrams/shopify-flash-sale/flash-sale-gaps.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "buyer",
+      "type": "frontend",
+      "label": "Buyer",
+      "sublabel": "browser"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Shop server",
+      "sublabel": "NestJS, many pods"
+    },
+    {
+      "id": "worker",
+      "type": "messagebus",
+      "label": "Number caller",
+      "sublabel": "BullMQ, every 5s"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Queue + fast stock",
+      "sublabel": "Redis: ZSET + Lua"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Main stock ledger",
+      "sublabel": "Postgres: orders, inventory"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 330,
+      "label": "Queuing"
+    },
+    {
+      "from": 345,
+      "to": 560,
+      "label": "Buying"
+    },
+    {
+      "from": 575,
+      "to": 780,
+      "label": "After buying"
+    }
+  ],
+  "messages": [
+    {
+      "id": "join",
+      "from": "buyer",
+      "to": "api",
+      "y": 170,
+      "label": "ask to join the queue",
+      "variant": "emphasis"
+    },
+    {
+      "id": "zadd",
+      "from": "api",
+      "to": "redis",
+      "y": 200,
+      "label": "record arrival time",
+      "note": "ZADD NX: one place per person"
+    },
+    {
+      "id": "pop",
+      "from": "worker",
+      "to": "redis",
+      "y": 255,
+      "label": "take first 50, issue 5-minute tickets",
+      "variant": "dashed",
+      "note": "Gap 3: ignores stock, issues tickets after selling out"
+    },
+    {
+      "id": "ready",
+      "from": "api",
+      "to": "buyer",
+      "y": 310,
+      "label": "your turn (WebSocket)",
+      "variant": "return"
+    },
+    {
+      "id": "buy",
+      "from": "buyer",
+      "to": "api",
+      "y": 365,
+      "label": "buy 1 unit",
+      "variant": "emphasis"
+    },
+    {
+      "id": "lua",
+      "from": "api",
+      "to": "redis",
+      "y": 395,
+      "label": "decrement stock + count per buyer",
+      "variant": "security",
+      "note": "flash_purchase.lua, atomic"
+    },
+    {
+      "id": "tx",
+      "from": "api",
+      "to": "db",
+      "y": 450,
+      "label": "create order awaiting payment",
+      "note": "Gap 2: pod dies between steps, Redis decremented but no order"
+    },
+    {
+      "id": "ok",
+      "from": "api",
+      "to": "buyer",
+      "y": 510,
+      "label": "201: order placed",
+      "variant": "return"
+    },
+    {
+      "id": "expire",
+      "from": "worker",
+      "to": "db",
+      "y": 595,
+      "label": "unpaid after 15 minutes: cancel order",
+      "variant": "dashed"
+    },
+    {
+      "id": "release",
+      "from": "api",
+      "to": "db",
+      "y": 640,
+      "label": "cancel event received, stock back to regular shelf",
+      "note": "Gap 1: flash-sale unit goes to the wrong shelf"
+    },
+    {
+      "id": "end",
+      "from": "worker",
+      "to": "redis",
+      "y": 700,
+      "label": "time's up: read the sold count",
+      "variant": "dashed"
+    },
+    {
+      "id": "fix",
+      "from": "worker",
+      "to": "db",
+      "y": 735,
+      "label": "fix the stock ledger to match Redis",
+      "note": "Gap 2b: phantom sales recorded as sold"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Done well",
+      "items": [
+        "Queue by arrival time, one place per person",
+        "Atomic Lua decrement, no overselling in Redis",
+        "Has a kill switch and rate limiting"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Gaps",
+      "items": [
+        "1. Cancel and complete both use the regular stock flow",
+        "2. Dual write, and reconciliation trusts Redis",
+        "3. Sold out, but the queue keeps running"
+      ]
+    }
+  ]
+}

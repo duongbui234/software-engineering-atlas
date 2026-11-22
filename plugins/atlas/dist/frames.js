@@ -1,7 +1,7 @@
 // Frame "atlas": khung neatline + masthead + lưới lề | bài | rail.
 // Toàn bộ CSS của theme nằm ở đây (Quartz chèn frame.css vào mọi trang dùng frame này).
 import { h, Fragment } from "preact"
-import { fm, isIndex, isHub, hasMargin, coordOf, hubFor, pageDate, fmtFull } from "./shared.js"
+import { fm, isIndex, isHub, hasMargin, coordOf, hubFor, pageDate, fmtFull, langOf, forLang, STR } from "./shared.js"
 import {
   AtlasBrand,
   AtlasHomeHead,
@@ -88,6 +88,15 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
 .atlas-brand .brand small { display: block; font: 400 .8125rem/1.4 var(--bodyFont); color: var(--ink-2); margin-top: .2rem; }
 .atlas-brand .brand-nav a { font-size: .9375rem; color: var(--ink); text-decoration: none; }
 .atlas-brand .brand-nav a:hover { text-decoration: underline; }
+.atlas-brand .brand-nav { display: flex; align-items: baseline; gap: 1rem; }
+.atlas-brand .brand-nav .lang-switch {
+  font: 500 .75rem/1 var(--codeFont); letter-spacing: .08em; padding: .3rem .45rem;
+  border: 1px solid var(--ink); color: var(--ink);
+}
+.atlas-brand .brand-nav .lang-switch:hover { text-decoration: none; background: var(--ink); color: var(--paper); }
+/* en/index là trang thư mục với Quartz: ẩn danh sách file, trang chủ đã có danh mục riêng */
+.atlas-sheet.is-home .page-listing { display: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .atlas-masthead .search { min-width: 12rem; }
 
 /* ── Lưới lề | bài | rail ─────────────────────────────────── */
@@ -369,15 +378,26 @@ body[data-slug="index"] article p { max-width: 36rem; margin: .5rem 0 0; }
 }
 `
 
-function cornerText(fileData, allFiles) {
+// <html lang> do Quartz đặt theo locale chung (vi-VN); trang tiếng Anh sửa lại khi tải và
+// sau mỗi lần điều hướng SPA, để trình đọc màn hình và ngắt dòng dùng đúng ngôn ngữ.
+const LANG_SCRIPT = `
+function atlasSetLang() {
+  const s = document.querySelector(".atlas-sheet[data-lang]");
+  if (s) document.documentElement.lang = s.dataset.lang === "en" ? "en" : "vi";
+}
+atlasSetLang();
+document.addEventListener("nav", atlasSetLang);
+`
+
+function cornerText(fileData, allFiles, S) {
   const m = fm(fileData)
-  if (isIndex(fileData)) return [`Cập nhật ${fmtFull(new Date())}`, "Vẽ bằng Quartz và archify"]
-  if (isHub(fileData)) return [`${m.title}, ${(m.stations || []).length} ga`, m.region || ""]
+  if (isIndex(fileData)) return [S.updated(fmtFull(new Date())), S.drawnWith]
+  if (isHub(fileData)) return [S.hubCorner(m.title, (m.stations || []).length), m.region || ""]
   const code = coordOf(allFiles, fileData)
   const hub = m.series ? hubFor(allFiles, m.series) : undefined
   const tl = [code, hub && fm(hub).region, hub && fm(hub).title].filter(Boolean).join(", ")
   const d = pageDate(fileData)
-  return [tl, d ? `Viết ${fmtFull(d)}` : ""]
+  return [tl, d ? S.writtenOn(fmtFull(d)) : ""]
 }
 
 export const AtlasFrame = {
@@ -385,28 +405,34 @@ export const AtlasFrame = {
   css: CSS,
   render({ componentData, header, beforeBody, pageBody: Content, afterBody, left, right, footer }) {
     const { fileData, allFiles } = componentData
+    const L = langOf(fileData)
+    const S = STR[L]
+    // component có sẵn của Quartz (mục lục, liên kết ngược, đồ thị, tìm kiếm) lấy chữ theo cfg.locale
+    if (L !== "vi") componentData = { ...componentData, cfg: { ...componentData.cfg, locale: S.locale } }
     const showMargin = hasMargin(fileData)
     const showRail = right.length > 0 && !isIndex(fileData) && !isHub(fileData)
-    const [tl, br] = cornerText(fileData, allFiles)
+    const [tl, br] = cornerText(fileData, forLang(allFiles, L), S)
     const gridClass = ["atlas-grid", showMargin && "has-margin", showRail && "has-rail"].filter(Boolean).join(" ")
     const render = (C) => h(C, componentData)
     return h(Fragment, null, [
       h("script", { dangerouslySetInnerHTML: { __html: ARCHIFY_SCRIPT } }),
       h("script", { dangerouslySetInnerHTML: { __html: MERMAID_SCRIPT } }),
-      h("div", { class: "atlas-sheet" }, [
+      h("div", { class: isIndex(fileData) ? "atlas-sheet is-home" : "atlas-sheet", "data-lang": L, lang: L }, [
         tl && h("span", { class: "corner tl" }, tl),
         br && h("span", { class: "corner br" }, br),
         h("div", { class: "atlas-inner" }, [
           h("header", { class: "atlas-masthead" }, [render(Brand), h("div", { class: "tools" }, header.map(render))]),
           h("div", { class: gridClass }, [
-            showMargin && h("aside", { class: "atlas-margin", "aria-label": "Thông tin bài" }, [render(Margin), ...left.map(render)]),
+            showMargin && h("aside", { class: "atlas-margin", "aria-label": S.postInfo }, [render(Margin), ...left.map(render)]),
             h("div", { class: "center" }, [
               h(
                 "div",
                 { class: "page-header" },
                 h("div", { class: "popover-hint" }, [
                   render(HomeHead),
-                  ...beforeBody.map(render),
+                  // trang chủ có tiêu đề lớn riêng (HomeHead); bỏ article-title, nhất là ở en/index,
+                  // nơi Quartz coi trang là trang thư mục nên điều kiện "not-index" không chặn được
+                  ...(isIndex(fileData) ? [] : beforeBody.map(render)),
                   render(Stand),
                   render(Line),
                   render(Hub),
@@ -416,11 +442,12 @@ export const AtlasFrame = {
               h("div", { class: "page-footer" }, [render(Home), ...afterBody.map(render)]),
             ]),
             showRail &&
-              h("aside", { class: "atlas-rail", "aria-label": "Điều hướng phụ" }, h("div", { class: "rail-inner" }, right.map(render))),
+              h("aside", { class: "atlas-rail", "aria-label": S.railNav }, h("div", { class: "rail-inner" }, right.map(render))),
           ]),
         ]),
       ]),
       ...footer.map(render),
+      h("script", { dangerouslySetInnerHTML: { __html: LANG_SCRIPT } }),
     ])
   },
 }

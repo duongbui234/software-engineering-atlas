@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Socket.IO on three pods: sticky sessions handle the way in, the Redis adapter handles broadcasting",
+    "output": "content/diagrams/websocket-scaling/pods.en.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "a",
+      "type": "frontend",
+      "label": "Buyer A",
+      "sublabel": "on pod 1",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "b",
+      "type": "frontend",
+      "label": "Buyer B",
+      "sublabel": "on pod 2",
+      "pos": [
+        40,
+        300
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "lb",
+      "type": "cloud",
+      "label": "Entry point",
+      "sublabel": "ingress-nginx: idle 30 s",
+      "pos": [
+        250,
+        180
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "p1",
+      "type": "backend",
+      "label": "Pod 1",
+      "sublabel": "A's socket + queue worker",
+      "pos": [
+        540,
+        40
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "p2",
+      "type": "backend",
+      "label": "Pod 2",
+      "sublabel": "B's socket",
+      "pos": [
+        540,
+        180
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "p3",
+      "type": "backend",
+      "label": "Pod 3",
+      "sublabel": "other people's sockets",
+      "pos": [
+        540,
+        320
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Shared broadcast channel",
+      "sublabel": "Redis Pub/Sub",
+      "pos": [
+        820,
+        180
+      ],
+      "size": [
+        210,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Each pod only knows the sockets in its own RAM",
+      "wraps": [
+        "p1",
+        "p2",
+        "p3"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ca",
+      "from": "a",
+      "to": "lb",
+      "label": "WebSocket"
+    },
+    {
+      "id": "cb",
+      "from": "b",
+      "to": "lb",
+      "label": "WebSocket"
+    },
+    {
+      "id": "l1",
+      "from": "lb",
+      "to": "p1",
+      "label": "same pod for the whole session",
+      "fromSide": "top",
+      "toSide": "left",
+      "variant": "security"
+    },
+    {
+      "id": "l2",
+      "from": "lb",
+      "to": "p2"
+    },
+    {
+      "id": "l3",
+      "from": "lb",
+      "to": "p3",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "pub",
+      "from": "p1",
+      "to": "redis",
+      "label": "PUBLISH stock_update",
+      "fromSide": "right",
+      "toSide": "top",
+      "variant": "emphasis"
+    },
+    {
+      "id": "s2",
+      "from": "redis",
+      "to": "p2",
+      "label": "pod 2 sends to B",
+      "variant": "emphasis"
+    },
+    {
+      "id": "s3",
+      "from": "redis",
+      "to": "p3",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Sticky session",
+      "items": [
+        "Mandatory while long polling is in play",
+        "Wrong pod: 400 Session ID unknown",
+        "Not needed with WebSocket only"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Adapter",
+      "items": [
+        "Without it: only people on pod 1 get the message",
+        "Redis adapter: every pod sends",
+        "Two Redis connections per pod: pub and sub"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "When a pod shuts down",
+      "items": [
+        "All the pod's clients drop at once",
+        "Jitter spreads out the reconnections",
+        "Cap the retries and clients may give up"
+      ]
+    }
+  ]
+}

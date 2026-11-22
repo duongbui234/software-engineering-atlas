@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Inside the post office: the AMQP 0-9-1 model",
+    "output": "content/diagrams/rabbitmq-amqp-model/amqp-model.en.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "producer", "type": "backend", "label": "Letter sender", "sublabel": "producer: ordering service", "pos": [40, 200], "size": [160, 70] },
+    { "id": "exchange", "type": "messagebus", "label": "Sorting desk", "sublabel": "exchange orders (topic)", "pos": [320, 200], "size": [170, 70] },
+    { "id": "q-stock", "type": "database", "label": "Stock mailbox", "sublabel": "queue stock.q", "pos": [610, 80], "size": [160, 64] },
+    { "id": "q-email", "type": "database", "label": "Email mailbox", "sublabel": "queue email.q", "pos": [610, 320], "size": [160, 64] },
+    { "id": "c-stock", "type": "backend", "label": "Stock clerk", "sublabel": "consumer: decrement stock", "pos": [880, 80], "size": [160, 64] },
+    { "id": "c-email", "type": "backend", "label": "Email clerk", "sublabel": "consumer: send email", "pos": [880, 320], "size": [160, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "RabbitMQ post office · branch (vhost) /", "wraps": ["exchange", "q-stock", "q-email"] }
+  ],
+  "connections": [
+    { "id": "publish", "from": "producer", "to": "exchange", "label": "send letter, label order.cancelled", "variant": "emphasis" },
+    { "id": "bind-stock", "from": "exchange", "to": "q-stock", "label": "rule: order.cancelled", "fromSide": "top", "toSide": "left" },
+    { "id": "bind-email", "from": "exchange", "to": "q-email", "label": "rule: order.*", "fromSide": "bottom", "toSide": "left" },
+    { "id": "deliver-stock", "from": "q-stock", "to": "c-stock", "label": "deliver letter" },
+    { "id": "deliver-email", "from": "q-email", "to": "c-email", "label": "deliver letter" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "The sender doesn't pick the mailbox",
+      "items": [
+        "The producer only hands the letter to the exchange with a label (routing key)",
+        "A binding is a rule linking an exchange to a queue",
+        "A letter that matches two rules gets two copies"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "The mail truck",
+      "items": [
+        "Connection: one long-lived, authenticated TCP connection",
+        "Channel: a logical lane inside the connection, one lane per thread",
+        "Vhost: a branch with separate names, permissions and policies"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Letters that match no rule",
+      "items": [
+        "Dropped by default, with no error",
+        "Station 3: mandatory, alternate exchange"
+      ]
+    }
+  ]
+}

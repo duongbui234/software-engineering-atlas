@@ -71,7 +71,7 @@ Trong docker-compose của flash-sale, Redis chạy không đặt `maxmemory`. N
 
 ### Maxmemory: đặt trần cho bộ nhớ
 
-**[[maxmemory|`maxmemory`]]** là lượng bộ nhớ tối đa Redis được dùng cho dữ liệu. Mặc định là `0`, nghĩa là không giới hạn (trên máy 64-bit). Khi đặt giới hạn, mỗi lệnh ghi mà làm bộ nhớ vượt trần sẽ kích hoạt việc đẩy key theo chính sách đã chọn.
+**[[concepts/maxmemory|`maxmemory`]]** là lượng bộ nhớ tối đa Redis được dùng cho dữ liệu. Mặc định là `0`, nghĩa là không giới hạn (trên máy 64-bit). Khi đặt giới hạn, mỗi lệnh ghi mà làm bộ nhớ vượt trần sẽ kích hoạt việc đẩy key theo chính sách đã chọn.
 
 Vài lưu ý khi chọn con số:
 
@@ -80,7 +80,7 @@ Vài lưu ý khi chọn con số:
 
 ### Eviction policy: đầy thì đẩy key nào
 
-**[[eviction-policy|`maxmemory-policy`]]** có hai nửa: *nhóm* key được phép đẩy, và *luật* chọn key trong nhóm. Redis 8 có mười giá trị:
+**[[concepts/eviction-policy|`maxmemory-policy`]]** có hai nửa: *nhóm* key được phép đẩy, và *luật* chọn key trong nhóm. Redis 8 có mười giá trị:
 
 | Chính sách | Đẩy trong nhóm | Theo luật |
 |---|---|---|
@@ -134,7 +134,7 @@ Cách xử lý: dùng **`UNLINK`** thay `DEL` (Redis 4.0+: gỡ key khỏi keysp
 
 ### SCAN và KEYS: tìm key mà không làm Redis đứng hình
 
-**[[scan-va-keys|`KEYS pattern`]]** duyệt **toàn bộ** keyspace trong một lệnh. Tài liệu Redis ghi thẳng: "Use extreme care when using this command in production… Don't use KEYS in your regular application code". Trong lúc nó chạy, không client nào khác được phục vụ.
+**[[concepts/scan-va-keys|`KEYS pattern`]]** duyệt **toàn bộ** keyspace trong một lệnh. Tài liệu Redis ghi thẳng: "Use extreme care when using this command in production… Don't use KEYS in your regular application code". Trong lúc nó chạy, không client nào khác được phục vụ.
 
 **`SCAN cursor MATCH pattern COUNT n`** duyệt từng đợt nhỏ: mỗi lần trả một ít key và một con trỏ để gọi tiếp, tới khi con trỏ về `0`. Giữa các đợt, client khác vẫn chạy bình thường. Cái giá: tổng thời gian lâu hơn, có thể trả trùng một key (phải tự lọc), và key thêm hoặc xóa trong lúc quét có thể có hoặc không có trong kết quả. Key tồn tại suốt quá trình thì chắc chắn được trả.
 

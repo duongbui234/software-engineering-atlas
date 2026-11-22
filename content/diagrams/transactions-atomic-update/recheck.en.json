@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "1 unit left, two conditional UPDATEs",
+    "output": "content/diagrams/transactions-atomic-update/recheck.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "a",
+      "type": "backend",
+      "label": "Request A",
+      "sublabel": "reserveStock()"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "stock row, stock = 1"
+    },
+    {
+      "id": "b",
+      "type": "backend",
+      "label": "Request B",
+      "sublabel": "reserveStock()"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 480,
+      "label": "READ COMMITTED: B waits, re-reads, doesn't decrement"
+    },
+    {
+      "from": 505,
+      "to": 710,
+      "label": "REPEATABLE READ: B is aborted"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "a",
+      "to": "pg",
+      "y": 170,
+      "label": "decrement if ≥ 1 left",
+      "variant": "emphasis",
+      "note": "UPDATE … SET stock = stock - 1 WHERE stock >= 1"
+    },
+    {
+      "id": "a2",
+      "from": "pg",
+      "to": "a",
+      "y": 230,
+      "label": "1 row, row lock until commit",
+      "variant": "return",
+      "note": "stock = 0, not committed"
+    },
+    {
+      "id": "b1",
+      "from": "b",
+      "to": "pg",
+      "y": 280,
+      "label": "decrement if ≥ 1 left",
+      "variant": "default",
+      "note": "same UPDATE"
+    },
+    {
+      "id": "b2",
+      "from": "pg",
+      "to": "b",
+      "y": 330,
+      "label": "waiting for A's row lock…",
+      "variant": "dashed",
+      "note": "300 ms"
+    },
+    {
+      "id": "a3",
+      "from": "a",
+      "to": "pg",
+      "y": 380,
+      "label": "commit",
+      "variant": "default",
+      "note": "COMMIT, release the lock"
+    },
+    {
+      "id": "b3",
+      "from": "pg",
+      "to": "b",
+      "y": 435,
+      "label": "re-read new version: 0 ≥ 1? false",
+      "variant": "return",
+      "note": "0 rows matched → sold out"
+    },
+    {
+      "id": "c1",
+      "from": "b",
+      "to": "pg",
+      "y": 525,
+      "label": "same statement, after the lock wait",
+      "variant": "default",
+      "note": "BEGIN ISOLATION LEVEL REPEATABLE READ"
+    },
+    {
+      "id": "c2",
+      "from": "a",
+      "to": "pg",
+      "y": 580,
+      "label": "commit",
+      "variant": "default",
+      "note": "COMMIT"
+    },
+    {
+      "id": "c3",
+      "from": "pg",
+      "to": "b",
+      "y": 635,
+      "label": "row changed after B's snapshot",
+      "variant": "security",
+      "note": "40001 concurrent update"
+    },
+    {
+      "id": "c4",
+      "from": "b",
+      "to": "pg",
+      "y": 685,
+      "label": "retry, this time sees sold out",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "One statement, no gap",
+      "items": [
+        "Check and decrement in one UPDATE",
+        "No moment to cut in between",
+        "rowCount = 0 means sold out"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Re-check after the wait",
+      "items": [
+        "Read Committed re-runs the WHERE",
+        "on the newest row version",
+        "Correct with no retry"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Final net: CHECK",
+      "items": [
+        "CHECK (stock >= 0)",
+        "Code that forgets the condition is still blocked",
+        "Error 23514, transaction rolls back"
+      ]
+    }
+  ]
+}

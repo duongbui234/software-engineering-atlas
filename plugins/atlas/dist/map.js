@@ -1,6 +1,6 @@
 // Bản đồ kiến thức (trang chủ): vùng = series/region, địa danh = ghi chú khái niệm, tuyến = series.
 import { h } from "preact"
-import { fm, rel, hubs, lineState, isConcept, isListed, hash, pageDate } from "./shared.js"
+import { fm, rel, hubs, lineState, isConcept, isListed, hash, pageDate, STR } from "./shared.js"
 
 const W = 960
 const H = 400
@@ -77,7 +77,7 @@ const dotBox = (x, y, r) => ({ x1: x - r, x2: x + r, y1: y - r, y2: y + r })
  * hàng thứ hai/ba (có đường dẫn), rồi mới sang phía đối diện. Lấy vị trí đầu tiên không đè lên
  * nhãn khác, chấm ga hay mép bản đồ; nếu không có, lấy vị trí đè ít nhất.
  */
-function placeStationLabels(stations, pts, fs, bounds, obstacles) {
+function placeStationLabels(stations, pts, fs, bounds, obstacles, S) {
   const placed = []
   const result = new Array(stations.length)
   const dots = pts.map(([x, y]) => dotBox(x, y, 9))
@@ -101,7 +101,7 @@ function placeStationLabels(stations, pts, fs, bounds, obstacles) {
     const lh = fs + 4
     const cands = []
     if (now) {
-      const w = Math.max(textW(s.name, fs, true), textW("bạn đang ở đây", fs))
+      const w = Math.max(textW(s.name, fs, true), textW(S.youAreHereLower, fs))
       const two = (anchor, ax, base, side) => ({ anchor, ax, base, side, rows: 0, box: boxOf(anchor, ax, base, w, fs, 2, fs + 4) })
       cands.push(two("start", x + 13, y - 6, "right"), two("end", x - 13, y - 6, "left"))
       for (const k of [0, 1]) {
@@ -134,7 +134,7 @@ function placeStationLabels(stations, pts, fs, bounds, obstacles) {
 }
 
 /** Dựng các lớp của bản đồ với cỡ chữ `fs` trong vùng nhìn `view` (bản rộng và bản hẹp có cỡ chữ khác nhau). */
-function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
+function buildLayers({ slug, allFiles, regions, slots, fs, view, S }) {
   const layers = { contours: [], routes: [], towns: [], labels: [] }
   const descParts = []
   const bounds = { x1: view.x + 4, x2: view.x + view.w - 4, y1: 4, y2: H - 4 }
@@ -173,7 +173,7 @@ function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
       if (visitedIdx >= 0) line(0, visitedIdx, "route")
       line(Math.max(visitedIdx, 0), n - 1, "route ahead")
 
-      const labels = placeStationLabels(st, pts, fs, bounds, [regionBox])
+      const labels = placeStationLabels(st, pts, fs, bounds, [regionBox], S)
       st.forEach((s, i) => {
         const [x, y] = pts[i]
         const L = labels[i]
@@ -191,7 +191,7 @@ function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
             h("circle", { class: "here-ring", cx: x, cy: y, r: 9 }),
             h("circle", { class: "here", cx: x, cy: y, r: 7 }),
             h("text", { class: "here-label", x: L.ax, y: L.base, "text-anchor": L.anchor }, s.name),
-            h("text", { class: "here-label sub", x: L.ax, y: L.base + fs + 4, "text-anchor": L.anchor }, "bạn đang ở đây"),
+            h("text", { class: "here-label sub", x: L.ax, y: L.base + fs + 4, "text-anchor": L.anchor }, S.youAreHereLower),
           )
         } else {
           parts.push(
@@ -207,7 +207,7 @@ function buildLayers({ slug, allFiles, regions, slots, fs, view }) {
       })
       const here = st.find((s) => s.state === "now")
       descParts.push(
-        `Tuyến ${fm(region.hub).title} đã đi ${region.state.visited} trên ${n} ga${here ? `, đang ở ga ${here.name}` : ""}.`,
+        S.mapLine(S.lineTitleShort(fm(region.hub).title), region.state.visited, n, here && here.name),
       )
 
       // Khái niệm thuộc một ga: "làng" nhỏ tụ quanh ga đó, phía đối diện nhãn ga.
@@ -264,7 +264,7 @@ function stationPoints(slot, n) {
   })
 }
 
-export function KnowledgeMap({ slug, allFiles }) {
+export function KnowledgeMap({ slug, allFiles, S = STR.vi }) {
   const region = currentRegion(allFiles)
   if (!region) return null
   const regions = [region]
@@ -282,9 +282,9 @@ export function KnowledgeMap({ slug, allFiles }) {
   const narrowX = Math.max(0, Math.min(W - narrowW, focusX - narrowW * 0.62))
 
   const svg = (cls, view, fs, id) => {
-    const { children, desc } = buildLayers({ slug, allFiles, regions, slots, fs, view })
+    const { children, desc } = buildLayers({ slug, allFiles, regions, slots, fs, view, S })
     return h("svg", { class: cls, viewBox: `${view.x.toFixed(0)} 0 ${view.w} ${H}`, role: "img", "aria-labelledby": `${id}-t ${id}-d` }, [
-      h("title", { id: `${id}-t` }, "Bản đồ kiến thức"),
+      h("title", { id: `${id}-t` }, S.mapTitle),
       h("desc", { id: `${id}-d` }, desc),
       ...children,
     ])
@@ -308,7 +308,7 @@ function miniLine(state) {
   ])
 }
 
-export function sheetIndex({ slug, allFiles, fmtDay }) {
+export function sheetIndex({ slug, allFiles, fmtDay, S = STR.vi }) {
   const lines = linesByRecency(allFiles)
   const inLine = new Set(lines.flatMap((l) => l.state.stations.flatMap((st) => st.concepts.map((c) => String(c).toLowerCase()))))
   const loose = new Map()
@@ -316,7 +316,7 @@ export function sheetIndex({ slug, allFiles, fmtDay }) {
     if (!isConcept(f) || !isListed(f)) continue
     if (inLine.has(String(fm(f).title || "").toLowerCase())) continue
     const m = fm(f)
-    const name = m.region || (Array.isArray(m.tags) && m.tags[0] ? `Vùng ${m.tags[0]}` : "Vùng khác")
+    const name = m.region || (Array.isArray(m.tags) && m.tags[0] ? S.regionFromTag(m.tags[0]) : S.otherRegion)
     if (!loose.has(name)) loose.set(name, [])
     loose.get(name).push(f)
   }
@@ -331,11 +331,11 @@ export function sheetIndex({ slug, allFiles, fmtDay }) {
         node: h("li", { class: "sheet" }, [
           h("a", { class: "internal sheet-link", href: rel(slug, hub.slug) }, [
             h("span", { class: "sheet-head" }, [h("span", { class: "sheet-code" }, state.code), h("span", { class: "sheet-region" }, m.region || "")]),
-            h("span", { class: "sheet-t" }, String(m.title || "").replace(/^Tuyến\s+/i, "")),
+            h("span", { class: "sheet-t" }, S.lineTitleShort(m.title)),
             miniLine(state),
             h("span", { class: "sheet-meta" }, [
-              `${state.visited}/${state.stations.length} ga`,
-              done ? " · đã đi hết" : here ? ` · đang ở ga ${here.n}` : "",
+              S.sheetStations(state.visited, state.stations.length),
+              done ? S.sheetDone : here ? S.sheetHere(here.n) : "",
               lastDate ? ` · ${fmtDay(new Date(lastDate))}` : "",
             ]),
           ]),
@@ -348,14 +348,14 @@ export function sheetIndex({ slug, allFiles, fmtDay }) {
       return {
         lastDate: lastDate - 1, // mảnh lẻ xếp sau tuyến cùng ngày
         node: h("li", { class: "sheet loose" }, [
-          h("span", { class: "sheet-head" }, [h("span", { class: "sheet-code" }, "LẺ"), h("span", { class: "sheet-region" }, name)]),
-          h("span", { class: "sheet-t" }, `${list.length} địa danh rời`),
+          h("span", { class: "sheet-head" }, [h("span", { class: "sheet-code" }, S.looseCode), h("span", { class: "sheet-region" }, name)]),
+          h("span", { class: "sheet-t" }, S.looseCount(list.length)),
           h(
             "span",
             { class: "sheet-towns" },
             list.slice(0, LOOSE_SHOWN).flatMap((c, i) => [i ? " · " : "", h("a", { class: "internal", href: rel(slug, c.slug) }, fm(c).title)]),
           ),
-          list.length > LOOSE_SHOWN && h("span", { class: "sheet-meta" }, `và ${list.length - LOOSE_SHOWN} địa danh khác`),
+          list.length > LOOSE_SHOWN && h("span", { class: "sheet-meta" }, S.looseMore(list.length - LOOSE_SHOWN)),
         ]),
       }
     }),
@@ -365,12 +365,12 @@ export function sheetIndex({ slug, allFiles, fmtDay }) {
   const shown = sheets.slice(0, SHEETS_SHOWN).map((s) => s.node)
   const rest = sheets.slice(SHEETS_SHOWN).map((s) => s.node)
   return h("section", { class: "sheets", "aria-labelledby": "sh-h" }, [
-    h("h2", { id: "sh-h" }, "Mục lục bản đồ"),
-    h("p", { class: "sheets-lede" }, `${lines.length} tuyến, mỗi tuyến một mảnh. Bản đồ phía trên là mảnh vừa đi.`),
+    h("h2", { id: "sh-h" }, S.sheetsTitle),
+    h("p", { class: "sheets-lede" }, S.sheetsLede(lines.length)),
     h("ol", { class: "sheet-grid" }, shown),
     rest.length > 0 &&
       h("details", { class: "sheets-more" }, [
-        h("summary", null, `Xem tất cả ${sheets.length} mảnh`),
+        h("summary", null, S.sheetsAll(sheets.length)),
         h("ol", { class: "sheet-grid" }, rest),
       ]),
   ])

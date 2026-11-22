@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Lifecycle of a POST /api/v1/checkout request",
+    "output": "content/diagrams/api-foundations/request-lifecycle.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Browser",
+      "sublabel": "sends with axios"
+    },
+    {
+      "id": "mw",
+      "type": "backend",
+      "label": "Host",
+      "sublabel": "Middleware: CorrelationId"
+    },
+    {
+      "id": "guard",
+      "type": "security",
+      "label": "Security",
+      "sublabel": "Guards: JWT, perms, rate"
+    },
+    {
+      "id": "pipe",
+      "type": "backend",
+      "label": "Body check",
+      "sublabel": "ValidationPipe"
+    },
+    {
+      "id": "ctrl",
+      "type": "backend",
+      "label": "Order handling",
+      "sublabel": "Controller + service"
+    },
+    {
+      "id": "icpt",
+      "type": "backend",
+      "label": "Result packaging",
+      "sublabel": "TransformInterceptor"
+    },
+    {
+      "id": "filter",
+      "type": "backend",
+      "label": "Error reporting",
+      "sublabel": "HttpExceptionFilter"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 420,
+      "label": "Order placed"
+    },
+    {
+      "from": 440,
+      "to": 700,
+      "label": "Product out of stock"
+    }
+  ],
+  "messages": [
+    {
+      "id": "req1",
+      "from": "browser",
+      "to": "mw",
+      "y": 170,
+      "label": "POST /checkout",
+      "variant": "emphasis",
+      "note": "Authorization, Idempotency-Key, body JSON"
+    },
+    {
+      "id": "mw1",
+      "from": "mw",
+      "to": "guard",
+      "y": 225,
+      "label": "forward, with a lookup number",
+      "note": "next(): X-Correlation-ID stored in AsyncLocalStorage"
+    },
+    {
+      "id": "g1",
+      "from": "guard",
+      "to": "pipe",
+      "y": 280,
+      "label": "valid pass, enough permissions",
+      "variant": "security"
+    },
+    {
+      "id": "p1",
+      "from": "pipe",
+      "to": "ctrl",
+      "y": 315,
+      "label": "body matches the form"
+    },
+    {
+      "id": "c1",
+      "from": "ctrl",
+      "to": "icpt",
+      "y": 350,
+      "label": "result: order id, total"
+    },
+    {
+      "id": "ok",
+      "from": "icpt",
+      "to": "browser",
+      "y": 385,
+      "label": "201 { success, data, msg }",
+      "variant": "return"
+    },
+    {
+      "id": "req2",
+      "from": "browser",
+      "to": "mw",
+      "y": 460,
+      "label": "POST /checkout",
+      "variant": "emphasis"
+    },
+    {
+      "id": "mw2",
+      "from": "mw",
+      "to": "guard",
+      "y": 495,
+      "label": "forward"
+    },
+    {
+      "id": "g2",
+      "from": "guard",
+      "to": "pipe",
+      "y": 530,
+      "label": "past security",
+      "variant": "security"
+    },
+    {
+      "id": "p2",
+      "from": "pipe",
+      "to": "ctrl",
+      "y": 565,
+      "label": "body matches the form"
+    },
+    {
+      "id": "c2",
+      "from": "ctrl",
+      "to": "filter",
+      "y": 600,
+      "label": "throws 409: out of stock",
+      "variant": "dashed",
+      "note": "Stock reservation failed; the error carries code FLASH_SALE_OUT_OF_STOCK"
+    },
+    {
+      "id": "err",
+      "from": "filter",
+      "to": "browser",
+      "y": 660,
+      "label": "409 { success: false, msg }",
+      "variant": "return",
+      "note": "Code lost: the frontend only shows axios's default message"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Fixed order",
+      "items": [
+        "Host → security → body check → handling → packaging",
+        "Security blocks before any effort goes into checking the body",
+        "An error at any stop goes to the error-reporting stop"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Bug found",
+      "items": [
+        "The exception carries code FLASH_SALE_OUT_OF_STOCK",
+        "The error stop keeps only message, returns a msg field",
+        "The frontend reads message and code, so it finds nothing"
+      ]
+    }
+  ]
+}

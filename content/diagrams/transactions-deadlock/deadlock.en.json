@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Two carts lock two SKUs in opposite orders",
+    "output": "content/diagrams/transactions-deadlock/deadlock.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "x",
+      "type": "backend",
+      "label": "Cart X",
+      "sublabel": "[A, B]"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "inventories A, B"
+    },
+    {
+      "id": "y",
+      "type": "backend",
+      "label": "Cart Y",
+      "sublabel": "[B, A]"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 470,
+      "label": "Unsorted: wait cycle"
+    },
+    {
+      "from": 495,
+      "to": 700,
+      "label": "Sorted ascending: queuing"
+    }
+  ],
+  "messages": [
+    {
+      "id": "x1",
+      "from": "x",
+      "to": "pg",
+      "y": 170,
+      "label": "reserve SKU A",
+      "variant": "default",
+      "note": "UPDATE … WHERE sku = 'A'"
+    },
+    {
+      "id": "y1",
+      "from": "y",
+      "to": "pg",
+      "y": 220,
+      "label": "reserve SKU B",
+      "variant": "default",
+      "note": "UPDATE … WHERE sku = 'B'"
+    },
+    {
+      "id": "x2",
+      "from": "x",
+      "to": "pg",
+      "y": 270,
+      "label": "now B: wait for Y",
+      "variant": "dashed",
+      "note": "B is locked by Y"
+    },
+    {
+      "id": "y2",
+      "from": "y",
+      "to": "pg",
+      "y": 320,
+      "label": "now A: wait for X",
+      "variant": "dashed",
+      "note": "closed wait cycle"
+    },
+    {
+      "id": "d1",
+      "from": "pg",
+      "to": "x",
+      "y": 375,
+      "label": "after 1 second: abort X",
+      "variant": "security",
+      "note": "40P01 deadlock detected"
+    },
+    {
+      "id": "d2",
+      "from": "pg",
+      "to": "y",
+      "y": 425,
+      "label": "Y gets A, COMMIT",
+      "variant": "return",
+      "note": "deadlock_timeout = 1s"
+    },
+    {
+      "id": "s1",
+      "from": "x",
+      "to": "pg",
+      "y": 515,
+      "label": "sorted: A first",
+      "variant": "emphasis",
+      "note": "sort(skuIds)"
+    },
+    {
+      "id": "s2",
+      "from": "y",
+      "to": "pg",
+      "y": 565,
+      "label": "sorted: also A first",
+      "variant": "default",
+      "note": "waits for X at the very first lock"
+    },
+    {
+      "id": "s3",
+      "from": "x",
+      "to": "pg",
+      "y": 615,
+      "label": "take B, COMMIT",
+      "variant": "return"
+    },
+    {
+      "id": "s4",
+      "from": "pg",
+      "to": "y",
+      "y": 665,
+      "label": "Y's turn, nobody aborted",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Deadlock",
+      "items": [
+        "Each side holds what the other needs",
+        "Postgres checks after deadlock_timeout",
+        "Aborts one side, unpredictably"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Lock ordering",
+      "items": [
+        "All code locks rows in the same order",
+        "flash-sale sorts skuId ascending",
+        "20/20 carts done, 0 errors"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Hold locks briefly",
+      "items": [
+        "No external API calls in a transaction",
+        "lock_timeout to fail fast",
+        "Retry 40P01 with jitter, but only as a net"
+      ]
+    }
+  ]
+}

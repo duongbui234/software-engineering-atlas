@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "One-pass hash map on [3, 2, 4], target 6",
+    "output": "content/diagrams/neetcode-two-sum/one-pass.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Loop",
+      "sublabel": "reads nums[i]"
+    },
+    {
+      "id": "map",
+      "type": "database",
+      "label": "Value → index notebook",
+      "sublabel": "Map / dict / map / HashMap"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 300,
+      "label": "i = 0: ask first, store second"
+    },
+    {
+      "from": 320,
+      "to": 450,
+      "label": "i = 1: complement not there yet"
+    },
+    {
+      "from": 470,
+      "to": 610,
+      "label": "i = 2: found"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "loop",
+      "to": "map",
+      "y": 170,
+      "label": "is value 3 there?",
+      "variant": "default",
+      "note": "x = 3, need 6 − 3 = 3"
+    },
+    {
+      "id": "a2",
+      "from": "map",
+      "to": "loop",
+      "y": 215,
+      "label": "no (notebook empty)",
+      "variant": "return",
+      "note": "storing first would find itself"
+    },
+    {
+      "id": "a3",
+      "from": "loop",
+      "to": "map",
+      "y": 260,
+      "label": "store 3 → 0",
+      "variant": "default"
+    },
+    {
+      "id": "b1",
+      "from": "loop",
+      "to": "map",
+      "y": 340,
+      "label": "is value 4 there?",
+      "variant": "default",
+      "note": "x = 2, need 4"
+    },
+    {
+      "id": "b2",
+      "from": "map",
+      "to": "loop",
+      "y": 385,
+      "label": "no: store 2 → 1",
+      "variant": "return"
+    },
+    {
+      "id": "c1",
+      "from": "loop",
+      "to": "map",
+      "y": 490,
+      "label": "is value 2 there?",
+      "variant": "emphasis",
+      "note": "x = 4, need 2"
+    },
+    {
+      "id": "c2",
+      "from": "map",
+      "to": "loop",
+      "y": 540,
+      "label": "yes, at index 1",
+      "variant": "emphasis",
+      "note": "return [1, 2]"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Complement lookup",
+      "items": [
+        "Need exactly target − x",
+        "One map lookup",
+        "O(n) time, O(n) space"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Two pointers",
+      "items": [
+        "Needs a sorted array",
+        "Sort indices, keep original positions",
+        "O(n log n)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "O(1) is an average",
+      "items": [
+        "Collision: many keys, one bucket",
+        "Java: bucket ≥ 8 keys becomes a tree",
+        "Table growth: amortized O(1)"
+      ]
+    }
+  ]
+}

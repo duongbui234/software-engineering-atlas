@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "A flash sale that never oversells: Redis filters first, Postgres holds the truth",
+    "output": "content/diagrams/transactions-flash-sale/gate.en.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "buyers",
+      "type": "frontend",
+      "label": "3000 people click buy",
+      "sublabel": "all at 21:00",
+      "pos": [
+        40,
+        180
+      ],
+      "size": [
+        180,
+        64
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Order server",
+      "sublabel": "FlashSaleOrderService",
+      "pos": [
+        280,
+        180
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Gate",
+      "sublabel": "Redis Lua: DECRBY + per-buyer limit",
+      "pos": [
+        560,
+        40
+      ],
+      "size": [
+        230,
+        64
+      ]
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Ledger of truth",
+      "sublabel": "Postgres: conditional UPDATE + INSERT order",
+      "pos": [
+        560,
+        320
+      ],
+      "size": [
+        230,
+        64
+      ]
+    },
+    {
+      "id": "rec",
+      "type": "backend",
+      "label": "End-of-campaign reconciliation",
+      "sublabel": "FlashSaleReconcileService",
+      "pos": [
+        880,
+        180
+      ],
+      "size": [
+        220,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "One Postgres transaction",
+      "wraps": [
+        "pg"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "buyers",
+      "to": "api",
+      "label": "POST order"
+    },
+    {
+      "id": "c2",
+      "from": "api",
+      "to": "redis",
+      "label": "units left? decrement 1",
+      "fromSide": "top",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c3",
+      "from": "api",
+      "to": "pg",
+      "label": "100 transactions, not 3000",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c4",
+      "from": "pg",
+      "to": "api",
+      "label": "DB error: compensate Redis",
+      "fromSide": "top",
+      "toSide": "right",
+      "variant": "dashed"
+    },
+    {
+      "id": "c5",
+      "from": "rec",
+      "to": "pg",
+      "label": "count real orders",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "variant": "default"
+    },
+    {
+      "id": "c6",
+      "from": "rec",
+      "to": "redis",
+      "label": "fix counters, free phantom units",
+      "fromSide": "top",
+      "toSide": "right",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Redis gate",
+      "items": [
+        "Lua runs whole, nobody cuts in",
+        "2900 people rejected in RAM",
+        "Postgres only sees buyers with a unit"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Postgres",
+      "items": [
+        "UPDATE sold < allocated",
+        "CHECK sold <= allocated is the final net",
+        "Real orders are the source of truth"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "When they drift",
+      "items": [
+        "DB error: Lua compensation returns the unit",
+        "Pod dies midway: phantom unit",
+        "Reconciliation at the end fixes it"
+      ]
+    }
+  ]
+}

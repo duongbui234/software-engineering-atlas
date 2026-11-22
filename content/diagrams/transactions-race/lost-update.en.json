@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Two buyers both see 1 unit left",
+    "output": "content/diagrams/transactions-race/lost-update.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "a",
+      "type": "frontend",
+      "label": "Buyer A",
+      "sublabel": "request 1"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "items.stock = 1"
+    },
+    {
+      "id": "b",
+      "type": "frontend",
+      "label": "Buyer B",
+      "sublabel": "request 2"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 400,
+      "label": "Both read before either writes"
+    },
+    {
+      "from": 425,
+      "to": 660,
+      "label": "Both write from a stale number"
+    }
+  ],
+  "messages": [
+    {
+      "id": "r1",
+      "from": "a",
+      "to": "pg",
+      "y": 170,
+      "label": "how many units left?",
+      "variant": "default",
+      "note": "SELECT stock → 1"
+    },
+    {
+      "id": "r2",
+      "from": "b",
+      "to": "pg",
+      "y": 220,
+      "label": "how many units left?",
+      "variant": "default",
+      "note": "SELECT stock → 1"
+    },
+    {
+      "id": "c1",
+      "from": "pg",
+      "to": "a",
+      "y": 270,
+      "label": "1, you can buy",
+      "variant": "return"
+    },
+    {
+      "id": "c2",
+      "from": "pg",
+      "to": "b",
+      "y": 320,
+      "label": "1, you can buy",
+      "variant": "return",
+      "note": "both go price it, check vouchers… 2 ms"
+    },
+    {
+      "id": "w1",
+      "from": "a",
+      "to": "pg",
+      "y": 445,
+      "label": "create order, write stock = 0",
+      "variant": "emphasis",
+      "note": "INSERT orders; UPDATE stock = 0"
+    },
+    {
+      "id": "w2",
+      "from": "b",
+      "to": "pg",
+      "y": 500,
+      "label": "create order, write stock = 0",
+      "variant": "security",
+      "note": "overwrites A's decrement"
+    },
+    {
+      "id": "e1",
+      "from": "pg",
+      "to": "a",
+      "y": 555,
+      "label": "COMMIT",
+      "variant": "return"
+    },
+    {
+      "id": "e2",
+      "from": "pg",
+      "to": "b",
+      "y": 605,
+      "label": "COMMIT: 2 orders, stock still 0",
+      "variant": "return",
+      "note": "1 oversold, 1 decrement lost"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Lost update",
+      "items": [
+        "Two decrements, stock drops by one",
+        "The later write overwrites the earlier",
+        "Read Committed allows it"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Check-then-act",
+      "items": [
+        "Check and act are separate",
+        "The condition is stale when acting",
+        "stock - 1 still oversells"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Measured",
+      "items": [
+        "300 people, 100 units",
+        "Read then write: 300 orders",
+        "Check then decrement: 149 orders, stock -49"
+      ]
+    }
+  ]
+}

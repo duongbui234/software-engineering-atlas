@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Life of a letter: receipt, delivery, death mid-task, redelivery",
+    "output": "content/diagrams/rabbitmq-ack-confirm/letter-life.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "producer",
+      "type": "backend",
+      "label": "Sender",
+      "sublabel": "producer, confirm channel"
+    },
+    {
+      "id": "broker",
+      "type": "messagebus",
+      "label": "Mailbox",
+      "sublabel": "RabbitMQ: durable queue"
+    },
+    {
+      "id": "disk",
+      "type": "database",
+      "label": "Storeroom",
+      "sublabel": "broker's disk"
+    },
+    {
+      "id": "worker-a",
+      "type": "backend",
+      "label": "Clerk A",
+      "sublabel": "consumer, prefetch 1"
+    },
+    {
+      "id": "worker-b",
+      "type": "backend",
+      "label": "Clerk B",
+      "sublabel": "consumer, prefetch 1"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 255,
+      "label": "Publish and get the receipt"
+    },
+    {
+      "from": 270,
+      "to": 360,
+      "label": "A receives, then dies"
+    },
+    {
+      "from": 380,
+      "to": 510,
+      "label": "Redelivered to B"
+    }
+  ],
+  "messages": [
+    {
+      "id": "publish",
+      "from": "producer",
+      "to": "broker",
+      "y": 165,
+      "label": "send registered letter, ask for receipt",
+      "variant": "emphasis",
+      "note": "publish persistent=true"
+    },
+    {
+      "id": "persist",
+      "from": "broker",
+      "to": "disk",
+      "y": 200,
+      "label": "write letter to disk",
+      "variant": "default"
+    },
+    {
+      "id": "confirm",
+      "from": "broker",
+      "to": "producer",
+      "y": 240,
+      "label": "receipt: I'm holding the letter",
+      "variant": "return",
+      "note": "basic.ack from publisher confirm"
+    },
+    {
+      "id": "deliver-a",
+      "from": "broker",
+      "to": "worker-a",
+      "y": 285,
+      "label": "deliver letter #1",
+      "variant": "default",
+      "note": "redelivered=false, A is full (prefetch 1)"
+    },
+    {
+      "id": "crash",
+      "from": "worker-a",
+      "to": "broker",
+      "y": 345,
+      "label": "A dies before signing",
+      "variant": "dashed",
+      "note": "channel closed, letter unacked"
+    },
+    {
+      "id": "deliver-b",
+      "from": "broker",
+      "to": "worker-b",
+      "y": 400,
+      "label": "redeliver letter #1",
+      "variant": "emphasis",
+      "note": "redelivered=true"
+    },
+    {
+      "id": "ack",
+      "from": "worker-b",
+      "to": "broker",
+      "y": 445,
+      "label": "signed: done processing",
+      "variant": "return",
+      "note": "basic.ack"
+    },
+    {
+      "id": "delete",
+      "from": "broker",
+      "to": "disk",
+      "y": 490,
+      "label": "remove letter from mailbox",
+      "variant": "default"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "broker",
+      "from": 165,
+      "to": 245,
+      "type": "messagebus"
+    },
+    {
+      "participant": "disk",
+      "from": 195,
+      "to": 215,
+      "type": "database"
+    },
+    {
+      "participant": "worker-a",
+      "from": 285,
+      "to": 345,
+      "type": "backend"
+    },
+    {
+      "participant": "worker-b",
+      "from": 400,
+      "to": 445,
+      "type": "backend"
+    },
+    {
+      "participant": "broker",
+      "from": 445,
+      "to": 495,
+      "type": "messagebus"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Acknowledgements both ways",
+      "items": [
+        "Publisher confirm: the broker tells the sender 'I'm holding the letter'",
+        "Consumer ack: the recipient tells the broker 'I'm done processing'",
+        "Only after the ack does the broker delete the letter"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "If you use auto-ack",
+      "items": [
+        "The letter counts as done the moment it is delivered to A",
+        "If A dies, the letter is lost and B never sees it",
+        "Prefetch stops working, and A can be flooded"
+      ]
+    }
+  ]
+}

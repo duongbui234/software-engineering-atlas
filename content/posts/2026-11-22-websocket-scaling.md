@@ -21,7 +21,7 @@ sources:
 > - Mỗi pod chỉ biết socket trong RAM của nó. Hai bài toán khác nhau: **đường vào** (request của một phiên phải tới đúng pod) và **đường ra** (tin phát ở pod 1 phải tới người đang ở pod 2).
 > - [[concepts/sticky-session|Sticky session]] lo đường vào. Bắt buộc khi còn long polling: tới nhầm pod là `400 Session ID unknown`. Chỉ dùng WebSocket thì không cần.
 > - [[concepts/socket-io-adapter|Adapter]] lo đường ra. Redis adapter publish mỗi lần phát lên Redis Pub/Sub để mọi pod cùng gửi; mỗi pod cần hai kết nối Redis riêng.
-> - [[reverse-proxy-upgrade|Proxy phải chuyển tiếp `Upgrade`]], và [[concepts/idle-timeout|idle timeout]] của mọi tầng phải dài hơn heartbeat (Socket.IO khuyên trên 45 giây; flash-sale đang đặt 30).
+> - [[concepts/reverse-proxy-upgrade|Proxy phải chuyển tiếp `Upgrade`]], và [[concepts/idle-timeout|idle timeout]] của mọi tầng phải dài hơn heartbeat (Socket.IO khuyên trên 45 giây; flash-sale đang đặt 30).
 > - Pod tắt là mọi client của nó đứt cùng lúc: [[concepts/reconnect-storm|reconnect storm]]. Jitter rải lượt nối lại, và [[concepts/graceful-shutdown|graceful shutdown]] đóng kết nối có chủ đích trước khi tiến trình thoát.
 
 > [!info] Bối cảnh

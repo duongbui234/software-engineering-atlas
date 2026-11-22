@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "The read path of the search API",
+    "output": "content/diagrams/api-performance/search-read-path.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Browser",
+      "sublabel": "search page"
+    },
+    {
+      "id": "ingress",
+      "type": "cloud",
+      "label": "Entrance, load balancer",
+      "sublabel": "Ingress NGINX"
+    },
+    {
+      "id": "pod",
+      "type": "backend",
+      "label": "One backend copy",
+      "sublabel": "API pod, 1 of 3–20"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Cache",
+      "sublabel": "Redis: 60s cache + lock"
+    },
+    {
+      "id": "es",
+      "type": "database",
+      "label": "Search engine",
+      "sublabel": "Elasticsearch"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 530,
+      "label": "First time: cache empty"
+    },
+    {
+      "from": 545,
+      "to": 770,
+      "label": "Next time: cache hit"
+    }
+  ],
+  "messages": [
+    {
+      "id": "q1",
+      "from": "browser",
+      "to": "ingress",
+      "y": 170,
+      "label": "GET /search?q=tai nghe",
+      "variant": "emphasis"
+    },
+    {
+      "id": "lb1",
+      "from": "ingress",
+      "to": "pod",
+      "y": 200,
+      "label": "pick a ready copy",
+      "note": "Readiness probe /health/ready"
+    },
+    {
+      "id": "get1",
+      "from": "pod",
+      "to": "redis",
+      "y": 255,
+      "label": "result already there?",
+      "note": "GET search:result:<hash>"
+    },
+    {
+      "id": "miss",
+      "from": "redis",
+      "to": "pod",
+      "y": 300,
+      "label": "not yet",
+      "variant": "return"
+    },
+    {
+      "id": "lock",
+      "from": "pod",
+      "to": "redis",
+      "y": 330,
+      "label": "grab the lock: only I go ask",
+      "variant": "security",
+      "note": "SET lock NX EX 5"
+    },
+    {
+      "id": "search",
+      "from": "pod",
+      "to": "es",
+      "y": 375,
+      "label": "search + sort + next page",
+      "variant": "emphasis",
+      "note": "query + sort + search_after"
+    },
+    {
+      "id": "hits",
+      "from": "es",
+      "to": "pod",
+      "y": 420,
+      "label": "20 results",
+      "variant": "return"
+    },
+    {
+      "id": "set",
+      "from": "pod",
+      "to": "redis",
+      "y": 450,
+      "label": "store the result for 60 seconds"
+    },
+    {
+      "id": "r1",
+      "from": "pod",
+      "to": "ingress",
+      "y": 480,
+      "label": "200 + list + next-page cursor",
+      "variant": "return"
+    },
+    {
+      "id": "r1b",
+      "from": "ingress",
+      "to": "browser",
+      "y": 510,
+      "label": "200",
+      "variant": "return"
+    },
+    {
+      "id": "q2",
+      "from": "browser",
+      "to": "ingress",
+      "y": 565,
+      "label": "same query, another person",
+      "variant": "emphasis"
+    },
+    {
+      "id": "lb2",
+      "from": "ingress",
+      "to": "pod",
+      "y": 595,
+      "label": "any copy will do",
+      "note": "Copies keep no state of their own; the cache is shared"
+    },
+    {
+      "id": "get2",
+      "from": "pod",
+      "to": "redis",
+      "y": 650,
+      "label": "result already there?"
+    },
+    {
+      "id": "hit",
+      "from": "redis",
+      "to": "pod",
+      "y": 680,
+      "label": "yes, it's there",
+      "variant": "return"
+    },
+    {
+      "id": "r2",
+      "from": "pod",
+      "to": "ingress",
+      "y": 710,
+      "label": "200, no need to ask Elasticsearch",
+      "variant": "return"
+    },
+    {
+      "id": "r2b",
+      "from": "ingress",
+      "to": "browser",
+      "y": 740,
+      "label": "200",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Fast because of",
+      "items": [
+        "Results remembered for 60 seconds in Redis",
+        "A short-lived lock: one goes to ask, the rest wait",
+        "Cursor pagination, no offset"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Load balancing",
+      "items": [
+        "The entrance spreads requests across backend copies",
+        "Copies keep no state of their own",
+        "Adds copies automatically when CPU passes 70% (HPA)"
+      ]
+    }
+  ]
+}

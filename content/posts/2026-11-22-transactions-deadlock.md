@@ -122,7 +122,7 @@ Postgres có ba tham số giới hạn, **đều tắt (0) theo mặc định**:
 
 | Tham số | Hủy khi | Lỗi |
 |---|---|---|
-| [[lock-timeout\|`lock_timeout`]] | một lần chờ khóa vượt quá thời gian này | `55P03` lock_not_available |
+| [[concepts/lock-timeout\|`lock_timeout`]] | một lần chờ khóa vượt quá thời gian này | `55P03` lock_not_available |
 | `statement_timeout` | một câu lệnh chạy quá lâu (kể cả thời gian chờ khóa) | `57014` query_canceled |
 | `idle_in_transaction_session_timeout` | session mở transaction mà ngồi không quá lâu | session bị đóng |
 

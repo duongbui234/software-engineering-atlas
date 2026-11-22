@@ -17,11 +17,11 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[idempotency|Idempotency]]: gửi lại một request không được gây tác dụng phụ lần hai. `POST` cần `Idempotency-Key`; server ghi key **trước** khi làm việc, lưu response, trả lại khi gặp lại key.
-> - [[timeouts|Timeout]]: mọi lời gọi ra ngoài phải có hạn chót, nếu không một dependency chậm sẽ kéo cả hệ thống chậm theo.
-> - [[retries-with-backoff|Retry với backoff]]: chỉ retry lỗi tạm thời, chờ lâu dần theo cấp số nhân và **thêm jitter** để các client không retry cùng lúc.
-> - [[circuit-breaker|Circuit breaker]]: dependency lỗi liên tục thì ngừng gọi một lúc, trả lỗi ngay (fail fast), rồi thử lại bằng một request duy nhất.
-> - [[rate-limiting|Rate limiting]] từ chối phần vượt mức (`429`); [[throttling|throttling]] làm chậm hoặc xếp hàng phần vượt mức. Flash-sale dùng cả hai.
+> - [[concepts/idempotency|Idempotency]]: gửi lại một request không được gây tác dụng phụ lần hai. `POST` cần `Idempotency-Key`; server ghi key **trước** khi làm việc, lưu response, trả lại khi gặp lại key.
+> - [[concepts/timeouts|Timeout]]: mọi lời gọi ra ngoài phải có hạn chót, nếu không một dependency chậm sẽ kéo cả hệ thống chậm theo.
+> - [[concepts/retries-with-backoff|Retry với backoff]]: chỉ retry lỗi tạm thời, chờ lâu dần theo cấp số nhân và **thêm jitter** để các client không retry cùng lúc.
+> - [[concepts/circuit-breaker|Circuit breaker]]: dependency lỗi liên tục thì ngừng gọi một lúc, trả lỗi ngay (fail fast), rồi thử lại bằng một request duy nhất.
+> - [[concepts/rate-limiting|Rate limiting]] từ chối phần vượt mức (`429`); [[concepts/throttling|throttling]] làm chậm hoặc xếp hàng phần vượt mức. Flash-sale dùng cả hai.
 
 > [!info] Bối cảnh
 > Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: đúng 21:00 mở bán, hàng nghìn người tranh vài trăm suất, rồi trả tiền qua MoMo hoặc VNPay. Đây đúng là kiểu hệ thống mà "thỉnh thoảng hỏng" sẽ thành "chắc chắn hỏng". Bạn không cần đọc code dự án. Đoạn code trích chỉ để minh họa, còn mỗi cơ chế đều có giải thích bằng lời thường trước.
@@ -44,12 +44,12 @@ Sáu khái niệm của ga này giống những phép lịch sự khi gọi đi�
 
 | Đời thường | Khái niệm | Nếu thiếu thì sao |
 |---|---|---|
-| Đọc **mã đơn** "đơn số 123" mỗi lần gọi lại. Tiệm tra mã thấy đã làm rồi thì không làm thêm cái thứ hai | [[idempotency\|Idempotency]] | Rớt cuộc gọi, gọi lại, nhận hai cái bánh và trả tiền hai lần |
-| Chờ máy tối đa 1 phút, không ai nghe thì cúp | [[timeouts\|Timeout]] | Cầm máy chờ cả buổi, không làm được việc khác |
-| Máy bận thì gọi lại sau 1 phút, rồi 2, rồi 4 phút. Mỗi người lệch nhau vài giây | [[retries-with-backoff\|Retry + backoff + jitter]] | Cả trăm người cùng gọi lại đúng một giây, tổng đài nghẽn thêm |
-| Cầu dao nhảy khi chập điện. Đợi một lúc rồi bật thử một lần | [[circuit-breaker\|Circuit breaker]] | Cứ bật lại liên tục, cháy luôn cả nhà |
-| Bảo vệ chỉ cho 10 người mỗi phút vào cửa hàng, quá thì mời về | [[rate-limiting\|Rate limiting]] | Một người (hoặc một bot) chiếm hết quầy |
-| Ngân hàng phát **số thứ tự**, ai cũng được phục vụ, chỉ phải chờ | [[throttling\|Throttling]] | Cả nghìn người chen vào quầy một lúc |
+| Đọc **mã đơn** "đơn số 123" mỗi lần gọi lại. Tiệm tra mã thấy đã làm rồi thì không làm thêm cái thứ hai | [[concepts/idempotency\|Idempotency]] | Rớt cuộc gọi, gọi lại, nhận hai cái bánh và trả tiền hai lần |
+| Chờ máy tối đa 1 phút, không ai nghe thì cúp | [[concepts/timeouts\|Timeout]] | Cầm máy chờ cả buổi, không làm được việc khác |
+| Máy bận thì gọi lại sau 1 phút, rồi 2, rồi 4 phút. Mỗi người lệch nhau vài giây | [[concepts/retries-with-backoff\|Retry + backoff + jitter]] | Cả trăm người cùng gọi lại đúng một giây, tổng đài nghẽn thêm |
+| Cầu dao nhảy khi chập điện. Đợi một lúc rồi bật thử một lần | [[concepts/circuit-breaker\|Circuit breaker]] | Cứ bật lại liên tục, cháy luôn cả nhà |
+| Bảo vệ chỉ cho 10 người mỗi phút vào cửa hàng, quá thì mời về | [[concepts/rate-limiting\|Rate limiting]] | Một người (hoặc một bot) chiếm hết quầy |
+| Ngân hàng phát **số thứ tự**, ai cũng được phục vụ, chỉ phải chờ | [[concepts/throttling\|Throttling]] | Cả nghìn người chen vào quầy một lúc |
 
 Ghép lại, một lời gọi từ backend ra cổng thanh toán đi qua các lớp bảo vệ theo thứ tự này:
 
@@ -145,7 +145,7 @@ Toàn bộ file: <a href="../code/api-reliability/idempotency.ts">code/api-relia
 
 ## Timeouts: không chờ vô hạn
 
-Một lời gọi không có [[timeouts|timeout]] là một lời hứa chờ mãi mãi. Hình dung một quán có 10 nhân viên. Mỗi người gọi điện cho nhà cung cấp rồi cầm máy chờ, mà nhà cung cấp không nghe máy. Mười người cầm mười cái điện thoại, và khách mới vào quán không còn ai phục vụ. Khi dependency chậm, mỗi request đang chờ giữ một kết nối, một ít bộ nhớ, có khi cả một transaction. Hết tài nguyên thì cả những endpoint *không liên quan* cũng chết theo. Đây là kiểu sự cố dây chuyền mà Amazon gọi là "brownout lan rộng".
+Một lời gọi không có [[concepts/timeouts|timeout]] là một lời hứa chờ mãi mãi. Hình dung một quán có 10 nhân viên. Mỗi người gọi điện cho nhà cung cấp rồi cầm máy chờ, mà nhà cung cấp không nghe máy. Mười người cầm mười cái điện thoại, và khách mới vào quán không còn ai phục vụ. Khi dependency chậm, mỗi request đang chờ giữ một kết nối, một ít bộ nhớ, có khi cả một transaction. Hết tài nguyên thì cả những endpoint *không liên quan* cũng chết theo. Đây là kiểu sự cố dây chuyền mà Amazon gọi là "brownout lan rộng".
 
 Flash-sale đặt timeout cho từng dependency, mỗi cái một con số khác nhau:
 
@@ -168,7 +168,7 @@ Cách chọn con số mà Amazon Builders' Library gợi ý: đo độ trễ c�
 
 ## Retries with Backoff: thử lại, nhưng có kỷ luật
 
-Lỗi mạng chập chờn, `503` khi pod đang khởi động, timeout lẻ tẻ: thử lại thường là thành công. Nhưng [[retries-with-backoff|retry]] sai cách thì biến một sự cố nhỏ thành sự cố lớn: dependency đang quá tải, mọi client đồng loạt gửi gấp ba lượng request.
+Lỗi mạng chập chờn, `503` khi pod đang khởi động, timeout lẻ tẻ: thử lại thường là thành công. Nhưng [[concepts/retries-with-backoff|retry]] sai cách thì biến một sự cố nhỏ thành sự cố lớn: dependency đang quá tải, mọi client đồng loạt gửi gấp ba lượng request.
 
 `RetryService` của flash-sale làm đủ ba việc:
 
@@ -192,7 +192,7 @@ Và điều kiện tiên quyết: **chỉ retry thao tác idempotent**, hoặc t
 
 ## Circuit Breaker: ngừng gọi thứ đang hỏng
 
-Retry giúp vượt qua lỗi *thoáng qua*. Khi dependency *sập hẳn*, retry chỉ làm mọi request chậm thêm (chờ timeout × số lần retry) rồi vẫn lỗi. [[circuit-breaker|Circuit breaker]] (Michael Nygard mô tả trong *Release It!*, Martin Fowler phổ biến) là cầu dao điện cho lời gọi từ xa:
+Retry giúp vượt qua lỗi *thoáng qua*. Khi dependency *sập hẳn*, retry chỉ làm mọi request chậm thêm (chờ timeout × số lần retry) rồi vẫn lỗi. [[concepts/circuit-breaker|Circuit breaker]] (Michael Nygard mô tả trong *Release It!*, Martin Fowler phổ biến) là cầu dao điện cho lời gọi từ xa:
 
 ```mermaid
 stateDiagram-v2
@@ -224,7 +224,7 @@ Retry nằm **bên trong** circuit breaker: breaker chỉ thấy kết quả cu�
 
 ## Rate Limiting: từ chối phần vượt mức
 
-[[rate-limiting|Rate limiting]] bảo vệ hệ thống khỏi bị dùng quá mức, dù là do bot, do bug ở client hay do một người bấm liên tục. Phần vượt mức bị từ chối ngay với `429 Too Many Requests`. Flash-sale có **bốn** lớp giới hạn, và mỗi lớp dùng một thuật toán khác:
+[[concepts/rate-limiting|Rate limiting]] bảo vệ hệ thống khỏi bị dùng quá mức, dù là do bot, do bug ở client hay do một người bấm liên tục. Phần vượt mức bị từ chối ngay với `429 Too Many Requests`. Flash-sale có **bốn** lớp giới hạn, và mỗi lớp dùng một thuật toán khác:
 
 | Lớp | Thuật toán | Ví dụ |
 |---|---|---|
@@ -252,7 +252,7 @@ Hai chi tiết vận hành đáng học:
 
 ## Throttling: xếp hàng thay vì đuổi về
 
-Hai từ này hay bị dùng lẫn. Cách mình phân biệt: [[rate-limiting|rate limiting]] **từ chối** phần vượt mức, [[throttling|throttling]] **làm chậm** phần vượt mức: xếp hàng, giãn ra, giảm chất lượng. Kết quả cuối cùng: rate limit trả `429`, throttling trả kết quả nhưng muộn hơn.
+Hai từ này hay bị dùng lẫn. Cách mình phân biệt: [[concepts/rate-limiting|rate limiting]] **từ chối** phần vượt mức, [[concepts/throttling|throttling]] **làm chậm** phần vượt mức: xếp hàng, giãn ra, giảm chất lượng. Kết quả cuối cùng: rate limit trả `429`, throttling trả kết quả nhưng muộn hơn.
 
 Ví dụ rõ nhất trong flash-sale là **hàng chờ ảo**. Lúc mở bán, không thể cho 10.000 người cùng vào checkout (kho, DB, cổng thanh toán đều không chịu nổi), nhưng cũng không thể trả `429` cho 9.950 người. Thay vào đó:
 

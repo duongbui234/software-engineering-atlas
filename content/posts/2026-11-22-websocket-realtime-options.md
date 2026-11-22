@@ -19,18 +19,18 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - HTTP là hỏi-đáp: server chỉ được nói khi client hỏi. Muốn [[server-push|server chủ động báo tin]] thì phải lách quanh luật đó.
-> - [[polling|Polling]] hỏi định kỳ: dễ nhất, nhưng tin trễ trung bình nửa chu kỳ và phần lớn request trả về rỗng. Trong ví dụ, hỏi mỗi 2 giây cho độ trễ trung bình khoảng 1 giây.
-> - [[long-polling|Long polling]]: server giữ request lại tới khi có tin. Gần như tức thì, nhưng mỗi tin tốn một request mới.
-> - [[server-sent-events|Server-Sent Events]]: một response HTTP không bao giờ kết thúc, server ghi từng sự kiện. Một chiều, có sẵn tự nối lại. Thường là đủ khi chỉ server cần nói.
-> - WebSocket mở một kết nối [[full-duplex|full-duplex]] bằng một request HTTP duy nhất. Socket.IO là một **thư viện** dùng long polling và WebSocket bên dưới, không phải tên khác của WebSocket (ga 3).
-> - [[webhooks|Webhooks]] hay được xếp chung bảng nhưng khác loại: đó là **server của bên khác gọi HTTP vào server của bạn** (MoMo báo "đã thanh toán"). Trình duyệt không nhận webhook được; server nhận xong phải chuyển tiếp xuống trình duyệt bằng một trong bốn cách trên.
+> - HTTP là hỏi-đáp: server chỉ được nói khi client hỏi. Muốn [[concepts/server-push|server chủ động báo tin]] thì phải lách quanh luật đó.
+> - [[concepts/polling|Polling]] hỏi định kỳ: dễ nhất, nhưng tin trễ trung bình nửa chu kỳ và phần lớn request trả về rỗng. Trong ví dụ, hỏi mỗi 2 giây cho độ trễ trung bình khoảng 1 giây.
+> - [[concepts/long-polling|Long polling]]: server giữ request lại tới khi có tin. Gần như tức thì, nhưng mỗi tin tốn một request mới.
+> - [[concepts/server-sent-events|Server-Sent Events]]: một response HTTP không bao giờ kết thúc, server ghi từng sự kiện. Một chiều, có sẵn tự nối lại. Thường là đủ khi chỉ server cần nói.
+> - WebSocket mở một kết nối [[concepts/full-duplex|full-duplex]] bằng một request HTTP duy nhất. Socket.IO là một **thư viện** dùng long polling và WebSocket bên dưới, không phải tên khác của WebSocket (ga 3).
+> - [[concepts/webhooks|Webhooks]] hay được xếp chung bảng nhưng khác loại: đó là **server của bên khác gọi HTTP vào server của bạn** (MoMo báo "đã thanh toán"). Trình duyệt không nhận webhook được; server nhận xong phải chuyển tiếp xuống trình duyệt bằng một trong bốn cách trên.
 
 > [!info] Bối cảnh
 > Ga 1 của **tuyến WebSocket và Socket.IO**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: đúng 21:00, hàng nghìn người cùng vào trang của một chiến dịch chỉ có vài trăm sản phẩm. Ai vào trước được xếp hàng chờ; khi tới lượt, server phải báo ngay "bạn có 5 phút để thanh toán", đồng thời cập nhật số hàng còn lại cho mọi người đang xem. Bạn không cần biết NestJS hay code của dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **HTTP request / response**: trình duyệt gửi một yêu cầu (request), server trả một câu trả lời (response). Xem ga [[2026-11-18-api-foundations|Nền tảng API]].
+> - **HTTP request / response**: trình duyệt gửi một yêu cầu (request), server trả một câu trả lời (response). Xem ga [[posts/2026-11-18-api-foundations|Nền tảng API]].
 > - **Kết nối TCP**: đường ống hai chiều giữa hai máy mà HTTP và WebSocket chạy bên trên. Mở một kết nối tốn vài vòng đi về qua mạng.
 > - **Header**: các dòng `Tên: giá trị` đầu mỗi request và response (cookie, loại nội dung…), thường vài trăm byte.
 > - **Độ trễ (latency)**: thời gian từ lúc sự kiện xảy ra ở server tới lúc trình duyệt biết.
@@ -46,12 +46,12 @@ Bạn gọi món ở một quán đông khách và muốn biết ngay khi đồ 
 
 | Đời thường | Khái niệm |
 |---|---|
-| Quán tự báo khi đồ xong, khách không cần hỏi | [[server-push\|Server push]] |
-| Cứ hai phút lại chạy ra quầy hỏi "xong chưa?" | [[polling\|Polling]] |
-| Ra quầy hỏi rồi **đứng chờ ở đó**, nhân viên trả lời khi đồ xong (hoặc sau 30 giây bảo "chưa, hỏi lại đi") | [[long-polling\|Long polling]] |
-| Quán có **loa gọi số**: quán nói, khách chỉ nghe, không nói lại được | [[server-sent-events\|Server-Sent Events]] |
-| Quán đưa bạn một **chiếc điện thoại**: hai bên nói lúc nào cũng được, cùng lúc cũng được | WebSocket, [[full-duplex\|full-duplex]] |
-| Bạn trả tiền qua ví; **ví gọi điện cho quán** (không phải cho bạn) báo "khách bàn 5 đã trả". Quán nghe xong mới báo lại bạn bằng loa hay điện thoại | [[webhooks\|Webhooks]] |
+| Quán tự báo khi đồ xong, khách không cần hỏi | [[concepts/server-push\|Server push]] |
+| Cứ hai phút lại chạy ra quầy hỏi "xong chưa?" | [[concepts/polling\|Polling]] |
+| Ra quầy hỏi rồi **đứng chờ ở đó**, nhân viên trả lời khi đồ xong (hoặc sau 30 giây bảo "chưa, hỏi lại đi") | [[concepts/long-polling\|Long polling]] |
+| Quán có **loa gọi số**: quán nói, khách chỉ nghe, không nói lại được | [[concepts/server-sent-events\|Server-Sent Events]] |
+| Quán đưa bạn một **chiếc điện thoại**: hai bên nói lúc nào cũng được, cùng lúc cũng được | WebSocket, [[concepts/full-duplex\|full-duplex]] |
+| Bạn trả tiền qua ví; **ví gọi điện cho quán** (không phải cho bạn) báo "khách bàn 5 đã trả". Quán nghe xong mới báo lại bạn bằng loa hay điện thoại | [[concepts/webhooks\|Webhooks]] |
 
 ```mermaid
 flowchart TB
@@ -78,13 +78,13 @@ Với flash-sale, đó là vấn đề thật. Lúc 21:00:03 hàng chờ cấp l
 
 ### Server push: đường đi ngược chiều
 
-**[[server-push|Server push]]** là khi server tự gửi dữ liệu lúc có chuyện xảy ra. Cả bốn cách dưới đây đều nhằm làm việc đó; chúng khác nhau ở chỗ ai giữ kết nối, kết nối sống bao lâu, và mỗi tin tốn bao nhiêu.
+**[[concepts/server-push|Server push]]** là khi server tự gửi dữ liệu lúc có chuyện xảy ra. Cả bốn cách dưới đây đều nhằm làm việc đó; chúng khác nhau ở chỗ ai giữ kết nối, kết nối sống bao lâu, và mỗi tin tốn bao nhiêu.
 
 Cần phân biệt với **HTTP/2 Server Push**, một tính năng khác hẳn: server gửi kèm file CSS, JS trước khi trình duyệt xin. Nó không đưa dữ liệu tới JavaScript của trang, và Chrome đã bỏ nó năm 2022. Đừng để cái tên làm nhầm.
 
 ### Polling: hỏi định kỳ
 
-**[[polling|Polling]]** là cách ngây thơ nhất: mỗi N giây trình duyệt gửi `GET /queue/status`. Ưu điểm là không có gì mới để học: request thường, cache thường, đi qua mọi proxy và firewall, server không phải giữ trạng thái gì.
+**[[concepts/polling|Polling]]** là cách ngây thơ nhất: mỗi N giây trình duyệt gửi `GET /queue/status`. Ưu điểm là không có gì mới để học: request thường, cache thường, đi qua mọi proxy và firewall, server không phải giữ trạng thái gì.
 
 Cái giá có hai mặt, và chúng kéo ngược nhau:
 
@@ -95,7 +95,7 @@ Giảm N thì đỡ trễ nhưng tốn hơn; tăng N thì rẻ nhưng chậm. Po
 
 ### Long polling: hỏi rồi đứng chờ
 
-**[[long-polling|Long polling]]** sửa độ trễ bằng một mẹo: server *không trả lời ngay*. Nếu chưa có gì mới, nó giữ request đó treo lại. Khi có sự kiện, nó trả lời request đang treo ngay lập tức; nếu hết thời gian chờ (thường 20–30 giây) mà vẫn chưa có gì, nó trả một response rỗng. Nhận xong, trình duyệt gửi ngay request tiếp theo. RFC 6202 mô tả kỹ thuật này và các vấn đề của nó.
+**[[concepts/long-polling|Long polling]]** sửa độ trễ bằng một mẹo: server *không trả lời ngay*. Nếu chưa có gì mới, nó giữ request đó treo lại. Khi có sự kiện, nó trả lời request đang treo ngay lập tức; nếu hết thời gian chờ (thường 20–30 giây) mà vẫn chưa có gì, nó trả một response rỗng. Nhận xong, trình duyệt gửi ngay request tiếp theo. RFC 6202 mô tả kỹ thuật này và các vấn đề của nó.
 
 Độ trễ gần như bằng không, và vẫn chỉ là HTTP thường. Nhưng:
 
@@ -107,7 +107,7 @@ Long polling ít khi là lựa chọn đầu tiên ngày nay, nhưng nó là **�
 
 ### Server-Sent Events: một response không bao giờ kết thúc
 
-**[[server-sent-events|Server-Sent Events]]** (SSE) dùng một request duy nhất mà server không bao giờ trả lời xong. Response có `Content-Type: text/event-stream`, và mỗi khi có tin, server ghi thêm vài dòng chữ:
+**[[concepts/server-sent-events|Server-Sent Events]]** (SSE) dùng một request duy nhất mà server không bao giờ trả lời xong. Response có `Content-Type: text/event-stream`, và mỗi khi có tin, server ghi thêm vài dòng chữ:
 
 ```text
 id: 42
@@ -138,7 +138,7 @@ Với flash-sale, phần lớn lưu lượng realtime là server → client (lư
 
 **WebSocket** (RFC 6455, 2011) bắt đầu bằng một request HTTP có header `Upgrade: websocket`. Server đồng ý bằng `101 Switching Protocols`, và từ đó **cùng kết nối TCP ấy không còn nói HTTP nữa**: hai bên gửi các frame nhỏ (vài byte đầu, rồi dữ liệu) theo cả hai chiều, bất cứ lúc nào. Ga 2 mổ xẻ từng byte của quá trình này.
 
-**[[full-duplex|Full-duplex]]** nghĩa là hai chiều độc lập: server đang đẩy tồn kho thì client vẫn gửi lệnh được, không ai phải chờ lượt. HTTP/1.1 là half-duplex theo kiểu hỏi-đáp; long polling và SSE chỉ giả lập chiều server → client.
+**[[concepts/full-duplex|Full-duplex]]** nghĩa là hai chiều độc lập: server đang đẩy tồn kho thì client vẫn gửi lệnh được, không ai phải chờ lượt. HTTP/1.1 là half-duplex theo kiểu hỏi-đáp; long polling và SSE chỉ giả lập chiều server → client.
 
 Cái giá của WebSocket là bạn **tự lo những gì HTTP và SSE cho sẵn**: không tự nối lại, không phát bù tin bị lỡ, không có khái niệm "sự kiện tên gì", không có xác thực mỗi tin, và proxy, load balancer phải được cấu hình để chuyển tiếp `Upgrade`. Đó chính là khoảng trống mà Socket.IO lấp vào, và cũng là lý do người ta hay nhầm hai thứ là một.
 
@@ -148,7 +148,7 @@ Socket.IO **không phải là một cách thứ năm** ngang hàng với bốn c
 
 ### Còn webhooks?
 
-Nhiều bài so sánh xếp **[[webhooks|webhooks]]** thành cột thứ năm cạnh polling, long polling, SSE và WebSocket. Xếp vậy dễ làm hiểu sai, vì webhook trả lời một câu hỏi khác. Bốn cách trên trả lời "**trình duyệt** biết tin mới bằng cách nào?". Webhook trả lời "**server của mình** biết chuyện xảy ra ở **hệ thống của người khác** bằng cách nào?".
+Nhiều bài so sánh xếp **[[concepts/webhooks|webhooks]]** thành cột thứ năm cạnh polling, long polling, SSE và WebSocket. Xếp vậy dễ làm hiểu sai, vì webhook trả lời một câu hỏi khác. Bốn cách trên trả lời "**trình duyệt** biết tin mới bằng cách nào?". Webhook trả lời "**server của mình** biết chuyện xảy ra ở **hệ thống của người khác** bằng cách nào?".
 
 Webhook là một request HTTP bình thường, chỉ đổi chiều: bạn đăng ký trước một URL với bên kia (cổng thanh toán, GitHub, nhà vận chuyển), và khi có sự kiện, **server của họ gửi `POST` tới URL đó**. Ở flash-sale, người mua trả tiền trên trang MoMo; server flash-sale không biết lúc nào xong, nên MoMo gọi `POST /webhooks/momo/ipn` kèm chữ ký.
 
@@ -170,7 +170,7 @@ Vì là HTTP từ Internet gọi vào, webhook có những luật riêng mà b�
 - **Trả `2xx` ngay**, việc nặng đẩy vào hàng đợi, như flash-sale đẩy `order.paid` qua RabbitMQ.
 - **Webhook có thể không bao giờ tới** (bên gửi hết lượt thử, endpoint của bạn sập lâu). Nên vẫn cần một job đối soát định kỳ hỏi lại API của bên kia, tức là quay về polling, nhưng làm lưới an toàn chứ không phải đường chính.
 
-Chi tiết cách flash-sale kiểm chữ ký và chống xử lý trùng (hai lớp idempotency) nằm ở ga [[2026-11-18-api-styles|Năm kiểu API]] của tuyến API.
+Chi tiết cách flash-sale kiểm chữ ký và chống xử lý trùng (hai lớp idempotency) nằm ở ga [[posts/2026-11-18-api-styles|Năm kiểu API]] của tuyến API.
 
 ### So sánh nhanh
 

@@ -19,19 +19,19 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Mỗi pod chỉ biết socket trong RAM của nó. Hai bài toán khác nhau: **đường vào** (request của một phiên phải tới đúng pod) và **đường ra** (tin phát ở pod 1 phải tới người đang ở pod 2).
-> - [[sticky-session|Sticky session]] lo đường vào. Bắt buộc khi còn long polling: tới nhầm pod là `400 Session ID unknown`. Chỉ dùng WebSocket thì không cần.
-> - [[socket-io-adapter|Adapter]] lo đường ra. Redis adapter publish mỗi lần phát lên Redis Pub/Sub để mọi pod cùng gửi; mỗi pod cần hai kết nối Redis riêng.
-> - [[reverse-proxy-upgrade|Proxy phải chuyển tiếp `Upgrade`]], và [[idle-timeout|idle timeout]] của mọi tầng phải dài hơn heartbeat (Socket.IO khuyên trên 45 giây; flash-sale đang đặt 30).
-> - Pod tắt là mọi client của nó đứt cùng lúc: [[reconnect-storm|reconnect storm]]. Jitter rải lượt nối lại, và [[graceful-shutdown|graceful shutdown]] đóng kết nối có chủ đích trước khi tiến trình thoát.
+> - [[concepts/sticky-session|Sticky session]] lo đường vào. Bắt buộc khi còn long polling: tới nhầm pod là `400 Session ID unknown`. Chỉ dùng WebSocket thì không cần.
+> - [[concepts/socket-io-adapter|Adapter]] lo đường ra. Redis adapter publish mỗi lần phát lên Redis Pub/Sub để mọi pod cùng gửi; mỗi pod cần hai kết nối Redis riêng.
+> - [[reverse-proxy-upgrade|Proxy phải chuyển tiếp `Upgrade`]], và [[concepts/idle-timeout|idle timeout]] của mọi tầng phải dài hơn heartbeat (Socket.IO khuyên trên 45 giây; flash-sale đang đặt 30).
+> - Pod tắt là mọi client của nó đứt cùng lúc: [[concepts/reconnect-storm|reconnect storm]]. Jitter rải lượt nối lại, và [[concepts/graceful-shutdown|graceful shutdown]] đóng kết nối có chủ đích trước khi tiến trình thoát.
 
 > [!info] Bối cảnh
 > Ga 5 của **tuyến WebSocket và Socket.IO**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: backend chạy tối thiểu 3 pod trên Kubernetes (tự tăng tới 20 khi tải cao), sau một ingress nginx. Worker hàng chờ chạy ở một pod nhưng phải báo `checkout_ready` cho người dùng đang nối vào bất kỳ pod nào. Bạn không cần biết Kubernetes: mọi thuật ngữ có trong từ điển dưới đây.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Engine.IO, `sid`, long polling, upgrade, heartbeat**: xem [[2026-11-22-websocket-socketio|ga 3]]. **Room, at most once, `io server disconnect`**: xem [[2026-11-22-websocket-rooms|ga 4]].
+> - **Engine.IO, `sid`, long polling, upgrade, heartbeat**: xem [[posts/2026-11-22-websocket-socketio|ga 3]]. **Room, at most once, `io server disconnect`**: xem [[posts/2026-11-22-websocket-rooms|ga 4]].
 > - **Pod**: một bản đang chạy của ứng dụng trong Kubernetes. Ba pod là ba tiến trình riêng, RAM riêng.
 > - **Load balancer, ingress**: cửa vào chia request cho các pod. Ingress nginx là nginx chạy làm cửa vào của cụm Kubernetes.
-> - **Redis Pub/Sub**: kiểu nhắn tin phát thanh của Redis, ai đang nghe kênh thì nhận, không lưu lại. Xem [[pubsub-invalidation|ga Caching]].
+> - **Redis Pub/Sub**: kiểu nhắn tin phát thanh của Redis, ai đang nghe kênh thì nhận, không lưu lại. Xem [[concepts/pubsub-invalidation|ga Caching]].
 > - **SIGTERM, preStop, readiness**: Kubernetes báo pod sắp bị tắt bằng tín hiệu SIGTERM; `preStop` là lệnh chạy trước đó; readiness là "pod này nhận request được chưa".
 > - **Header hop-by-hop**: header chỉ có nghĩa cho một chặng mạng, proxy không tự chuyển tiếp (`Connection`, `Upgrade`).
 > - **File descriptor**: số hiệu hệ điều hành cấp cho mỗi kết nối mở; mỗi tiến trình có giới hạn.
@@ -42,12 +42,12 @@ Tổng đài ở ga 3 giờ có ba nhân viên trực. Mỗi người có một 
 
 | Đời thường | Khái niệm |
 |---|---|
-| Khách gửi thư nhiều lần cho cùng một cuộc trao đổi: lễ tân phải chuyển về đúng người đang giữ hồ sơ | [[sticky-session\|Sticky session]] |
-| Loa nội bộ giữa các nhân viên: "ai đang giữ khách xem chiến dịch 21h thì báo họ" | [[socket-io-adapter\|Adapter]] (Redis Pub/Sub) |
-| Lễ tân tòa nhà phải biết "đây là cuộc gọi, nối máy", không xử lý như thư | [[reverse-proxy-upgrade\|Proxy chuyển tiếp Upgrade]] |
-| Lễ tân tự cúp máy nếu đường dây im lặng 30 giây | [[idle-timeout\|Idle timeout]] |
-| Một nhân viên nghỉ đột ngột, cả trăm khách cùng gọi lại một lúc | [[reconnect-storm\|Reconnect storm]] |
-| Trước khi nghỉ, nhân viên báo từng khách "gọi lại số chung nhé" rồi mới rời bàn | [[graceful-shutdown\|Graceful shutdown]] |
+| Khách gửi thư nhiều lần cho cùng một cuộc trao đổi: lễ tân phải chuyển về đúng người đang giữ hồ sơ | [[concepts/sticky-session\|Sticky session]] |
+| Loa nội bộ giữa các nhân viên: "ai đang giữ khách xem chiến dịch 21h thì báo họ" | [[concepts/socket-io-adapter\|Adapter]] (Redis Pub/Sub) |
+| Lễ tân tòa nhà phải biết "đây là cuộc gọi, nối máy", không xử lý như thư | [[concepts/reverse-proxy-upgrade\|Proxy chuyển tiếp Upgrade]] |
+| Lễ tân tự cúp máy nếu đường dây im lặng 30 giây | [[concepts/idle-timeout\|Idle timeout]] |
+| Một nhân viên nghỉ đột ngột, cả trăm khách cùng gọi lại một lúc | [[concepts/reconnect-storm\|Reconnect storm]] |
+| Trước khi nghỉ, nhân viên báo từng khách "gọi lại số chung nhé" rồi mới rời bàn | [[concepts/graceful-shutdown\|Graceful shutdown]] |
 
 ```mermaid
 flowchart TB
@@ -77,7 +77,7 @@ Rồi tới những thứ không gãy ngay mà gãy lúc deploy: proxy cắt k�
 
 ### Sticky session: đường vào
 
-**[[sticky-session|Sticky session]]** là load balancer gắn một client với một pod cho cả phiên. Socket.IO cần nó vì một lý do cụ thể: **long polling là nhiều request HTTP riêng lẻ**, và chỉ pod đã cấp `sid` mới có phiên đó trong RAM. Tới nhầm pod, Engine.IO trả:
+**[[concepts/sticky-session|Sticky session]]** là load balancer gắn một client với một pod cho cả phiên. Socket.IO cần nó vì một lý do cụ thể: **long polling là nhiều request HTTP riêng lẻ**, và chỉ pod đã cấp `sid` mới có phiên đó trong RAM. Tới nhầm pod, Engine.IO trả:
 
 ```text
 HTTP 400 {"code":1,"message":"Session ID unknown"}
@@ -94,7 +94,7 @@ flash-sale chạy 3 pod và ingress **chưa bật sticky**. Client `/flash-sale`
 
 ### Adapter: đường ra
 
-Sticky session lo cho request của một phiên tới đúng pod. Nó **không** giúp tin phát ở pod 1 tới socket ở pod 2. Việc đó là của **[[socket-io-adapter|adapter]]**: thành phần của Socket.IO quyết định một lần `to(room).emit()` tới những socket nào. Adapter mặc định chỉ tra trong RAM của pod hiện tại.
+Sticky session lo cho request của một phiên tới đúng pod. Nó **không** giúp tin phát ở pod 1 tới socket ở pod 2. Việc đó là của **[[concepts/socket-io-adapter|adapter]]**: thành phần của Socket.IO quyết định một lần `to(room).emit()` tới những socket nào. Adapter mặc định chỉ tra trong RAM của pod hiện tại.
 
 **Redis adapter** (`@socket.io/redis-adapter`) làm thế này: mỗi lần phát vào phòng, pod gửi cho socket của chính nó *và* `PUBLISH` gói tin lên một kênh Redis (dạng `socket.io#/flash-sale#`). Mọi pod khác đang `SUBSCRIBE` kênh đó nhận gói, tra phòng trong RAM của mình, và gửi cho socket của mình. Nó cũng lo các thao tác cần cả cụm: `fetchSockets()`, `socketsJoin()`, `disconnectSockets()` trên mọi pod, và `serverSideEmit()` để pod nói chuyện với nhau.
 
@@ -124,7 +124,7 @@ Những điều cần biết về Redis adapter:
 
 ### Reverse proxy: chuyển tiếp Upgrade
 
-Ga 2 đã nói `Upgrade` và `Connection` là header **hop-by-hop**: proxy không tự chuyển tiếp. Proxy HTTP/1.0 hay proxy mặc định của nginx (dùng HTTP/1.0 khi nói với upstream) sẽ nuốt mất chúng, server không thấy yêu cầu nâng cấp và trả 400, còn Socket.IO thì lặng lẽ ở lại long polling. **[[reverse-proxy-upgrade|Cấu hình nginx tối thiểu]]**:
+Ga 2 đã nói `Upgrade` và `Connection` là header **hop-by-hop**: proxy không tự chuyển tiếp. Proxy HTTP/1.0 hay proxy mặc định của nginx (dùng HTTP/1.0 khi nói với upstream) sẽ nuốt mất chúng, server không thấy yêu cầu nâng cấp và trả 400, còn Socket.IO thì lặng lẽ ở lại long polling. **[[concepts/reverse-proxy-upgrade|Cấu hình nginx tối thiểu]]**:
 
 ```nginx
 location /socket.io/ {
@@ -143,7 +143,7 @@ Một hệ quả ít được nhắc: **mỗi kết nối WebSocket đi qua prox
 
 ### Idle timeout: im lặng quá lâu là bị cắt
 
-Mọi tầng giữa trình duyệt và pod đều có **[[idle-timeout|idle timeout]]**: không có dữ liệu chạy qua trong N giây thì cắt kết nối. nginx là `proxy_read_timeout` (mặc định 60 giây), load balancer của cloud có số riêng, NAT của nhà mạng di động có khi chỉ vài phút. Với kết nối realtime, "im lặng" là chuyện bình thường: không có ai mua thì không có tin.
+Mọi tầng giữa trình duyệt và pod đều có **[[concepts/idle-timeout|idle timeout]]**: không có dữ liệu chạy qua trong N giây thì cắt kết nối. nginx là `proxy_read_timeout` (mặc định 60 giây), load balancer của cloud có số riêng, NAT của nhà mạng di động có khi chỉ vài phút. Với kết nối realtime, "im lặng" là chuyện bình thường: không có ai mua thì không có tin.
 
 Heartbeat sinh ra để giữ đường không im lặng. Quy tắc: **heartbeat phải ngắn hơn timeout nhỏ nhất trong chuỗi**. Tài liệu Socket.IO khuyên timeout của proxy lớn hơn `pingInterval + pingTimeout`, tức 45 giây với mặc định.
 
@@ -151,7 +151,7 @@ flash-sale đặt `proxy-read-timeout: "30"` trên ingress, và Socket.IO dùng 
 
 ### Reconnect storm: cả nghìn người gọi lại một lúc
 
-Kết nối realtime có một tính chất mà REST không có: **chúng chết cùng nhau**. Pod tắt (deploy, OOM, node bị rút) là mọi client đang nối vào nó mất kết nối trong cùng một mili giây. Nếu tất cả chờ đúng 1 giây rồi nối lại, các pod còn lại nhận một cú dồn: hàng nghìn bắt tay, hàng nghìn lần xác minh JWT, hàng nghìn `subscribe_campaign` và có khi hàng nghìn lần gọi REST để đồng bộ lại. Đó là **[[reconnect-storm|reconnect storm]]**, họ hàng của [[cache-stampede|cache stampede]].
+Kết nối realtime có một tính chất mà REST không có: **chúng chết cùng nhau**. Pod tắt (deploy, OOM, node bị rút) là mọi client đang nối vào nó mất kết nối trong cùng một mili giây. Nếu tất cả chờ đúng 1 giây rồi nối lại, các pod còn lại nhận một cú dồn: hàng nghìn bắt tay, hàng nghìn lần xác minh JWT, hàng nghìn `subscribe_campaign` và có khi hàng nghìn lần gọi REST để đồng bộ lại. Đó là **[[concepts/reconnect-storm|reconnect storm]]**, họ hàng của [[concepts/cache-stampede|cache stampede]].
 
 Thuốc chữa là **jitter**: mỗi client chờ một khoảng ngẫu nhiên. `socket.io-client` có sẵn `randomizationFactor` 0,5, nên lần chờ đầu nằm trong khoảng 500–1500 ms thay vì đúng 1000 ms; lần sau nhân đôi, cũng có ngẫu nhiên. Trong ví dụ, 10.000 client không có jitter rơi trọn vào một khung 100 ms; có jitter thì trải ra 10 khung, khung đông nhất khoảng 1.000. Đừng đặt `randomizationFactor: 0` cho "dễ đoán".
 
@@ -167,7 +167,7 @@ Khi Kubernetes tắt một pod, chuỗi việc lý tưởng cho kết nối real
 
 Bước 2 có một bẫy, và ví dụ bên dưới chạy để thấy: **đóng bằng `socket.disconnect(true)` thì client Socket.IO không tự nối lại** (lý do `io server disconnect`, ga 4), người dùng mất realtime. Phải đóng ở tầng vận chuyển (`io.close()`, hoặc `socket.conn.close()` cho từng socket) để client thấy `transport close` và nối lại. Với WebSocket thuần, gửi frame close mã **1001** (going away) để client biết đây là server tắt, nên nối lại.
 
-**[[graceful-shutdown|Graceful shutdown]]** của flash-sale đã có các bước dừng HTTP, chờ xử lý xong tin RabbitMQ, outbox, job, rồi đóng Prisma, trong 45 giây. Chưa có bước nào dành riêng cho Socket.IO, nên kết nối realtime chỉ đứt khi tiến trình thoát, tất cả cùng lúc. Jitter phía client đỡ được phần nào; thêm một bước đóng rải dần ở phase 1 sẽ êm hơn.
+**[[concepts/graceful-shutdown|Graceful shutdown]]** của flash-sale đã có các bước dừng HTTP, chờ xử lý xong tin RabbitMQ, outbox, job, rồi đóng Prisma, trong 45 giây. Chưa có bước nào dành riêng cho Socket.IO, nên kết nối realtime chỉ đứt khi tiến trình thoát, tất cả cùng lúc. Jitter phía client đỡ được phần nào; thêm một bước đóng rải dần ở phase 1 sẽ êm hơn.
 
 ## Ví dụ chạy được
 

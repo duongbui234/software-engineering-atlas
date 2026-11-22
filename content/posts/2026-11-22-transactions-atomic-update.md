@@ -16,17 +16,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[conditional-update|UPDATE có điều kiện]]: `UPDATE … SET stock = stock - 1 WHERE id = 1 AND stock >= 1`. Kiểm tra và trừ nằm trong **một câu**, không còn khe hở. Không dòng nào khớp nghĩa là hết hàng. Kết quả: 300 người, đúng 100 đơn, không cần retry.
-> - Mỗi `UPDATE` tự lấy [[row-lock|khóa dòng]] và giữ tới khi transaction kết thúc. Người tới sau phải chờ.
-> - [[re-check-after-lock|Đọc lại sau khi chờ khóa]]: ở Read Committed, người chờ được nhả ra sẽ chạy lại `WHERE` trên **phiên bản mới nhất** của dòng. Còn 1 suất, hai người cùng trừ: người sau thấy `0 >= 1` sai và không trừ.
+> - [[concepts/conditional-update|UPDATE có điều kiện]]: `UPDATE … SET stock = stock - 1 WHERE id = 1 AND stock >= 1`. Kiểm tra và trừ nằm trong **một câu**, không còn khe hở. Không dòng nào khớp nghĩa là hết hàng. Kết quả: 300 người, đúng 100 đơn, không cần retry.
+> - Mỗi `UPDATE` tự lấy [[concepts/row-lock|khóa dòng]] và giữ tới khi transaction kết thúc. Người tới sau phải chờ.
+> - [[concepts/re-check-after-lock|Đọc lại sau khi chờ khóa]]: ở Read Committed, người chờ được nhả ra sẽ chạy lại `WHERE` trên **phiên bản mới nhất** của dòng. Còn 1 suất, hai người cùng trừ: người sau thấy `0 >= 1` sai và không trừ.
 > - Ở Repeatable Read, cùng câu đó lại bị hủy với `40001`: điều làm cách này đúng mà không cần retry là chính hành vi của Read Committed.
-> - [[check-constraint|CHECK]] (`stock >= 0`) là lưới cuối: đoạn code nào quên điều kiện thì database vẫn từ chối (lỗi `23514`). Bảng tồn kho thường của flash-sale chưa có lưới này.
+> - [[concepts/check-constraint|CHECK]] (`stock >= 0`) là lưới cuối: đoạn code nào quên điều kiện thì database vẫn từ chối (lỗi `23514`). Bảng tồn kho thường của flash-sale chưa có lưới này.
 
 > [!info] Bối cảnh
 > Ga 4 của **tuyến Transaction và khóa**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng. Lúc đặt hàng thường (không phải flash sale), server **giữ hàng** cho đơn đang chờ thanh toán: cột `reserved_stock` tăng, và chỉ được tăng khi `total_stock - reserved_stock` còn đủ. Ga 2 cho thấy cách "đọc rồi kiểm tra" bán quá; ga 3 cho thấy nâng isolation thì đúng nhưng phải retry rất nhiều. Bạn không cần biết NestJS hay code của dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Read Committed, Repeatable Read, `40001`**: xem [[2026-11-22-transactions-isolation|ga 3]]. **Phiên bản dòng (MVCC)**: xem [[2026-11-22-transactions-acid|ga 1]].
+> - **Read Committed, Repeatable Read, `40001`**: xem [[posts/2026-11-22-transactions-isolation|ga 3]]. **Phiên bản dòng (MVCC)**: xem [[posts/2026-11-22-transactions-acid|ga 1]].
 > - **`rowCount`**: số dòng mà một câu `UPDATE`/`DELETE` vừa tác động. Thư viện `pg` trả về trong `result.rowCount`; Prisma `updateMany` trả `{ count }`.
 > - **`RETURNING`**: phần thêm vào cuối `UPDATE`/`INSERT` để Postgres trả lại giá trị của dòng sau khi sửa, khỏi phải `SELECT` lại.
 > - **Ràng buộc (constraint)**: luật khai báo trên bảng mà database tự kiểm tra mỗi lần ghi: `NOT NULL`, `UNIQUE`, khóa ngoại, `CHECK`.
@@ -38,10 +38,10 @@ Hai nhân viên ở quầy vé không còn "liếc sổ rồi quay đi bán" n�
 
 | Đời thường | Khái niệm |
 |---|---|
-| "Gạch 1 nếu còn ít nhất 1" là **một động tác**, không có chuyện xem trước rồi quay lại sau | [[conditional-update\|UPDATE có điều kiện]] |
-| Bút đang đặt trên dòng thì người khác không gạch được dòng đó, phải chờ | [[row-lock\|Khóa dòng]] |
-| Người chờ được tới lượt thì **nhìn lại con số hiện tại** trên dòng rồi mới quyết định gạch hay không | [[re-check-after-lock\|Đọc lại sau khi chờ khóa]] |
-| Sổ in sẵn ô số không cho viết số âm, ai cố viết thì bị từ chối | [[check-constraint\|CHECK]] |
+| "Gạch 1 nếu còn ít nhất 1" là **một động tác**, không có chuyện xem trước rồi quay lại sau | [[concepts/conditional-update\|UPDATE có điều kiện]] |
+| Bút đang đặt trên dòng thì người khác không gạch được dòng đó, phải chờ | [[concepts/row-lock\|Khóa dòng]] |
+| Người chờ được tới lượt thì **nhìn lại con số hiện tại** trên dòng rồi mới quyết định gạch hay không | [[concepts/re-check-after-lock\|Đọc lại sau khi chờ khóa]] |
+| Sổ in sẵn ô số không cho viết số âm, ai cố viết thì bị từ chối | [[concepts/check-constraint\|CHECK]] |
 
 ```mermaid
 sequenceDiagram
@@ -96,11 +96,11 @@ Ba điều làm nó đúng:
 
 Cùng mẫu này lặp lại khắp flash-sale: xác nhận bán (`WHERE reserved_stock >= qty`), dùng voucher (`WHERE usage_limit = 0 OR usage_count < usage_limit`), và số đã bán của flash sale.
 
-Hàm này **không tự mở transaction**; nó nhận `tx` của người gọi. Sau câu `UPDATE` là một `INSERT` vào sổ kho với khóa idempotency `sha256(orderId:skuId:RESERVE)` và `ON CONFLICT DO NOTHING`, để một consumer RabbitMQ chạy lại cùng tin nhắn không ghi sổ hai lần (xem [[idempotent-consumer|idempotent consumer]]).
+Hàm này **không tự mở transaction**; nó nhận `tx` của người gọi. Sau câu `UPDATE` là một `INSERT` vào sổ kho với khóa idempotency `sha256(orderId:skuId:RESERVE)` và `ON CONFLICT DO NOTHING`, để một consumer RabbitMQ chạy lại cùng tin nhắn không ghi sổ hai lần (xem [[concepts/idempotent-consumer|idempotent consumer]]).
 
 ### Khóa dòng
 
-Mỗi `UPDATE` tự lấy một [[row-lock|khóa dòng]] trên mọi dòng nó sửa, và **giữ tới khi transaction COMMIT hoặc ROLLBACK**, không phải tới khi câu lệnh xong. Khóa dòng không chặn người đọc (MVCC lo việc đó); nó chỉ chặn người khác muốn sửa, xóa hay khóa cùng dòng.
+Mỗi `UPDATE` tự lấy một [[concepts/row-lock|khóa dòng]] trên mọi dòng nó sửa, và **giữ tới khi transaction COMMIT hoặc ROLLBACK**, không phải tới khi câu lệnh xong. Khóa dòng không chặn người đọc (MVCC lo việc đó); nó chỉ chặn người khác muốn sửa, xóa hay khóa cùng dòng.
 
 Tài liệu Postgres có bảng các chế độ khóa dòng. Ở đây chỉ cần hai: `UPDATE` thường lấy `FOR NO KEY UPDATE`; `DELETE` hay `UPDATE` đổi cột khóa thì lấy `FOR UPDATE`, chế độ mạnh nhất. Hai chế độ này đều xung đột với chính nó, nên hai câu `UPDATE` cùng một dòng luôn phải xếp hàng.
 
@@ -114,7 +114,7 @@ Tài liệu Postgres có bảng các chế độ khóa dòng. Ở đây chỉ c�
 2. Nếu kia ROLLBACK: dùng phiên bản cũ, như chưa có gì xảy ra.
 3. Nếu kia COMMIT: lấy **phiên bản mới nhất** của dòng, **chạy lại điều kiện `WHERE`** trên đó. Còn khớp thì áp thao tác lên bản mới; không khớp thì bỏ qua dòng.
 
-Bước 3 là [[re-check-after-lock|đọc lại sau khi chờ khóa]] (trong mã nguồn Postgres gọi là EvalPlanQual). Nhờ nó, câu `UPDATE … WHERE stock >= 1` của người thứ hai được đánh giá trên con số **sau** khi người thứ nhất đã trừ. Còn 1 suất: người thứ nhất trừ còn 0, người thứ hai thấy `0 >= 1` sai, không khớp dòng nào, `rowCount = 0`, hết hàng.
+Bước 3 là [[concepts/re-check-after-lock|đọc lại sau khi chờ khóa]] (trong mã nguồn Postgres gọi là EvalPlanQual). Nhờ nó, câu `UPDATE … WHERE stock >= 1` của người thứ hai được đánh giá trên con số **sau** khi người thứ nhất đã trừ. Còn 1 suất: người thứ nhất trừ còn 0, người thứ hai thấy `0 >= 1` sai, không khớp dòng nào, `rowCount = 0`, hết hàng.
 
 Cùng hành vi đó gây ra lost update ở ga 2. Khác biệt duy nhất là thao tác: `SET stock = 36` (hằng số app tính từ dữ liệu cũ) áp lên bản mới vẫn ra 36; còn `SET stock = stock - 1 WHERE stock >= 1` thì cả điều kiện lẫn phép tính đều dùng bản mới.
 
@@ -124,7 +124,7 @@ Một giới hạn cần nhớ: đọc lại chỉ áp dụng cho **dòng đang 
 
 ### CHECK: lưới cuối trong database
 
-UPDATE có điều kiện chỉ đúng khi **mọi** đoạn code ghi vào bảng đều nhớ điều kiện. Một job admin chỉnh tồn kho, một migration, một hàm mới viết vội: chỉ cần một chỗ quên `AND stock >= 1`. Một [[check-constraint|ràng buộc CHECK]] chuyển luật đó vào database:
+UPDATE có điều kiện chỉ đúng khi **mọi** đoạn code ghi vào bảng đều nhớ điều kiện. Một job admin chỉnh tồn kho, một migration, một hàm mới viết vội: chỉ cần một chỗ quên `AND stock >= 1`. Một [[concepts/check-constraint|ràng buộc CHECK]] chuyển luật đó vào database:
 
 ```sql
 ALTER TABLE items ADD CONSTRAINT items_stock_nonneg CHECK (stock >= 0);

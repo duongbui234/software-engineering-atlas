@@ -8,4 +8,4 @@ region: Vùng API
 
 **JSON** chỉ có string, number, boolean, null, object và array. Không có kiểu ngày, không có decimal, và number thường bị parse thành số thực 64-bit, nên tiền và id lớn nên gửi dạng string, ngày tháng theo ISO 8601.
 
-Đọc thêm trong bài [[2026-11-18-api-foundations|Nền tảng API]].
+Đọc thêm trong bài [[posts/2026-11-18-api-foundations|Nền tảng API]].

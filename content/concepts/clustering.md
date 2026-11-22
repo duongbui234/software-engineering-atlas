@@ -8,4 +8,4 @@ region: Vùng Messaging
 
 **Cụm** chép user, vhost, quyền, exchange, queue, binding, policy tới mọi node; client nối node nào cũng dùng được mọi queue. Nội dung classic queue vẫn chỉ ở một node. Các node cần chung Erlang cookie, thấy nhau ở cổng 4369 và 25672, cùng LAN, số node lẻ. Ghép node bằng `join_cluster` hoặc peer discovery.
 
-Đọc thêm trong bài [[2026-11-21-rabbitmq-cluster|Cụm và sẵn sàng cao]].
+Đọc thêm trong bài [[posts/2026-11-21-rabbitmq-cluster|Cụm và sẵn sàng cao]].

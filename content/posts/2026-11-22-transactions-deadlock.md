@@ -16,20 +16,20 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[deadlock|Deadlock]]: giỏ X giữ khóa SKU A và chờ B, giỏ Y giữ B và chờ A. Không ai nhả được. Postgres chờ `deadlock_timeout` (mặc định 1 giây), phát hiện vòng chờ và hủy một bên với lỗi `40P01`.
-> - [[lock-ordering|Khóa theo thứ tự]]: mọi đoạn code khóa nhiều dòng theo **cùng một thứ tự** thì không thể có vòng chờ. flash-sale sắp xếp `skuId` tăng dần trước khi giữ hàng cho cả giỏ. Kết quả: 20/20 giỏ xong, không lỗi.
-> - [[transaction-retry|Retry]] lỗi `40P01`/`40001` có jitter là lưới an toàn cần có, nhưng không thay được việc khóa theo thứ tự: không sắp xếp mà retry tối đa 5 lần, vẫn chỉ 8/20 giỏ xong.
-> - [[long-running-transaction|Transaction dài]]: một request giữ khóa SKU A trong 3 giây vì gọi cổng thanh toán bên trong transaction, mọi người mua A chờ đúng 3 giây.
-> - [[lock-timeout|lock_timeout]] biến "chờ vô thời hạn" thành lỗi `55P03` sau một khoảng bạn chọn, để request thất bại nhanh thay vì kéo cả hệ thống treo theo.
+> - [[concepts/deadlock|Deadlock]]: giỏ X giữ khóa SKU A và chờ B, giỏ Y giữ B và chờ A. Không ai nhả được. Postgres chờ `deadlock_timeout` (mặc định 1 giây), phát hiện vòng chờ và hủy một bên với lỗi `40P01`.
+> - [[concepts/lock-ordering|Khóa theo thứ tự]]: mọi đoạn code khóa nhiều dòng theo **cùng một thứ tự** thì không thể có vòng chờ. flash-sale sắp xếp `skuId` tăng dần trước khi giữ hàng cho cả giỏ. Kết quả: 20/20 giỏ xong, không lỗi.
+> - [[concepts/transaction-retry|Retry]] lỗi `40P01`/`40001` có jitter là lưới an toàn cần có, nhưng không thay được việc khóa theo thứ tự: không sắp xếp mà retry tối đa 5 lần, vẫn chỉ 8/20 giỏ xong.
+> - [[concepts/long-running-transaction|Transaction dài]]: một request giữ khóa SKU A trong 3 giây vì gọi cổng thanh toán bên trong transaction, mọi người mua A chờ đúng 3 giây.
+> - [[concepts/lock-timeout|lock_timeout]] biến "chờ vô thời hạn" thành lỗi `55P03` sau một khoảng bạn chọn, để request thất bại nhanh thay vì kéo cả hệ thống treo theo.
 
 > [!info] Bối cảnh
 > Ga 6 của **tuyến Transaction và khóa**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng. Lúc thanh toán giỏ hàng nhiều sản phẩm, server giữ hàng cho **từng SKU** trong một transaction, mỗi SKU một câu `UPDATE` có điều kiện (ga 4). Hai người có giỏ chứa cùng các SKU, bấm thanh toán cùng lúc. Bạn không cần biết NestJS hay code của dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Khóa dòng, UPDATE có điều kiện**: xem [[2026-11-22-transactions-atomic-update|ga 4]]. **`FOR UPDATE`, `NOWAIT`, `55P03`**: xem [[2026-11-22-transactions-locking|ga 5]]. **`40001`**: xem [[2026-11-22-transactions-isolation|ga 3]].
+> - **Khóa dòng, UPDATE có điều kiện**: xem [[posts/2026-11-22-transactions-atomic-update|ga 4]]. **`FOR UPDATE`, `NOWAIT`, `55P03`**: xem [[posts/2026-11-22-transactions-locking|ga 5]]. **`40001`**: xem [[posts/2026-11-22-transactions-isolation|ga 3]].
 > - **SKU**: một biến thể cụ thể của sản phẩm (áo đỏ cỡ M). Tồn kho được tính theo SKU.
 > - **Vòng chờ**: A chờ B, B chờ A (hoặc dài hơn: A chờ B, B chờ C, C chờ A).
-> - **Backoff lũy thừa và jitter**: thử lại sau 50 ms, rồi tới 100, 200, 400 ms…, mỗi lần chọn ngẫu nhiên trong khoảng đó. Xem [[retries-with-backoff|retry với backoff]].
+> - **Backoff lũy thừa và jitter**: thử lại sau 50 ms, rồi tới 100, 200, 400 ms…, mỗi lần chọn ngẫu nhiên trong khoảng đó. Xem [[concepts/retries-with-backoff|retry với backoff]].
 > - **`SET LOCAL`**: đổi một tham số Postgres chỉ cho transaction hiện tại.
 
 ## Hình dung trước: hai người, hai cánh cửa
@@ -38,12 +38,12 @@ Hai người cần đi qua hai phòng liền nhau, phòng A và phòng B, mỗi 
 
 | Đời thường | Khái niệm |
 |---|---|
-| X đứng trong phòng A, cần sang B; Y đứng trong phòng B, cần sang A. Không ai chịu lùi | [[deadlock\|Deadlock]] |
+| X đứng trong phòng A, cần sang B; Y đứng trong phòng B, cần sang A. Không ai chịu lùi | [[concepts/deadlock\|Deadlock]] |
 | Bảo vệ đợi một lúc, thấy hai người kẹt nhau thì mời một người ra ngoài làm lại từ đầu | Postgres phát hiện, hủy một bên (`40P01`) |
-| Quy định: ai cũng phải vào phòng A trước rồi mới tới B | [[lock-ordering\|Khóa theo thứ tự]] |
-| Người bị mời ra đợi một lúc ngẫu nhiên rồi đi lại | [[transaction-retry\|Thử lại có jitter]] |
-| Một người vào phòng A rồi **ngồi gọi điện 3 phút**, cả hàng sau lưng đứng chờ | [[long-running-transaction\|Transaction dài]] |
-| Người xếp hàng tự đặt giới hạn: chờ quá nửa giây thì bỏ đi | [[lock-timeout\|lock_timeout]] |
+| Quy định: ai cũng phải vào phòng A trước rồi mới tới B | [[concepts/lock-ordering\|Khóa theo thứ tự]] |
+| Người bị mời ra đợi một lúc ngẫu nhiên rồi đi lại | [[concepts/transaction-retry\|Thử lại có jitter]] |
+| Một người vào phòng A rồi **ngồi gọi điện 3 phút**, cả hàng sau lưng đứng chờ | [[concepts/long-running-transaction\|Transaction dài]] |
+| Người xếp hàng tự đặt giới hạn: chờ quá nửa giây thì bỏ đi | [[concepts/lock-timeout\|lock_timeout]] |
 
 ```mermaid
 flowchart TB
@@ -72,7 +72,7 @@ Cùng lúc đó, có một kiểu kẹt khác không cần tới hai người: m
 
 ### Deadlock
 
-Một [[deadlock|deadlock]] là một vòng chờ: mỗi transaction trong vòng đang giữ một khóa mà transaction kế tiếp cần. Tài liệu Postgres mô tả đúng ví dụ chuyển tiền giữa hai tài khoản, cập nhật theo hai thứ tự khác nhau.
+Một [[concepts/deadlock|deadlock]] là một vòng chờ: mỗi transaction trong vòng đang giữ một khóa mà transaction kế tiếp cần. Tài liệu Postgres mô tả đúng ví dụ chuyển tiền giữa hai tài khoản, cập nhật theo hai thứ tự khác nhau.
 
 Postgres xử lý như sau:
 
@@ -106,7 +106,7 @@ Lời khuyên thứ hai trong tài liệu: lấy khóa mạnh nhất cần thi�
 
 ### Transaction dài
 
-Một [[long-running-transaction|transaction dài]] là transaction mở lâu hơn mức cần, thường vì làm việc không liên quan tới database bên trong nó: gọi HTTP sang cổng thanh toán, gửi email, chờ một hàng đợi. Nó gây hại theo ba cách:
+Một [[concepts/long-running-transaction|transaction dài]] là transaction mở lâu hơn mức cần, thường vì làm việc không liên quan tới database bên trong nó: gọi HTTP sang cổng thanh toán, gửi email, chờ một hàng đợi. Nó gây hại theo ba cách:
 
 - **Giữ khóa**: mọi dòng đã sửa vẫn bị khóa. Ví dụ dưới: giữ khóa SKU A 3 giây thì mọi người mua A chờ 3 giây.
 - **Giữ kết nối**: một kết nối trong pool bị chiếm suốt thời gian đó. Đủ nhiều transaction dài là pool cạn, các request không liên quan cũng phải chờ.
@@ -130,7 +130,7 @@ Postgres có ba tham số giới hạn, **đều tắt (0) theo mặc định**:
 
 ### Thử lại có jitter
 
-Có những lỗi mà "thử lại là được": `40P01` (deadlock) và `40001` (serialization failure, ga 3). Prisma gộp cả hai thành `P2034`. Một vòng [[transaction-retry|thử lại]] tử tế:
+Có những lỗi mà "thử lại là được": `40P01` (deadlock) và `40001` (serialization failure, ga 3). Prisma gộp cả hai thành `P2034`. Một vòng [[concepts/transaction-retry|thử lại]] tử tế:
 
 - thử lại **cả transaction** từ đầu, không phải câu lệnh lỗi;
 - chỉ thử lại đúng những mã lỗi đó, không thử lại lỗi nghiệp vụ hay lỗi cú pháp;

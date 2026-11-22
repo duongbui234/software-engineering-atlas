@@ -17,17 +17,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[opening-handshake|Opening handshake]]: một `GET` HTTP/1.1 với `Upgrade: websocket` và một khóa ngẫu nhiên; server đáp `101` kèm `Sec-WebSocket-Accept = base64(SHA-1(khóa + một GUID cố định))`. Sau dòng trống đó, kết nối không còn nói HTTP.
-> - Dữ liệu đi trong [[websocket-frame|frame]]: 2–14 byte đầu (FIN, opcode, MASK, độ dài) rồi payload. Opcode 1 text, 2 binary, 8 close, 9 ping, 10 pong.
-> - [[masking|Masking]]: mọi frame client gửi lên phải XOR với 4 byte ngẫu nhiên. Không phải mã hóa; nó chặn một kiểu đầu độc cache của proxy cũ.
-> - [[ping-pong|Ping/Pong]] phát hiện kết nối chết lặng lẽ. [[close-code|Close code]] cho biết vì sao đóng; 1006 nghĩa là đứt mà không có lời chào, và không bao giờ đi trên dây.
-> - [[subprotocol|Subprotocol]] để hai bên thống nhất nội dung tin. Ngoài những thứ này, RFC 6455 không có gì nữa: không room, không ack, không tự nối lại.
+> - [[concepts/opening-handshake|Opening handshake]]: một `GET` HTTP/1.1 với `Upgrade: websocket` và một khóa ngẫu nhiên; server đáp `101` kèm `Sec-WebSocket-Accept = base64(SHA-1(khóa + một GUID cố định))`. Sau dòng trống đó, kết nối không còn nói HTTP.
+> - Dữ liệu đi trong [[concepts/websocket-frame|frame]]: 2–14 byte đầu (FIN, opcode, MASK, độ dài) rồi payload. Opcode 1 text, 2 binary, 8 close, 9 ping, 10 pong.
+> - [[concepts/masking|Masking]]: mọi frame client gửi lên phải XOR với 4 byte ngẫu nhiên. Không phải mã hóa; nó chặn một kiểu đầu độc cache của proxy cũ.
+> - [[concepts/ping-pong|Ping/Pong]] phát hiện kết nối chết lặng lẽ. [[concepts/close-code|Close code]] cho biết vì sao đóng; 1006 nghĩa là đứt mà không có lời chào, và không bao giờ đi trên dây.
+> - [[concepts/subprotocol|Subprotocol]] để hai bên thống nhất nội dung tin. Ngoài những thứ này, RFC 6455 không có gì nữa: không room, không ack, không tự nối lại.
 
 > [!info] Bối cảnh
 > Ga 2 của **tuyến WebSocket và Socket.IO**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: trang hàng chờ mở một kết nối realtime để nhận "tới lượt bạn" và số hàng còn lại. Bài này chưa dùng thư viện nào: mình tự viết một server WebSocket bằng module `http` của Node để nhìn tận mắt các byte. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Polling, long polling, SSE, full-duplex**: xem [[2026-11-22-websocket-realtime-options|ga 1]].
+> - **Polling, long polling, SSE, full-duplex**: xem [[posts/2026-11-22-websocket-realtime-options|ga 1]].
 > - **Byte, hex**: một byte là 8 bit, viết dạng hex là hai ký tự `00`–`ff` (`81` = 1000 0001).
 > - **Bit**: một chữ số 0 hoặc 1. "Bit cao nhất" của byte là bit đầu bên trái.
 > - **XOR**: phép "khác thì 1, giống thì 0" trên từng bit. XOR hai lần với cùng một khóa là ra lại giá trị cũ.
@@ -42,12 +42,12 @@ WebSocket giống một cuộc điện thoại giữa trình duyệt và server.
 
 | Đời thường | Khái niệm |
 |---|---|
-| Nhấc máy: "Alo, có phải cửa hàng không?", "Đúng rồi, tôi nghe được câu mật khẩu của anh" | [[opening-handshake\|Opening handshake]] |
-| Mỗi câu nói là một đoạn tiếng, câu dài thì nói thành nhiều hơi | [[websocket-frame\|Frame]] (và fragment) |
-| Khách nói qua một bộ đổi giọng ngẫu nhiên, để tổng đài cũ không tưởng nhầm là lệnh nội bộ | [[masking\|Masking]] |
-| "Còn nghe không?", "Còn" | [[ping-pong\|Ping/Pong]] |
-| Cúp máy kèm lý do: "hết giờ", "sai mật khẩu"; hay rớt sóng không kịp chào | [[close-code\|Close code]] (1000, 1008…; 1006) |
-| Đầu cuộc gọi thống nhất nói tiếng Việt hay tiếng Anh | [[subprotocol\|Subprotocol]] |
+| Nhấc máy: "Alo, có phải cửa hàng không?", "Đúng rồi, tôi nghe được câu mật khẩu của anh" | [[concepts/opening-handshake\|Opening handshake]] |
+| Mỗi câu nói là một đoạn tiếng, câu dài thì nói thành nhiều hơi | [[concepts/websocket-frame\|Frame]] (và fragment) |
+| Khách nói qua một bộ đổi giọng ngẫu nhiên, để tổng đài cũ không tưởng nhầm là lệnh nội bộ | [[concepts/masking\|Masking]] |
+| "Còn nghe không?", "Còn" | [[concepts/ping-pong\|Ping/Pong]] |
+| Cúp máy kèm lý do: "hết giờ", "sai mật khẩu"; hay rớt sóng không kịp chào | [[concepts/close-code\|Close code]] (1000, 1008…; 1006) |
+| Đầu cuộc gọi thống nhất nói tiếng Việt hay tiếng Anh | [[concepts/subprotocol\|Subprotocol]] |
 
 ```mermaid
 sequenceDiagram
@@ -77,7 +77,7 @@ Mình từng nghĩ những thứ quen dùng với Socket.IO (đặt tên sự ki
 
 ### Opening handshake: bắt đầu bằng HTTP
 
-**[[opening-handshake|Opening handshake]]** là một request HTTP/1.1 bình thường. Client mà mình tự viết server để nghe đã gửi:
+**[[concepts/opening-handshake|Opening handshake]]** là một request HTTP/1.1 bình thường. Client mà mình tự viết server để nghe đã gửi:
 
 ```text
 GET /flash-sale HTTP/1.1
@@ -110,7 +110,7 @@ Hai biến thể đáng biết: trên HTTP/2, WebSocket không dùng `Upgrade` m
 
 ### Frame: đơn vị của mọi thứ
 
-Mọi dữ liệu sau handshake đi trong **[[websocket-frame|frame]]**. Đây là frame đầu tiên client gửi khi gọi `ws.send('mua')`, đọc từng byte:
+Mọi dữ liệu sau handshake đi trong **[[concepts/websocket-frame|frame]]**. Đây là frame đầu tiên client gửi khi gọi `ws.send('mua')`, đọc từng byte:
 
 ```text
 81 83 97 d2 5e 23 fa a7 3f
@@ -135,7 +135,7 @@ Lưu ý: **WebSocket là giao thức theo tin (message), không phải theo lu�
 
 ### Masking: client luôn che, server không bao giờ
 
-**[[masking|Masking]]** là quy định lạ nhất của RFC 6455: **mọi frame client gửi lên phải có mask**, server nhận frame không mask phải đóng kết nối; ngược lại server **không được** che frame gửi xuống. Che bằng cách XOR từng byte payload với mask key, xoay vòng 4 byte: `fa XOR 97 = 6d` ('m'), `a7 XOR d2 = 75` ('u'), `3f XOR 5e = 61` ('a').
+**[[concepts/masking|Masking]]** là quy định lạ nhất của RFC 6455: **mọi frame client gửi lên phải có mask**, server nhận frame không mask phải đóng kết nối; ngược lại server **không được** che frame gửi xuống. Che bằng cách XOR từng byte payload với mask key, xoay vòng 4 byte: `fa XOR 97 = 6d` ('m'), `a7 XOR d2 = 75` ('u'), `3f XOR 5e = 61` ('a').
 
 Đây **không phải mã hóa**: mask key nằm ngay trong frame, ai đọc được frame đều gỡ được. Bảo mật nội dung là việc của TLS (`wss://`). Lý do có masking nằm ở một nghiên cứu năm 2011 (Huang, Chen, Barth, Rescorla, Jackson): nếu JavaScript của kẻ tấn công chọn được chính xác các byte đi trên dây, nó có thể viết một frame trông y như một request HTTP. Một số proxy trong suốt đời cũ không hiểu `Upgrade`, đọc nhầm frame đó thành request, và lưu response giả vào cache cho mọi người dùng sau: đầu độc cache. Mask key ngẫu nhiên do trình duyệt chọn, mỗi frame một khóa, làm kẻ tấn công không còn kiểm soát được các byte thật sự đi qua proxy.
 
@@ -143,7 +143,7 @@ Server không phải che vì mã độc chạy ở phía trình duyệt, không 
 
 ### Ping/Pong: còn sống không?
 
-TCP không báo khi đầu bên kia biến mất lặng lẽ: điện thoại vào thang máy, Wi-Fi đổi mạng, NAT của nhà mạng xóa bảng. Kết nối "trông vẫn mở" cả chục phút trong khi không ai nghe. **[[ping-pong|Ping/Pong]]** giải quyết chuyện đó: một bên gửi frame ping (opcode 9, payload tùy ý tối đa 125 byte), bên kia **bắt buộc** trả pong (opcode 10) với cùng payload. Không thấy pong trong một khoảng thời gian thì coi kết nối đã chết và đóng nó.
+TCP không báo khi đầu bên kia biến mất lặng lẽ: điện thoại vào thang máy, Wi-Fi đổi mạng, NAT của nhà mạng xóa bảng. Kết nối "trông vẫn mở" cả chục phút trong khi không ai nghe. **[[concepts/ping-pong|Ping/Pong]]** giải quyết chuyện đó: một bên gửi frame ping (opcode 9, payload tùy ý tối đa 125 byte), bên kia **bắt buộc** trả pong (opcode 10) với cùng payload. Không thấy pong trong một khoảng thời gian thì coi kết nối đã chết và đóng nó.
 
 Ping còn có tác dụng phụ quan trọng: proxy và load balancer thấy có dữ liệu chạy qua nên không cắt kết nối vì "im lặng quá lâu" (ga 5).
 
@@ -151,7 +151,7 @@ Một điểm hay bị bỏ qua: **API WebSocket của trình duyệt không có
 
 ### Close code: cúp máy có lý do
 
-Đóng kết nối đúng cách là một cuộc **bắt tay đóng**: một bên gửi frame close (opcode 8) mang 2 byte **[[close-code|mã đóng]]** và một lý do dạng chữ UTF-8 (tổng cộng không quá 125 byte); bên kia đáp lại một frame close; sau đó server đóng TCP. Phía JavaScript thấy `onclose` với `code`, `reason` và `wasClean = true`.
+Đóng kết nối đúng cách là một cuộc **bắt tay đóng**: một bên gửi frame close (opcode 8) mang 2 byte **[[concepts/close-code|mã đóng]]** và một lý do dạng chữ UTF-8 (tổng cộng không quá 125 byte); bên kia đáp lại một frame close; sau đó server đóng TCP. Phía JavaScript thấy `onclose` với `code`, `reason` và `wasClean = true`.
 
 | Mã | Ý nghĩa | Ví dụ |
 |---|---|---|
@@ -169,7 +169,7 @@ Ba mã **không bao giờ được gửi trên dây**, chỉ dùng để báo ch
 
 ### Subprotocol: thống nhất nói tiếng gì
 
-WebSocket chỉ chở byte; hai bên phải tự thống nhất định dạng. **[[subprotocol|Subprotocol]]** là cách thỏa thuận lúc bắt tay: client gửi danh sách trong `Sec-WebSocket-Protocol` (`stock.v1, stock.v2`), server chọn **đúng một** trong số đó và trả lại; `ws.protocol` phía client cho biết kết quả. Server trả một giá trị client không đề xuất thì trình duyệt hủy kết nối. Không trả gì thì nghĩa là "không dùng subprotocol nào".
+WebSocket chỉ chở byte; hai bên phải tự thống nhất định dạng. **[[concepts/subprotocol|Subprotocol]]** là cách thỏa thuận lúc bắt tay: client gửi danh sách trong `Sec-WebSocket-Protocol` (`stock.v1, stock.v2`), server chọn **đúng một** trong số đó và trả lại; `ws.protocol` phía client cho biết kết quả. Server trả một giá trị client không đề xuất thì trình duyệt hủy kết nối. Không trả gì thì nghĩa là "không dùng subprotocol nào".
 
 Các subprotocol có tên tuổi: STOMP và MQTT (nhắn tin), `graphql-transport-ws` (GraphQL subscription), `wamp`. Với hệ thống tự viết, subprotocol là chỗ tốt để đánh **phiên bản định dạng tin**: client cũ xin `stock.v1`, client mới xin `stock.v2`, server phục vụ cả hai trong thời gian chuyển đổi.
 

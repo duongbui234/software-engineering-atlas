@@ -23,22 +23,22 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[resource-alarm|Cảnh báo tài nguyên]]: một node vượt ngưỡng RAM (mặc định 60%) hoặc ổ đĩa còn dưới ngưỡng (mặc định 50 MB) là **mọi publisher của cả cụm bị chặn**. Consumer vẫn chạy.
-> - [[flow-control|Flow control]] là phanh tự động nhẹ hơn: broker làm chậm connection đang gửi quá nhanh so với sức xử lý. Tách connection gửi và nhận để consumer không bị phanh oan.
-> - [[queue-metrics|Chỉ số queue]]: `ready` tăng đều là consumer không theo kịp; `unacked` cao là consumer đang ôm nhiều việc. Theo dõi bằng Prometheus, không chỉ nhìn management UI.
-> - [[access-control|Quyền truy cập]] theo vhost với ba quyền configure / write / read; xóa user `guest`, mỗi ứng dụng một user, bật TLS. [[policy|Policy]] cấu hình queue lúc đang chạy, không phải khai báo lại.
-> - RabbitMQ 4.x nói [[giao-thuc-ngoai-amqp-0-9-1|nhiều giao thức]]: AMQP 1.0 (khuyên cho ứng dụng mới), MQTT cho IoT, STOMP, stream protocol. Cuối bài là [[production-checklist|checklist production]].
+> - [[concepts/resource-alarm|Cảnh báo tài nguyên]]: một node vượt ngưỡng RAM (mặc định 60%) hoặc ổ đĩa còn dưới ngưỡng (mặc định 50 MB) là **mọi publisher của cả cụm bị chặn**. Consumer vẫn chạy.
+> - [[concepts/flow-control|Flow control]] là phanh tự động nhẹ hơn: broker làm chậm connection đang gửi quá nhanh so với sức xử lý. Tách connection gửi và nhận để consumer không bị phanh oan.
+> - [[concepts/queue-metrics|Chỉ số queue]]: `ready` tăng đều là consumer không theo kịp; `unacked` cao là consumer đang ôm nhiều việc. Theo dõi bằng Prometheus, không chỉ nhìn management UI.
+> - [[concepts/access-control|Quyền truy cập]] theo vhost với ba quyền configure / write / read; xóa user `guest`, mỗi ứng dụng một user, bật TLS. [[concepts/policy|Policy]] cấu hình queue lúc đang chạy, không phải khai báo lại.
+> - RabbitMQ 4.x nói [[concepts/giao-thuc-ngoai-amqp-0-9-1|nhiều giao thức]]: AMQP 1.0 (khuyên cho ứng dụng mới), MQTT cho IoT, STOMP, stream protocol. Cuối bài là [[concepts/production-checklist|checklist production]].
 
 > [!info] Bối cảnh
 > Ga 9, ga cuối của **tuyến RabbitMQ**. Tám ga trước dựng mọi khái niệm; ga này hỏi: chạy thật thì cần nhìn gì, chặn gì, cấu hình gì. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: lúc 21:00 producer gửi dồn dập, và câu hỏi là RabbitMQ có chịu nổi không, và nếu không thì nó báo bằng cách nào. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Ready / unacked**: tin đang chờ trong queue / tin đã giao cho consumer nhưng chưa ack. Xem [[2026-11-21-rabbitmq-ack-confirm|ga 4]].
+> - **Ready / unacked**: tin đang chờ trong queue / tin đã giao cho consumer nhưng chưa ack. Xem [[posts/2026-11-21-rabbitmq-ack-confirm|ga 4]].
 > - **Prometheus, Grafana**: Prometheus định kỳ thu số liệu từ các hệ thống; Grafana vẽ biểu đồ và cảnh báo từ số liệu đó.
 > - **Watermark (ngưỡng)**: mức mà vượt qua thì hệ thống phản ứng.
 > - **Back-pressure**: bên nhận không theo kịp thì đẩy ngược áp lực về bên gửi, buộc bên gửi chậm lại.
 > - **Regex**: biểu thức mô tả một mẫu chuỗi, ví dụ `^orders\.` là "mọi tên bắt đầu bằng `orders.`".
-> - **JWT, OAuth 2**: thẻ đăng nhập có chữ ký và giao thức cấp thẻ. Xem [[2026-11-18-api-security|ga Bảo mật của tuyến API]].
+> - **JWT, OAuth 2**: thẻ đăng nhập có chữ ký và giao thức cấp thẻ. Xem [[posts/2026-11-18-api-security|ga Bảo mật của tuyến API]].
 > - **IoT**: thiết bị nhỏ nối mạng (cảm biến, thiết bị gia dụng thông minh).
 > - **Health check / readiness probe**: phép kiểm tra định kỳ xem dịch vụ còn sống và sẵn sàng nhận việc chưa.
 
@@ -46,13 +46,13 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Kho đầy quá 60%: đóng cửa nhận thư mới ở **mọi** chi nhánh, vẫn tiếp tục phát thư | [[resource-alarm\|Resource alarm]] |
-| Quầy nhận thư làm chậm lại khi bàn phân loại phía sau đang ùn | [[flow-control\|Flow control]] |
-| Bảng điện tử: bao nhiêu thư đang chờ, bao nhiêu thư đang trên đường phát | [[queue-metrics\|Queue metrics]] |
-| Thẻ nhân viên: ai được mở kho nào, ai chỉ được gửi, ai chỉ được nhận | [[access-control\|Access control]] |
-| Thông báo nội bộ "mọi hộc thư bắt đầu bằng `orders.` chỉ chứa 10.000 lá" | [[policy\|Policy]] |
-| Quầy nhận thư bằng nhiều thứ tiếng: bưu phẩm quốc tế, điện tín, thư nội bộ | [[giao-thuc-ngoai-amqp-0-9-1\|Giao thức ngoài AMQP 0-9-1]] |
-| Danh sách kiểm tra trước ngày khai trương | [[production-checklist\|Production checklist]] |
+| Kho đầy quá 60%: đóng cửa nhận thư mới ở **mọi** chi nhánh, vẫn tiếp tục phát thư | [[concepts/resource-alarm\|Resource alarm]] |
+| Quầy nhận thư làm chậm lại khi bàn phân loại phía sau đang ùn | [[concepts/flow-control\|Flow control]] |
+| Bảng điện tử: bao nhiêu thư đang chờ, bao nhiêu thư đang trên đường phát | [[concepts/queue-metrics\|Queue metrics]] |
+| Thẻ nhân viên: ai được mở kho nào, ai chỉ được gửi, ai chỉ được nhận | [[concepts/access-control\|Access control]] |
+| Thông báo nội bộ "mọi hộc thư bắt đầu bằng `orders.` chỉ chứa 10.000 lá" | [[concepts/policy\|Policy]] |
+| Quầy nhận thư bằng nhiều thứ tiếng: bưu phẩm quốc tế, điện tín, thư nội bộ | [[concepts/giao-thuc-ngoai-amqp-0-9-1\|Giao thức ngoài AMQP 0-9-1]] |
+| Danh sách kiểm tra trước ngày khai trương | [[concepts/production-checklist\|Production checklist]] |
 
 ```mermaid
 flowchart TB
@@ -75,7 +75,7 @@ Trên máy dev, RabbitMQ không bao giờ có chuyện gì. Mình từng nghĩ "
 
 ### Cảnh báo tài nguyên: bảo vệ broker bằng cách chặn người gửi
 
-[[resource-alarm|Resource alarm]] là cơ chế tự vệ của RabbitMQ. Có hai loại:
+[[concepts/resource-alarm|Resource alarm]] là cơ chế tự vệ của RabbitMQ. Có hai loại:
 
 - **Memory alarm**: RAM dùng vượt `vm_memory_high_watermark`, mặc định **0,6** (60%) RAM máy. Chạy trong container thì nên đặt giá trị **tuyệt đối** (ví dụ `vm_memory_high_watermark.absolute = 3GiB`), vì tỉ lệ được tính trên lượng RAM mà RabbitMQ phát hiện được, và con số đó có thể không khớp giới hạn bộ nhớ đặt cho container. Checklist khuyên khoảng 0,4–0,7.
 - **Disk alarm**: dung lượng trống còn dưới `disk_free_limit`, mặc định **50 MB**. Con số này chỉ hợp cho máy dev; production nên đặt xấp xỉ bằng dung lượng RAM.
@@ -86,11 +86,11 @@ Khi một cảnh báo bật trên **bất kỳ** node nào:
 - Consumer **vẫn chạy**, để hàng được xả bớt.
 - Client được báo qua sự kiện `connection.blocked` / `unblocked` (trong `amqplib`: `conn.on('blocked')`).
 
-Chặn cả cụm chỉ vì một node nghe có vẻ quá tay, nhưng đó là cách duy nhất để không node nào bị tràn: tin gửi vào node A có thể được chuyển sang queue ở node B. Hệ quả cho ứng dụng: producer phải có **timeout** cho việc gửi, dùng confirm để biết tin chưa vào, và có chỗ giữ tin (outbox ở ga 5 làm đúng việc này). Cách phòng từ gốc là giới hạn độ dài queue ([[2026-11-21-rabbitmq-dlx-retry|ga 6]]) để một consumer chết không kéo theo cả cụm.
+Chặn cả cụm chỉ vì một node nghe có vẻ quá tay, nhưng đó là cách duy nhất để không node nào bị tràn: tin gửi vào node A có thể được chuyển sang queue ở node B. Hệ quả cho ứng dụng: producer phải có **timeout** cho việc gửi, dùng confirm để biết tin chưa vào, và có chỗ giữ tin (outbox ở ga 5 làm đúng việc này). Cách phòng từ gốc là giới hạn độ dài queue ([[posts/2026-11-21-rabbitmq-dlx-retry|ga 6]]) để một consumer chết không kéo theo cả cụm.
 
 ### Flow control: phanh nhẹ trước khi phanh gấp
 
-[[flow-control|Flow control]] là cơ chế back-pressure bên trong broker. Mỗi tin đi qua một chuỗi tiến trình: connection đọc socket, channel, queue, ghi đĩa, chép sang bản sao. Khâu nào chậm thì khâu trước nó bị chặn tạm thời, cứ thế dồn ngược về **connection đang gửi**. Connection đó hiện trạng thái `flow` trong management UI: bị chặn và mở lại nhiều lần mỗi giây, nên tốc độ gửi tự khớp với tốc độ broker ghi được.
+[[concepts/flow-control|Flow control]] là cơ chế back-pressure bên trong broker. Mỗi tin đi qua một chuỗi tiến trình: connection đọc socket, channel, queue, ghi đĩa, chép sang bản sao. Khâu nào chậm thì khâu trước nó bị chặn tạm thời, cứ thế dồn ngược về **connection đang gửi**. Connection đó hiện trạng thái `flow` trong management UI: bị chặn và mở lại nhiều lần mỗi giây, nên tốc độ gửi tự khớp với tốc độ broker ghi được.
 
 Hai điều rút ra:
 
@@ -101,7 +101,7 @@ Hai điều rút ra:
 
 ### Chỉ số queue: đọc đồng hồ đo
 
-[[queue-metrics|Queue metrics]] là thứ đầu tiên cần nhìn. Ba con số cơ bản của mỗi queue:
+[[concepts/queue-metrics|Queue metrics]] là thứ đầu tiên cần nhìn. Ba con số cơ bản của mỗi queue:
 
 | Chỉ số | Ý nghĩa | Đáng lo khi |
 |---|---|---|
@@ -123,7 +123,7 @@ Health check có nhiều mức: `rabbitmq-diagnostics ping` (node có trả lờ
 
 ### Quyền truy cập
 
-[[access-control|Access control]] của RabbitMQ gồm xác thực (bạn là ai) và phân quyền (bạn được làm gì).
+[[concepts/access-control|Access control]] của RabbitMQ gồm xác thực (bạn là ai) và phân quyền (bạn được làm gì).
 
 **Xác thực** bằng username/password (mặc định), chứng chỉ x.509 (cơ chế `EXTERNAL`, qua plugin), hoặc JWT qua **plugin OAuth 2**. Với OAuth 2, token được gửi ở chỗ password; quyền đọc từ scope trong token, dạng `rabbitmq.read:<vhost>/<mẫu tên>`; giá trị `resource_server_id` phải nằm trong trường `aud` của token. Token hết hạn thì client AMQP 0-9-1 gửi token mới bằng lệnh `update-secret` mà không phải nối lại.
 
@@ -146,7 +146,7 @@ Mặc định đáng sửa:
 
 ### Policy: đổi cấu hình queue khi đang chạy
 
-[[policy|Policy]] là cấu hình áp vào mọi queue hoặc exchange có tên khớp một regex, trong một vhost:
+[[concepts/policy|Policy]] là cấu hình áp vào mọi queue hoặc exchange có tên khớp một regex, trong một vhost:
 
 ```bash
 rabbitmqctl set_policy orders-limits "^orders\." \
@@ -165,7 +165,7 @@ Cách làm tốt: ứng dụng chỉ khai báo tên, loại và cờ `durable`; 
 
 ### Các giao thức ngoài AMQP 0-9-1
 
-[[giao-thuc-ngoai-amqp-0-9-1|RabbitMQ 4.x nói nhiều giao thức]], chung một broker, chung queue:
+[[concepts/giao-thuc-ngoai-amqp-0-9-1|RabbitMQ 4.x nói nhiều giao thức]], chung một broker, chung queue:
 
 | Giao thức | Cổng | Dùng cho | Ghi chú |
 |---|---|---|---|
@@ -186,7 +186,7 @@ Phần lớn ứng dụng Node.js dùng RabbitMQ qua một framework. Với Nest
 
 ### Checklist production
 
-[[production-checklist|Production checklist]], gom từ checklist chính thức và các ga trước:
+[[concepts/production-checklist|Production checklist]], gom từ checklist chính thức và các ga trước:
 
 **Hạ tầng**
 - Cụm 3 hoặc 5 node, cùng LAN; giữa các vùng dùng federation hoặc shovel (ga 8).

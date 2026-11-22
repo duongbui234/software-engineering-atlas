@@ -19,18 +19,18 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - Producer **không bao giờ** gửi thẳng vào queue. Nó gửi cho một [[exchange|exchange]] kèm một nhãn gọi là [[routing-key|routing key]]; exchange dựa vào các [[binding|binding]] để chép tin vào đúng [[queue|queue]].
-> - [[connection|Connection]] là một kết nối TCP sống lâu; [[channel|channel]] là các "làn" nhẹ bên trong nó. Mở connection mỗi request là lỗi kinh điển.
-> - [[virtual-host|Virtual host]] chia một broker thành nhiều "chi nhánh" tách biệt tên, quyền và chính sách, nhưng dùng chung RAM, CPU.
-> - Một tin nhắn gồm **properties** (thuộc tính chuẩn như `message_id`, `persistent`), **headers** (bảng tùy ý) và **body** (mảng byte broker không đọc). Xem [[message-properties|Message properties]].
+> - Producer **không bao giờ** gửi thẳng vào queue. Nó gửi cho một [[concepts/exchange|exchange]] kèm một nhãn gọi là [[concepts/routing-key|routing key]]; exchange dựa vào các [[concepts/binding|binding]] để chép tin vào đúng [[concepts/queue|queue]].
+> - [[concepts/connection|Connection]] là một kết nối TCP sống lâu; [[concepts/channel|channel]] là các "làn" nhẹ bên trong nó. Mở connection mỗi request là lỗi kinh điển.
+> - [[concepts/virtual-host|Virtual host]] chia một broker thành nhiều "chi nhánh" tách biệt tên, quyền và chính sách, nhưng dùng chung RAM, CPU.
+> - Một tin nhắn gồm **properties** (thuộc tính chuẩn như `message_id`, `persistent`), **headers** (bảng tùy ý) và **body** (mảng byte broker không đọc). Xem [[concepts/message-properties|Message properties]].
 > - `sendToQueue` chỉ là đường tắt: gửi vào **default exchange** với routing key bằng tên queue.
 
 > [!info] Bối cảnh
-> Ga 2 của **tuyến RabbitMQ**. Ở [[2026-11-21-rabbitmq-why-queues|ga 1]], mình coi RabbitMQ là một bưu điện đứng giữa các dịch vụ của **flash-sale** (trang bán hàng giảm giá giờ vàng mình tự viết). Ga này mở cửa bưu điện, xem bên trong có những bộ phận nào. Bạn không cần biết code dự án; mọi ví dụ chạy trên một RabbitMQ thật trong Docker.
+> Ga 2 của **tuyến RabbitMQ**. Ở [[posts/2026-11-21-rabbitmq-why-queues|ga 1]], mình coi RabbitMQ là một bưu điện đứng giữa các dịch vụ của **flash-sale** (trang bán hàng giảm giá giờ vàng mình tự viết). Ga này mở cửa bưu điện, xem bên trong có những bộ phận nào. Bạn không cần biết code dự án; mọi ví dụ chạy trên một RabbitMQ thật trong Docker.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Giao thức (protocol)**: bộ quy tắc hai chương trình dùng để nói chuyện qua mạng, như HTTP cho web.
-> - **AMQP 0-9-1**: giao thức RabbitMQ dùng từ đầu. Tên đọc là "A-M-Q-P không chín một". Xem [[amqp|AMQP]].
+> - **AMQP 0-9-1**: giao thức RabbitMQ dùng từ đầu. Tên đọc là "A-M-Q-P không chín một". Xem [[concepts/amqp|AMQP]].
 > - **TCP**: tầng kết nối mạng bên dưới; mở một kết nối TCP tốn vài vòng hỏi-đáp và tài nguyên ở cả hai đầu.
 > - **TLS**: lớp mã hóa đặt trên TCP, cùng thứ làm nên HTTPS.
 > - **Thread (luồng)**: một mạch chạy song song trong chương trình.
@@ -44,15 +44,15 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Xe chở thư từ công ty bạn tới bưu điện, chạy cả ngày | [[connection\|Connection]] (kết nối TCP) |
-| Các làn riêng trong xe, mỗi nhân viên một làn | [[channel\|Channel]] |
-| Mỗi chi nhánh bưu điện có sổ sách riêng, nhân viên riêng | [[virtual-host\|Virtual host]] |
-| Bàn phân loại: nhận thư, xem nhãn, quyết định bỏ hộc nào | [[exchange\|Exchange]] |
-| Hộc thư: thư nằm chờ theo thứ tự tới khi có người lấy | [[queue\|Queue]] |
-| Quy tắc dán trên bàn: "thư nhãn `order.cancelled` bỏ hộc kho" | [[binding\|Binding]] |
-| Nhãn dán trên phong bì | [[routing-key\|Routing key]] |
-| Phong bì (thông tin chuẩn) + giấy ghi chú kẹp kèm + lá thư bên trong | [[message-properties\|Properties, headers, body]] |
-| Bộ quy tắc chung của ngành bưu chính | [[amqp\|AMQP 0-9-1]] |
+| Xe chở thư từ công ty bạn tới bưu điện, chạy cả ngày | [[concepts/connection\|Connection]] (kết nối TCP) |
+| Các làn riêng trong xe, mỗi nhân viên một làn | [[concepts/channel\|Channel]] |
+| Mỗi chi nhánh bưu điện có sổ sách riêng, nhân viên riêng | [[concepts/virtual-host\|Virtual host]] |
+| Bàn phân loại: nhận thư, xem nhãn, quyết định bỏ hộc nào | [[concepts/exchange\|Exchange]] |
+| Hộc thư: thư nằm chờ theo thứ tự tới khi có người lấy | [[concepts/queue\|Queue]] |
+| Quy tắc dán trên bàn: "thư nhãn `order.cancelled` bỏ hộc kho" | [[concepts/binding\|Binding]] |
+| Nhãn dán trên phong bì | [[concepts/routing-key\|Routing key]] |
+| Phong bì (thông tin chuẩn) + giấy ghi chú kẹp kèm + lá thư bên trong | [[concepts/message-properties\|Properties, headers, body]] |
+| Bộ quy tắc chung của ngành bưu chính | [[concepts/amqp\|AMQP 0-9-1]] |
 
 ```mermaid
 flowchart TB
@@ -84,13 +84,13 @@ Cả ba lỗi đều tới từ việc không biết bên trong bưu điện có
 
 ### AMQP 0-9-1: luật chung của bưu điện
 
-[[amqp|AMQP]] (Advanced Message Queuing Protocol) bản 0-9-1 là giao thức RabbitMQ dùng từ những ngày đầu. Nó quy định cả *cách nói chuyện* (các lệnh như `basic.publish`, `queue.declare`, `basic.ack`) lẫn *mô hình* bên trong broker: exchange, queue, binding. Nhờ giao thức chung, ứng dụng Node.js, Java hay Go đều nói chuyện được với RabbitMQ bằng thư viện của ngôn ngữ mình.
+[[concepts/amqp|AMQP]] (Advanced Message Queuing Protocol) bản 0-9-1 là giao thức RabbitMQ dùng từ những ngày đầu. Nó quy định cả *cách nói chuyện* (các lệnh như `basic.publish`, `queue.declare`, `basic.ack`) lẫn *mô hình* bên trong broker: exchange, queue, binding. Nhờ giao thức chung, ứng dụng Node.js, Java hay Go đều nói chuyện được với RabbitMQ bằng thư viện của ngôn ngữ mình.
 
-Một điểm khác HTTP: trong AMQP, **ứng dụng tự khai báo** cấu trúc bưu điện. Producer hay consumer gọi `assertExchange`, `assertQueue`, `bindQueue` lúc khởi động; nếu đã có rồi thì lệnh khai báo không làm gì. Bưu điện được "lắp" bởi chính những người dùng nó. Từ RabbitMQ 4.0, broker nói thêm được **AMQP 1.0**, một giao thức khác hẳn dù trùng tên; [[2026-11-21-rabbitmq-operations|ga 9]] so sánh hai bản.
+Một điểm khác HTTP: trong AMQP, **ứng dụng tự khai báo** cấu trúc bưu điện. Producer hay consumer gọi `assertExchange`, `assertQueue`, `bindQueue` lúc khởi động; nếu đã có rồi thì lệnh khai báo không làm gì. Bưu điện được "lắp" bởi chính những người dùng nó. Từ RabbitMQ 4.0, broker nói thêm được **AMQP 1.0**, một giao thức khác hẳn dù trùng tên; [[posts/2026-11-21-rabbitmq-operations|ga 9]] so sánh hai bản.
 
 ### Connection: xe chở thư sống lâu
 
-[[connection|Connection]] là một kết nối TCP (có thể bọc TLS) từ ứng dụng tới broker, có đăng nhập bằng user/password. Mở một connection tốn nhiều vòng hỏi-đáp, và mỗi connection chiếm bộ nhớ cùng một file handle ở broker.
+[[concepts/connection|Connection]] là một kết nối TCP (có thể bọc TLS) từ ứng dụng tới broker, có đăng nhập bằng user/password. Mở một connection tốn nhiều vòng hỏi-đáp, và mỗi connection chiếm bộ nhớ cùng một file handle ở broker.
 
 Vì vậy connection phải **sống lâu**: mở một lần khi ứng dụng khởi động, dùng tới khi tắt. Tài liệu RabbitMQ coi hơn khoảng 100 connection mở mới mỗi giây là dấu hiệu quản lý kết nối sai (connection churn). Nên đặt tên cho connection (`connection_name`) để thấy ngay trong management UI nó thuộc ứng dụng nào.
 
@@ -98,7 +98,7 @@ Vì vậy connection phải **sống lâu**: mở một lần khi ứng dụng k
 
 ### Channel: các làn trong xe
 
-[[channel|Channel]] là "kết nối nhẹ" chạy chung một connection. Mọi thao tác (gửi tin, khai báo queue, ack) đều diễn ra trên một channel cụ thể. Mở channel rẻ hơn mở connection rất nhiều, nhưng vẫn không miễn phí.
+[[concepts/channel|Channel]] là "kết nối nhẹ" chạy chung một connection. Mọi thao tác (gửi tin, khai báo queue, ack) đều diễn ra trên một channel cụ thể. Mở channel rẻ hơn mở connection rất nhiều, nhưng vẫn không miễn phí.
 
 Quy tắc dùng:
 
@@ -108,19 +108,19 @@ Quy tắc dùng:
 
 ### Virtual host: chi nhánh bưu điện
 
-[[virtual-host|Virtual host]] (vhost) chia một broker thành nhiều không gian tách biệt. Mỗi vhost có exchange, queue, binding, quyền và chính sách riêng; queue `orders` ở vhost `/shop` và queue `orders` ở vhost `/test` là hai queue khác nhau. Vhost mặc định tên là `/`.
+[[concepts/virtual-host|Virtual host]] (vhost) chia một broker thành nhiều không gian tách biệt. Mỗi vhost có exchange, queue, binding, quyền và chính sách riêng; queue `orders` ở vhost `/shop` và queue `orders` ở vhost `/test` là hai queue khác nhau. Vhost mặc định tên là `/`.
 
 User được cấp quyền theo từng vhost, và mỗi vhost đặt được giới hạn số connection, số queue. Nhưng vhost **chỉ tách về logic**: mọi vhost vẫn dùng chung RAM, CPU, đĩa của broker. Một vhost làm đầy RAM thì cả broker cùng chịu.
 
 ### Exchange: bàn phân loại
 
-[[exchange|Exchange]] nhận tin từ producer và quyết định chép tin vào queue nào. Exchange **không lưu tin**: nếu không queue nào khớp, tin bị bỏ ngay (trừ khi có cấu hình khác, [[2026-11-21-rabbitmq-exchanges|ga 3]]).
+[[concepts/exchange|Exchange]] nhận tin từ producer và quyết định chép tin vào queue nào. Exchange **không lưu tin**: nếu không queue nào khớp, tin bị bỏ ngay (trừ khi có cấu hình khác, [[posts/2026-11-21-rabbitmq-exchanges|ga 3]]).
 
 Mỗi exchange có tên, **kiểu** (direct, fanout, topic, headers; ga 3 đi qua từng kiểu), cờ `durable` (còn tồn tại sau khi broker khởi động lại) và cờ `auto-delete` (tự xóa khi không còn binding nào). Mỗi broker có sẵn vài exchange tên bắt đầu bằng `amq.` và một exchange đặc biệt không tên, **default exchange**, nói ở phần cuối.
 
 ### Queue: hộc thư
 
-[[queue|Queue]] là nơi tin thật sự nằm chờ, theo thứ tự tới trước ra trước (FIFO). Một queue có:
+[[concepts/queue|Queue]] là nơi tin thật sự nằm chờ, theo thứ tự tới trước ra trước (FIFO). Một queue có:
 
 - **Tên**: tối đa 255 byte. Tên bắt đầu bằng `amq.` dành riêng cho broker. Khai báo tên rỗng thì broker tự đặt tên dạng `amq.gen-…`, hay dùng cho queue tạm của một consumer.
 - **`durable`**: queue được khôi phục khi broker khởi động lại. Queue không durable bị xóa khi khởi động lại.
@@ -131,13 +131,13 @@ Mỗi exchange có tên, **kiểu** (direct, fanout, topic, headers; ga 3 đi qu
 > [!warning] RabbitMQ 4.3+: queue không durable phải là exclusive
 > Từ 4.3, khai báo queue `durable: false` mà không `exclusive` bị **từ chối**, connection đóng với lỗi `541 INTERNAL_ERROR - Feature transient_nonexcl_queues is deprecated`. Rất nhiều bài hướng dẫn cũ (kể cả bản cũ của tutorial chính thức) dùng `durable: false`. Mọi ví dụ trong tuyến này đều dùng queue durable.
 
-Khai báo lại một queue đã có với thuộc tính khác (ví dụ thêm `x-max-length`) thì broker trả lỗi `406 PRECONDITION_FAILED` và đóng channel. Muốn đổi cấu hình queue đang chạy thì dùng **policy** ([[2026-11-21-rabbitmq-operations|ga 9]]).
+Khai báo lại một queue đã có với thuộc tính khác (ví dụ thêm `x-max-length`) thì broker trả lỗi `406 PRECONDITION_FAILED` và đóng channel. Muốn đổi cấu hình queue đang chạy thì dùng **policy** ([[posts/2026-11-21-rabbitmq-operations|ga 9]]).
 
 ### Binding và routing key: quy tắc và nhãn
 
-[[binding|Binding]] là một quy tắc nối exchange với queue: *"exchange E chép tin vào queue Q khi nhãn khớp mẫu K"*. Mẫu K gọi là **binding key**.
+[[concepts/binding|Binding]] là một quy tắc nối exchange với queue: *"exchange E chép tin vào queue Q khi nhãn khớp mẫu K"*. Mẫu K gọi là **binding key**.
 
-[[routing-key|Routing key]] là nhãn producer dán lên **từng tin** lúc gửi. Exchange so routing key của tin với binding key của từng binding để quyết định.
+[[concepts/routing-key|Routing key]] là nhãn producer dán lên **từng tin** lúc gửi. Exchange so routing key của tin với binding key của từng binding để quyết định.
 
 Hai thứ hay bị nhầm vì tên gần giống:
 
@@ -151,13 +151,13 @@ Một queue có thể có nhiều binding (nghe nhiều loại tin), một excha
 
 ### Tin nhắn: phong bì, ghi chú và lá thư
 
-Một tin AMQP gồm ba phần. Xem thêm [[message-properties|Message properties]].
+Một tin AMQP gồm ba phần. Xem thêm [[concepts/message-properties|Message properties]].
 
 - **Body**: mảng byte. Broker **không đọc** body; JSON hay Protobuf là chuyện của hai đầu.
 - **Properties**: các trường chuẩn, giống thông tin in sẵn trên phong bì.
   - `delivery_mode`: 1 = không bền, 2 = bền (persistent, ghi xuống đĩa). Trong `amqplib` là `{ persistent: true }`.
   - `content_type`, `content_encoding`: body là gì, mã hóa thế nào.
-  - `message_id`: mã định danh tin, dùng để chống xử lý trùng ([[2026-11-21-rabbitmq-delivery-guarantees|ga 5]]).
+  - `message_id`: mã định danh tin, dùng để chống xử lý trùng ([[posts/2026-11-21-rabbitmq-delivery-guarantees|ga 5]]).
   - `correlation_id`, `reply_to`: dùng cho kiểu hỏi-đáp (ga 5).
   - `expiration`: thời hạn sống của tin, tính bằng mili giây, kiểu chuỗi (ga 6).
   - `priority`: độ ưu tiên (ga 6).
@@ -194,7 +194,7 @@ sequenceDiagram
     C->>Q: basic.ack,<br/>tin bị xóa
 ```
 
-Consumer nhận tin theo kiểu **đẩy** (push): nó đăng ký một lần bằng `basic.consume`, broker tự đẩy tin tới khi có. Cũng có kiểu **kéo** (`basic.get`, hỏi từng tin một), nhưng tài liệu RabbitMQ khuyên tránh vì rất tốn: mỗi lần hỏi là một vòng mạng, kể cả khi hàng trống. Bước `ack` cuối cùng là chủ đề của [[2026-11-21-rabbitmq-ack-confirm|ga 4]].
+Consumer nhận tin theo kiểu **đẩy** (push): nó đăng ký một lần bằng `basic.consume`, broker tự đẩy tin tới khi có. Cũng có kiểu **kéo** (`basic.get`, hỏi từng tin một), nhưng tài liệu RabbitMQ khuyên tránh vì rất tốn: mỗi lần hỏi là một vòng mạng, kể cả khi hàng trống. Bước `ack` cuối cùng là chủ đề của [[posts/2026-11-21-rabbitmq-ack-confirm|ga 4]].
 
 ## Ví dụ chạy được
 

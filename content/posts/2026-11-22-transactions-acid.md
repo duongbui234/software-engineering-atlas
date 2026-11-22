@@ -17,11 +17,11 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - Một [[transaction|transaction]] gom nhiều câu lệnh thành **một khối**: hoặc mọi câu đều có hiệu lực, hoặc không câu nào. Trong ví dụ, đặt hàng ba bước lỗi ở bước 3: không có transaction thì còn lại 1 suất bị giữ và 1 đơn mồ côi; có transaction thì sạch trơn.
-> - [[acid|ACID]] là bốn lời hứa của transaction: Atomicity (cả khối hoặc không), Consistency (luật của dữ liệu vẫn đúng), Isolation (các transaction chạy cùng lúc không giẫm chân nhau), Durability (đã commit là không mất).
-> - [[commit-va-rollback|COMMIT]] chốt cả khối; [[commit-va-rollback|ROLLBACK]] bỏ cả khối. Lỗi, mất kết nối hay pod bị kill giữa chừng đều dẫn tới rollback.
-> - Durability nhờ [[write-ahead-log|Write-Ahead Log]]: Postgres ghi nhật ký thay đổi xuống đĩa **trước** khi trả lời "COMMIT xong", bảng thì ghi sau.
-> - [[mvcc|MVCC]]: `UPDATE` không sửa tại chỗ mà tạo một **phiên bản dòng mới**. Người đang đọc vẫn thấy bản cũ đã commit và không phải chờ người ghi.
+> - Một [[concepts/transaction|transaction]] gom nhiều câu lệnh thành **một khối**: hoặc mọi câu đều có hiệu lực, hoặc không câu nào. Trong ví dụ, đặt hàng ba bước lỗi ở bước 3: không có transaction thì còn lại 1 suất bị giữ và 1 đơn mồ côi; có transaction thì sạch trơn.
+> - [[concepts/acid|ACID]] là bốn lời hứa của transaction: Atomicity (cả khối hoặc không), Consistency (luật của dữ liệu vẫn đúng), Isolation (các transaction chạy cùng lúc không giẫm chân nhau), Durability (đã commit là không mất).
+> - [[concepts/commit-va-rollback|COMMIT]] chốt cả khối; [[concepts/commit-va-rollback|ROLLBACK]] bỏ cả khối. Lỗi, mất kết nối hay pod bị kill giữa chừng đều dẫn tới rollback.
+> - Durability nhờ [[concepts/write-ahead-log|Write-Ahead Log]]: Postgres ghi nhật ký thay đổi xuống đĩa **trước** khi trả lời "COMMIT xong", bảng thì ghi sau.
+> - [[concepts/mvcc|MVCC]]: `UPDATE` không sửa tại chỗ mà tạo một **phiên bản dòng mới**. Người đang đọc vẫn thấy bản cũ đã commit và không phải chờ người ghi.
 
 > [!info] Bối cảnh
 > Ga 1 của **tuyến Transaction và khóa**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: đúng 21:00, hàng nghìn người cùng giành vài trăm sản phẩm. Mỗi lần đặt hàng, server phải giữ hàng trong kho, tạo đơn và ghi một dòng vào sổ kho. Database là PostgreSQL. Bạn không cần biết NestJS, Prisma hay code của dự án.
@@ -41,11 +41,11 @@ Một quầy bán vé dùng chung một **cuốn sổ lớn**. Nhân viên khôn
 
 | Đời thường | Khái niệm |
 |---|---|
-| Một phiếu giao dịch gom mọi bước của một lần bán | [[transaction\|Transaction]] |
-| Phiếu hoặc vào sổ trọn vẹn, hoặc bị xé; sổ luôn khớp; người khác không thấy phiếu đang ghi dở; đã đóng dấu thì không mất | [[acid\|ACID]] |
-| Đóng dấu chuyển vào sổ / xé phiếu | [[commit-va-rollback\|COMMIT / ROLLBACK]] |
-| Trước khi đóng dấu, ghi một dòng vào **nhật ký** đóng gáy cất trong két; cháy sổ thì chép lại từ nhật ký | [[write-ahead-log\|Write-Ahead Log]] |
-| Sửa sổ bằng cách viết **dòng mới** và gạch dòng cũ, không tẩy; ai đang xem trang cũ vẫn đọc được | [[mvcc\|MVCC]] |
+| Một phiếu giao dịch gom mọi bước của một lần bán | [[concepts/transaction\|Transaction]] |
+| Phiếu hoặc vào sổ trọn vẹn, hoặc bị xé; sổ luôn khớp; người khác không thấy phiếu đang ghi dở; đã đóng dấu thì không mất | [[concepts/acid\|ACID]] |
+| Đóng dấu chuyển vào sổ / xé phiếu | [[concepts/commit-va-rollback\|COMMIT / ROLLBACK]] |
+| Trước khi đóng dấu, ghi một dòng vào **nhật ký** đóng gáy cất trong két; cháy sổ thì chép lại từ nhật ký | [[concepts/write-ahead-log\|Write-Ahead Log]] |
+| Sửa sổ bằng cách viết **dòng mới** và gạch dòng cũ, không tẩy; ai đang xem trang cũ vẫn đọc được | [[concepts/mvcc\|MVCC]] |
 
 ```mermaid
 flowchart TB
@@ -76,7 +76,7 @@ Muốn dọn thì phải viết code dọn cho từng tổ hợp lỗi: lỗi sa
 
 ### Transaction: một khối "tất cả hoặc không gì cả"
 
-Một [[transaction|transaction]] bắt đầu bằng `BEGIN` và kết thúc bằng `COMMIT` hoặc `ROLLBACK`. Mọi câu lệnh ở giữa chạy trong cùng một session, và hiệu lực của chúng được giữ "treo" cho tới lúc kết thúc:
+Một [[concepts/transaction|transaction]] bắt đầu bằng `BEGIN` và kết thúc bằng `COMMIT` hoặc `ROLLBACK`. Mọi câu lệnh ở giữa chạy trong cùng một session, và hiệu lực của chúng được giữ "treo" cho tới lúc kết thúc:
 
 ```sql
 BEGIN;
@@ -100,11 +100,11 @@ const orders = await prisma.$transaction(async (tx) => {
 });
 ```
 
-Một điểm dễ bỏ qua: `StockService` trong flash-sale **không tự mở transaction**. Mọi hàm của nó nhận `tx` từ người gọi, nên giữ hàng, tạo đơn, ghi sổ kho và ghi sự kiện outbox (xem [[transactional-outbox|transactional outbox]] ở tuyến RabbitMQ) luôn nằm chung một khối. Nếu mỗi service tự mở transaction riêng, mình lại quay về bài toán ba câu tự commit.
+Một điểm dễ bỏ qua: `StockService` trong flash-sale **không tự mở transaction**. Mọi hàm của nó nhận `tx` từ người gọi, nên giữ hàng, tạo đơn, ghi sổ kho và ghi sự kiện outbox (xem [[concepts/transactional-outbox|transactional outbox]] ở tuyến RabbitMQ) luôn nằm chung một khối. Nếu mỗi service tự mở transaction riêng, mình lại quay về bài toán ba câu tự commit.
 
 ### ACID: bốn lời hứa
 
-[[acid|ACID]] là tên gom bốn tính chất mà transaction hứa:
+[[concepts/acid|ACID]] là tên gom bốn tính chất mà transaction hứa:
 
 | Chữ | Nghĩa | Ai lo |
 |---|---|---|
@@ -119,7 +119,7 @@ Chữ I là chữ phức tạp nhất và là chủ đề của ga 2 và 3: "kh�
 
 ### COMMIT và ROLLBACK
 
-[[commit-va-rollback|COMMIT]] làm mọi thay đổi trong khối hiện ra với các session khác cùng một lúc. [[commit-va-rollback|ROLLBACK]] bỏ chúng. Có ba đường dẫn tới rollback:
+[[concepts/commit-va-rollback|COMMIT]] làm mọi thay đổi trong khối hiện ra với các session khác cùng một lúc. [[concepts/commit-va-rollback|ROLLBACK]] bỏ chúng. Có ba đường dẫn tới rollback:
 
 - Code gọi `ROLLBACK` (Prisma làm khi hàm trong `$transaction` ném lỗi).
 - Một câu lệnh lỗi (vi phạm `CHECK`, trùng khóa…). Sau đó Postgres từ chối mọi câu tiếp theo trong khối với lỗi "current transaction is aborted" cho tới khi bạn gửi `ROLLBACK`.
@@ -141,7 +141,7 @@ Cái giá là phiên bản cũ nằm lại trên đĩa cho tới khi `VACUUM` d�
 
 ### WAL: nhật ký ghi trước
 
-Lời hứa Durability nghe có vẻ đắt: chẳng lẽ mỗi COMMIT phải ghi lại mọi trang bảng bị sửa xuống đĩa? Postgres làm rẻ hơn bằng [[write-ahead-log|Write-Ahead Log]] (WAL): mọi thay đổi trước tiên được ghi thành bản ghi nhật ký nối đuôi nhau trong thư mục `pg_wal`. Khi bạn COMMIT, Postgres chỉ cần **fsync nhật ký** (ghi tuần tự, nhanh) rồi trả lời. Trang bảng thật được ghi dần sau đó, lúc checkpoint. Nếu máy chết trước khi trang bảng kịp ghi, lúc khởi động lại Postgres phát lại nhật ký từ checkpoint gần nhất.
+Lời hứa Durability nghe có vẻ đắt: chẳng lẽ mỗi COMMIT phải ghi lại mọi trang bảng bị sửa xuống đĩa? Postgres làm rẻ hơn bằng [[concepts/write-ahead-log|Write-Ahead Log]] (WAL): mọi thay đổi trước tiên được ghi thành bản ghi nhật ký nối đuôi nhau trong thư mục `pg_wal`. Khi bạn COMMIT, Postgres chỉ cần **fsync nhật ký** (ghi tuần tự, nhanh) rồi trả lời. Trang bảng thật được ghi dần sau đó, lúc checkpoint. Nếu máy chết trước khi trang bảng kịp ghi, lúc khởi động lại Postgres phát lại nhật ký từ checkpoint gần nhất.
 
 `synchronous_commit = on` (mặc định) nghĩa là COMMIT chỉ trả lời sau khi WAL đã xuống đĩa. Đặt `off` thì COMMIT trả lời sớm hơn và có thể mất vài trăm mili giây giao dịch cuối khi máy sập, nhưng không làm hỏng dữ liệu. WAL cũng là thứ được gửi sang các bản sao (replica).
 

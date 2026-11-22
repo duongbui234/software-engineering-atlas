@@ -8,4 +8,4 @@ region: Vùng Messaging
 
 **Policy** đặt giới hạn độ dài, TTL, DLX, delivery limit… mà không phải khai báo lại queue. Mỗi đối tượng nhận một policy có priority cao nhất; tham số `x-` trên queue thắng policy thường. Loại queue và `x-max-priority` không đặt bằng policy được. **Operator policy** áp giới hạn trên: giá trị nhỏ hơn thắng.
 
-Đọc thêm trong bài [[2026-11-21-rabbitmq-operations|Vận hành RabbitMQ trong production]].
+Đọc thêm trong bài [[posts/2026-11-21-rabbitmq-operations|Vận hành RabbitMQ trong production]].

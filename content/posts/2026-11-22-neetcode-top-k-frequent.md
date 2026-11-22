@@ -18,16 +18,16 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Đề: trả về k giá trị xuất hiện nhiều nhất. Bước 1 luôn là đếm (ga 2), O(n). Cái khó nằm ở bước 2: chọn k giá trị lớn nhất trong m tần suất.
-> - Sắp xếp m cặp (giá trị, tần suất): O(m log m). [[heap|Min-heap]] giữ đúng k phần tử: O(m log k). Python có sẵn `Counter.most_common(k)`, bên dưới dùng chính heap.
-> - [[bucket-sort|Bucket sort]] theo tần suất: tần suất chỉ từ 1 tới n, nên có n ô và cả bài là O(n). Nó vượt được [[sorting-lower-bound|giới hạn O(n log n)]] của mọi thuật toán sắp xếp dựa trên so sánh.
-> - [[quickselect|Quickselect]]: phân hoạch như quicksort nhưng chỉ đi vào một nửa, O(n) **trung bình**, O(n²) tệ nhất.
+> - Sắp xếp m cặp (giá trị, tần suất): O(m log m). [[concepts/heap|Min-heap]] giữ đúng k phần tử: O(m log k). Python có sẵn `Counter.most_common(k)`, bên dưới dùng chính heap.
+> - [[concepts/bucket-sort|Bucket sort]] theo tần suất: tần suất chỉ từ 1 tới n, nên có n ô và cả bài là O(n). Nó vượt được [[concepts/sorting-lower-bound|giới hạn O(n log n)]] của mọi thuật toán sắp xếp dựa trên so sánh.
+> - [[concepts/quickselect|Quickselect]]: phân hoạch như quicksort nhưng chỉ đi vào một nửa, O(n) **trung bình**, O(n²) tệ nhất.
 > - Đo trên một triệu số: bước **đếm** chiếm phần lớn thời gian. Bucket sort "O(n)" chậm nhất khi ít giá trị khác nhau (phải cấp phát một triệu ô). Quickselect mất 798 ms khi hầu hết tần suất bằng nhau, chậm gấp 3,5 lần sắp xếp.
 
 > [!info] Bối cảnh
 > Ga 5 của **tuyến NeetCode 150: Arrays & Hashing**. Đếm là việc của ga 2; ga này hỏi tiếp: đếm xong, lấy **top k** thế nào cho nhanh. Đây cũng là lần đầu tuyến gặp heap, cấu trúc sẽ có cả một nhóm riêng về sau trong NeetCode 150. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Đếm tần suất, Map**: xem [[2026-11-22-neetcode-valid-anagram|ga 2]]. **Big-O**: xem [[2026-11-22-neetcode-contains-duplicate|ga 1]].
+> - **Đếm tần suất, Map**: xem [[posts/2026-11-22-neetcode-valid-anagram|ga 2]]. **Big-O**: xem [[posts/2026-11-22-neetcode-contains-duplicate|ga 1]].
 > - **m**: số giá trị *khác nhau* trong mảng. Luôn có m ≤ n.
 > - **Heap (đống)**: cây nhị phân lưu trong một mảng, trong đó cha luôn nhỏ hơn (min-heap) hoặc lớn hơn (max-heap) các con. Phần tử nhỏ nhất luôn ở đỉnh.
 > - **Priority queue (hàng đợi ưu tiên)**: kiểu dữ liệu "lấy ra phần tử ưu tiên nhất". Heap là cách cài phổ biến nhất.
@@ -42,10 +42,10 @@ Một cuộc bình chọn nhận một triệu phiếu cho vài chục nghìn b�
 |---|---|
 | Kiểm phiếu: mỗi bài một dòng, mỗi phiếu thêm một gạch | Đếm tần suất (ga 2) |
 | Xếp hạng **mọi** bài theo số phiếu rồi lấy 10 bài đầu | Sắp xếp, O(m log m) |
-| Một bục 10 chỗ; bài yếu nhất trên bục đứng ngay mép. Bài mới mạnh hơn thì đẩy nó xuống | [[heap\|Min-heap]] k phần tử |
-| Các hộp đánh số "1 phiếu", "2 phiếu", … "1 triệu phiếu"; bỏ mỗi bài vào hộp đúng số phiếu, rồi đi từ hộp lớn nhất xuống | [[bucket-sort\|Bucket sort]] |
-| Chọn đại một bài làm mốc, chia hai phe "nhiều phiếu hơn mốc" và "ít hơn", chỉ tiếp tục chia phe chứa ranh giới top 10 | [[quickselect\|Quickselect]] |
-| Chỉ được so hai bài với nhau thì không thể xếp hạng nhanh hơn n log n; nhìn thẳng con số phiếu thì được | [[sorting-lower-bound\|Giới hạn của sắp xếp so sánh]] |
+| Một bục 10 chỗ; bài yếu nhất trên bục đứng ngay mép. Bài mới mạnh hơn thì đẩy nó xuống | [[concepts/heap\|Min-heap]] k phần tử |
+| Các hộp đánh số "1 phiếu", "2 phiếu", … "1 triệu phiếu"; bỏ mỗi bài vào hộp đúng số phiếu, rồi đi từ hộp lớn nhất xuống | [[concepts/bucket-sort\|Bucket sort]] |
+| Chọn đại một bài làm mốc, chia hai phe "nhiều phiếu hơn mốc" và "ít hơn", chỉ tiếp tục chia phe chứa ranh giới top 10 | [[concepts/quickselect\|Quickselect]] |
+| Chỉ được so hai bài với nhau thì không thể xếp hạng nhanh hơn n log n; nhìn thẳng con số phiếu thì được | [[concepts/sorting-lower-bound\|Giới hạn của sắp xếp so sánh]] |
 
 ```mermaid
 flowchart TB
@@ -81,7 +81,7 @@ Câu hỏi mở rộng là phần thú vị. Sắp xếp các tần suất là O
 
 ### Cách 2, min-heap k phần tử: O(n + m log k)
 
-Một [[heap|heap]] lưu cây nhị phân trong mảng: cha ở vị trí i, hai con ở 2i+1 và 2i+2. Thêm phần tử thì đặt ở cuối rồi "nổi lên"; lấy đỉnh thì đưa phần tử cuối lên đỉnh rồi "chìm xuống". Mỗi thao tác đi qua chiều cao của cây, tức O(log kích thước).
+Một [[concepts/heap|heap]] lưu cây nhị phân trong mảng: cha ở vị trí i, hai con ở 2i+1 và 2i+2. Thêm phần tử thì đặt ở cuối rồi "nổi lên"; lấy đỉnh thì đưa phần tử cuối lên đỉnh rồi "chìm xuống". Mỗi thao tác đi qua chiều cao của cây, tức O(log kích thước).
 
 Mẹo là dùng **min**-heap để tìm phần tử **lớn** nhất: heap giữ k ứng viên tốt nhất tới giờ, và đỉnh là ứng viên **yếu nhất** trong số đó. Mỗi cặp mới được đẩy vào; heap quá k phần tử thì bỏ đỉnh. Heap không bao giờ lớn hơn k+1, nên mỗi bước là O(log k), cả bài O(m log k). Với k nhỏ (top 10 trong một triệu), log k gần như là hằng số.
 
@@ -96,13 +96,13 @@ Heap có sẵn ở mọi ngôn ngữ trừ JS:
 
 ### Cách 3, bucket sort: O(n)
 
-Mọi thuật toán sắp xếp chỉ dựa vào phép so sánh hai phần tử đều cần Ω(n log n) phép so sánh trong trường hợp tệ nhất. Đó là [[sorting-lower-bound|giới hạn dưới của sắp xếp so sánh]]: có n! thứ tự có thể, mỗi phép so sánh chỉ loại được một nửa, nên cần ít nhất log₂(n!) ≈ n log n phép.
+Mọi thuật toán sắp xếp chỉ dựa vào phép so sánh hai phần tử đều cần Ω(n log n) phép so sánh trong trường hợp tệ nhất. Đó là [[concepts/sorting-lower-bound|giới hạn dưới của sắp xếp so sánh]]: có n! thứ tự có thể, mỗi phép so sánh chỉ loại được một nửa, nên cần ít nhất log₂(n!) ≈ n log n phép.
 
-[[bucket-sort|Bucket sort]] thoát giới hạn đó vì nó **không so sánh**: nó dùng thẳng giá trị tần suất làm chỉ số mảng. Mà tần suất của một giá trị luôn nằm từ 1 tới n. Tạo n+1 ô, bỏ mỗi giá trị vào ô `buckets[tần suất]`, rồi đi từ ô n xuống ô 1, gom tới khi đủ k. Tổng cộng O(n) thời gian, O(n) bộ nhớ. Đây là lời giải mà câu hỏi mở rộng nhắm tới.
+[[concepts/bucket-sort|Bucket sort]] thoát giới hạn đó vì nó **không so sánh**: nó dùng thẳng giá trị tần suất làm chỉ số mảng. Mà tần suất của một giá trị luôn nằm từ 1 tới n. Tạo n+1 ô, bỏ mỗi giá trị vào ô `buckets[tần suất]`, rồi đi từ ô n xuống ô 1, gom tới khi đủ k. Tổng cộng O(n) thời gian, O(n) bộ nhớ. Đây là lời giải mà câu hỏi mở rộng nhắm tới.
 
 ### Cách 4, quickselect: O(n) trung bình
 
-[[quickselect|Quickselect]] là quicksort chỉ đi một nhánh. Chọn một chốt ngẫu nhiên và phân hoạch m cặp theo tần suất. Nếu chốt rơi đúng vào ranh giới "k phần tử lớn nhất", xong. Nếu không, chỉ cần tiếp tục ở **một** phía. Chi phí trung bình là m + m/2 + m/4 + … ≈ 2m, tức O(m).
+[[concepts/quickselect|Quickselect]] là quicksort chỉ đi một nhánh. Chọn một chốt ngẫu nhiên và phân hoạch m cặp theo tần suất. Nếu chốt rơi đúng vào ranh giới "k phần tử lớn nhất", xong. Nếu không, chỉ cần tiếp tục ở **một** phía. Chi phí trung bình là m + m/2 + m/4 + … ≈ 2m, tức O(m).
 
 "Trung bình" là chữ quan trọng. Nếu chốt liên tục rơi vào phía tệ, mỗi lần chỉ loại một phần tử và tổng thành O(m²). Chọn chốt ngẫu nhiên chống được input cố tình xấu. Nhưng có một kiểu input mà ngẫu nhiên không cứu được: **rất nhiều giá trị bằng nhau**. Phân hoạch hai phần với điều kiện `<` dồn mọi phần tử bằng chốt về một phía, nên với hàng trăm nghìn tần suất bằng 1, mỗi lần phân hoạch hầu như chẳng loại được gì. Cách sửa là phân hoạch ba phần (nhỏ hơn, bằng, lớn hơn chốt), còn gọi là "Dutch national flag".
 

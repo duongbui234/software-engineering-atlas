@@ -18,17 +18,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[ttl|TTL]] là lưới an toàn: nó giới hạn *thời gian tối đa* cache được sai, chứ không làm cache đúng. Không có TTL, một lần quên xóa là sai vĩnh viễn.
-> - [[cache-invalidation|Invalidation]] là xóa (hoặc đánh dấu cũ) mục trong cache khi nguồn đổi. Ai xóa, lúc nào, bằng cách nào là ba câu hỏi riêng.
-> - [[stale-set-race|Race stale set]]: người đọc trượt, đọc DB cũ, bị chậm; người ghi ghi DB rồi xóa cache; người đọc tỉnh lại ghi giá trị cũ vào cache. Kết quả: DB 200, cache 100 trong 60 giây.
-> - [[cache-lease|Lease]] (của memcache Facebook) và [[versioned-key|version]] đóng hẳn khe hở đó: cache từ chối giá trị cũ thay vì tin người ghi tới sau cùng.
-> - [[negative-caching|Negative caching]]: cache cả câu trả lời "không tồn tại", với TTL ngắn, để những câu hỏi về thứ không có không đổ hết xuống database.
+> - [[concepts/ttl|TTL]] là lưới an toàn: nó giới hạn *thời gian tối đa* cache được sai, chứ không làm cache đúng. Không có TTL, một lần quên xóa là sai vĩnh viễn.
+> - [[concepts/cache-invalidation|Invalidation]] là xóa (hoặc đánh dấu cũ) mục trong cache khi nguồn đổi. Ai xóa, lúc nào, bằng cách nào là ba câu hỏi riêng.
+> - [[concepts/stale-set-race|Race stale set]]: người đọc trượt, đọc DB cũ, bị chậm; người ghi ghi DB rồi xóa cache; người đọc tỉnh lại ghi giá trị cũ vào cache. Kết quả: DB 200, cache 100 trong 60 giây.
+> - [[concepts/cache-lease|Lease]] (của memcache Facebook) và [[concepts/versioned-key|version]] đóng hẳn khe hở đó: cache từ chối giá trị cũ thay vì tin người ghi tới sau cùng.
+> - [[concepts/negative-caching|Negative caching]]: cache cả câu trả lời "không tồn tại", với TTL ngắn, để những câu hỏi về thứ không có không đổ hết xuống database.
 
 > [!info] Bối cảnh
 > Ga 4 của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: người bán đổi giá, đơn đổi trạng thái, admin thu quyền của một role; mỗi thay đổi đều phải tới được những bản sao trong cache. Ga này đi vào câu nổi tiếng "cache invalidation là một trong hai việc khó nhất". Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Cache-aside, write-through**: xem [[2026-11-22-caching-patterns|ga 3]].
+> - **Cache-aside, write-through**: xem [[posts/2026-11-22-caching-patterns|ga 3]].
 > - **Race condition**: lỗi chỉ xảy ra khi hai việc chạy xen kẽ nhau theo một thứ tự xui xẻo.
 > - **Lua script trong Redis**: một đoạn code nhỏ gửi lên Redis và chạy trọn vẹn, không lệnh nào khác chen vào giữa (nguyên tử).
 > - **Token**: một chuỗi ngẫu nhiên dùng làm "vé", ai giữ đúng vé mới được làm.
@@ -42,12 +42,12 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Phiếu hẹn: hết ngày thì trả kho, ai hỏi cũng vậy | [[ttl\|TTL]] |
-| Kho có bản in mới: rút bản cũ khỏi giá | [[cache-invalidation\|Cache invalidation]] |
-| Nhân viên chậm chân đặt bản cũ lên giá sau khi đã rút | [[stale-set-race\|Stale set race]] |
-| Phiếu "được phép đặt sách lên giá", bị hủy khi có bản in mới | [[cache-lease\|Cache lease]] |
-| Ghi "lần in 3" lên gáy, giá chỉ nhận bản lần in mới hơn | [[versioned-key\|Versioned key]] |
-| Tấm thẻ "thư viện không có cuốn này" để khỏi xuống kho tìm lại | [[negative-caching\|Negative caching]] |
+| Phiếu hẹn: hết ngày thì trả kho, ai hỏi cũng vậy | [[concepts/ttl\|TTL]] |
+| Kho có bản in mới: rút bản cũ khỏi giá | [[concepts/cache-invalidation\|Cache invalidation]] |
+| Nhân viên chậm chân đặt bản cũ lên giá sau khi đã rút | [[concepts/stale-set-race\|Stale set race]] |
+| Phiếu "được phép đặt sách lên giá", bị hủy khi có bản in mới | [[concepts/cache-lease\|Cache lease]] |
+| Ghi "lần in 3" lên gáy, giá chỉ nhận bản lần in mới hơn | [[concepts/versioned-key\|Versioned key]] |
+| Tấm thẻ "thư viện không có cuốn này" để khỏi xuống kho tìm lại | [[concepts/negative-caching\|Negative caching]] |
 
 ```mermaid
 sequenceDiagram
@@ -67,7 +67,7 @@ sequenceDiagram
 
 ## Vấn đề: xóa đúng chỗ mà vẫn sai
 
-Mình từng nghĩ quy tắc "ghi DB trước, xóa cache sau" của [[2026-11-22-caching-patterns|ga 3]] là đủ. Thống kê người bán trong flash-sale làm đúng như vậy: đổi trạng thái đơn, commit, rồi `DEL stats:seller:<id>`. Vậy mà vẫn có lúc số trên dashboard lệch cả phút.
+Mình từng nghĩ quy tắc "ghi DB trước, xóa cache sau" của [[posts/2026-11-22-caching-patterns|ga 3]] là đủ. Thống kê người bán trong flash-sale làm đúng như vậy: đổi trạng thái đơn, commit, rồi `DEL stats:seller:<id>`. Vậy mà vẫn có lúc số trên dashboard lệch cả phút.
 
 Lý do là người **đọc** cũng ghi vào cache: khi trượt, nó nạp giá trị nó vừa đọc từ DB. Nếu giá trị đó đã cũ vào lúc nó ghi, thì lần xóa của người ghi đã "trôi qua" trước đó và không còn tác dụng. Cache sẽ sai tới khi hết TTL. Ga này đi từ công cụ thô nhất (TTL) tới các cách đóng hẳn khe hở.
 
@@ -80,7 +80,7 @@ Lý do là người **đọc** cũng ghi vào cache: khi trượt, nó nạp gi�
 
 ### TTL: giới hạn thời gian sai, không làm cho đúng
 
-**[[ttl|TTL]]** (time to live) là thời gian sống của một mục cache. Trong Redis: `SET key value EX 60` hoặc `EXPIRE key 60`; `TTL key` trả số giây còn lại, `-1` nếu key không có hạn, `-2` nếu key không tồn tại.
+**[[concepts/ttl|TTL]]** (time to live) là thời gian sống của một mục cache. Trong Redis: `SET key value EX 60` hoặc `EXPIRE key 60`; `TTL key` trả số giây còn lại, `-1` nếu key không có hạn, `-2` nếu key không tồn tại.
 
 TTL là lưới an toàn cho mọi kiểu invalidation khác: quên xóa, xóa thất bại, race… cuối cùng mục sai cũng tự biến mất. Vì vậy **mọi mục cache nên có TTL**, kể cả khi đã có xóa chủ động.
 
@@ -93,7 +93,7 @@ Hai chi tiết Redis hay làm người mới vấp:
 
 ### Invalidation: ai xóa, lúc nào, bằng cách nào
 
-**[[cache-invalidation|Cache invalidation]]** là làm cho mục cache cũ không còn được dùng khi nguồn đổi. Có ba cách hay gặp, thường kết hợp:
+**[[concepts/cache-invalidation|Cache invalidation]]** là làm cho mục cache cũ không còn được dùng khi nguồn đổi. Có ba cách hay gặp, thường kết hợp:
 
 | Cách | Ai làm | Ưu | Nhược |
 |---|---|---|---|
@@ -138,7 +138,7 @@ Còn một biến thể tệ hơn nếu người ghi **cập nhật** cache thay
 
 ### Lease: cache từ chối giá trị cũ
 
-Facebook chữa stale set bằng **[[cache-lease|lease]]**: khi một client trượt, memcache phát cho nó một **token 64-bit** gắn với key đó. Client chỉ được ghi giá trị vào cache nếu đưa ra đúng token. Khi có lệnh xóa key, token cũng bị hủy. Người đọc chậm chân ở bước 5 mang theo token đã bị hủy, nên bị từ chối.
+Facebook chữa stale set bằng **[[concepts/cache-lease|lease]]**: khi một client trượt, memcache phát cho nó một **token 64-bit** gắn với key đó. Client chỉ được ghi giá trị vào cache nếu đưa ra đúng token. Khi có lệnh xóa key, token cũng bị hủy. Người đọc chậm chân ở bước 5 mang theo token đã bị hủy, nên bị từ chối.
 
 Redis không có lease sẵn, nhưng dựng được bằng một key phụ và một Lua script (chạy nguyên tử):
 
@@ -154,11 +154,11 @@ Người đọc: trượt → `SET lease:<key> <token> PX 10000` → đọc DB �
 
 ### Versioned key: so phiên bản thay vì tin thứ tự
 
-**[[versioned-key|Version]]** là cách thứ hai, có hai dạng:
+**[[concepts/versioned-key|Version]]** là cách thứ hai, có hai dạng:
 
 **Version trong giá trị.** Database có cột `version` tăng mỗi lần ghi. Cache lưu `version:giá trị`. Người ghi, thay vì xóa trắng, để lại một **tombstone** mang version mới (`2:deleted`). Lệnh ghi vào cache chỉ được nhận nếu version mới hơn cái đang nằm đó. Người đọc chậm chân mang version 1, cache đang giữ version 2, bị từ chối. Đọc thấy tombstone thì coi như trượt.
 
-**Version trong khóa** (namespace version). Thay vì xóa từng key, đưa một số thế hệ vào tên key: `search:g17:<hash>`. Số thế hệ hiện tại nằm ở một key riêng (`search:gen = 17`). Muốn xóa *toàn bộ* cache tìm kiếm, chỉ cần `INCR search:gen`; mọi key cũ không còn được ai đọc tới và tự hết hạn theo TTL. Đây là cách xóa một nhóm lớn mà không phải tìm từng key (ga 6 giải thích vì sao tìm key bằng `KEYS` là ý tồi). Với file tĩnh, mã băm trong tên file ở [[2026-11-22-caching-http|ga 2]] cũng là một dạng version trong khóa.
+**Version trong khóa** (namespace version). Thay vì xóa từng key, đưa một số thế hệ vào tên key: `search:g17:<hash>`. Số thế hệ hiện tại nằm ở một key riêng (`search:gen = 17`). Muốn xóa *toàn bộ* cache tìm kiếm, chỉ cần `INCR search:gen`; mọi key cũ không còn được ai đọc tới và tự hết hạn theo TTL. Đây là cách xóa một nhóm lớn mà không phải tìm từng key (ga 6 giải thích vì sao tìm key bằng `KEYS` là ý tồi). Với file tĩnh, mã băm trong tên file ở [[posts/2026-11-22-caching-http|ga 2]] cũng là một dạng version trong khóa.
 
 ### Delayed double delete: thu hẹp, không đóng hẳn
 
@@ -168,7 +168,7 @@ Một mẹo hay gặp trên mạng: người ghi xóa cache, chờ vài trăm mi
 
 Cache-aside bình thường không lưu gì khi DB trả về rỗng. Hậu quả: mọi câu hỏi về thứ không tồn tại đều trượt và đi xuống DB, *mỗi lần*. Với feature flag, đó là mỗi lần code kiểm tra một cờ đã bị xóa; với sản phẩm, đó là mỗi lần ai đó (hoặc bot) mở `/products/999999`.
 
-**[[negative-caching|Negative caching]]** lưu luôn câu trả lời "không có", thường với TTL ngắn hơn câu trả lời bình thường. DNS làm việc này từ lâu (RFC 2308). Cache feature flag của flash-sale giữ một tập riêng cho những tên cờ đã xác nhận là không tồn tại:
+**[[concepts/negative-caching|Negative caching]]** lưu luôn câu trả lời "không có", thường với TTL ngắn hơn câu trả lời bình thường. DNS làm việc này từ lâu (RFC 2308). Cache feature flag của flash-sale giữ một tập riêng cho những tên cờ đã xác nhận là không tồn tại:
 
 ```ts
 // trích rút gọn từ cache feature flag của flash-sale

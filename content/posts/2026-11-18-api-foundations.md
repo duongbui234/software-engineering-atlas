@@ -15,10 +15,10 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - Một [[endpoint|endpoint]] là cặp *method + đường dẫn*: `POST /api/v1/checkout` khác hẳn `GET /api/v1/checkout`.
-> - Mỗi request đi qua một chuỗi bước cố định: middleware → guard → pipe → handler → interceptor, lỗi ở bất kỳ đâu rơi vào exception filter ([[request-response|request-response]]).
-> - Method nói lên *ý định* và các cam kết đi kèm (safe, idempotent), header mang *ngữ cảnh*, body JSON mang *dữ liệu*, status code là *kết luận* ([[http-methods]], [[headers]], [[json]], [[status-codes]]).
-> - Phần dễ sai nhất là [[error-handling|xử lý lỗi]]: backend của mình làm rơi mất mã lỗi, nên người dùng chỉ thấy "Request failed with status code 409".
+> - Một [[concepts/endpoint|endpoint]] là cặp *method + đường dẫn*: `POST /api/v1/checkout` khác hẳn `GET /api/v1/checkout`.
+> - Mỗi request đi qua một chuỗi bước cố định: middleware → guard → pipe → handler → interceptor, lỗi ở bất kỳ đâu rơi vào exception filter ([[concepts/request-response|request-response]]).
+> - Method nói lên *ý định* và các cam kết đi kèm (safe, idempotent), header mang *ngữ cảnh*, body JSON mang *dữ liệu*, status code là *kết luận* ([[concepts/http-methods]], [[concepts/headers]], [[concepts/json]], [[concepts/status-codes]]).
+> - Phần dễ sai nhất là [[concepts/error-handling|xử lý lỗi]]: backend của mình làm rơi mất mã lỗi, nên người dùng chỉ thấy "Request failed with status code 409".
 
 > [!info] Bối cảnh: flash-sale là gì, và bạn cần biết gì để đọc bài
 > Cả series lấy ví dụ từ **flash-sale**, một trang bán hàng giảm giá giờ vàng mình tự viết. Đúng 21:00 mở bán, mỗi sản phẩm chỉ có vài trăm suất, và hàng nghìn người cùng bấm "Mua ngay". Phần chạy trên máy chủ (*backend*) viết bằng **NestJS**, một framework của Node.js. Phần chạy trong trình duyệt (*frontend*) gọi backend qua API.
@@ -40,13 +40,13 @@ Trước khi vào chữ nghĩa, mình thấy dễ nhất là coi một lần g�
 
 | Ở nhà hàng | Trong API | Khái niệm |
 |---|---|---|
-| Món trên thực đơn, ví dụ "món số 12, gọi thêm" | Địa chỉ cộng hành động: `POST /api/v1/checkout` | [[endpoint\|Endpoint]] |
-| Gọi món thì phải chờ phục vụ mang ra. Mỗi lần gọi là một lần nhận | Gửi một request thì nhận đúng một response | [[request-response\|Request-Response]] |
-| "Gọi món", "hỏi giá", "hủy món" là những việc khác nhau | `POST` tạo mới, `GET` đọc, `DELETE` xóa… | [[http-methods\|HTTP Methods]] |
-| Thông tin ghi ở góc phiếu: số bàn, thẻ thành viên, "phiếu này là gọi lại" | `Authorization`, `Idempotency-Key`, `Content-Type`… | [[headers\|Headers]] |
-| Nội dung phiếu gọi món, viết theo mẫu chung | Body dạng `{"items": ["SKU-1"]}` | [[json\|JSON]] |
-| Phục vụ báo "có ngay", "hết món", "bạn chưa đặt bàn" | `201`, `409`, `401` | [[status-codes\|Status Codes]] |
-| Hết món thì phải nói *món nào* hết, để khách chọn món khác | Lỗi có `code` rõ ràng để client biết xử lý | [[error-handling\|Error Handling]] |
+| Món trên thực đơn, ví dụ "món số 12, gọi thêm" | Địa chỉ cộng hành động: `POST /api/v1/checkout` | [[concepts/endpoint\|Endpoint]] |
+| Gọi món thì phải chờ phục vụ mang ra. Mỗi lần gọi là một lần nhận | Gửi một request thì nhận đúng một response | [[concepts/request-response\|Request-Response]] |
+| "Gọi món", "hỏi giá", "hủy món" là những việc khác nhau | `POST` tạo mới, `GET` đọc, `DELETE` xóa… | [[concepts/http-methods\|HTTP Methods]] |
+| Thông tin ghi ở góc phiếu: số bàn, thẻ thành viên, "phiếu này là gọi lại" | `Authorization`, `Idempotency-Key`, `Content-Type`… | [[concepts/headers\|Headers]] |
+| Nội dung phiếu gọi món, viết theo mẫu chung | Body dạng `{"items": ["SKU-1"]}` | [[concepts/json\|JSON]] |
+| Phục vụ báo "có ngay", "hết món", "bạn chưa đặt bàn" | `201`, `409`, `401` | [[concepts/status-codes\|Status Codes]] |
+| Hết món thì phải nói *món nào* hết, để khách chọn món khác | Lỗi có `code` rõ ràng để client biết xử lý | [[concepts/error-handling\|Error Handling]] |
 
 Và trước khi bếp nấu, phiếu gọi món đi qua vài người, mỗi người kiểm một việc:
 
@@ -68,7 +68,7 @@ Phần còn lại của bài là phiên bản "kỹ thuật" của đúng câu c
 
 ## Vấn đề: "gọi API" là gọi cái gì?
 
-Mình viết backend flash-sale bằng NestJS khá lâu rồi, nhưng thú thật là phần lớn các mảnh như guard, interceptor, filter mình viết theo mẫu. Khi bắt đầu tuyến [[api-concepts|API Concepts]], mình quyết định không học bảy khái niệm nền một cách rời rạc, mà theo chân **đúng một request**: người dùng bấm "Đặt hàng" trong giỏ hàng.
+Mình viết backend flash-sale bằng NestJS khá lâu rồi, nhưng thú thật là phần lớn các mảnh như guard, interceptor, filter mình viết theo mẫu. Khi bắt đầu tuyến [[series/api-concepts|API Concepts]], mình quyết định không học bảy khái niệm nền một cách rời rạc, mà theo chân **đúng một request**: người dùng bấm "Đặt hàng" trong giỏ hàng.
 
 Frontend gửi đi thế này (mình chú thích từng dòng ngay bên dưới):
 
@@ -129,7 +129,7 @@ Cột cuối chỉ để ai muốn đối chiếu với code. Đọc bài không
 
 ## Endpoint: địa chỉ cộng với động từ
 
-Một [[endpoint]] là điểm vào cụ thể của API. Trong flash-sale, đường dẫn đầy đủ được ghép từ ba chỗ:
+Một [[concepts/endpoint]] là điểm vào cụ thể của API. Trong flash-sale, đường dẫn đầy đủ được ghép từ ba chỗ:
 
 ```ts
 app.setGlobalPrefix('api/v1')          // main.ts
@@ -151,7 +151,7 @@ Vài quy ước mình thấy đáng giữ:
 
 ## Request-Response: một hỏi, một đáp, không nhớ gì
 
-HTTP là giao thức [[request-response]]: client mở lời, server trả lời đúng một response cho mỗi request, rồi coi như xong. Server **không nhớ** request trước (stateless). Vì vậy mỗi request phải tự mang đủ ngữ cảnh: ai gọi (token), gọi lần thứ mấy (idempotency key), thuộc luồng nào (correlation id).
+HTTP là giao thức [[concepts/request-response]]: client mở lời, server trả lời đúng một response cho mỗi request, rồi coi như xong. Server **không nhớ** request trước (stateless). Vì vậy mỗi request phải tự mang đủ ngữ cảnh: ai gọi (token), gọi lần thứ mấy (idempotency key), thuộc luồng nào (correlation id).
 
 Một request gồm bốn phần: method, target (đường dẫn + query), headers, body tùy chọn. Response gồm status code, headers, body tùy chọn. Hết. Mọi framework, từ Express tới NestJS, chỉ là cách tổ chức code quanh bốn phần này.
 
@@ -159,7 +159,7 @@ Hệ quả thực tế của tính stateless: flash-sale chạy nhiều pod sau 
 
 ## HTTP Methods: động từ kèm cam kết
 
-[[http-methods|Method]] không chỉ là nhãn. RFC 9110 gắn cho mỗi method hai tính chất mà client, proxy và trình duyệt đều dựa vào:
+[[concepts/http-methods|Method]] không chỉ là nhãn. RFC 9110 gắn cho mỗi method hai tính chất mà client, proxy và trình duyệt đều dựa vào:
 
 | Method | Dùng cho | Safe (không đổi state) | Idempotent (gọi N lần = 1 lần) |
 |---|---|---|---|
@@ -174,13 +174,13 @@ Hệ quả thực tế của tính stateless: flash-sale chạy nhiều pod sau 
 Hai chỗ trong flash-sale cho thấy cam kết này có tác dụng thật:
 
 - `CsrfGuard` bỏ qua `GET`, `HEAD`, `OPTIONS` vì chúng là *safe*: không đổi state thì không có gì để giả mạo.
-- `POST /checkout` **không idempotent**: mạng chập chờn khiến client gửi lại là có thể tạo hai đơn. Vì vậy endpoint này bắt buộc header `Idempotency-Key` và trả `400` nếu thiếu. Cơ chế đầy đủ nằm ở ga 4 ([[idempotency]]).
+- `POST /checkout` **không idempotent**: mạng chập chờn khiến client gửi lại là có thể tạo hai đơn. Vì vậy endpoint này bắt buộc header `Idempotency-Key` và trả `400` nếu thiếu. Cơ chế đầy đủ nằm ở ga 4 ([[concepts/idempotency]]).
 
 Còn một ca thú vị: `POST /checkout/preview-discount` chỉ *tính thử* giảm giá, không ghi gì vào DB, đúng ra là thao tác đọc. Nó vẫn dùng `POST` vì cần gửi danh sách mã giảm giá trong body. `GET` có body thì RFC 9110 nói rõ là không có ngữ nghĩa, nhiều proxy bỏ đi. Đây là lựa chọn thực dụng phổ biến; cái giá là response không được cache tự động như `GET`. (HTTP đang chuẩn hóa method `QUERY` cho đúng trường hợp này: đọc an toàn nhưng có body.)
 
 ## Headers: ngữ cảnh đi kèm request
 
-[[headers|Header]] là metadata dạng `Tên: giá trị`, không phân biệt hoa thường ở tên. Chỉ trong một request checkout của flash-sale đã có đủ các nhóm:
+[[concepts/headers|Header]] là metadata dạng `Tên: giá trị`, không phân biệt hoa thường ở tên. Chỉ trong một request checkout của flash-sale đã có đủ các nhóm:
 
 - **Định dạng**: `Content-Type: application/json` nói body là gì; `Accept` nói client muốn nhận gì.
 - **Xác thực**: `Authorization: Bearer <access token>`. `JwtAuthGuard` tách chuỗi theo khoảng trắng và chỉ nhận kiểu `Bearer`.
@@ -193,7 +193,7 @@ Một điều nhỏ mà quan trọng: tiền tố `X-` cho header tự đặt đ
 
 ## JSON: định dạng chung, nhưng chỉ có một kiểu số
 
-[[json|JSON]] thắng XML vì gọn và map thẳng vào object của JavaScript. Nhưng nó chỉ có sáu kiểu: string, number, boolean, null, object, array. Không có kiểu ngày, không có kiểu decimal, và number trong thực tế bị parse thành số thực 64-bit.
+[[concepts/json|JSON]] thắng XML vì gọn và map thẳng vào object của JavaScript. Nhưng nó chỉ có sáu kiểu: string, number, boolean, null, object, array. Không có kiểu ngày, không có kiểu decimal, và number trong thực tế bị parse thành số thực 64-bit.
 
 Flash-sale tính tiền bằng `Prisma.Decimal`, và controller `preview-discount` có một dòng comment rất đúng:
 
@@ -215,7 +215,7 @@ Vỏ này tiện cho frontend (luôn đọc `data`), nhưng nó lặp lại thô
 
 ## Status Codes: kết luận ở dòng đầu tiên
 
-[[status-codes|Status code]] là thứ đầu tiên client đọc, trước cả body. Năm nhóm: `1xx` thông tin, `2xx` thành công, `3xx` chuyển hướng, `4xx` lỗi do phía gọi, `5xx` lỗi do server. Swagger của endpoint checkout khai báo đúng những mã mà mình nghĩ một API đặt hàng cần:
+[[concepts/status-codes|Status code]] là thứ đầu tiên client đọc, trước cả body. Năm nhóm: `1xx` thông tin, `2xx` thành công, `3xx` chuyển hướng, `4xx` lỗi do phía gọi, `5xx` lỗi do server. Swagger của endpoint checkout khai báo đúng những mã mà mình nghĩ một API đặt hàng cần:
 
 | Mã | Khi nào trong flash-sale | Client nên làm gì |
 |---|---|---|

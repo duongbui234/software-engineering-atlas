@@ -8,4 +8,4 @@ region: Vùng API
 
 Một **endpoint** là cặp *method + đường dẫn*, ví dụ `POST /api/v1/checkout`; cùng đường dẫn nhưng khác method là hai endpoint khác nhau. Mình đặt đường dẫn bằng danh từ (tài nguyên), để method làm động từ, dùng path param cho danh tính và query param cho bộ lọc.
 
-Đọc thêm trong bài [[2026-11-18-api-foundations|Nền tảng API]].
+Đọc thêm trong bài [[posts/2026-11-18-api-foundations|Nền tảng API]].

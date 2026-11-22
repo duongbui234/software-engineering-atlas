@@ -16,21 +16,21 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[isolation-level|Isolation level]] quyết định một transaction thấy gì khi người khác đang ghi cùng lúc. Postgres có ba mức thật: Read Committed, Repeatable Read, Serializable.
-> - [[read-committed|Read Committed]] (mặc định của Postgres và Prisma): **mỗi câu lệnh** thấy một ảnh mới của dữ liệu đã commit. Code "đọc, kiểm tra, ghi" ở ga 2 chạy ở mức này: 300 đơn cho 100 suất.
-> - Repeatable Read của Postgres thực chất là [[snapshot-isolation|Snapshot Isolation]]: cả transaction thấy một ảnh duy nhất, và ai sửa dòng mà người khác đã sửa sau ảnh đó thì bị hủy. Hết bán quá, nhưng 293 trên 300 người nhận lỗi.
-> - [[write-skew|Write skew]]: hai transaction đọc cùng dữ liệu rồi ghi vào **hai dòng khác nhau**, nên Snapshot Isolation không thấy xung đột. Ví dụ: giới hạn 2 suất mỗi người, hai tab cùng mua, user có 3 đơn.
-> - [[serializable|Serializable]] chặn cả write skew bằng cách theo dõi ai đọc gì, ai ghi gì, rồi hủy một bên với [[serialization-failure|serialization failure]] (mã `40001`). Nó không khóa chờ; **app phải thử lại** cả transaction.
+> - [[concepts/isolation-level|Isolation level]] quyết định một transaction thấy gì khi người khác đang ghi cùng lúc. Postgres có ba mức thật: Read Committed, Repeatable Read, Serializable.
+> - [[concepts/read-committed|Read Committed]] (mặc định của Postgres và Prisma): **mỗi câu lệnh** thấy một ảnh mới của dữ liệu đã commit. Code "đọc, kiểm tra, ghi" ở ga 2 chạy ở mức này: 300 đơn cho 100 suất.
+> - Repeatable Read của Postgres thực chất là [[concepts/snapshot-isolation|Snapshot Isolation]]: cả transaction thấy một ảnh duy nhất, và ai sửa dòng mà người khác đã sửa sau ảnh đó thì bị hủy. Hết bán quá, nhưng 293 trên 300 người nhận lỗi.
+> - [[concepts/write-skew|Write skew]]: hai transaction đọc cùng dữ liệu rồi ghi vào **hai dòng khác nhau**, nên Snapshot Isolation không thấy xung đột. Ví dụ: giới hạn 2 suất mỗi người, hai tab cùng mua, user có 3 đơn.
+> - [[concepts/serializable|Serializable]] chặn cả write skew bằng cách theo dõi ai đọc gì, ai ghi gì, rồi hủy một bên với [[concepts/serialization-failure|serialization failure]] (mã `40001`). Nó không khóa chờ; **app phải thử lại** cả transaction.
 
 > [!info] Bối cảnh
 > Ga 3 của **tuyến Transaction và khóa**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: hàng nghìn người cùng giành vài trăm suất, và mỗi người chỉ được mua tối đa vài suất mỗi sản phẩm. Ga 2 đã tái hiện lỗi bán quá số hàng ở mức isolation mặc định; ga này thử nâng mức lên. Bạn không cần biết NestJS hay code của dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Transaction, MVCC, phiên bản dòng**: xem [[2026-11-22-transactions-acid|ga 1]]. **Lost update, read-modify-write, oversell**: xem [[2026-11-22-transactions-race|ga 2]].
+> - **Transaction, MVCC, phiên bản dòng**: xem [[posts/2026-11-22-transactions-acid|ga 1]]. **Lost update, read-modify-write, oversell**: xem [[posts/2026-11-22-transactions-race|ga 2]].
 > - **Snapshot (ảnh chụp)**: danh sách transaction nào đã commit tại một thời điểm. Đọc theo snapshot nghĩa là chỉ thấy phiên bản dòng do các transaction trong danh sách đó tạo ra.
 > - **`COUNT(*)`**: câu SQL đếm số dòng thỏa điều kiện, ví dụ số đơn của một người.
 > - **SQLSTATE**: mã lỗi 5 ký tự chuẩn của SQL. `40001` là serialization failure, `40P01` là deadlock.
-> - **Retry có jitter**: thử lại sau một khoảng chờ có thêm phần ngẫu nhiên để các request không cùng thử lại một lúc. Xem [[retries-with-backoff|retry với backoff]].
+> - **Retry có jitter**: thử lại sau một khoảng chờ có thêm phần ngẫu nhiên để các request không cùng thử lại một lúc. Xem [[concepts/retries-with-backoff|retry với backoff]].
 
 ## Hình dung trước: nhân viên xem sổ thế nào
 
@@ -38,12 +38,12 @@ Quầy vé ở ga 2 vẫn hai nhân viên, một cuốn sổ. Câu hỏi bây gi
 
 | Đời thường | Khái niệm |
 |---|---|
-| Quy định về cách nhân viên được nhìn sổ trong lúc người khác đang ghi | [[isolation-level\|Isolation level]] |
-| Mỗi lần liếc sổ là thấy bản mới nhất đã đóng dấu, hai lần liếc có thể thấy hai con số khác nhau | [[read-committed\|Read Committed]] |
-| Đầu giao dịch **chụp ảnh** cả cuốn sổ và chỉ nhìn ảnh đó; lúc ghi, nếu dòng mình định sửa đã bị ai sửa sau khi chụp thì phải bỏ giao dịch | [[snapshot-isolation\|Snapshot Isolation]] |
-| Hai nhân viên cùng nhìn ảnh "khách 7 đã mua 1 vé", mỗi người bán thêm 1 vé và ghi vào **hai dòng khác nhau**; không dòng nào bị sửa hai lần, nhưng khách có 3 vé | [[write-skew\|Write skew]] |
-| Một **trọng tài** ghi lại ai đã nhìn dòng nào, ai đã ghi dòng nào; nếu không thể xếp hai giao dịch thành "người này trước, người kia sau" thì trọng tài hủy một giao dịch | [[serializable\|Serializable]] |
-| Giao dịch bị hủy, nhân viên phải làm lại từ đầu | [[serialization-failure\|Serialization failure (40001)]] |
+| Quy định về cách nhân viên được nhìn sổ trong lúc người khác đang ghi | [[concepts/isolation-level\|Isolation level]] |
+| Mỗi lần liếc sổ là thấy bản mới nhất đã đóng dấu, hai lần liếc có thể thấy hai con số khác nhau | [[concepts/read-committed\|Read Committed]] |
+| Đầu giao dịch **chụp ảnh** cả cuốn sổ và chỉ nhìn ảnh đó; lúc ghi, nếu dòng mình định sửa đã bị ai sửa sau khi chụp thì phải bỏ giao dịch | [[concepts/snapshot-isolation\|Snapshot Isolation]] |
+| Hai nhân viên cùng nhìn ảnh "khách 7 đã mua 1 vé", mỗi người bán thêm 1 vé và ghi vào **hai dòng khác nhau**; không dòng nào bị sửa hai lần, nhưng khách có 3 vé | [[concepts/write-skew\|Write skew]] |
+| Một **trọng tài** ghi lại ai đã nhìn dòng nào, ai đã ghi dòng nào; nếu không thể xếp hai giao dịch thành "người này trước, người kia sau" thì trọng tài hủy một giao dịch | [[concepts/serializable\|Serializable]] |
+| Giao dịch bị hủy, nhân viên phải làm lại từ đầu | [[concepts/serialization-failure\|Serialization failure (40001)]] |
 
 ```mermaid
 flowchart TB
@@ -81,13 +81,13 @@ Prisma không đổi gì: nếu bạn không truyền `isolationLevel`, nó dùn
 
 ### Read Committed: mỗi câu một ảnh mới
 
-Ở [[read-committed|Read Committed]], mỗi câu lệnh lấy một snapshot mới lúc nó bắt đầu. Hai câu `SELECT` trong cùng một transaction có thể thấy hai con số khác nhau nếu ở giữa có người commit. Đó là lý do code "đọc, kiểm tra, ghi" vỡ: con số ở câu `SELECT` và trạng thái lúc câu `UPDATE` chạy là hai thời điểm khác nhau.
+Ở [[concepts/read-committed|Read Committed]], mỗi câu lệnh lấy một snapshot mới lúc nó bắt đầu. Hai câu `SELECT` trong cùng một transaction có thể thấy hai con số khác nhau nếu ở giữa có người commit. Đó là lý do code "đọc, kiểm tra, ghi" vỡ: con số ở câu `SELECT` và trạng thái lúc câu `UPDATE` chạy là hai thời điểm khác nhau.
 
 Khi một `UPDATE` gặp dòng mà transaction khác đang sửa, nó **chờ** transaction kia kết thúc, rồi **chạy lại điều kiện `WHERE`** trên phiên bản mới nhất và áp thao tác lên đó. Hành vi này gây ra lost update cho code read-modify-write, nhưng lại là thứ làm cho cách sửa ở ga 4 đúng.
 
 ### Snapshot Isolation: một ảnh cho cả transaction
 
-Ở Repeatable Read, snapshot được lấy **một lần** ở câu lệnh đầu tiên và dùng cho cả transaction. Postgres cài mức này thành [[snapshot-isolation|Snapshot Isolation]], mạnh hơn chuẩn yêu cầu (chặn cả phantom read).
+Ở Repeatable Read, snapshot được lấy **một lần** ở câu lệnh đầu tiên và dùng cho cả transaction. Postgres cài mức này thành [[concepts/snapshot-isolation|Snapshot Isolation]], mạnh hơn chuẩn yêu cầu (chặn cả phantom read).
 
 Điểm quyết định nằm ở lúc ghi. Nếu transaction muốn `UPDATE`, `DELETE` hay khóa một dòng đã bị transaction khác sửa **sau** khi snapshot được chụp, Postgres không áp thao tác lên bản mới như Read Committed. Nó hủy transaction với lỗi:
 
@@ -99,7 +99,7 @@ Lý do: transaction này đang tin vào một ảnh mà ở đó dòng chưa đ�
 
 ### Write skew: hai dòng khác nhau, một luật bị vi phạm
 
-Snapshot Isolation chỉ phát hiện xung đột khi hai transaction ghi vào **cùng một dòng**. [[write-skew|Write skew]] là khi hai transaction đọc cùng một tập dữ liệu, quyết định dựa trên nó, rồi ghi vào **những dòng khác nhau**:
+Snapshot Isolation chỉ phát hiện xung đột khi hai transaction ghi vào **cùng một dòng**. [[concepts/write-skew|Write skew]] là khi hai transaction đọc cùng một tập dữ liệu, quyết định dựa trên nó, rồi ghi vào **những dòng khác nhau**:
 
 1. Luật: mỗi người tối đa 2 suất mỗi sản phẩm. User 7 đã có 1 đơn.
 2. Tab 1 và tab 2 cùng bấm mua. Mỗi transaction chạy `SELECT count(*) FROM orders WHERE buyer = 7` và thấy 1.
@@ -112,7 +112,7 @@ Trong bảng của Berenson và cộng sự (1995), đây là hiện tượng A5
 
 ### Serializable: trọng tài không khóa, chỉ hủy
 
-[[serializable|Serializable]] hứa: kết quả của các transaction chạy đồng thời giống như **một thứ tự tuần tự nào đó** của chúng. Postgres cài bằng Serializable Snapshot Isolation (SSI): vẫn là Snapshot Isolation, cộng thêm việc ghi lại "transaction nào đã đọc dữ liệu gì" (khóa vị từ, hiện trong `pg_locks` với chế độ `SIReadLock`). Khi phát hiện một vòng phụ thuộc kiểu "T1 đọc thứ T2 ghi, T2 đọc thứ T1 ghi", nó hủy một bên:
+[[concepts/serializable|Serializable]] hứa: kết quả của các transaction chạy đồng thời giống như **một thứ tự tuần tự nào đó** của chúng. Postgres cài bằng Serializable Snapshot Isolation (SSI): vẫn là Snapshot Isolation, cộng thêm việc ghi lại "transaction nào đã đọc dữ liệu gì" (khóa vị từ, hiện trong `pg_locks` với chế độ `SIReadLock`). Khi phát hiện một vòng phụ thuộc kiểu "T1 đọc thứ T2 ghi, T2 đọc thứ T1 ghi", nó hủy một bên:
 
 ```text
 ERROR:  could not serialize access due to read/write dependencies among transactions
@@ -125,7 +125,7 @@ Hai điều trái với lời đồn:
 
 ### Serialization failure: thử lại cả transaction
 
-[[serialization-failure|Serialization failure]] (SQLSTATE `40001`) không phải bug: đó là cách Snapshot Isolation và Serializable nói "transaction này không thể commit mà vẫn đúng, làm lại đi". Prisma báo nó (và deadlock) bằng mã lỗi `P2034`, và tài liệu Prisma có sẵn mẫu vòng lặp thử lại tối đa 5 lần chỉ cho mã đó.
+[[concepts/serialization-failure|Serialization failure]] (SQLSTATE `40001`) không phải bug: đó là cách Snapshot Isolation và Serializable nói "transaction này không thể commit mà vẫn đúng, làm lại đi". Prisma báo nó (và deadlock) bằng mã lỗi `P2034`, và tài liệu Prisma có sẵn mẫu vòng lặp thử lại tối đa 5 lần chỉ cho mã đó.
 
 Thử lại phải là thử lại **cả transaction từ đầu**, kể cả các câu `SELECT`: lần thử sau cần một snapshot mới. Và phải có giới hạn số lần cùng khoảng chờ ngẫu nhiên, nếu không thì hàng trăm request bị hủy sẽ cùng thử lại cùng lúc và lại đụng nhau. Ví dụ dưới cho thấy con số đó lớn tới mức nào khi mọi người tranh **một dòng**.
 

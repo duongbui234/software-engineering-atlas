@@ -19,17 +19,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - Mặc định Redis có `maxmemory 0` (không giới hạn) và chính sách `noeviction`: đặt giới hạn mà không đổi chính sách thì đầy là **mọi lệnh ghi bị từ chối** (OOM). Muốn Redis làm cache, phải đặt cả [[maxmemory|maxmemory]] lẫn [[eviction-policy|eviction policy]].
+> - Mặc định Redis có `maxmemory 0` (không giới hạn) và chính sách `noeviction`: đặt giới hạn mà không đổi chính sách thì đầy là **mọi lệnh ghi bị từ chối** (OOM). Muốn Redis làm cache, phải đặt cả [[concepts/maxmemory|maxmemory]] lẫn [[concepts/eviction-policy|eviction policy]].
 > - `allkeys-*` đẩy bất kỳ key nào; `volatile-*` chỉ đẩy key có TTL. Redis dùng chung cho session (không TTL) và cache: `volatile-lru` vẫn OOM khi session chiếm hết chỗ.
-> - [[lru-va-lfu|LRU]] đẩy key lâu nhất chưa ai đọc, LFU đẩy key ít được đọc nhất. Một lượt quét 15.000 key "lạnh": LRU còn giữ 55/200 key hot, LFU giữ đủ 200/200.
-> - [[key-expiration|Key hết hạn]] bị xóa theo hai cách: khi có người đọc tới, và một vòng quét nền lấy mẫu ngẫu nhiên. 50.000 key hết hạn tự biến mất trong 3 giây dù không ai đọc.
-> - [[big-key|Big key]] và [[scan-va-keys|KEYS]] làm Redis đứng hình vì Redis xử lý lệnh trên một luồng: `KEYS` trên 1 triệu key chặn mọi client 91 ms, `SCAN` chỉ 1 ms; `DEL` một hash 1 triệu field chặn 51 ms, `UNLINK` gần 0.
+> - [[concepts/lru-va-lfu|LRU]] đẩy key lâu nhất chưa ai đọc, LFU đẩy key ít được đọc nhất. Một lượt quét 15.000 key "lạnh": LRU còn giữ 55/200 key hot, LFU giữ đủ 200/200.
+> - [[concepts/key-expiration|Key hết hạn]] bị xóa theo hai cách: khi có người đọc tới, và một vòng quét nền lấy mẫu ngẫu nhiên. 50.000 key hết hạn tự biến mất trong 3 giây dù không ai đọc.
+> - [[concepts/big-key|Big key]] và [[concepts/scan-va-keys|KEYS]] làm Redis đứng hình vì Redis xử lý lệnh trên một luồng: `KEYS` trên 1 triệu key chặn mọi client 91 ms, `SCAN` chỉ 1 ms; `DEL` một hash 1 triệu field chặn 51 ms, `UNLINK` gần 0.
 
 > [!info] Bối cảnh
 > Ga 6 của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: một instance Redis duy nhất giữ cả phiên đăng nhập, hàng đợi job, bộ đếm rate limit lẫn cache, và chưa đặt giới hạn bộ nhớ. Ga này hỏi: khi Redis đầy thì chuyện gì xảy ra, và nên cấu hình thế nào. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **TTL, version trong khóa**: xem [[2026-11-22-caching-invalidation|ga 4]]. **Hot key**: xem [[2026-11-22-caching-under-load|ga 5]].
+> - **TTL, version trong khóa**: xem [[posts/2026-11-22-caching-invalidation|ga 4]]. **Hot key**: xem [[posts/2026-11-22-caching-under-load|ga 5]].
 > - **OOM (out of memory)**: hết bộ nhớ. Trong Redis là lỗi `OOM command not allowed when used memory > 'maxmemory'`.
 > - **Một luồng (single-threaded)**: Redis chạy các lệnh lần lượt từng cái một. Một lệnh chậm làm mọi client khác phải chờ.
 > - **O(N)**: thời gian chạy tăng theo số phần tử N. `KEYS` là O(N) với N là tổng số key.
@@ -43,12 +43,12 @@ Giá sách cạnh quầy chỉ có 300 ô. Khi đầy mà có cuốn mới cần
 
 | Đời thường | Khái niệm |
 |---|---|
-| Giá sách chỉ có 300 ô | [[maxmemory\|Maxmemory]] |
-| Luật "giá đầy thì cất cuốn nào" | [[eviction-policy\|Eviction policy]] |
-| Cất cuốn lâu nhất chưa ai mở / cuốn ít người mượn nhất | [[lru-va-lfu\|LRU và LFU]] |
-| Sách hết phiếu hẹn: cất khi có người hỏi, hoặc khi thủ thư đi tuần | [[key-expiration\|Key expiration]] |
-| Bộ bách khoa 40 tập chiếm cả một tầng giá, dọn mất cả buổi | [[big-key\|Big key]] |
-| Kiểm kê cả giá một lượt (quầy đóng cửa) / mỗi lần một ngăn | [[scan-va-keys\|SCAN và KEYS]] |
+| Giá sách chỉ có 300 ô | [[concepts/maxmemory\|Maxmemory]] |
+| Luật "giá đầy thì cất cuốn nào" | [[concepts/eviction-policy\|Eviction policy]] |
+| Cất cuốn lâu nhất chưa ai mở / cuốn ít người mượn nhất | [[concepts/lru-va-lfu\|LRU và LFU]] |
+| Sách hết phiếu hẹn: cất khi có người hỏi, hoặc khi thủ thư đi tuần | [[concepts/key-expiration\|Key expiration]] |
+| Bộ bách khoa 40 tập chiếm cả một tầng giá, dọn mất cả buổi | [[concepts/big-key\|Big key]] |
+| Kiểm kê cả giá một lượt (quầy đóng cửa) / mỗi lần một ngăn | [[concepts/scan-va-keys\|SCAN và KEYS]] |
 
 ```mermaid
 flowchart TB
@@ -102,7 +102,7 @@ Hai quy tắc chọn nhanh:
 
 ### LRU và LFU: Redis đoán key nào ít giá trị
 
-**[[lru-va-lfu|LRU]]** (least recently used) đẩy key *lâu nhất chưa được đụng tới*. **LFU** (least frequently used) đẩy key *ít được dùng nhất*. Khác nhau rõ nhất khi có một **lượt quét**: một job báo cáo đọc lướt toàn bộ catalog một lần. Với LRU, mỗi key bị quét đều thành "vừa được dùng", đẩy những key hot thật ra ngoài. Với LFU, key bị quét chỉ có tần suất 1 lần, không thắng nổi key hot đã được đọc hàng nghìn lần.
+**[[concepts/lru-va-lfu|LRU]]** (least recently used) đẩy key *lâu nhất chưa được đụng tới*. **LFU** (least frequently used) đẩy key *ít được dùng nhất*. Khác nhau rõ nhất khi có một **lượt quét**: một job báo cáo đọc lướt toàn bộ catalog một lần. Với LRU, mỗi key bị quét đều thành "vừa được dùng", đẩy những key hot thật ra ngoài. Với LFU, key bị quét chỉ có tần suất 1 lần, không thắng nổi key hot đã được đọc hàng nghìn lần.
 
 Redis không giữ một danh sách LRU chính xác cho mọi key (quá tốn bộ nhớ). Thay vào đó nó **xấp xỉ**:
 
@@ -113,7 +113,7 @@ Redis không giữ một danh sách LRU chính xác cho mọi key (quá tốn b�
 
 ### Key expiration: key hết hạn bị xóa lúc nào
 
-Key có TTL không biến mất đúng giây hết hạn. **[[key-expiration|Redis xóa key hết hạn]]** theo hai cách:
+Key có TTL không biến mất đúng giây hết hạn. **[[concepts/key-expiration|Redis xóa key hết hạn]]** theo hai cách:
 
 1. **Thụ động**: khi một client đọc tới key đã hết hạn, Redis xóa nó và trả như không tồn tại. Người đọc không bao giờ thấy giá trị đã hết hạn.
 2. **Chủ động**: một vòng quét nền chạy nhiều lần mỗi giây (theo `hz`, mặc định 10), lấy mẫu ngẫu nhiên các key có TTL và xóa những key đã hết hạn; nếu trong mẫu có nhiều key hết hạn thì quét tiếp ngay. `active-expire-effort` (1–10, mặc định 1) cho phép dành nhiều CPU hơn để dọn nhanh hơn.
@@ -124,7 +124,7 @@ Một điểm mới đáng biết: từ **Redis 7.4**, từng field trong một 
 
 ### Big key: một key chiếm cả tầng giá
 
-**[[big-key|Big key]]** là key có giá trị rất lớn (chuỗi vài MB) hoặc collection rất nhiều phần tử (hash, set, list hàng triệu phần tử). Vì Redis chạy lệnh trên một luồng, big key gây hại theo nhiều kiểu:
+**[[concepts/big-key|Big key]]** là key có giá trị rất lớn (chuỗi vài MB) hoặc collection rất nhiều phần tử (hash, set, list hàng triệu phần tử). Vì Redis chạy lệnh trên một luồng, big key gây hại theo nhiều kiểu:
 
 - **Xóa chậm**: `DEL` trên collection là O(N) theo số phần tử, chặn mọi client trong lúc giải phóng bộ nhớ. Một big key hết hạn hoặc bị đẩy cũng vậy, trừ khi bật `lazyfree-lazy-expire` / `lazyfree-lazy-eviction` (mặc định tắt).
 - **Đọc chậm, nghẽn mạng**: `HGETALL` hay `GET` một giá trị 5 MB chiếm băng thông và thời gian của cả server.
@@ -138,7 +138,7 @@ Cách xử lý: dùng **`UNLINK`** thay `DEL` (Redis 4.0+: gỡ key khỏi keysp
 
 **`SCAN cursor MATCH pattern COUNT n`** duyệt từng đợt nhỏ: mỗi lần trả một ít key và một con trỏ để gọi tiếp, tới khi con trỏ về `0`. Giữa các đợt, client khác vẫn chạy bình thường. Cái giá: tổng thời gian lâu hơn, có thể trả trùng một key (phải tự lọc), và key thêm hoặc xóa trong lúc quét có thể có hoặc không có trong kết quả. Key tồn tại suốt quá trình thì chắc chắn được trả.
 
-Hàm `invalidate(pattern)` trong cache tìm kiếm của flash-sale dùng `KEYS` rồi `DEL`. Hiện chưa chỗ nào gọi nó, nhưng nếu một ngày ai đó gọi nó lúc 21:00 với hàng triệu key thì cả Redis (kèm session và rate limit) đứng lại theo. Thay thế tốt hơn là version trong khóa ([[2026-11-22-caching-invalidation|ga 4]]): không cần tìm key nào cả.
+Hàm `invalidate(pattern)` trong cache tìm kiếm của flash-sale dùng `KEYS` rồi `DEL`. Hiện chưa chỗ nào gọi nó, nhưng nếu một ngày ai đó gọi nó lúc 21:00 với hàng triệu key thì cả Redis (kèm session và rate limit) đứng lại theo. Thay thế tốt hơn là version trong khóa ([[posts/2026-11-22-caching-invalidation|ga 4]]): không cần tìm key nào cả.
 
 ## Ví dụ chạy được
 

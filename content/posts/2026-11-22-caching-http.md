@@ -18,17 +18,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - Giữa người dùng và server có ít nhất hai tầng cache: [[browser-cache|cache của trình duyệt]] (riêng từng người) và [[cdn|CDN]] (dùng chung cho mọi người). Server điều khiển cả hai bằng header [[cache-control|Cache-Control]].
+> - Giữa người dùng và server có ít nhất hai tầng cache: [[concepts/browser-cache|cache của trình duyệt]] (riêng từng người) và [[concepts/cdn|CDN]] (dùng chung cho mọi người). Server điều khiển cả hai bằng header [[concepts/cache-control|Cache-Control]].
 > - `max-age=N`: dùng lại trong N giây không cần hỏi. `no-cache` **không** có nghĩa "đừng cache" mà là "lưu được, nhưng hỏi lại trước khi dùng"; cấm lưu là `no-store`. `private`: chỉ trình duyệt được giữ, CDN thì không.
-> - [[etag|ETag]] là "mã phiên bản" của response. Hết hạn, client hỏi lại kèm `If-None-Match`; chưa đổi thì server trả `304` không có body.
-> - [[vary|Vary]] đưa thêm header của request vào khóa cache: cùng URL nhưng tiếng Việt và tiếng Anh là hai bản khác nhau.
-> - [[stale-while-revalidate|stale-while-revalidate]]: hết hạn rồi vẫn trả bản cũ ngay, rồi đi lấy bản mới ở nền. Người dùng không phải chờ.
+> - [[concepts/etag|ETag]] là "mã phiên bản" của response. Hết hạn, client hỏi lại kèm `If-None-Match`; chưa đổi thì server trả `304` không có body.
+> - [[concepts/vary|Vary]] đưa thêm header của request vào khóa cache: cùng URL nhưng tiếng Việt và tiếng Anh là hai bản khác nhau.
+> - [[concepts/stale-while-revalidate|stale-while-revalidate]]: hết hạn rồi vẫn trả bản cũ ngay, rồi đi lấy bản mới ở nền. Người dùng không phải chờ.
 
 > [!info] Bối cảnh
 > Ga 2 của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: lúc 21:00, ảnh, CSS và trang sản phẩm bị tải hàng trăm nghìn lần. Ga này ở tầng xa server nhất: chính trình duyệt và CDN. Ví dụ là một CDN thu nhỏ chạy bằng Docker trên máy bạn. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Hit, miss, hit ratio, cache key, staleness**: xem [[2026-11-22-caching-why|ga 1]].
+> - **Hit, miss, hit ratio, cache key, staleness**: xem [[posts/2026-11-22-caching-why|ga 1]].
 > - **Header HTTP**: các dòng `Tên: giá trị` đi kèm request và response, mang thông tin phụ (ngôn ngữ, kiểu dữ liệu, luật cache…).
 > - **Origin**: server gốc tạo ra response (ở đây là server Node của shop), đối lập với các cache đứng trước nó.
 > - **CDN (Content Delivery Network)**: mạng máy chủ đặt ở nhiều nơi trên thế giới, giữ bản sao nội dung gần người dùng. Ví dụ: Cloudflare, Fastly, CloudFront.
@@ -42,13 +42,13 @@ sources:
 
 | Đời thường | Khái niệm |
 |---|---|
-| Sách để trên bàn ở nhà, chỉ bạn đọc | [[browser-cache\|Browser cache]] (cache riêng) |
-| Thư viện quận: bản sao dùng chung cho cả khu | [[cdn\|CDN]] (cache dùng chung) |
+| Sách để trên bàn ở nhà, chỉ bạn đọc | [[concepts/browser-cache\|Browser cache]] (cache riêng) |
+| Thư viện quận: bản sao dùng chung cho cả khu | [[concepts/cdn\|CDN]] (cache dùng chung) |
 | Thư viện trung tâm, nơi in và giữ bản gốc | Origin server |
-| Nhãn dán trên bìa: "dùng được tới ngày…", "không cho mượn ra ngoài" | [[cache-control\|Cache-Control]] |
-| Số lần in trên gáy sách: gọi hỏi "lần in 3 còn mới không?" | [[etag\|ETag]] và `If-None-Match` |
-| Cùng tựa sách nhưng có bản tiếng Việt và bản tiếng Anh | [[vary\|Vary]] |
-| Sách quá hạn vẫn cho mượn tạm, trong lúc gửi yêu cầu lấy bản mới | [[stale-while-revalidate\|stale-while-revalidate]] |
+| Nhãn dán trên bìa: "dùng được tới ngày…", "không cho mượn ra ngoài" | [[concepts/cache-control\|Cache-Control]] |
+| Số lần in trên gáy sách: gọi hỏi "lần in 3 còn mới không?" | [[concepts/etag\|ETag]] và `If-None-Match` |
+| Cùng tựa sách nhưng có bản tiếng Việt và bản tiếng Anh | [[concepts/vary\|Vary]] |
+| Sách quá hạn vẫn cho mượn tạm, trong lúc gửi yêu cầu lấy bản mới | [[concepts/stale-while-revalidate\|stale-while-revalidate]] |
 
 ```mermaid
 flowchart TB
@@ -77,14 +77,14 @@ HTTP đã có sẵn cả bộ luật cho chuyện này từ lâu: server ghi lu�
 
 RFC 9111 chia cache HTTP làm hai loại, và mọi luật đều xoay quanh sự khác nhau này:
 
-- **Private cache** (cache riêng): chỉ phục vụ một người. Đó là **[[browser-cache|cache của trình duyệt]]**. Nó được giữ cả dữ liệu riêng tư (trang tài khoản của bạn), vì không ai khác đọc được.
-- **Shared cache** (cache dùng chung): một bản phục vụ nhiều người. Đó là **[[cdn|CDN]]**, reverse proxy như nginx, proxy của công ty. Lỡ giữ dữ liệu riêng của người A là có thể trả cho người B.
+- **Private cache** (cache riêng): chỉ phục vụ một người. Đó là **[[concepts/browser-cache|cache của trình duyệt]]**. Nó được giữ cả dữ liệu riêng tư (trang tài khoản của bạn), vì không ai khác đọc được.
+- **Shared cache** (cache dùng chung): một bản phục vụ nhiều người. Đó là **[[concepts/cdn|CDN]]**, reverse proxy như nginx, proxy của công ty. Lỡ giữ dữ liệu riêng của người A là có thể trả cho người B.
 
 CDN đặt máy chủ ở hàng trăm thành phố (gọi là PoP hay edge). Người ở Hà Nội lấy ảnh từ máy chủ ở Hà Nội thay vì vượt biển sang server gốc ở Singapore. Ngoài tốc độ, CDN còn **chắn tải**: origin chỉ thấy những lần CDN trượt.
 
 ### Cache-Control: luật ghi trên từng response
 
-[[cache-control|Cache-Control]] là header server gửi kèm response. Các chỉ thị hay dùng:
+[[concepts/cache-control|Cache-Control]] là header server gửi kèm response. Các chỉ thị hay dùng:
 
 | Chỉ thị | Nghĩa | Ví dụ dùng |
 |---|---|---|
@@ -111,7 +111,7 @@ Với file tĩnh, mẹo phổ biến nhất là **đặt mã băm nội dung và
 
 Hết hạn không có nghĩa là đã đổi. Thay vì tải lại cả trang, cache hỏi origin: "bản tôi đang có còn đúng không?". Đó là **conditional request** (request có điều kiện), dựa trên một trong hai dấu phiên bản:
 
-- **[[etag|ETag]]**: chuỗi do server tự đặt, đại diện cho một phiên bản nội dung, ví dụ `"a1b2c3"`. Client hỏi lại bằng `If-None-Match: "a1b2c3"`.
+- **[[concepts/etag|ETag]]**: chuỗi do server tự đặt, đại diện cho một phiên bản nội dung, ví dụ `"a1b2c3"`. Client hỏi lại bằng `If-None-Match: "a1b2c3"`.
 - **`Last-Modified`**: thời điểm sửa cuối. Client hỏi lại bằng `If-Modified-Since`. Chỉ chính xác tới giây.
 
 Nếu chưa đổi, server trả **`304 Not Modified`** không có body, kèm thời hạn mới. Nếu đã đổi, trả `200` với nội dung và ETag mới.
@@ -126,7 +126,7 @@ ETag có hai loại (RFC 9110):
 
 ### Vary: khi URL không đủ làm khóa
 
-Khóa cache mặc định là method + URL. Nhưng nếu server trả nội dung khác nhau theo header của request, ví dụ `Accept-Language`, thì một URL có nhiều phiên bản. Header **[[vary|Vary]]** trong response nói với cache: "hãy đưa header này của request vào khóa".
+Khóa cache mặc định là method + URL. Nhưng nếu server trả nội dung khác nhau theo header của request, ví dụ `Accept-Language`, thì một URL có nhiều phiên bản. Header **[[concepts/vary|Vary]]** trong response nói với cache: "hãy đưa header này của request vào khóa".
 
 ```http
 Vary: Accept-Language

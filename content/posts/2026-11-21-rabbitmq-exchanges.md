@@ -22,18 +22,18 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[direct-exchange|Direct]]: chép tin vào queue có binding key **trùng khớp hoàn toàn** routing key. [[default-exchange|Default exchange]] là một direct exchange đặc biệt.
-> - [[fanout-exchange|Fanout]]: chép tin vào **mọi** queue đã bind, bỏ qua routing key. Đây là kiểu "phát loa".
-> - [[topic-exchange|Topic]]: routing key là các từ nối bằng dấu chấm; trong binding, `*` khớp đúng **một** từ, `#` khớp **không hoặc nhiều** từ.
-> - [[headers-exchange|Headers]] định tuyến theo bảng headers thay vì routing key. [[exchange-to-exchange-binding|Exchange-to-exchange binding]] cho phép nối exchange vào exchange.
+> - [[concepts/direct-exchange|Direct]]: chép tin vào queue có binding key **trùng khớp hoàn toàn** routing key. [[concepts/default-exchange|Default exchange]] là một direct exchange đặc biệt.
+> - [[concepts/fanout-exchange|Fanout]]: chép tin vào **mọi** queue đã bind, bỏ qua routing key. Đây là kiểu "phát loa".
+> - [[concepts/topic-exchange|Topic]]: routing key là các từ nối bằng dấu chấm; trong binding, `*` khớp đúng **một** từ, `#` khớp **không hoặc nhiều** từ.
+> - [[concepts/headers-exchange|Headers]] định tuyến theo bảng headers thay vì routing key. [[concepts/exchange-to-exchange-binding|Exchange-to-exchange binding]] cho phép nối exchange vào exchange.
 > - **Phổ biến nhất**: default exchange (đứng sau `sendToQueue`, nhiều framework dùng mặc định) cho hàng đợi công việc, và **topic** cho sự kiện. Headers hiếm gặp nhất. Phân vân thì chọn topic.
-> - Một [[unroutable-message|tin không khớp binding nào]] mặc định **bị bỏ im lặng**. Muốn biết thì dùng cờ `mandatory` (broker trả tin lại) hoặc [[alternate-exchange|alternate exchange]] (broker chuyển tin sang exchange dự phòng).
+> - Một [[concepts/unroutable-message|tin không khớp binding nào]] mặc định **bị bỏ im lặng**. Muốn biết thì dùng cờ `mandatory` (broker trả tin lại) hoặc [[concepts/alternate-exchange|alternate exchange]] (broker chuyển tin sang exchange dự phòng).
 
 > [!info] Bối cảnh
-> Ga 3 của **tuyến RabbitMQ**. [[2026-11-21-rabbitmq-amqp-model|Ga 2]] cho thấy producer luôn gửi cho exchange, và binding quyết định tin đi đâu. Ga này hỏi tiếp: exchange *so* routing key với binding key theo luật nào? Ví dụ là các sự kiện của **flash-sale** (trang bán hàng giảm giá giờ vàng mình tự viết): `order.placed`, `order.cancelled`, `payment.paid`… Bạn không cần biết code dự án.
+> Ga 3 của **tuyến RabbitMQ**. [[posts/2026-11-21-rabbitmq-amqp-model|Ga 2]] cho thấy producer luôn gửi cho exchange, và binding quyết định tin đi đâu. Ga này hỏi tiếp: exchange *so* routing key với binding key theo luật nào? Ví dụ là các sự kiện của **flash-sale** (trang bán hàng giảm giá giờ vàng mình tự viết): `order.placed`, `order.cancelled`, `payment.paid`… Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Exchange, queue, binding, routing key, binding key**: xem [[2026-11-21-rabbitmq-amqp-model|ga 2]]. Tóm tắt: exchange là bàn phân loại, queue là hộc thư, binding là quy tắc nối hai thứ đó, routing key là nhãn trên thư.
+> - **Exchange, queue, binding, routing key, binding key**: xem [[posts/2026-11-21-rabbitmq-amqp-model|ga 2]]. Tóm tắt: exchange là bàn phân loại, queue là hộc thư, binding là quy tắc nối hai thứ đó, routing key là nhãn trên thư.
 > - **Pub/sub (publish/subscribe)**: một bên phát, nhiều bên đăng ký cùng nhận.
 > - **Audit log**: sổ ghi lại mọi chuyện xảy ra để tra cứu sau.
 > - **Plugin**: phần mở rộng cài thêm vào RabbitMQ.
@@ -46,14 +46,14 @@ Bàn phân loại ở ga 2 thật ra có bốn kiểu nhân viên, mỗi ngườ
 
 | Đời thường | Khái niệm |
 |---|---|
-| Nhân viên chỉ đọc đúng mã bưu chính, khớp từng chữ số mới bỏ hộc | [[direct-exchange\|Direct exchange]] |
-| Quầy "gửi theo tên hộc": ghi tên hộc lên phong bì là tới thẳng hộc đó | [[default-exchange\|Default exchange]] |
-| Loa phường: ai đăng ký cũng nghe, không cần đọc địa chỉ | [[fanout-exchange\|Fanout exchange]] |
-| Nhân viên đọc địa chỉ theo cấp "tỉnh.huyện.xã", hiểu được "mọi xã của huyện X" | [[topic-exchange\|Topic exchange]] |
-| Nhân viên không nhìn địa chỉ, chỉ đọc tờ ghi chú kẹp kèm ("thư bảo đảm", "khổ lớn") | [[headers-exchange\|Headers exchange]] |
-| Bàn phân loại tổng chuyển cả xấp cho bàn phân loại của từng tỉnh | [[exchange-to-exchange-binding\|Exchange-to-exchange binding]] |
-| Thư sai địa chỉ: bỏ đi, trả lại người gửi, hoặc chuyển "phòng thư thất lạc" | [[unroutable-message\|Unroutable message]] |
-| Phòng thư thất lạc | [[alternate-exchange\|Alternate exchange]] |
+| Nhân viên chỉ đọc đúng mã bưu chính, khớp từng chữ số mới bỏ hộc | [[concepts/direct-exchange\|Direct exchange]] |
+| Quầy "gửi theo tên hộc": ghi tên hộc lên phong bì là tới thẳng hộc đó | [[concepts/default-exchange\|Default exchange]] |
+| Loa phường: ai đăng ký cũng nghe, không cần đọc địa chỉ | [[concepts/fanout-exchange\|Fanout exchange]] |
+| Nhân viên đọc địa chỉ theo cấp "tỉnh.huyện.xã", hiểu được "mọi xã của huyện X" | [[concepts/topic-exchange\|Topic exchange]] |
+| Nhân viên không nhìn địa chỉ, chỉ đọc tờ ghi chú kẹp kèm ("thư bảo đảm", "khổ lớn") | [[concepts/headers-exchange\|Headers exchange]] |
+| Bàn phân loại tổng chuyển cả xấp cho bàn phân loại của từng tỉnh | [[concepts/exchange-to-exchange-binding\|Exchange-to-exchange binding]] |
+| Thư sai địa chỉ: bỏ đi, trả lại người gửi, hoặc chuyển "phòng thư thất lạc" | [[concepts/unroutable-message\|Unroutable message]] |
+| Phòng thư thất lạc | [[concepts/alternate-exchange\|Alternate exchange]] |
 
 ```mermaid
 flowchart TB
@@ -91,7 +91,7 @@ Mình từng nghĩ cứ mỗi kiểu người nghe thì producer gửi một b�
 
 ### Direct exchange: khớp nguyên văn
 
-[[direct-exchange|Direct exchange]] chép tin vào mọi queue có binding key **giống hệt** routing key. Binding `payment.paid` chỉ nhận tin có routing key đúng `payment.paid`, không hơn không kém.
+[[concepts/direct-exchange|Direct exchange]] chép tin vào mọi queue có binding key **giống hệt** routing key. Binding `payment.paid` chỉ nhận tin có routing key đúng `payment.paid`, không hơn không kém.
 
 - Nhiều queue cùng bind một khóa thì mỗi queue nhận một bản.
 - Một queue bind nhiều khóa thì nhận tin của tất cả các khóa đó.
@@ -101,11 +101,11 @@ Hợp khi khóa là một tập cố định, rõ ràng: loại lệnh (`resize-
 
 ### Default exchange: direct exchange không tên
 
-[[default-exchange|Default exchange]] (tên rỗng `""`) là một direct exchange mà **mọi queue tự động bind vào với binding key bằng tên queue**. Không ai bind hay gỡ được binding trên nó. Đây là thứ đứng sau `sendToQueue` ở ga 2. Nó cũng không hỗ trợ alternate exchange (phần cuối bài).
+[[concepts/default-exchange|Default exchange]] (tên rỗng `""`) là một direct exchange mà **mọi queue tự động bind vào với binding key bằng tên queue**. Không ai bind hay gỡ được binding trên nó. Đây là thứ đứng sau `sendToQueue` ở ga 2. Nó cũng không hỗ trợ alternate exchange (phần cuối bài).
 
 ### Fanout exchange: phát loa
 
-[[fanout-exchange|Fanout exchange]] chép tin vào **mọi** queue đang bind với nó và **bỏ qua routing key**. Gửi `order.placed` hay `abc` cũng như nhau.
+[[concepts/fanout-exchange|Fanout exchange]] chép tin vào **mọi** queue đang bind với nó và **bỏ qua routing key**. Gửi `order.placed` hay `abc` cũng như nhau.
 
 Đây là mẫu **pub/sub** cơ bản: mỗi bên muốn nghe tạo một queue riêng, bind vào fanout exchange, và mọi bên nhận mọi tin. Trong tutorial "Publish/Subscribe", mỗi consumer tạo một queue tạm (tên do broker đặt, `exclusive`) để nghe khi đang chạy, tắt là queue biến mất. Exchange có sẵn: `amq.fanout`.
 
@@ -113,7 +113,7 @@ Fanout nhanh và đơn giản, nhưng không lọc được gì. Khi người ng
 
 ### Topic exchange: khớp theo mẫu
 
-[[topic-exchange|Topic exchange]] là kiểu linh hoạt nhất và hay dùng nhất cho sự kiện. Luật:
+[[concepts/topic-exchange|Topic exchange]] là kiểu linh hoạt nhất và hay dùng nhất cho sự kiện. Luật:
 
 - Routing key là các **từ** nối bằng dấu chấm: `order.vn.hcm.placed`.
 - Binding key cũng là các từ nối bằng dấu chấm, thêm hai ký tự đặc biệt:
@@ -135,7 +135,7 @@ Mẹo đặt tên: đi từ chung tới riêng, `<thực thể>.<khu vực>.<hà
 
 ### Headers exchange: đọc tờ ghi chú
 
-[[headers-exchange|Headers exchange]] bỏ qua routing key, so **headers** của tin với các tham số của binding. Tham số `x-match` quyết định cách so:
+[[concepts/headers-exchange|Headers exchange]] bỏ qua routing key, so **headers** của tin với các tham số của binding. Tham số `x-match` quyết định cách so:
 
 - `x-match: all`: mọi cặp khóa-giá trị trong binding đều phải có trong headers của tin.
 - `x-match: any`: chỉ cần một cặp khớp.
@@ -163,7 +163,7 @@ Topic là kiểu "bao" các kiểu kia: binding không có `*` hay `#` thì topi
 
 RabbitMQ không công bố thống kê, nên câu trả lời dưới đây dựa vào mặc định của các thư viện phổ biến và các tutorial chính thức:
 
-- **Default exchange là kiểu được dùng nhiều nhất mà người dùng ít để ý.** Mỗi lần gọi `sendToQueue` là một lần dùng nó. Client RabbitMQ của NestJS mặc định gửi bằng `sendToQueue`. Spring AMQP (`RabbitTemplate`) mặc định gửi vào exchange tên rỗng. Đây là đường đi của mẫu **work queue**: một việc, một hàng, nhiều worker chia nhau ([[2026-11-21-rabbitmq-ack-confirm|ga 4]]).
+- **Default exchange là kiểu được dùng nhiều nhất mà người dùng ít để ý.** Mỗi lần gọi `sendToQueue` là một lần dùng nó. Client RabbitMQ của NestJS mặc định gửi bằng `sendToQueue`. Spring AMQP (`RabbitTemplate`) mặc định gửi vào exchange tên rỗng. Đây là đường đi của mẫu **work queue**: một việc, một hàng, nhiều worker chia nhau ([[posts/2026-11-21-rabbitmq-ack-confirm|ga 4]]).
 - **Topic là kiểu được khai báo tường minh nhiều nhất cho sự kiện.** Hệ thống hướng sự kiện cần "ai muốn nghe gì thì tự bind" và cần thêm người nghe mà không sửa producer. Cả **14 exchange** của flash-sale đều là `topic`.
 - **Direct** hợp khi khóa là một danh sách cố định và nhỏ: loại lệnh, mức log, tên tenant.
 - **Fanout** hợp cho phát loa. MassTransit (thư viện .NET) mặc định tạo một fanout exchange cho mỗi loại message, rồi bind queue của từng consumer vào đó.
@@ -185,7 +185,7 @@ Nếu phân vân giữa direct và topic, mình chọn **topic**. Hôm nay dùng
 
 ### Exchange-to-exchange binding và CC/BCC
 
-[[exchange-to-exchange-binding|Exchange-to-exchange binding]] là phần mở rộng của RabbitMQ: một exchange bind vào **exchange khác** thay vì queue. Tin đi qua chuỗi exchange theo luật của từng cái. Ví dụ một fanout exchange `events.all` bind tới hai topic exchange `orders` và `payments`; mỗi đội tự quản exchange của mình. Broker gộp đường đi lại trước khi chép, nên dù có nhiều đường dẫn tới cùng một queue, **mỗi queue chỉ nhận đúng một bản**, và vòng lặp giữa các exchange bị phát hiện.
+[[concepts/exchange-to-exchange-binding|Exchange-to-exchange binding]] là phần mở rộng của RabbitMQ: một exchange bind vào **exchange khác** thay vì queue. Tin đi qua chuỗi exchange theo luật của từng cái. Ví dụ một fanout exchange `events.all` bind tới hai topic exchange `orders` và `payments`; mỗi đội tự quản exchange của mình. Broker gộp đường đi lại trước khi chép, nên dù có nhiều đường dẫn tới cùng một queue, **mỗi queue chỉ nhận đúng một bản**, và vòng lặp giữa các exchange bị phát hiện.
 
 **Sender-selected distribution** là một mẹo nhỏ khác: producer thêm header `CC` hoặc `BCC` (mảng chuỗi) để tin được định tuyến *thêm* theo các khóa đó, như gửi đồng kính gửi. Header `BCC` bị gỡ khỏi tin trước khi giao, nên người nhận không thấy.
 
@@ -196,11 +196,11 @@ Ngoài bốn kiểu chuẩn, RabbitMQ có các kiểu từ plugin. Hai kiểu đ
 - **Consistent hash** (`x-consistent-hash`): băm routing key (hoặc một header) để chia tin đều cho nhiều queue, mà cùng một khóa luôn vào cùng một queue. Binding key ở đây là **trọng số**: queue bind với `"2"` nhận gấp đôi queue bind với `"1"`. Dùng khi muốn chia tải mà vẫn giữ mọi tin của một đơn hàng ở cùng một queue.
 - **Local random** (`x-local-random`, từ 4.0): luôn chọn ngẫu nhiên một queue nằm trên **cùng node** với connection của producer, hợp cho kiểu hỏi-đáp trong cụm nhiều node.
 
-Plugin **delayed message** (`x-delayed-message`) từng rất phổ biến nhưng đã ngừng được bảo trì; [[2026-11-21-rabbitmq-dlx-retry|ga 6]] nói cách hẹn giờ thay thế.
+Plugin **delayed message** (`x-delayed-message`) từng rất phổ biến nhưng đã ngừng được bảo trì; [[posts/2026-11-21-rabbitmq-dlx-retry|ga 6]] nói cách hẹn giờ thay thế.
 
 ### Ba số phận của tin không có người nhận
 
-Gửi một tin mà không binding nào khớp, đó là một [[unroutable-message|unroutable message]]. Có ba khả năng:
+Gửi một tin mà không binding nào khớp, đó là một [[concepts/unroutable-message|unroutable message]]. Có ba khả năng:
 
 ```mermaid
 flowchart TB
@@ -213,7 +213,7 @@ flowchart TB
 
 1. **Bỏ im lặng** (mặc định). Không lỗi, không log ở phía ứng dụng. Broker chỉ tăng bộ đếm `messages_unroutable_dropped`.
 2. **Trả về người gửi** nếu producer gửi với cờ `mandatory: true`. Broker gửi lại tin kèm mã `312 NO_ROUTE` qua lệnh `basic.return`; trong `amqplib`, channel phát sự kiện `'return'`.
-3. **Chuyển sang [[alternate-exchange|alternate exchange]]** (AE) nếu exchange được cấu hình có AE. Tin đi tiếp sang AE (thường là một fanout exchange bind tới queue "thư thất lạc") để người vận hành xem lại. AE nên đặt bằng **policy** để đổi được lúc chạy; cũng đặt được bằng tham số `alternate-exchange` khi khai báo exchange. Khi có AE, tin được coi là "đã định tuyến", nên dù gửi `mandatory` cũng không có `basic.return`.
+3. **Chuyển sang [[concepts/alternate-exchange|alternate exchange]]** (AE) nếu exchange được cấu hình có AE. Tin đi tiếp sang AE (thường là một fanout exchange bind tới queue "thư thất lạc") để người vận hành xem lại. AE nên đặt bằng **policy** để đổi được lúc chạy; cũng đặt được bằng tham số `alternate-exchange` khi khai báo exchange. Khi có AE, tin được coi là "đã định tuyến", nên dù gửi `mandatory` cũng không có `basic.return`.
 
 > [!warning] Biên nhận không có nghĩa là có người nhận
 > Ga 4 sẽ nói về **publisher confirm**, giấy biên nhận broker gửi cho producer. Một tin unroutable bị bỏ vẫn được broker gửi biên nhận *thành công*: broker đã "xử lý xong" tin đó bằng cách xác định không ai nhận. Confirm chỉ chứng minh broker đã nhận trách nhiệm, không chứng minh có queue nào giữ tin.
@@ -328,7 +328,7 @@ Trong topic, `*` là đúng **một từ** (giữa hai dấu chấm), không ph�
 
 ### Tin bị bỏ mà không ai biết
 
-Đây là lỗi khó thấy nhất của RabbitMQ. Trong production, gắn alternate exchange cho các exchange quan trọng, hoặc gửi với `mandatory` và xử lý sự kiện `return`. Theo dõi bộ đếm tin unroutable trên Prometheus ([[2026-11-21-rabbitmq-operations|ga 9]]).
+Đây là lỗi khó thấy nhất của RabbitMQ. Trong production, gắn alternate exchange cho các exchange quan trọng, hoặc gửi với `mandatory` và xử lý sự kiện `return`. Theo dõi bộ đếm tin unroutable trên Prometheus ([[posts/2026-11-21-rabbitmq-operations|ga 9]]).
 
 ### Dùng fanout rồi lọc trong consumer
 

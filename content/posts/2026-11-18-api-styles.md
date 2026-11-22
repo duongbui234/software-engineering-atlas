@@ -18,16 +18,16 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Không có kiểu API "tốt nhất"; mỗi kiểu trả lời một câu hỏi khác: *ai mở lời* và *dữ liệu đi một chiều hay hai chiều*.
-> - [[rest|REST]]: client hỏi, server đáp, tài nguyên có URL riêng; mặc định cho API công khai.
-> - [[graphql|GraphQL]]: client tự chọn field cần lấy qua một endpoint duy nhất; hợp khi nhiều loại client cần dữ liệu khác nhau.
-> - [[grpc|gRPC]]: hợp đồng `.proto`, nhị phân, HTTP/2; hợp cho gọi nội bộ giữa các service.
-> - [[websockets|WebSockets]]: kết nối mở liên tục, server đẩy tin bất cứ lúc nào. [[webhooks|Webhooks]]: hệ thống *bên ngoài* gọi ngược vào mình khi có sự kiện.
+> - [[concepts/rest|REST]]: client hỏi, server đáp, tài nguyên có URL riêng; mặc định cho API công khai.
+> - [[concepts/graphql|GraphQL]]: client tự chọn field cần lấy qua một endpoint duy nhất; hợp khi nhiều loại client cần dữ liệu khác nhau.
+> - [[concepts/grpc|gRPC]]: hợp đồng `.proto`, nhị phân, HTTP/2; hợp cho gọi nội bộ giữa các service.
+> - [[concepts/websockets|WebSockets]]: kết nối mở liên tục, server đẩy tin bất cứ lúc nào. [[concepts/webhooks|Webhooks]]: hệ thống *bên ngoài* gọi ngược vào mình khi có sự kiện.
 
 > [!info] Bối cảnh
 > Ví dụ lấy từ **flash-sale**, trang bán hàng giảm giá giờ vàng mình tự viết: đúng giờ mở bán, hàng nghìn người tranh vài trăm suất. Vì quá đông, người mua phải vào một **hàng chờ ảo** trước, tới lượt mới được thanh toán. Thanh toán đi qua ví **MoMo** hoặc **VNPay**. Bạn không cần đọc code dự án. Tên riêng nào xuất hiện cũng có giải thích bằng lời thường.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Endpoint, request, status code**: xem [[2026-11-18-api-foundations|ga 1]].
+> - **Endpoint, request, status code**: xem [[posts/2026-11-18-api-foundations|ga 1]].
 > - **Polling**: client cứ vài giây hỏi lại một lần "có gì mới chưa?".
 > - **Push**: server chủ động gửi tin cho client mà không chờ client hỏi.
 > - **Service**: một chương trình chạy riêng, làm một phần việc của hệ thống (đăng nhập, thanh toán…).
@@ -44,11 +44,11 @@ Mỗi kiểu API giống một cách liên lạc khác nhau. Câu hỏi để ph
 
 | Đời thường | Kiểu API | Ai mở lời | Hợp với |
 |---|---|---|---|
-| Ra quầy hỏi "cho một ly cà phê sữa", nhận ly rồi đi | [[rest\|REST]] | Khách | Hầu hết mọi việc hỏi-đáp |
-| Điền phiếu, tự tick đúng những thứ mình muốn: "ít đá, thêm shot, không đường" | [[graphql\|GraphQL]] | Khách | Mỗi khách cần một kiểu dữ liệu khác nhau |
-| Quầy và kho nói chuyện bằng bộ đàm, dùng mã số ngắn thay cho câu dài | [[grpc\|gRPC]] | Bộ phận nội bộ | Các service trong cùng hệ thống gọi nhau |
-| Gọi điện cho quán rồi **giữ máy**, khi nào đồ xong quán nói luôn | [[websockets\|WebSockets]] | Cả hai, lúc nào cũng được | Server cần báo tin ngay khi có |
-| Để lại số điện thoại, **ngân hàng tự gọi** báo "tiền đã vào tài khoản" | [[webhooks\|Webhooks]] | Hệ thống bên ngoài | Chờ kết quả từ một bên thứ ba |
+| Ra quầy hỏi "cho một ly cà phê sữa", nhận ly rồi đi | [[concepts/rest\|REST]] | Khách | Hầu hết mọi việc hỏi-đáp |
+| Điền phiếu, tự tick đúng những thứ mình muốn: "ít đá, thêm shot, không đường" | [[concepts/graphql\|GraphQL]] | Khách | Mỗi khách cần một kiểu dữ liệu khác nhau |
+| Quầy và kho nói chuyện bằng bộ đàm, dùng mã số ngắn thay cho câu dài | [[concepts/grpc\|gRPC]] | Bộ phận nội bộ | Các service trong cùng hệ thống gọi nhau |
+| Gọi điện cho quán rồi **giữ máy**, khi nào đồ xong quán nói luôn | [[concepts/websockets\|WebSockets]] | Cả hai, lúc nào cũng được | Server cần báo tin ngay khi có |
+| Để lại số điện thoại, **ngân hàng tự gọi** báo "tiền đã vào tài khoản" | [[concepts/webhooks\|Webhooks]] | Hệ thống bên ngoài | Chờ kết quả từ một bên thứ ba |
 
 Nếu không có WebSocket, cách duy nhất để biết "đồ xong chưa" là cứ hai phút lại chạy ra quầy hỏi (polling). Hỏi nhiều thì mệt, hỏi ít thì biết tin muộn.
 
@@ -99,7 +99,7 @@ Bước 1 và 3 là hỏi-đáp bình thường. Bước 2 và 5 là server ch�
 
 ## REST: tài nguyên có địa chỉ, thao tác bằng method chuẩn
 
-[[rest|REST]] không phải giao thức mà là một *phong cách kiến trúc* Roy Fielding mô tả năm 2000, gồm các ràng buộc: client-server, stateless, response có thể cache, giao diện thống nhất, hệ thống phân lớp. Trong thực tế, "REST API" thường có nghĩa:
+[[concepts/rest|REST]] không phải giao thức mà là một *phong cách kiến trúc* Roy Fielding mô tả năm 2000, gồm các ràng buộc: client-server, stateless, response có thể cache, giao diện thống nhất, hệ thống phân lớp. Trong thực tế, "REST API" thường có nghĩa:
 
 - mỗi tài nguyên có URL riêng: `/products/42`, `/orders/ord_1`;
 - dùng đúng method HTTP với ngữ nghĩa của nó (ga 1);
@@ -112,7 +112,7 @@ Flash-sale theo REST ở mức thực dụng: tài nguyên rõ ràng, method đ�
 
 ## GraphQL: client tự viết "đơn đặt hàng" cho dữ liệu
 
-[[graphql|GraphQL]] (Facebook công bố năm 2015) đảo ngược quyền quyết định: server công bố một **schema có kiểu**, client gửi một câu query mô tả đúng hình dạng dữ liệu mình cần, thường qua một endpoint duy nhất `POST /graphql`:
+[[concepts/graphql|GraphQL]] (Facebook công bố năm 2015) đảo ngược quyền quyết định: server công bố một **schema có kiểu**, client gửi một câu query mô tả đúng hình dạng dữ liệu mình cần, thường qua một endpoint duy nhất `POST /graphql`:
 
 ```graphql
 query {
@@ -136,7 +136,7 @@ Flash-sale có một frontend web, các màn hình khá cố định, nên REST 
 
 ## gRPC: hợp đồng chặt, nhị phân, cho service nói với service
 
-[[grpc|gRPC]] (Google, 2015) gọi hàm ở máy khác như gọi hàm cục bộ. Hợp đồng viết bằng Protocol Buffers, rồi công cụ sinh code client và server cho từng ngôn ngữ. Flash-sale có một bản thiết kế (chưa merge) tách phần đăng nhập và phân quyền thành `iam-service`, giao tiếp qua gRPC:
+[[concepts/grpc|gRPC]] (Google, 2015) gọi hàm ở máy khác như gọi hàm cục bộ. Hợp đồng viết bằng Protocol Buffers, rồi công cụ sinh code client và server cho từng ngôn ngữ. Flash-sale có một bản thiết kế (chưa merge) tách phần đăng nhập và phân quyền thành `iam-service`, giao tiếp qua gRPC:
 
 ```proto
 service IamService {
@@ -159,7 +159,7 @@ Vì sao gRPC hợp cho đường nội bộ này:
 
 ## WebSockets: một kết nối mở để server nói trước
 
-Với HTTP thường, server chỉ được nói khi client hỏi. Muốn biết "đến lượt chưa", client phải hỏi liên tục (polling). [[websockets|WebSocket]] (RFC 6455) giải quyết bằng cách *nâng cấp* một request HTTP thành kênh hai chiều lâu dài:
+Với HTTP thường, server chỉ được nói khi client hỏi. Muốn biết "đến lượt chưa", client phải hỏi liên tục (polling). [[concepts/websockets|WebSocket]] (RFC 6455) giải quyết bằng cách *nâng cấp* một request HTTP thành kênh hai chiều lâu dài:
 
 ```http
 GET /socket HTTP/1.1
@@ -188,7 +188,7 @@ Một chi tiết mình từng nhầm: **Socket.IO không phải WebSocket thuầ
 
 ## Webhooks: hệ thống khác gọi ngược vào mình
 
-Khi người mua trả tiền trên trang MoMo, server của mình không biết lúc nào xong. [[webhooks|Webhook]] là hợp đồng ngược: mình đăng ký một URL, và *bên kia* gửi HTTP request tới URL đó khi có sự kiện. Các cổng thanh toán Việt Nam gọi nó là **IPN** (Instant Payment Notification).
+Khi người mua trả tiền trên trang MoMo, server của mình không biết lúc nào xong. [[concepts/webhooks|Webhook]] là hợp đồng ngược: mình đăng ký một URL, và *bên kia* gửi HTTP request tới URL đó khi có sự kiện. Các cổng thanh toán Việt Nam gọi nó là **IPN** (Instant Payment Notification).
 
 Trình tự dễ hình dung nhất:
 

@@ -15,17 +15,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[race-condition|Race condition]]: kết quả phụ thuộc vào thứ tự ngẫu nhiên mà các request chen nhau. Chạy một mình thì đúng, chạy cùng lúc thì sai.
-> - Mẫu code gây lỗi là [[read-modify-write|read-modify-write]]: đọc tồn kho lên app, kiểm tra, tính số mới, ghi lại. Giữa lúc đọc và lúc ghi có một khe hở.
-> - [[lost-update|Lost update]]: hai người cùng đọc 37, cùng ghi 36, kho chỉ giảm 1 dù bán 2. Trong ví dụ: 300 đơn, tồn kho cuối vẫn còn 86.
-> - Đổi sang `stock = stock - 1` sửa được lost update nhưng **không** sửa được [[oversell|oversell]]: kiểm tra "còn hàng" vẫn tách rời với lúc trừ. Kết quả: 149 đơn cho 100 suất, tồn kho -49.
+> - [[concepts/race-condition|Race condition]]: kết quả phụ thuộc vào thứ tự ngẫu nhiên mà các request chen nhau. Chạy một mình thì đúng, chạy cùng lúc thì sai.
+> - Mẫu code gây lỗi là [[concepts/read-modify-write|read-modify-write]]: đọc tồn kho lên app, kiểm tra, tính số mới, ghi lại. Giữa lúc đọc và lúc ghi có một khe hở.
+> - [[concepts/lost-update|Lost update]]: hai người cùng đọc 37, cùng ghi 36, kho chỉ giảm 1 dù bán 2. Trong ví dụ: 300 đơn, tồn kho cuối vẫn còn 86.
+> - Đổi sang `stock = stock - 1` sửa được lost update nhưng **không** sửa được [[concepts/oversell|oversell]]: kiểm tra "còn hàng" vẫn tách rời với lúc trừ. Kết quả: 149 đơn cho 100 suất, tồn kho -49.
 > - Tất cả xảy ra **bên trong transaction**, ở mức mặc định Read Committed. Transaction không tự chống race condition.
 
 > [!info] Bối cảnh
 > Ga 2 của **tuyến Transaction và khóa**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: đúng 21:00, hàng nghìn người cùng bấm mua một sản phẩm chỉ có vài trăm suất. Mỗi lần bấm là một request, các request chạy song song trên nhiều kết nối tới cùng một Postgres. Bạn không cần biết NestJS hay code của dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Transaction, COMMIT, ROLLBACK**: xem [[2026-11-22-transactions-acid|ga 1]].
+> - **Transaction, COMMIT, ROLLBACK**: xem [[posts/2026-11-22-transactions-acid|ga 1]].
 > - **Connection pool**: một nhóm kết nối tới database dùng chung cho nhiều request. Ví dụ dùng 50 kết nối, nên tối đa 50 transaction chạy cùng lúc.
 > - **Read Committed**: mức isolation mặc định của Postgres; mỗi câu lệnh thấy dữ liệu đã commit tính tới lúc câu đó bắt đầu. Ga 3 nói kỹ.
 > - **Đồng thời (concurrent)**: nhiều việc đang diễn ra trong cùng một khoảng thời gian, xen kẽ nhau, không nhất thiết đúng cùng một tích tắc.
@@ -36,10 +36,10 @@ Quầy vé ở ga 1 giờ có hai nhân viên. Sổ ghi "hàng A: còn 1 vé".
 
 | Đời thường | Khái niệm |
 |---|---|
-| Hai nhân viên cùng liếc sổ, cùng bán, và ai nhanh tay hơn thì "thắng" một cách ngẫu nhiên | [[race-condition\|Race condition]] |
-| Liếc sổ thấy 1, quay đi bán vé, quay lại ghi "còn 0" theo con số trong đầu | [[read-modify-write\|Read-modify-write]] |
-| Cả hai cùng ghi "còn 0": sổ chỉ ghi nhận một lần bán, lần kia biến mất | [[lost-update\|Lost update]] |
-| Hai khách cầm hai vé cho cùng một ghế | [[oversell\|Oversell]] |
+| Hai nhân viên cùng liếc sổ, cùng bán, và ai nhanh tay hơn thì "thắng" một cách ngẫu nhiên | [[concepts/race-condition\|Race condition]] |
+| Liếc sổ thấy 1, quay đi bán vé, quay lại ghi "còn 0" theo con số trong đầu | [[concepts/read-modify-write\|Read-modify-write]] |
+| Cả hai cùng ghi "còn 0": sổ chỉ ghi nhận một lần bán, lần kia biến mất | [[concepts/lost-update\|Lost update]] |
+| Hai khách cầm hai vé cho cùng một ghế | [[concepts/oversell\|Oversell]] |
 
 ```mermaid
 sequenceDiagram
@@ -83,11 +83,11 @@ Ga 1 nói transaction hứa bốn chữ ACID, nhưng chữ I ở mức mặc đ�
 
 ### Race condition
 
-Một [[race-condition|race condition]] xảy ra khi kết quả phụ thuộc vào thứ tự mà các thao tác chạy đồng thời chen vào nhau, và có ít nhất một thứ tự cho kết quả sai. Với 300 request trên 50 kết nối, thứ tự chen nhau là ngẫu nhiên mỗi lần chạy. Vì thế lỗi kiểu này có ba đặc điểm khó chịu: không hiện ra khi test bằng tay, mỗi lần chạy ra một con số khác, và thường chỉ xuất hiện đúng lúc tải cao nhất.
+Một [[concepts/race-condition|race condition]] xảy ra khi kết quả phụ thuộc vào thứ tự mà các thao tác chạy đồng thời chen vào nhau, và có ít nhất một thứ tự cho kết quả sai. Với 300 request trên 50 kết nối, thứ tự chen nhau là ngẫu nhiên mỗi lần chạy. Vì thế lỗi kiểu này có ba đặc điểm khó chịu: không hiện ra khi test bằng tay, mỗi lần chạy ra một con số khác, và thường chỉ xuất hiện đúng lúc tải cao nhất.
 
 ### Read-modify-write: khe hở giữa đọc và ghi
 
-Đoạn code ở trên theo mẫu [[read-modify-write|read-modify-write]]:
+Đoạn code ở trên theo mẫu [[concepts/read-modify-write|read-modify-write]]:
 
 | Bước | Ở đâu | Việc |
 |---|---|---|
@@ -101,13 +101,13 @@ Còn một biến thể nữa, gọi là **check-then-act** (kiểm tra rồi m�
 
 ### Lost update
 
-[[lost-update|Lost update]] là hậu quả của read-modify-write: hai transaction cùng đọc một giá trị, cùng ghi một giá trị tính từ nó, và lần ghi sau đè lên lần ghi trước như thể lần trước chưa từng xảy ra. Trong bảng phân loại bất thường của Berenson và cộng sự (1995), đây là hiện tượng **P4**. Bộ kiểm thử Hermitage xác nhận Read Committed của Postgres **không** chặn P4.
+[[concepts/lost-update|Lost update]] là hậu quả của read-modify-write: hai transaction cùng đọc một giá trị, cùng ghi một giá trị tính từ nó, và lần ghi sau đè lên lần ghi trước như thể lần trước chưa từng xảy ra. Trong bảng phân loại bất thường của Berenson và cộng sự (1995), đây là hiện tượng **P4**. Bộ kiểm thử Hermitage xác nhận Read Committed của Postgres **không** chặn P4.
 
 Vì sao Postgres để lần ghi thứ hai đè lên? Vì ở Read Committed, khi request B muốn `UPDATE` dòng mà A vừa sửa, B chờ A commit rồi **áp dụng thao tác của mình lên phiên bản mới nhất**. Thao tác của B là "đặt stock = 36", một hằng số app gửi xuống, nên áp lên bản mới nhất vẫn ra 36. Database làm đúng điều nó được bảo; chỉ là điều nó được bảo đã sai từ lúc app đọc.
 
 ### Oversell
 
-[[oversell|Oversell]] (bán quá số hàng) là thứ người dùng và kế toán thật sự nhìn thấy: số đơn hợp lệ nhiều hơn số hàng có. Nó có thể đến từ lost update (kho không giảm đủ nên vẫn "còn hàng" cho người sau), hoặc từ check-then-act (kho giảm đúng, nhưng xuống dưới 0). Hai lỗi khác nhau, cách sửa khác nhau, và sửa một cái không sửa được cái kia. Ví dụ dưới đo cả hai.
+[[concepts/oversell|Oversell]] (bán quá số hàng) là thứ người dùng và kế toán thật sự nhìn thấy: số đơn hợp lệ nhiều hơn số hàng có. Nó có thể đến từ lost update (kho không giảm đủ nên vẫn "còn hàng" cho người sau), hoặc từ check-then-act (kho giảm đúng, nhưng xuống dưới 0). Hai lỗi khác nhau, cách sửa khác nhau, và sửa một cái không sửa được cái kia. Ví dụ dưới đo cả hai.
 
 ## Ví dụ chạy được
 

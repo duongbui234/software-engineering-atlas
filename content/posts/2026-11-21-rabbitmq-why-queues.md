@@ -16,18 +16,18 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[message-broker|Message broker]] là phần mềm đứng giữa, nhận tin từ bên gửi, giữ hộ và chuyển cho bên nhận. RabbitMQ là một broker như vậy.
-> - [[asynchronous-messaging|Gửi bất đồng bộ]]: bên gửi giao tin cho broker rồi đi làm việc khác, không chờ bên nhận xử lý xong.
-> - [[decoupling|Tách rời]]: bên gửi không cần biết ai nhận, bao nhiêu bên nhận, bên nhận đang sống hay chết.
-> - [[load-leveling|San tải]]: khi việc tới nhanh hơn sức xử lý, hàng đợi giữ phần dư để bên nhận làm dần theo tốc độ của mình.
-> - [[queue-va-log|Queue và log]] là hai kiểu broker khác nhau: queue xóa tin khi đã xử lý xong, log (Kafka, RabbitMQ stream) giữ tin lại để đọc lại.
+> - [[concepts/message-broker|Message broker]] là phần mềm đứng giữa, nhận tin từ bên gửi, giữ hộ và chuyển cho bên nhận. RabbitMQ là một broker như vậy.
+> - [[concepts/asynchronous-messaging|Gửi bất đồng bộ]]: bên gửi giao tin cho broker rồi đi làm việc khác, không chờ bên nhận xử lý xong.
+> - [[concepts/decoupling|Tách rời]]: bên gửi không cần biết ai nhận, bao nhiêu bên nhận, bên nhận đang sống hay chết.
+> - [[concepts/load-leveling|San tải]]: khi việc tới nhanh hơn sức xử lý, hàng đợi giữ phần dư để bên nhận làm dần theo tốc độ của mình.
+> - [[concepts/queue-va-log|Queue và log]] là hai kiểu broker khác nhau: queue xóa tin khi đã xử lý xong, log (Kafka, RabbitMQ stream) giữ tin lại để đọc lại.
 
 > [!info] Bối cảnh
 > Đây là ga đầu của **tuyến RabbitMQ**. Ví dụ xuyên suốt là **flash-sale**, một trang bán hàng giảm giá giờ vàng mình tự viết: đúng 21:00 mở bán, hàng nghìn người tranh vài trăm suất. Mỗi đơn đặt thành công kéo theo một loạt việc phụ: trừ kho, gửi email, cập nhật trang sản phẩm, đồng bộ ô tìm kiếm. Bạn không cần biết code dự án, cũng không cần biết RabbitMQ là gì. Ga này chưa có dòng cấu hình nào, chỉ trả lời câu hỏi "tại sao".
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Service (dịch vụ)**: một chương trình chạy riêng, làm một phần việc của hệ thống, ví dụ dịch vụ đặt hàng, dịch vụ gửi email.
-> - **HTTP request / gọi API**: một chương trình hỏi chương trình khác qua mạng và chờ câu trả lời. Xem lại [[2026-11-18-api-foundations|ga Nền tảng của tuyến API]].
+> - **HTTP request / gọi API**: một chương trình hỏi chương trình khác qua mạng và chờ câu trả lời. Xem lại [[posts/2026-11-18-api-foundations|ga Nền tảng của tuyến API]].
 > - **Đồng bộ (synchronous)**: hỏi xong phải đứng chờ trả lời mới làm tiếp.
 > - **Tin nhắn (message)**: một gói dữ liệu nhỏ, thường là JSON, mô tả một việc cần làm hoặc một chuyện vừa xảy ra ("đơn 123 vừa được đặt").
 > - **Sự kiện (event)**: tin nhắn kể lại một chuyện *đã* xảy ra. Khác với lệnh (command) là tin nhắn yêu cầu làm một việc.
@@ -41,13 +41,13 @@ Cả tuyến dùng một hình ảnh: **RabbitMQ là một bưu điện**. Ga n�
 
 | Đời thường | Khái niệm |
 |---|---|
-| Bưu điện: nhận thư, giữ hộ, chuyển tới người nhận | [[message-broker\|Message broker]] |
-| Gửi thư xong là về, không đứng chờ người nhận đọc | [[asynchronous-messaging\|Gửi bất đồng bộ]] |
+| Bưu điện: nhận thư, giữ hộ, chuyển tới người nhận | [[concepts/message-broker\|Message broker]] |
+| Gửi thư xong là về, không đứng chờ người nhận đọc | [[concepts/asynchronous-messaging\|Gửi bất đồng bộ]] |
 | Gọi điện: phải chờ bên kia nhấc máy, bên kia bận là mình cũng kẹt | gọi đồng bộ (HTTP) |
-| Người gửi chỉ ghi địa chỉ, không cần biết ai ở nhà, nhà có mấy người đọc | [[decoupling\|Tách rời]] |
-| Tết, thư dồn về gấp mười, bưu điện chất vào kho rồi phát dần | [[load-leveling\|San tải]] |
-| Người gửi thư / người nhận thư | [[producer-va-consumer\|Producer và consumer]] |
-| Hộc thư: lấy thư ra là hết. Sổ lưu trữ: ai cũng đọc lại được từ trang đầu | [[queue-va-log\|Queue và log]] |
+| Người gửi chỉ ghi địa chỉ, không cần biết ai ở nhà, nhà có mấy người đọc | [[concepts/decoupling\|Tách rời]] |
+| Tết, thư dồn về gấp mười, bưu điện chất vào kho rồi phát dần | [[concepts/load-leveling\|San tải]] |
+| Người gửi thư / người nhận thư | [[concepts/producer-va-consumer\|Producer và consumer]] |
+| Hộc thư: lấy thư ra là hết. Sổ lưu trữ: ai cũng đọc lại được từ trang đầu | [[concepts/queue-va-log\|Queue và log]] |
 
 ```mermaid
 flowchart TB
@@ -88,19 +88,19 @@ Ba câu này có chung một gốc: dịch vụ đặt hàng đang **làm hộ**
 
 ### Message broker: người trung gian giữ hộ
 
-[[message-broker|Message broker]] (người môi giới tin nhắn) là một phần mềm chạy riêng, chuyên nhận tin, giữ tin và chuyển tin. Bên gửi không nói chuyện trực tiếp với bên nhận nữa, mà nói chuyện với broker:
+[[concepts/message-broker|Message broker]] (người môi giới tin nhắn) là một phần mềm chạy riêng, chuyên nhận tin, giữ tin và chuyển tin. Bên gửi không nói chuyện trực tiếp với bên nhận nữa, mà nói chuyện với broker:
 
-- **Bên gửi** ([[producer-va-consumer|producer]], hay publisher): đưa tin cho broker.
+- **Bên gửi** ([[concepts/producer-va-consumer|producer]], hay publisher): đưa tin cho broker.
 - **Broker** (RabbitMQ): nhận tin, cất vào **hàng đợi** (queue), giữ cho tới khi có người lấy.
 - **Bên nhận** (consumer): đăng ký nhận tin từ hàng đợi, xử lý từng tin.
 
 Với flash-sale, dịch vụ đặt hàng chỉ còn làm hai việc: lưu đơn vào database, rồi gửi *một* tin "đơn 123 vừa được đặt" cho broker. Kho, email, thông báo, tìm kiếm, thống kê mỗi bên tự lấy tin đó và tự làm phần của mình.
 
-RabbitMQ là broker mã nguồn mở phổ biến nhất, viết bằng Erlang, ra đời năm 2007. Nó nói chuyện với ứng dụng qua một giao thức chuẩn tên **AMQP 0-9-1** (sẽ mổ xẻ ở [[2026-11-21-rabbitmq-amqp-model|ga 2]]). Từ bản 4.0, nó còn nói được AMQP 1.0, MQTT và STOMP (xem [[2026-11-21-rabbitmq-operations|ga 9]]).
+RabbitMQ là broker mã nguồn mở phổ biến nhất, viết bằng Erlang, ra đời năm 2007. Nó nói chuyện với ứng dụng qua một giao thức chuẩn tên **AMQP 0-9-1** (sẽ mổ xẻ ở [[posts/2026-11-21-rabbitmq-amqp-model|ga 2]]). Từ bản 4.0, nó còn nói được AMQP 1.0, MQTT và STOMP (xem [[posts/2026-11-21-rabbitmq-operations|ga 9]]).
 
 ### Bất đồng bộ: giao xong là đi
 
-[[asynchronous-messaging|Gửi bất đồng bộ]] nghĩa là bên gửi không chờ bên nhận xử lý. Nó chỉ chờ một điều: broker xác nhận "tôi đã nhận giữ tin này". Xác nhận đó tới trong vài mili giây, vì broker chỉ việc ghi tin vào hàng đợi.
+[[concepts/asynchronous-messaging|Gửi bất đồng bộ]] nghĩa là bên gửi không chờ bên nhận xử lý. Nó chỉ chờ một điều: broker xác nhận "tôi đã nhận giữ tin này". Xác nhận đó tới trong vài mili giây, vì broker chỉ việc ghi tin vào hàng đợi.
 
 Điều này đổi hẳn cách tính thời gian của request "Mua ngay":
 
@@ -119,7 +119,7 @@ RabbitMQ là broker mã nguồn mở phổ biến nhất, viết bằng Erlang, 
 
 Khi gọi thẳng, dịch vụ đặt hàng phải biết địa chỉ của năm dịch vụ kia, biết API của từng cái, và phải sửa code mỗi khi thêm dịch vụ thứ sáu. Đó là **ràng buộc chặt** (tight coupling).
 
-Với broker, dịch vụ đặt hàng chỉ biết một điều: "gửi tin `order.placed` cho broker". Ai muốn nghe thì tự đăng ký với broker. Tháng sau team marketing muốn tặng voucher cho đơn đầu tiên? Họ viết một consumer mới, đăng ký nhận `order.placed`, và **không ai phải sửa dịch vụ đặt hàng**. Đó là [[decoupling|tách rời]] (decoupling).
+Với broker, dịch vụ đặt hàng chỉ biết một điều: "gửi tin `order.placed` cho broker". Ai muốn nghe thì tự đăng ký với broker. Tháng sau team marketing muốn tặng voucher cho đơn đầu tiên? Họ viết một consumer mới, đăng ký nhận `order.placed`, và **không ai phải sửa dịch vụ đặt hàng**. Đó là [[concepts/decoupling|tách rời]] (decoupling).
 
 Tách rời theo ba chiều:
 
@@ -136,7 +136,7 @@ Ràng buộc không biến mất hẳn, nó chuyển sang **hợp đồng tin nh
 - **Gọi thẳng**: 9.800 lời gọi bị nghẽn hoặc timeout. Dịch vụ email có thể sập vì quá tải.
 - **Có hàng đợi**: 10.000 tin nằm trong hàng. Dịch vụ email lấy ra 200 tin/giây, sau 50 giây là hết. Không ai sập, chỉ có email đến muộn hơn một chút.
 
-Đó là [[load-leveling|san tải]] (load leveling): hàng đợi biến một đỉnh nhọn thành một đường bằng. Muốn xử lý nhanh hơn thì chạy thêm consumer; broker tự chia tin cho các consumer (ga 4 gọi đó là *work queue*).
+Đó là [[concepts/load-leveling|san tải]] (load leveling): hàng đợi biến một đỉnh nhọn thành một đường bằng. Muốn xử lý nhanh hơn thì chạy thêm consumer; broker tự chia tin cho các consumer (ga 4 gọi đó là *work queue*).
 
 ```mermaid
 flowchart TB
@@ -146,9 +146,9 @@ flowchart TB
 ```
 
 > [!warning] Hàng đợi không phải cái túi không đáy
-> Tin nằm trong hàng tốn RAM và đĩa của broker. Hàng dài mãi (consumer chết, hoặc chậm hơn producer quá lâu) thì tới lúc RabbitMQ **chặn mọi bên gửi trên toàn cụm** để tự bảo vệ. [[2026-11-21-rabbitmq-dlx-retry|Ga 6]] nói cách giới hạn độ dài hàng, [[2026-11-21-rabbitmq-operations|ga 9]] nói về cảnh báo tài nguyên.
+> Tin nằm trong hàng tốn RAM và đĩa của broker. Hàng dài mãi (consumer chết, hoặc chậm hơn producer quá lâu) thì tới lúc RabbitMQ **chặn mọi bên gửi trên toàn cụm** để tự bảo vệ. [[posts/2026-11-21-rabbitmq-dlx-retry|Ga 6]] nói cách giới hạn độ dài hàng, [[posts/2026-11-21-rabbitmq-operations|ga 9]] nói về cảnh báo tài nguyên.
 
-Một chi tiết thật từ flash-sale: phần "xếp hàng người mua lúc 21:00" của dự án **không** dùng RabbitMQ mà dùng Redis (xem [[2026-11-21-shopify-flash-sale|bài về Shopify]]). RabbitMQ trong flash-sale chở các **sự kiện** sinh ra *sau* khi đơn đã được tạo: `order.placed`, `order.cancelled`, `inventory.changed`. Hàng chờ người mua cần trả lời "bạn đứng thứ mấy" ngay lập tức, còn sự kiện thì cần được giao chắc chắn. Hai nhu cầu khác nhau, hai công cụ khác nhau.
+Một chi tiết thật từ flash-sale: phần "xếp hàng người mua lúc 21:00" của dự án **không** dùng RabbitMQ mà dùng Redis (xem [[posts/2026-11-21-shopify-flash-sale|bài về Shopify]]). RabbitMQ trong flash-sale chở các **sự kiện** sinh ra *sau* khi đơn đã được tạo: `order.placed`, `order.cancelled`, `inventory.changed`. Hàng chờ người mua cần trả lời "bạn đứng thứ mấy" ngay lập tức, còn sự kiện thì cần được giao chắc chắn. Hai nhu cầu khác nhau, hai công cụ khác nhau.
 
 ### Queue và log: hai kiểu broker
 
@@ -164,7 +164,7 @@ Có hai họ broker, và chọn sai họ là chọn sai từ gốc.
 | Mạnh ở | định tuyến linh hoạt, ack từng tin, thư lỗi, hẹn giờ, ưu tiên | đọc lại, rất nhiều consumer cùng đọc, throughput rất cao |
 | Hợp với | giao việc cho worker, sự kiện cần xử lý một lần | event sourcing, phân tích, nhiều hệ thống cùng đọc một dòng sự kiện |
 
-Mình từng nghĩ "RabbitMQ không đọc lại được, muốn đọc lại phải dùng Kafka". Câu đó đúng trước năm 2021. Từ 3.9, RabbitMQ có stream; [[2026-11-21-rabbitmq-queue-types|ga 7]] chạy thử việc đọc lại theo offset.
+Mình từng nghĩ "RabbitMQ không đọc lại được, muốn đọc lại phải dùng Kafka". Câu đó đúng trước năm 2021. Từ 3.9, RabbitMQ có stream; [[posts/2026-11-21-rabbitmq-queue-types|ga 7]] chạy thử việc đọc lại theo offset.
 
 ## Ví dụ chạy được
 

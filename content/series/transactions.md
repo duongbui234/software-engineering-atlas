@@ -41,7 +41,7 @@ Mỗi ga mở đầu bằng **"Hình dung trước"** (khái niệm so với chu
 
 Không thể hiểu vì sao `UPDATE … WHERE stock >= 1` đúng nếu chưa biết Read Committed đọc lại dòng sau khi chờ khóa; không thể hiểu vì sao cần sắp xếp SKU nếu chưa biết mỗi `UPDATE` giữ khóa dòng tới khi commit. Mỗi ga chỉ dùng từ vựng của các ga trước.
 
-Tuyến này dùng lại vài từ của [[series/caching|tuyến Caching]] (Redis, hot key), [[series/rabbitmq|tuyến RabbitMQ]] (transactional outbox, idempotent consumer) và ga [[2026-11-18-api-reliability|Độ tin cậy của API]] (idempotency, retry có jitter). Ga [[2026-11-21-shopify-flash-sale|Shopify xử lý flash sale thế nào]] là một cách làm khác cho cùng bài toán.
+Tuyến này dùng lại vài từ của [[series/caching|tuyến Caching]] (Redis, hot key), [[series/rabbitmq|tuyến RabbitMQ]] (transactional outbox, idempotent consumer) và ga [[posts/2026-11-18-api-reliability|Độ tin cậy của API]] (idempotency, retry có jitter). Ga [[posts/2026-11-21-shopify-flash-sale|Shopify xử lý flash sale thế nào]] là một cách làm khác cho cùng bài toán.
 
 ## Phiên bản và nguồn
 

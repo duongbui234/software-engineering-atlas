@@ -16,17 +16,17 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[pessimistic-locking|Khóa bi quan]]: `SELECT … FOR UPDATE` khóa dòng **trước khi đọc**; ai tới sau xếp hàng chờ. Đúng, không retry, nhưng mọi người tranh cùng một dòng phải đi qua từng người một.
-> - [[optimistic-locking|Khóa lạc quan]]: đọc không khóa, ghi kèm `WHERE version = <số đã đọc>`; 0 dòng khớp thì có người ghi trước, đọc lại và thử lại. Hợp khi ít đụng nhau. Trên một [[hot-row|dòng nóng]]: 300 người, 100 suất, khoảng **4100 transaction**.
-> - [[skip-locked|NOWAIT và SKIP LOCKED]]: không chờ khóa. `NOWAIT` báo lỗi `55P03` ngay; `SKIP LOCKED` bỏ qua dòng đang bị khóa và lấy dòng khác, hợp cho bảng kiểu hàng đợi. flash-sale dùng nó cho cron hủy đơn quá hạn chạy trên nhiều pod.
-> - [[advisory-lock|Advisory lock]]: khóa theo một con số do app đặt, không gắn với dòng nào. flash-sale dùng `pg_try_advisory_xact_lock` để chỉ một pod chạy job dọn dẹp mỗi giờ.
+> - [[concepts/pessimistic-locking|Khóa bi quan]]: `SELECT … FOR UPDATE` khóa dòng **trước khi đọc**; ai tới sau xếp hàng chờ. Đúng, không retry, nhưng mọi người tranh cùng một dòng phải đi qua từng người một.
+> - [[concepts/optimistic-locking|Khóa lạc quan]]: đọc không khóa, ghi kèm `WHERE version = <số đã đọc>`; 0 dòng khớp thì có người ghi trước, đọc lại và thử lại. Hợp khi ít đụng nhau. Trên một [[concepts/hot-row|dòng nóng]]: 300 người, 100 suất, khoảng **4100 transaction**.
+> - [[concepts/skip-locked|NOWAIT và SKIP LOCKED]]: không chờ khóa. `NOWAIT` báo lỗi `55P03` ngay; `SKIP LOCKED` bỏ qua dòng đang bị khóa và lấy dòng khác, hợp cho bảng kiểu hàng đợi. flash-sale dùng nó cho cron hủy đơn quá hạn chạy trên nhiều pod.
+> - [[concepts/advisory-lock|Advisory lock]]: khóa theo một con số do app đặt, không gắn với dòng nào. flash-sale dùng `pg_try_advisory_xact_lock` để chỉ một pod chạy job dọn dẹp mỗi giờ.
 > - Ba cách trên cùng dòng tồn kho: UPDATE có điều kiện (ga 4) nhanh nhất; bi quan đứng thứ hai; lạc quan chậm nhất và tốn nhất.
 
 > [!info] Bối cảnh
 > Ga 5 của **tuyến Transaction và khóa**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng. Ngoài tồn kho, flash-sale còn nhiều chỗ phải chống ghi đè: chuyển trạng thái đơn (PENDING → PAID → SHIPPED…), sửa số lượng trong giỏ, một cron hủy đơn chưa thanh toán sau 15 phút chạy trên mọi pod. Không phải chỗ nào cũng viết được thành một câu `UPDATE`. Bạn không cần biết NestJS hay code của dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Khóa dòng, UPDATE có điều kiện, `rowCount`**: xem [[2026-11-22-transactions-atomic-update|ga 4]]. **Read Committed, `40001`**: xem [[2026-11-22-transactions-isolation|ga 3]].
+> - **Khóa dòng, UPDATE có điều kiện, `rowCount`**: xem [[posts/2026-11-22-transactions-atomic-update|ga 4]]. **Read Committed, `40001`**: xem [[posts/2026-11-22-transactions-isolation|ga 3]].
 > - **Pod**: một bản chạy của server trong Kubernetes. flash-sale chạy nhiều pod giống hệt nhau, nên mọi cron cũng chạy trên mọi pod cùng lúc.
 > - **Cron**: việc tự chạy theo lịch (mỗi phút, mỗi giờ).
 > - **State machine (máy trạng thái)**: danh sách trạng thái của đơn và những bước chuyển hợp lệ giữa chúng.
@@ -38,11 +38,11 @@ Văn phòng có một phòng họp, nhiều nhóm muốn dùng.
 
 | Đời thường | Khái niệm |
 |---|---|
-| Treo biển "đang dùng" trước khi vào; nhóm khác thấy biển thì đứng ngoài chờ | [[pessimistic-locking\|Khóa bi quan]] (`FOR UPDATE`) |
-| Không treo biển; cứ chuẩn bị, lúc vào thì xem sổ đặt phòng còn đúng phiên bản mình đã xem không; đã có người đặt thì quay về chuẩn bị lại | [[optimistic-locking\|Khóa lạc quan]] (cột `version`) |
-| Thấy biển thì **không chờ**: hoặc bỏ đi ngay (NOWAIT), hoặc sang phòng trống bên cạnh (SKIP LOCKED) | [[skip-locked\|NOWAIT và SKIP LOCKED]] |
-| Một tấm thẻ "người trực dọn dẹp tối nay" chỉ có một cái; ai cầm được thẻ thì dọn, không gắn với phòng nào | [[advisory-lock\|Advisory lock]] |
-| Một phòng duy nhất mà cả công ty cùng muốn dùng lúc 9 giờ | [[hot-row\|Dòng nóng]] |
+| Treo biển "đang dùng" trước khi vào; nhóm khác thấy biển thì đứng ngoài chờ | [[concepts/pessimistic-locking\|Khóa bi quan]] (`FOR UPDATE`) |
+| Không treo biển; cứ chuẩn bị, lúc vào thì xem sổ đặt phòng còn đúng phiên bản mình đã xem không; đã có người đặt thì quay về chuẩn bị lại | [[concepts/optimistic-locking\|Khóa lạc quan]] (cột `version`) |
+| Thấy biển thì **không chờ**: hoặc bỏ đi ngay (NOWAIT), hoặc sang phòng trống bên cạnh (SKIP LOCKED) | [[concepts/skip-locked\|NOWAIT và SKIP LOCKED]] |
+| Một tấm thẻ "người trực dọn dẹp tối nay" chỉ có một cái; ai cầm được thẻ thì dọn, không gắn với phòng nào | [[concepts/advisory-lock\|Advisory lock]] |
+| Một phòng duy nhất mà cả công ty cùng muốn dùng lúc 9 giờ | [[concepts/hot-row\|Dòng nóng]] |
 
 ```mermaid
 flowchart TB
@@ -72,7 +72,7 @@ Những chỗ này cần một trong hai chiến lược khóa, cộng vài côn
 
 ### Khóa bi quan: SELECT … FOR UPDATE
 
-[[pessimistic-locking|Khóa bi quan]] giả định xung đột sẽ xảy ra, nên khóa trước:
+[[concepts/pessimistic-locking|Khóa bi quan]] giả định xung đột sẽ xảy ra, nên khóa trước:
 
 ```sql
 BEGIN;
@@ -91,7 +91,7 @@ Cái giá: khóa giữ từ câu `SELECT` tới `COMMIT`, lâu hơn câu `UPDATE
 
 ### Khóa lạc quan: cột version
 
-[[optimistic-locking|Khóa lạc quan]] giả định xung đột hiếm, nên không khóa gì cả lúc đọc. Mỗi dòng có thêm cột `version`, tăng 1 mỗi lần ghi. Lúc ghi, điều kiện là "version vẫn là số mình đã đọc":
+[[concepts/optimistic-locking|Khóa lạc quan]] giả định xung đột hiếm, nên không khóa gì cả lúc đọc. Mỗi dòng có thêm cột `version`, tăng 1 mỗi lần ghi. Lúc ghi, điều kiện là "version vẫn là số mình đã đọc":
 
 ```ts
 // minh họa, không chạy trực tiếp (rút gọn từ OrderService.transition của flash-sale)
@@ -117,7 +117,7 @@ Khóa lạc quan hợp khi **ít đụng nhau** hoặc khi **khoảng giữa đ�
 
 ### Dòng nóng
 
-Một [[hot-row|dòng nóng]] là dòng mà rất nhiều transaction cùng muốn ghi trong cùng một khoảng thời gian: tồn kho của sản phẩm flash sale, bộ đếm lượt dùng của voucher toàn sàn. Với dòng nóng, mọi chiến lược đều bị giới hạn bởi cùng một thứ: **chỉ một transaction được giữ khóa ghi tại một thời điểm**. Thông lượng tối đa xấp xỉ 1 chia cho thời gian giữ khóa. Muốn nhanh hơn chỉ có hai cách: giữ khóa ngắn hơn (UPDATE có điều kiện, không làm việc thừa trong transaction), hoặc **không để mọi request tới được dòng đó** (Redis chặn trước, ga 7). Ý tưởng tương tự "hot key" ở [[hot-key|tuyến Caching]].
+Một [[concepts/hot-row|dòng nóng]] là dòng mà rất nhiều transaction cùng muốn ghi trong cùng một khoảng thời gian: tồn kho của sản phẩm flash sale, bộ đếm lượt dùng của voucher toàn sàn. Với dòng nóng, mọi chiến lược đều bị giới hạn bởi cùng một thứ: **chỉ một transaction được giữ khóa ghi tại một thời điểm**. Thông lượng tối đa xấp xỉ 1 chia cho thời gian giữ khóa. Muốn nhanh hơn chỉ có hai cách: giữ khóa ngắn hơn (UPDATE có điều kiện, không làm việc thừa trong transaction), hoặc **không để mọi request tới được dòng đó** (Redis chặn trước, ga 7). Ý tưởng tương tự "hot key" ở [[concepts/hot-key|tuyến Caching]].
 
 ### NOWAIT và SKIP LOCKED
 
@@ -141,11 +141,11 @@ for (const { id } of expired) {
 }
 ```
 
-Mọi pod chạy câu này mỗi phút. Pod nào tới trước khóa 100 đơn cũ nhất; pod tới sau bỏ qua 100 đơn đó và lấy 100 đơn tiếp theo. Không pod nào chờ pod nào, không đơn nào bị hủy hai lần. Có 30 giây "ân hạn" trong `cutoff` để không tranh với webhook thanh toán tới sát hạn, và nếu vẫn tranh thì khóa lạc quan trong `transition()` quyết định ai thắng. Ga [[2026-11-21-shopify-flash-sale|Shopify xử lý flash sale thế nào]] dùng cùng mẫu này cho chính việc giữ hàng: mỗi suất là một dòng, người mua khóa một dòng trống bằng `SKIP LOCKED`.
+Mọi pod chạy câu này mỗi phút. Pod nào tới trước khóa 100 đơn cũ nhất; pod tới sau bỏ qua 100 đơn đó và lấy 100 đơn tiếp theo. Không pod nào chờ pod nào, không đơn nào bị hủy hai lần. Có 30 giây "ân hạn" trong `cutoff` để không tranh với webhook thanh toán tới sát hạn, và nếu vẫn tranh thì khóa lạc quan trong `transition()` quyết định ai thắng. Ga [[posts/2026-11-21-shopify-flash-sale|Shopify xử lý flash sale thế nào]] dùng cùng mẫu này cho chính việc giữ hàng: mỗi suất là một dòng, người mua khóa một dòng trống bằng `SKIP LOCKED`.
 
 ### Advisory lock
 
-Một [[advisory-lock|advisory lock]] là khóa theo **một con số do app chọn**, không gắn với dòng hay bảng nào. Postgres chỉ giữ và nhả nó; ý nghĩa của con số là do app quy ước. Có hai loại:
+Một [[concepts/advisory-lock|advisory lock]] là khóa theo **một con số do app chọn**, không gắn với dòng hay bảng nào. Postgres chỉ giữ và nhả nó; ý nghĩa của con số là do app quy ước. Có hai loại:
 
 - **Theo session** (`pg_advisory_lock`): giữ tới khi gọi unlock hoặc session đóng, **kể cả khi transaction rollback**. Dễ quên nhả, nhất là với connection pool.
 - **Theo transaction** (`pg_advisory_xact_lock`): tự nhả khi transaction kết thúc, không có lệnh unlock. An toàn hơn cho code chạy qua pool.

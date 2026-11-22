@@ -18,19 +18,19 @@ sources:
 ---
 
 > [!tldr] Đọc nhanh
-> - [[cache-metrics|Đo cache]] theo từng loại dữ liệu. `INFO` của Redis gộp mọi tính năng: ví dụ báo 38,9% trong khi cache sản phẩm thật ra trúng 77,8%. Theo dõi thêm số key bị đẩy, bộ nhớ, độ trễ và tải database.
-> - Cache sập: client Redis mặc định (ioredis) **xếp lệnh vào hàng chờ và chờ mãi**, request treo theo. [[fail-open|Fail-open]] nghĩa là hết thời gian chờ ngắn thì coi như trượt và đọc nguồn, nhưng khi đó *toàn bộ* tải dồn về database.
-> - [[cache-poisoning|Cache poisoning]]: kẻ tấn công gửi một header không nằm trong khóa cache (`X-Forwarded-Host`) để origin sinh ra nội dung độc, cache lưu lại và phát cho mọi người.
-> - [[web-cache-deception|Web cache deception]]: lừa nạn nhân mở `/account/avatar.css`; cache thấy đuôi `.css` nên lưu trang tài khoản của nạn nhân, kẻ tấn công mở cùng URL và đọc được.
-> - Cả hai đều do cache và origin hiểu khác nhau về "hai request có giống nhau không". [[cache-checklist|Checklist]] cuối bài gom cả tuyến lại.
+> - [[concepts/cache-metrics|Đo cache]] theo từng loại dữ liệu. `INFO` của Redis gộp mọi tính năng: ví dụ báo 38,9% trong khi cache sản phẩm thật ra trúng 77,8%. Theo dõi thêm số key bị đẩy, bộ nhớ, độ trễ và tải database.
+> - Cache sập: client Redis mặc định (ioredis) **xếp lệnh vào hàng chờ và chờ mãi**, request treo theo. [[concepts/fail-open|Fail-open]] nghĩa là hết thời gian chờ ngắn thì coi như trượt và đọc nguồn, nhưng khi đó *toàn bộ* tải dồn về database.
+> - [[concepts/cache-poisoning|Cache poisoning]]: kẻ tấn công gửi một header không nằm trong khóa cache (`X-Forwarded-Host`) để origin sinh ra nội dung độc, cache lưu lại và phát cho mọi người.
+> - [[concepts/web-cache-deception|Web cache deception]]: lừa nạn nhân mở `/account/avatar.css`; cache thấy đuôi `.css` nên lưu trang tài khoản của nạn nhân, kẻ tấn công mở cùng URL và đọc được.
+> - Cả hai đều do cache và origin hiểu khác nhau về "hai request có giống nhau không". [[concepts/cache-checklist|Checklist]] cuối bài gom cả tuyến lại.
 
 > [!info] Bối cảnh
 > Ga cuối của **tuyến Caching**. Ví dụ là **flash-sale**, trang bán hàng giảm giá giờ vàng: cache đã đỡ phần lớn tải lúc 21:00, giờ phải biết nó có đang làm tốt không, chuyện gì xảy ra khi chính nó sập, và nó có vô tình phát dữ liệu của người này cho người khác không. Ví dụ bảo mật chạy hoàn toàn trên máy bạn. Bạn không cần biết code dự án.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Hit ratio, cache key, Cache-Control, Vary, CDN, eviction, stampede**: xem các ga trước, nhất là [[2026-11-22-caching-why|ga 1]], [[2026-11-22-caching-http|ga 2]] và [[2026-11-22-caching-redis|ga 6]].
-> - **Timeout**: thời gian chờ tối đa; quá thì bỏ cuộc. Xem [[timeouts|Timeouts]] ở tuyến API.
-> - **Circuit breaker (cầu dao)**: lỗi liên tiếp thì tạm ngừng gọi một dịch vụ một lúc, thay vì tiếp tục chờ nó. Xem [[circuit-breaker|Circuit Breaker]].
+> - **Hit ratio, cache key, Cache-Control, Vary, CDN, eviction, stampede**: xem các ga trước, nhất là [[posts/2026-11-22-caching-why|ga 1]], [[posts/2026-11-22-caching-http|ga 2]] và [[posts/2026-11-22-caching-redis|ga 6]].
+> - **Timeout**: thời gian chờ tối đa; quá thì bỏ cuộc. Xem [[concepts/timeouts|Timeouts]] ở tuyến API.
+> - **Circuit breaker (cầu dao)**: lỗi liên tiếp thì tạm ngừng gọi một dịch vụ một lúc, thay vì tiếp tục chờ nó. Xem [[concepts/circuit-breaker|Circuit Breaker]].
 > - **Unkeyed input**: phần của request mà origin có dùng nhưng cache không đưa vào khóa.
 > - **`X-Forwarded-Host`**: header proxy dùng để báo cho origin biết tên miền mà người dùng gõ ban đầu.
 > - **XSS**: chèn JavaScript độc vào trang người khác xem.
@@ -42,11 +42,11 @@ Thư viện chạy ổn rồi. Giờ thủ thư trưởng cần **sổ thống k
 
 | Đời thường | Khái niệm |
 |---|---|
-| Sổ ghi lượt mượn từ giá và từ kho, theo từng loại sách | [[cache-metrics\|Cache metrics]] |
-| Giá sảnh đóng: thủ thư xuống thẳng kho, nhưng thang máy kho chịu được bao nhiêu người? | [[fail-open\|Fail-open]] |
-| Kẹp tờ rơi giả vào sách trên giá chung | [[cache-poisoning\|Cache poisoning]] |
-| Lừa bạn để sổ khám bệnh của bạn lên giá chung | [[web-cache-deception\|Web cache deception]] |
-| Danh sách kiểm tra trước giờ mở cửa | [[cache-checklist\|Cache checklist]] |
+| Sổ ghi lượt mượn từ giá và từ kho, theo từng loại sách | [[concepts/cache-metrics\|Cache metrics]] |
+| Giá sảnh đóng: thủ thư xuống thẳng kho, nhưng thang máy kho chịu được bao nhiêu người? | [[concepts/fail-open\|Fail-open]] |
+| Kẹp tờ rơi giả vào sách trên giá chung | [[concepts/cache-poisoning\|Cache poisoning]] |
+| Lừa bạn để sổ khám bệnh của bạn lên giá chung | [[concepts/web-cache-deception\|Web cache deception]] |
+| Danh sách kiểm tra trước giờ mở cửa | [[concepts/cache-checklist\|Cache checklist]] |
 
 ```mermaid
 flowchart TB
@@ -71,7 +71,7 @@ Mình từng nghĩ cache là thứ "thêm vào cho nhanh, hỏng thì bỏ ra". 
 
 ### Cache metrics: đo đúng thứ cần đo
 
-**[[cache-metrics|Cache metrics]]** cần trả lời ba câu: cache có đang trúng không, có đang thiếu chỗ không, và nó có đang làm database dễ thở hơn không.
+**[[concepts/cache-metrics|Cache metrics]]** cần trả lời ba câu: cache có đang trúng không, có đang thiếu chỗ không, và nó có đang làm database dễ thở hơn không.
 
 Redis cho số liệu toàn instance qua `INFO stats` và `INFO memory`:
 
@@ -90,18 +90,18 @@ Vì Redis gộp mọi thứ, hãy **đếm ở phía ứng dụng theo từng lo
 Cache là một phụ thuộc, và nó sẽ có lúc sập: Redis khởi động lại, failover, mạng chập chờn. Có hai lựa chọn:
 
 - **Fail-closed**: cache lỗi thì request lỗi. Hợp lý khi cache *không phải* cache mà là nơi lưu chính (session, khóa phân tán, bộ đếm rate limit).
-- **[[fail-open|Fail-open]]**: cache lỗi thì coi như trượt, đọc thẳng nguồn. Đúng với cache thật sự (mọi thứ đều nạp lại được).
+- **[[concepts/fail-open|Fail-open]]**: cache lỗi thì coi như trượt, đọc thẳng nguồn. Đúng với cache thật sự (mọi thứ đều nạp lại được).
 
 Fail-open nghe đơn giản nhưng có hai bẫy:
 
-1. **Client mặc định không "lỗi" nhanh.** ioredis mặc định bật *offline queue*: khi mất kết nối, lệnh được xếp hàng chờ nối lại, mỗi lệnh thử lại tới 20 lần. Request treo tới khi một timeout ở tầng cao hơn cắt nó. Phải cấu hình để thất bại nhanh: tắt offline queue (`enableOfflineQueue: false`), giới hạn số lần thử lại (`maxRetriesPerRequest`), và bọc mỗi lệnh cache trong một [[timeouts|timeout]] ngắn (vài chục mili giây, cache chậm hơn thế thì không còn là cache).
-2. **Fail-open dồn 100% tải về database.** Với hit ratio 95%, database đang chỉ thấy 5% lượt đọc; cache sập là tải nhân 20 lần, đúng lúc mọi người đang dùng. Nếu database không chịu được, fail-open chỉ dời sự cố từ cache sang database. Cần một trong các thứ sau: database đủ dư, giới hạn số query đồng thời xuống database (bulkhead), trả dữ liệu dự phòng (bản cũ trong L1, trang tĩnh), hoặc [[rate-limiting|giới hạn tải]] ở cửa vào.
+1. **Client mặc định không "lỗi" nhanh.** ioredis mặc định bật *offline queue*: khi mất kết nối, lệnh được xếp hàng chờ nối lại, mỗi lệnh thử lại tới 20 lần. Request treo tới khi một timeout ở tầng cao hơn cắt nó. Phải cấu hình để thất bại nhanh: tắt offline queue (`enableOfflineQueue: false`), giới hạn số lần thử lại (`maxRetriesPerRequest`), và bọc mỗi lệnh cache trong một [[concepts/timeouts|timeout]] ngắn (vài chục mili giây, cache chậm hơn thế thì không còn là cache).
+2. **Fail-open dồn 100% tải về database.** Với hit ratio 95%, database đang chỉ thấy 5% lượt đọc; cache sập là tải nhân 20 lần, đúng lúc mọi người đang dùng. Nếu database không chịu được, fail-open chỉ dời sự cố từ cache sang database. Cần một trong các thứ sau: database đủ dư, giới hạn số query đồng thời xuống database (bulkhead), trả dữ liệu dự phòng (bản cũ trong L1, trang tĩnh), hoặc [[concepts/rate-limiting|giới hạn tải]] ở cửa vào.
 
-Thêm một [[circuit-breaker|cầu dao]]: lỗi liên tiếp vài lần thì bỏ qua cache trong vài giây, để không phải trả giá timeout cho mỗi request trong lúc cache đang chết.
+Thêm một [[concepts/circuit-breaker|cầu dao]]: lỗi liên tiếp vài lần thì bỏ qua cache trong vài giây, để không phải trả giá timeout cho mỗi request trong lúc cache đang chết.
 
 ### Cache poisoning: đầu độc bản dùng chung
 
-**[[cache-poisoning|Web cache poisoning]]** (James Kettle, PortSwigger, 2018) khai thác **unkeyed input**: thứ mà origin dùng để tạo response nhưng cache *không* đưa vào khóa.
+**[[concepts/cache-poisoning|Web cache poisoning]]** (James Kettle, PortSwigger, 2018) khai thác **unkeyed input**: thứ mà origin dùng để tạo response nhưng cache *không* đưa vào khóa.
 
 Trong ví dụ, origin dựng link script tuyệt đối từ header `X-Forwarded-Host` (một thói quen phổ biến để biết tên miền gốc sau proxy). Cache chỉ dùng URL làm khóa. Kẻ tấn công:
 
@@ -117,7 +117,7 @@ Một request, mọi người dùng bị ảnh hưởng. Cách chặn:
 
 ### Web cache deception: lừa cache giữ trang riêng tư
 
-**[[web-cache-deception|Web cache deception]]** (Omer Gil, 2017) khai thác chỗ **cache và origin hiểu khác nhau về một URL**:
+**[[concepts/web-cache-deception|Web cache deception]]** (Omer Gil, 2017) khai thác chỗ **cache và origin hiểu khác nhau về một URL**:
 
 - Cache có luật "đuôi `.css`, `.js`, `.png` là file tĩnh, cache 10 phút, bỏ qua header của origin".
 - Origin (nhiều framework như vậy) phục vụ `/account/avatar.css` như `/account`, bỏ qua phần đuôi không khớp route nào, và trả trang tài khoản của người đang đăng nhập.
@@ -132,7 +132,7 @@ Cách chặn:
 
 ### Checklist: gom cả tuyến lại
 
-**[[cache-checklist|Cache checklist]]** trước khi đưa một cache lên production:
+**[[concepts/cache-checklist|Cache checklist]]** trước khi đưa một cache lên production:
 
 | Hạng mục | Câu hỏi | Ga |
 |---|---|---|

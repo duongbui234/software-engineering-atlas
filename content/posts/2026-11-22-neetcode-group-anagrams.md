@@ -17,16 +17,16 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Đề: cho danh sách từ, gom các từ là anagram của nhau vào cùng một nhóm.
-> - [[canonical-key|Khóa chuẩn]]: biến mỗi từ thành một giá trị mà mọi anagram đều cho ra **cùng** một giá trị, rồi [[group-by|gom nhóm]] bằng hash map `khóa → danh sách từ`.
-> - Khóa sắp xếp (`"eat"` → `"aet"`): O(k log k) mỗi từ. [[count-key|Khóa đếm]] (bảng 26 số của ga 2): O(k) mỗi từ. Khóa đếm thắng 47 lần khi từ dài 1000 chữ, nhưng **thua** khi từ chỉ dài 5 chữ.
-> - [[key-serialization|Nối khóa thành chuỗi]] phải có dấu phân cách. Bảng đếm `[1, 11, …]` và `[11, 1, …]` nối không phân cách đều thành `"1110…"`, nên hai từ không phải anagram bị gom chung. Lỗi này vẫn qua cả 4 ca test.
+> - [[concepts/canonical-key|Khóa chuẩn]]: biến mỗi từ thành một giá trị mà mọi anagram đều cho ra **cùng** một giá trị, rồi [[concepts/group-by|gom nhóm]] bằng hash map `khóa → danh sách từ`.
+> - Khóa sắp xếp (`"eat"` → `"aet"`): O(k log k) mỗi từ. [[concepts/count-key|Khóa đếm]] (bảng 26 số của ga 2): O(k) mỗi từ. Khóa đếm thắng 47 lần khi từ dài 1000 chữ, nhưng **thua** khi từ chỉ dài 5 chữ.
+> - [[concepts/key-serialization|Nối khóa thành chuỗi]] phải có dấu phân cách. Bảng đếm `[1, 11, …]` và `[11, 1, …]` nối không phân cách đều thành `"1110…"`, nên hai từ không phải anagram bị gom chung. Lỗi này vẫn qua cả 4 ca test.
 > - Mỗi ngôn ngữ có một luật riêng về thứ gì làm khóa được: Go cho mảng cố định làm khóa, Python cần tuple, JS và Java so mảng theo **danh tính** nên phải đổi sang chuỗi.
 
 > [!info] Bối cảnh
 > Ga 4 của **tuyến NeetCode 150: Arrays & Hashing**, bài Medium đầu tiên. Nó ghép ga 2 (anagram, bảng đếm) với hash map của ga 3, nhưng lần này bảng đếm không phải đáp án mà là **khóa**. Lời giải có đủ TypeScript, JavaScript, Python, Go và Java.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
-> - **Anagram, bảng đếm 26 ô**: xem [[2026-11-22-neetcode-valid-anagram|ga 2]]. **Hash map, va chạm**: xem [[2026-11-22-neetcode-two-sum|ga 3]].
+> - **Anagram, bảng đếm 26 ô**: xem [[posts/2026-11-22-neetcode-valid-anagram|ga 2]]. **Hash map, va chạm**: xem [[posts/2026-11-22-neetcode-two-sum|ga 3]].
 > - **k**: độ dài của một từ. **n**: số từ. Độ phức tạp bài này phụ thuộc cả hai.
 > - **Khóa (key)**: giá trị dùng để tra trong map. Hai khóa "bằng nhau" thì trỏ tới cùng một ô.
 > - **Danh tính (identity)**: hai object là "một" chỉ khi chúng là cùng một vùng nhớ. Hai mảng `[1, 2]` tạo riêng có cùng nội dung nhưng khác danh tính.
@@ -38,11 +38,11 @@ Bưu điện nhận một bao thư. Mỗi thư phải vào đúng ngăn của kh
 
 | Đời thường | Khái niệm |
 |---|---|
-| Từ địa chỉ viết tay (mỗi người viết một kiểu), suy ra **mã bưu chính** | [[canonical-key\|Khóa chuẩn]] |
+| Từ địa chỉ viết tay (mỗi người viết một kiểu), suy ra **mã bưu chính** | [[concepts/canonical-key\|Khóa chuẩn]] |
 | Mã bưu chính = các chữ cái của từ, xếp A→Z | Khóa sắp xếp |
-| Mã bưu chính = "có mấy chữ a, mấy chữ b, …" | [[count-key\|Khóa đếm]] |
-| In mã lên nhãn: "1-11-0" chứ không in "1110" | [[key-serialization\|Nối khóa có dấu phân cách]] |
-| Một dãy ngăn có nhãn, thư cùng mã vào cùng ngăn | [[group-by\|Gom nhóm]] bằng hash map |
+| Mã bưu chính = "có mấy chữ a, mấy chữ b, …" | [[concepts/count-key\|Khóa đếm]] |
+| In mã lên nhãn: "1-11-0" chứ không in "1110" | [[concepts/key-serialization\|Nối khóa có dấu phân cách]] |
+| Một dãy ngăn có nhãn, thư cùng mã vào cùng ngăn | [[concepts/group-by\|Gom nhóm]] bằng hash map |
 
 ```mermaid
 flowchart TB
@@ -77,7 +77,7 @@ Cách ngây thơ: so từng cặp từ bằng hàm anagram của ga 2. Với n t
 
 ### Khóa chuẩn: thay so cặp bằng so khóa
 
-Ý tưởng trung tâm là một [[canonical-key|khóa chuẩn]]: một hàm `key(w)` sao cho `key(a) == key(b)` **khi và chỉ khi** a và b là anagram. Có hàm đó rồi, bài toán thành [[group-by|gom nhóm]] theo khóa: duyệt từng từ, tính khóa, bỏ vào ngăn của khóa trong một hash map. Mỗi từ chỉ được xử lý một lần.
+Ý tưởng trung tâm là một [[concepts/canonical-key|khóa chuẩn]]: một hàm `key(w)` sao cho `key(a) == key(b)` **khi và chỉ khi** a và b là anagram. Có hàm đó rồi, bài toán thành [[concepts/group-by|gom nhóm]] theo khóa: duyệt từng từ, tính khóa, bỏ vào ngăn của khóa trong một hash map. Mỗi từ chỉ được xử lý một lần.
 
 "Khi và chỉ khi" có hai chiều, và cả hai đều quan trọng:
 
@@ -90,7 +90,7 @@ Sắp xếp các chữ của từ: `"eat"`, `"tea"`, `"ate"` đều thành `"aet
 
 ### Khóa đếm: O(n · k)
 
-Bảng đếm 26 ô của ga 2 cũng là một khóa chuẩn: anagram thì cùng bảng đếm. Tạo bảng tốn O(k), không cần sắp xếp. Nhưng bảng đếm là một **mảng**, và hầu hết ngôn ngữ không cho mảng làm khóa hash map một cách trực tiếp. Phải [[key-serialization|biến nó thành một giá trị làm khóa được]]:
+Bảng đếm 26 ô của ga 2 cũng là một khóa chuẩn: anagram thì cùng bảng đếm. Tạo bảng tốn O(k), không cần sắp xếp. Nhưng bảng đếm là một **mảng**, và hầu hết ngôn ngữ không cho mảng làm khóa hash map một cách trực tiếp. Phải [[concepts/key-serialization|biến nó thành một giá trị làm khóa được]]:
 
 | | Mảng làm khóa map? | Cách làm |
 |---|---|---|

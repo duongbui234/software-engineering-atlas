@@ -2,7 +2,8 @@
 // Lỗi (exit 1) khi:
 //   - trang cuộn ngang (scrollWidth lớn hơn bề rộng màn hình);
 //   - một sơ đồ Mermaid render hỏng (theme thay bằng khối code) hoặc hiện "Unsupported markdown";
-//   - một sơ đồ Mermaid bị co dưới 75% cỡ thật (chữ quá nhỏ để đọc).
+//   - một sơ đồ Mermaid bị co dưới 75% cỡ thật (chữ quá nhỏ để đọc);
+//   - một sơ đồ archify nhúng bị cắt: khung iframe thấp hơn nội dung (viewer đặt overflow:hidden).
 //
 // Chạy local:  npx quartz build && npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
 // Chrome:      dùng CHROME_PATH nếu có, không thì /usr/bin/google-chrome hoặc Chromium của Playwright.
@@ -94,6 +95,23 @@ async function checkPage(page, origin, file, width) {
       if (d.scale !== undefined && d.scale < MIN_SCALE - 0.005) problems.push(`Mermaid #${d.i + 1}: bị co còn ${(d.scale * 100).toFixed(0)}% (tối thiểu ${MIN_SCALE * 100}%)`);
     }
   }
+  const archify = await page.locator('iframe[data-archify]').count();
+  for (let i = 0; i < archify; i++) {
+    const frame = page.locator('iframe[data-archify]').nth(i);
+    await frame.scrollIntoViewIfNeeded();
+    try {
+      // chờ viewer vẽ xong và ARCHIFY_SCRIPT đặt chiều cao theo nội dung
+      await page.waitForFunction((el) => {
+        const c = el.contentDocument && el.contentDocument.querySelector('.container');
+        return c && el.contentDocument.querySelector('svg') && el.style.height !== '';
+      }, await frame.elementHandle(), { timeout: 15000 });
+    } catch {
+      problems.push(`archify #${i + 1} (${await frame.getAttribute('data-archify')}): viewer không tải xong hoặc không được đặt chiều cao sau 15 giây`);
+      continue;
+    }
+    const fit = await frame.evaluate((el) => ({ box: el.clientHeight, content: Math.ceil(el.contentDocument.querySelector('.container').getBoundingClientRect().height) }));
+    if (fit.content > fit.box + 2) problems.push(`archify #${i + 1} (${await frame.getAttribute('data-archify')}): bị cắt, khung cao ${fit.box}px < nội dung ${fit.content}px`);
+  }
   const overflow = await page.evaluate(() => {
     const W = document.documentElement.clientWidth;
     const sw = document.documentElement.scrollWidth;
@@ -146,4 +164,4 @@ if (failures.length) {
   for (const f of failures.sort()) console.error('  ' + f);
   process.exit(1);
 }
-console.log(`✓ Kiểm tra hiển thị: ${pages.length} trang × ${WIDTHS.join('/')}px, không cuộn ngang, Mermaid đọc được (${secs}s)`);
+console.log(`✓ Kiểm tra hiển thị: ${pages.length} trang × ${WIDTHS.join('/')}px, không cuộn ngang, Mermaid đọc được, archify không bị cắt (${secs}s)`);

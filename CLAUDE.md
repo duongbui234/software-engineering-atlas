@@ -27,7 +27,8 @@ npx quartz plugin doctor        # check plugin config
 npm run check                   # tsc + prettier (upstream code)
 
 # Render check (also runs in CI after build): every page at 390px and 1440px.
-# Fails on horizontal page scroll, broken Mermaid, "Unsupported markdown" labels, or diagrams shrunk below 75%.
+# Fails on horizontal page scroll, broken Mermaid, "Unsupported markdown" labels, Mermaid diagrams shrunk below 75%,
+# or an archify iframe shorter than the diagram inside it.
 npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
 
 # Preview the prototype (iframes and theme sync need http, not file://)
@@ -119,7 +120,7 @@ Three user-invoked skills: `.claude/skills/learn/`, `.claude/skills/publish/` an
   <figcaption><span><b>Hình 1.</b> …</span><a href="../diagrams/<slug>/<name>.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
   </figure>
   ```
-  `ARCHIFY_SCRIPT` sets `src` to `…?embed=1&theme=<light|dark>` and follows `themechange`. It also rewrites the caption link, because Quartz strips `.html` from it. In embed mode, archify keeps its toolbar (theme, export, fullscreen), so give `--ar` enough height for it.
+  `ARCHIFY_SCRIPT` sets `src` to `…?embed=1&theme=<light|dark>` and follows `themechange`. It also rewrites the caption link, because Quartz strips `.html` from it. The viewer fits the diagram to the iframe width and hides overflow (`body { overflow: hidden }`), so a frame shorter than the diagram cuts off its bottom. `ARCHIFY_SCRIPT` therefore measures the viewer's `.container` (same origin) on load and on resize and sets the iframe height to match. `--ar` only sizes the frame before the viewer loads, or when it cannot be measured (file://).
 - **Size budget:** each rendered HTML file is about 820 KB, and GitHub Pages limits a site to about 1 GB. Use at most one interactive archify diagram per post and Mermaid for secondary diagrams. Revisit (move to R2 or Git LFS) once the site passes about 600 MB.
 - **Labels:** a participant or component `label` names its role in plain Vietnamese (`Bảo vệ`, `Sổ phiên`, `Bộ nhớ tạm`); the `sublabel` carries the class or tool (`Guards: JWT, quyền, rate`, `Redis: session, refresh_token`). A message `label` says what happens in words (`giành khóa: chỉ mình tôi đi hỏi`); the raw command or route goes in its `note` (`SET lock NX EX 5`). Cards use plain language too. archify has no separate click-to-reveal field, so the sublabel is the "detail" layer. A new `note` needs vertical room: when `finalize` reports `sequence/note-overlap`, move the later messages down.
 - archify has no Vietnamese viewer catalog, so omit `meta.locale` (viewer chrome stays English) and keep all authored strings in Vietnamese. Generated receipts (`*.finalize.json`, `*.browser-check.json`, `*.delivery.json`) are gitignored and skipped by the emitter.

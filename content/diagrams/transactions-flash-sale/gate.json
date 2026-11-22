@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Flash sale không bán quá số hàng: Redis chặn trước, Postgres giữ sự thật",
+    "output": "content/diagrams/transactions-flash-sale/gate.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "buyers",
+      "type": "frontend",
+      "label": "3000 người bấm mua",
+      "sublabel": "cùng lúc 21:00",
+      "pos": [
+        40,
+        180
+      ],
+      "size": [
+        180,
+        64
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Server đặt hàng",
+      "sublabel": "FlashSaleOrderService",
+      "pos": [
+        280,
+        180
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Cổng chặn",
+      "sublabel": "Redis Lua: DECRBY + giới hạn mỗi người",
+      "pos": [
+        560,
+        40
+      ],
+      "size": [
+        230,
+        64
+      ]
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Sổ sự thật",
+      "sublabel": "Postgres: UPDATE có điều kiện + INSERT đơn",
+      "pos": [
+        560,
+        320
+      ],
+      "size": [
+        230,
+        64
+      ]
+    },
+    {
+      "id": "rec",
+      "type": "backend",
+      "label": "Đối soát cuối chiến dịch",
+      "sublabel": "FlashSaleReconcileService",
+      "pos": [
+        880,
+        180
+      ],
+      "size": [
+        220,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Một transaction Postgres",
+      "wraps": [
+        "pg"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "buyers",
+      "to": "api",
+      "label": "POST đặt hàng"
+    },
+    {
+      "id": "c2",
+      "from": "api",
+      "to": "redis",
+      "label": "còn suất? trừ 1",
+      "fromSide": "top",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c3",
+      "from": "api",
+      "to": "pg",
+      "label": "100 transaction, không phải 3000",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c4",
+      "from": "pg",
+      "to": "api",
+      "label": "DB lỗi: bù trừ Redis",
+      "fromSide": "top",
+      "toSide": "right",
+      "variant": "dashed"
+    },
+    {
+      "id": "c5",
+      "from": "rec",
+      "to": "pg",
+      "label": "đếm đơn thật",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "variant": "default"
+    },
+    {
+      "id": "c6",
+      "from": "rec",
+      "to": "redis",
+      "label": "sửa bộ đếm, nhả suất ma",
+      "fromSide": "top",
+      "toSide": "right",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Cổng Redis",
+      "items": [
+        "Lua chạy trọn, không ai chen giữa",
+        "2900 người bị từ chối trong RAM",
+        "Postgres chỉ thấy người có suất"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Postgres",
+      "items": [
+        "UPDATE sold < allocated",
+        "CHECK sold <= allocated là lưới cuối",
+        "Đơn thật là nguồn sự thật"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Khi lệch",
+      "items": [
+        "DB lỗi: Lua bù trừ trả suất",
+        "Pod chết giữa chừng: suất ma",
+        "Đối soát lúc kết thúc sửa lại"
+      ]
+    }
+  ]
+}

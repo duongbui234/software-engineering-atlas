@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Khóa bi quan xếp hàng, khóa lạc quan thua thì thử lại",
+    "output": "content/diagrams/transactions-locking/pess-vs-opt.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "a",
+      "type": "backend",
+      "label": "Request A",
+      "sublabel": "người mua 1"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "items: stock 5, version 7"
+    },
+    {
+      "id": "b",
+      "type": "backend",
+      "label": "Request B",
+      "sublabel": "người mua 2"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 420,
+      "label": "Bi quan: khóa rồi mới đọc"
+    },
+    {
+      "from": 445,
+      "to": 740,
+      "label": "Lạc quan: đọc tự do, ghi có điều kiện"
+    }
+  ],
+  "messages": [
+    {
+      "id": "p1",
+      "from": "a",
+      "to": "pg",
+      "y": 170,
+      "label": "đọc và khóa dòng",
+      "variant": "emphasis",
+      "note": "SELECT … FOR UPDATE → 5"
+    },
+    {
+      "id": "p2",
+      "from": "b",
+      "to": "pg",
+      "y": 220,
+      "label": "đọc và khóa dòng",
+      "variant": "default",
+      "note": "SELECT … FOR UPDATE"
+    },
+    {
+      "id": "p3",
+      "from": "pg",
+      "to": "b",
+      "y": 270,
+      "label": "chờ A xong",
+      "variant": "dashed",
+      "note": "xếp hàng, không tốn retry"
+    },
+    {
+      "id": "p4",
+      "from": "a",
+      "to": "pg",
+      "y": 320,
+      "label": "ghi 4, chốt",
+      "variant": "default",
+      "note": "UPDATE stock = 4; COMMIT"
+    },
+    {
+      "id": "p5",
+      "from": "pg",
+      "to": "b",
+      "y": 375,
+      "label": "tới lượt: thấy 4",
+      "variant": "return",
+      "note": "đọc bản mới nhất, ghi 3"
+    },
+    {
+      "id": "o1",
+      "from": "a",
+      "to": "pg",
+      "y": 465,
+      "label": "đọc không khóa",
+      "variant": "default",
+      "note": "SELECT stock, version → 5, 7"
+    },
+    {
+      "id": "o2",
+      "from": "b",
+      "to": "pg",
+      "y": 515,
+      "label": "đọc không khóa",
+      "variant": "default",
+      "note": "SELECT → 5, 7"
+    },
+    {
+      "id": "o3",
+      "from": "a",
+      "to": "pg",
+      "y": 565,
+      "label": "ghi nếu version vẫn là 7",
+      "variant": "emphasis",
+      "note": "UPDATE … WHERE version = 7 → 1 dòng"
+    },
+    {
+      "id": "o4",
+      "from": "b",
+      "to": "pg",
+      "y": 620,
+      "label": "ghi nếu version vẫn là 7",
+      "variant": "security",
+      "note": "0 dòng: A đã đổi thành 8"
+    },
+    {
+      "id": "o5",
+      "from": "b",
+      "to": "pg",
+      "y": 675,
+      "label": "đọc lại 4, 8 rồi thử lại",
+      "variant": "dashed",
+      "note": "dòng nóng: thử lại rất nhiều lần"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Bi quan",
+      "items": [
+        "SELECT … FOR UPDATE",
+        "Hợp khi tranh chấp cao",
+        "Giữ khóa ngắn, đừng gọi API ngoài"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Lạc quan",
+      "items": [
+        "Cột version, so khi ghi",
+        "Hợp khi ít đụng nhau, request dài",
+        "300 người, 100 suất: 4289 transaction"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Không chờ",
+      "items": [
+        "NOWAIT: lỗi 55P03 ngay",
+        "SKIP LOCKED: bỏ qua dòng đang bị khóa",
+        "Advisory lock: khóa theo tên"
+      ]
+    }
+  ]
+}

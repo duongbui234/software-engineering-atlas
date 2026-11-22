@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Còn 1 suất, hai câu UPDATE có điều kiện",
+    "output": "content/diagrams/transactions-atomic-update/recheck.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "a",
+      "type": "backend",
+      "label": "Request A",
+      "sublabel": "reserveStock()"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "dòng tồn kho, stock = 1"
+    },
+    {
+      "id": "b",
+      "type": "backend",
+      "label": "Request B",
+      "sublabel": "reserveStock()"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 480,
+      "label": "READ COMMITTED: B chờ, đọc lại, không trừ"
+    },
+    {
+      "from": 505,
+      "to": 710,
+      "label": "REPEATABLE READ: B bị hủy"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "a",
+      "to": "pg",
+      "y": 170,
+      "label": "trừ nếu còn ≥ 1",
+      "variant": "emphasis",
+      "note": "UPDATE … SET stock = stock - 1 WHERE stock >= 1"
+    },
+    {
+      "id": "a2",
+      "from": "pg",
+      "to": "a",
+      "y": 230,
+      "label": "1 dòng, khóa dòng tới khi commit",
+      "variant": "return",
+      "note": "stock = 0, chưa commit"
+    },
+    {
+      "id": "b1",
+      "from": "b",
+      "to": "pg",
+      "y": 280,
+      "label": "trừ nếu còn ≥ 1",
+      "variant": "default",
+      "note": "cùng câu UPDATE"
+    },
+    {
+      "id": "b2",
+      "from": "pg",
+      "to": "b",
+      "y": 330,
+      "label": "chờ khóa dòng của A…",
+      "variant": "dashed",
+      "note": "300 ms"
+    },
+    {
+      "id": "a3",
+      "from": "a",
+      "to": "pg",
+      "y": 380,
+      "label": "chốt",
+      "variant": "default",
+      "note": "COMMIT, nhả khóa"
+    },
+    {
+      "id": "b3",
+      "from": "pg",
+      "to": "b",
+      "y": 435,
+      "label": "đọc lại bản mới: 0 ≥ 1? sai",
+      "variant": "return",
+      "note": "0 dòng khớp → hết hàng"
+    },
+    {
+      "id": "c1",
+      "from": "b",
+      "to": "pg",
+      "y": 525,
+      "label": "cùng câu, sau khi chờ khóa",
+      "variant": "default",
+      "note": "BEGIN ISOLATION LEVEL REPEATABLE READ"
+    },
+    {
+      "id": "c2",
+      "from": "a",
+      "to": "pg",
+      "y": 580,
+      "label": "chốt",
+      "variant": "default",
+      "note": "COMMIT"
+    },
+    {
+      "id": "c3",
+      "from": "pg",
+      "to": "b",
+      "y": 635,
+      "label": "dòng đã đổi sau snapshot của B",
+      "variant": "security",
+      "note": "40001 concurrent update"
+    },
+    {
+      "id": "c4",
+      "from": "b",
+      "to": "pg",
+      "y": 685,
+      "label": "retry, lần này thấy hết hàng",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Một câu, không khe hở",
+      "items": [
+        "Kiểm tra và trừ trong cùng UPDATE",
+        "Không có lúc nào chen vào giữa",
+        "rowCount = 0 nghĩa là hết hàng"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Đọc lại sau khi chờ",
+      "items": [
+        "Read Committed chạy lại WHERE",
+        "trên phiên bản dòng mới nhất",
+        "Đúng mà không cần retry"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Lưới cuối: CHECK",
+      "items": [
+        "CHECK (stock >= 0)",
+        "Code quên điều kiện vẫn bị chặn",
+        "Lỗi 23514, transaction rollback"
+      ]
+    }
+  ]
+}

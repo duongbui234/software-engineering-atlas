@@ -38,7 +38,7 @@ Mỗi ga mở đầu bằng **"Hình dung trước"** (khái niệm so với chu
 
 Không thể hiểu vì sao Socket.IO cần sticky session nếu chưa biết Engine.IO bắt đầu bằng long polling; không thể hiểu vì sao tin bị mất khi deploy nếu chưa biết at most once. Mỗi ga chỉ dùng từ vựng của các ga trước.
 
-Tuyến này đào sâu một mục ngắn trong ga [[2026-11-18-api-styles|Năm kiểu API]] của tuyến API, và dùng lại vài từ của [[2026-11-22-caching-distributed|tuyến Caching]] (Redis Pub/Sub) và [[rabbitmq|tuyến RabbitMQ]] (at most once, at least once).
+Tuyến này đào sâu một mục ngắn trong ga [[2026-11-18-api-styles|Năm kiểu API]] của tuyến API, và dùng lại vài từ của [[2026-11-22-caching-distributed|tuyến Caching]] (Redis Pub/Sub) và [[series/rabbitmq|tuyến RabbitMQ]] (at most once, at least once).
 
 ## Phiên bản và nguồn
 

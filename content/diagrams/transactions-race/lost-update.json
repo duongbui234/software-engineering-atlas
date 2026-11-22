@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Hai người cùng thấy còn 1 suất",
+    "output": "content/diagrams/transactions-race/lost-update.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "a",
+      "type": "frontend",
+      "label": "Người mua A",
+      "sublabel": "request 1"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "items.stock = 1"
+    },
+    {
+      "id": "b",
+      "type": "frontend",
+      "label": "Người mua B",
+      "sublabel": "request 2"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 400,
+      "label": "Cả hai đọc trước khi ai kịp ghi"
+    },
+    {
+      "from": 425,
+      "to": 660,
+      "label": "Cả hai ghi theo con số đã cũ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "r1",
+      "from": "a",
+      "to": "pg",
+      "y": 170,
+      "label": "còn mấy suất?",
+      "variant": "default",
+      "note": "SELECT stock → 1"
+    },
+    {
+      "id": "r2",
+      "from": "b",
+      "to": "pg",
+      "y": 220,
+      "label": "còn mấy suất?",
+      "variant": "default",
+      "note": "SELECT stock → 1"
+    },
+    {
+      "id": "c1",
+      "from": "pg",
+      "to": "a",
+      "y": 270,
+      "label": "1, mua được",
+      "variant": "return"
+    },
+    {
+      "id": "c2",
+      "from": "pg",
+      "to": "b",
+      "y": 320,
+      "label": "1, mua được",
+      "variant": "return",
+      "note": "cả hai đi tính giá, voucher… 2 ms"
+    },
+    {
+      "id": "w1",
+      "from": "a",
+      "to": "pg",
+      "y": 445,
+      "label": "tạo đơn, ghi stock = 0",
+      "variant": "emphasis",
+      "note": "INSERT orders; UPDATE stock = 0"
+    },
+    {
+      "id": "w2",
+      "from": "b",
+      "to": "pg",
+      "y": 500,
+      "label": "tạo đơn, ghi stock = 0",
+      "variant": "security",
+      "note": "ghi đè lần trừ của A"
+    },
+    {
+      "id": "e1",
+      "from": "pg",
+      "to": "a",
+      "y": 555,
+      "label": "COMMIT",
+      "variant": "return"
+    },
+    {
+      "id": "e2",
+      "from": "pg",
+      "to": "b",
+      "y": 605,
+      "label": "COMMIT: 2 đơn, kho vẫn 0",
+      "variant": "return",
+      "note": "bán quá 1, mất 1 lần trừ"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Lost update",
+      "items": [
+        "Hai lần trừ, kho chỉ giảm một",
+        "Lần ghi sau đè lần ghi trước",
+        "Read Committed cho phép"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Check-then-act",
+      "items": [
+        "Kiểm tra và hành động tách rời",
+        "Điều kiện đã sai khi hành động",
+        "stock - 1 vẫn bán quá"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Đo được",
+      "items": [
+        "300 người, 100 suất",
+        "Đọc rồi ghi: 300 đơn",
+        "Kiểm tra rồi trừ: 149 đơn, kho -49"
+      ]
+    }
+  ]
+}

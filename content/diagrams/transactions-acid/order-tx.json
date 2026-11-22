@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đặt một đơn: ba câu lệnh, một transaction",
+    "output": "content/diagrams/transactions-acid/order-tx.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "Server đặt hàng",
+      "sublabel": "CheckoutService"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "một session, một transaction"
+    },
+    {
+      "id": "wal",
+      "type": "database",
+      "label": "Nhật ký trên đĩa",
+      "sublabel": "WAL: pg_wal/"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 400,
+      "label": "Lỗi giữa chừng: ROLLBACK"
+    },
+    {
+      "from": 425,
+      "to": 710,
+      "label": "Mọi bước xong: COMMIT"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "app",
+      "to": "pg",
+      "y": 170,
+      "label": "bắt đầu",
+      "variant": "default",
+      "note": "BEGIN"
+    },
+    {
+      "id": "a2",
+      "from": "app",
+      "to": "pg",
+      "y": 215,
+      "label": "giữ 1 suất",
+      "variant": "default",
+      "note": "UPDATE inventories … AND total >= reserved + 1"
+    },
+    {
+      "id": "a3",
+      "from": "app",
+      "to": "pg",
+      "y": 275,
+      "label": "tạo đơn PENDING",
+      "variant": "default",
+      "note": "INSERT INTO orders"
+    },
+    {
+      "id": "a4",
+      "from": "app",
+      "to": "pg",
+      "y": 325,
+      "label": "crash trước khi ghi sổ kho",
+      "variant": "security",
+      "note": "mất kết nối, bug, pod bị kill"
+    },
+    {
+      "id": "a5",
+      "from": "pg",
+      "to": "app",
+      "y": 375,
+      "label": "bỏ hết, như chưa từng làm",
+      "variant": "return",
+      "note": "ROLLBACK: 0 suất, 0 đơn"
+    },
+    {
+      "id": "b1",
+      "from": "app",
+      "to": "pg",
+      "y": 445,
+      "label": "bắt đầu lại, ba bước",
+      "variant": "default",
+      "note": "BEGIN; UPDATE; INSERT; INSERT ledger"
+    },
+    {
+      "id": "b2",
+      "from": "app",
+      "to": "pg",
+      "y": 500,
+      "label": "xong rồi, chốt",
+      "variant": "emphasis",
+      "note": "COMMIT"
+    },
+    {
+      "id": "b3",
+      "from": "pg",
+      "to": "wal",
+      "y": 550,
+      "label": "ghi nhật ký trước",
+      "variant": "emphasis",
+      "note": "WAL record + fsync"
+    },
+    {
+      "id": "b4",
+      "from": "wal",
+      "to": "pg",
+      "y": 600,
+      "label": "đã nằm trên đĩa",
+      "variant": "return"
+    },
+    {
+      "id": "b5",
+      "from": "pg",
+      "to": "app",
+      "y": 650,
+      "label": "OK, mất điện cũng không mất",
+      "variant": "return",
+      "note": "synchronous_commit = on"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Atomicity",
+      "items": [
+        "Ba câu thành một khối",
+        "Lỗi ở đâu cũng ROLLBACK cả khối",
+        "Không còn đơn mồ côi"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "MVCC",
+      "items": [
+        "UPDATE tạo phiên bản dòng mới",
+        "Người đọc thấy bản đã commit",
+        "Đọc không chờ người ghi"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Durability",
+      "items": [
+        "COMMIT trả lời sau khi WAL xuống đĩa",
+        "Crash thì phát lại WAL",
+        "Bảng ghi sau, nhật ký ghi trước"
+      ]
+    }
+  ]
+}

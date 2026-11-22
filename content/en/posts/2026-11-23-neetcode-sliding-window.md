@@ -84,10 +84,10 @@ The `while` sits inside the `for`, but `left` moves forward at most n times in t
 |---|---|---|---|
 | [[en/problems/best-time-to-buy-and-sell-stock\|Best Time to Buy and Sell Stock]] | `left` is the day with the lowest price so far | variable | one number: the price at `left` |
 | [[en/problems/longest-substring-without-repeating-characters\|Longest Substring Without Repeating Characters]] | no character repeats | variable, find the longest | each character's last-seen position |
-| Longest Repeating Character Replacement | length − count of the most frequent letter ≤ k | variable, find the longest | a 26-letter count table and `maxFreq` |
-| Permutation in String | the window is a permutation of s1 | fixed, length \|s1\| | two count tables and the number of matching letters |
-| Minimum Window Substring | the window covers every letter of t | variable, find the **shortest** | a "still missing" table and the missing count |
-| Sliding Window Maximum | (return the max of every window of length k) | fixed, length k | a queue of indices with decreasing values |
+| [[en/problems/longest-repeating-character-replacement\|Longest Repeating Character Replacement]] | length − count of the most frequent letter ≤ k | variable, find the longest | a 26-letter count table and `maxFreq` |
+| [[en/problems/permutation-in-string\|Permutation in String]] | the window is a permutation of s1 | fixed, length \|s1\| | two count tables and the number of matching letters |
+| [[en/problems/minimum-window-substring\|Minimum Window Substring]] | the window covers every letter of t | variable, find the **shortest** | a "still missing" table and the missing count |
+| [[en/problems/sliding-window-maximum\|Sliding Window Maximum]] | (return the max of every window of length k) | fixed, length k | a queue of indices with decreasing values |
 
 The two search directions are worth noticing:
 - **Finding the longest** (Longest Substring, Character Replacement): expand until it breaks, shrink until it's good again, update the answer **after** shrinking.
@@ -98,6 +98,8 @@ The two search directions are worth noticing:
 **Character Replacement never needs to decrease `maxFreq`.** When `left` moves, the count of the most frequent letter may drop, but the code keeps the old `maxFreq`. That's fine because the answer only grows when a window with a **larger** `maxFreq` than the record turns up; a stale `maxFreq` only makes the window slide at constant length instead of shrinking, and a shorter window is never a new answer anyway. So here `if` is enough, no `while`: the window never shrinks, it only slides or grows.
 
 **Sliding Window Maximum needs a monotonic queue.** A count table can't answer "the max of the window" once the largest element slides out. A [[en/concepts/monotonic-deque|monotonic deque]] keeps indices in decreasing order of value: a new element pushes out every smaller element at the back (they can never be the max while the new one is in the window), and the front is dropped once it slides out. The front is always the max. Each index enters and leaves the queue once: O(n).
+
+Each problem's page goes deeper: [[en/problems/longest-repeating-character-replacement|Longest Repeating Character Replacement]] keeps a [[en/concepts/non-shrinking-window|non-shrinking window]] and proves why `maxFreq` never needs to drop; [[en/problems/permutation-in-string|Permutation in String]] slides a fixed window of length \|s1\| and compares count tables, or counts matching cells; [[en/problems/minimum-window-substring|Minimum Window Substring]] measures the `missing` counter about 45 times faster than comparing the whole count table; [[en/problems/sliding-window-maximum|Sliding Window Maximum]] proves the monotonic deque is O(n) with aggregate analysis and measures JS `shift()` almost 900 times slower in the worst case.
 
 ## Runnable example
 
@@ -284,7 +286,7 @@ Python, Go, Java and JavaScript run the same 12 cases and all print `12/12 ca đ
 - **Letting the left end move back.** Jumping `left` to the previous sighting without checking it's still in the window: `"abba"` gives 3. Use `left = max(left, …)`.
 - **Using `if` where `while` is needed, or the other way round.** Longest Substring with a Set and Minimum Window must shrink several steps; Character Replacement shrinks exactly one.
 - **Updating the answer in the wrong place.** Finding the longest: update after shrinking; finding the shortest: update during shrinking, before removing `s[left]`.
-- **Using a window on a problem without monotonicity.** Finding a range with sum k when the array has negative numbers: adding an element can lower the sum, so "bad means longer is bad too" no longer holds. That problem needs prefix sums and a hash table.
+- **Using a window on a problem without monotonicity.** Finding a range with sum k when the array has negative numbers: adding an element can lower the sum, so "bad means longer is bad too" no longer holds. That problem needs [[en/concepts/prefix-sum|prefix sums]] and a hash table. The file [negative-numbers.ts](../code/neetcode-sliding-window/negative-numbers.ts) counts the ranges whose sum is exactly k: for `[3, 4, 7, 2, -3, 1, 4, 2]` and k = 7, brute force and prefix sums both give 4 while the window gives only 2; for `[1, -1, 0]` and k = 0 the answer is 3 and the window gives 1. On an all-positive array such as `[1, 2, 3]`, all three give 2.
 - **`shift()` on a JS array as a queue.** `shift` is O(n) each time; use a head pointer as in the code above, or Python's `deque`, Java's `ArrayDeque`.
 
 ## Self-check questions

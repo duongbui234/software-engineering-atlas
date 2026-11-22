@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A stack checks brackets: \"{[]}\" is valid, \"([)]\" is not",
+    "output": "content/diagrams/neetcode-stack/matching.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Reading loop",
+      "sublabel": "one character at a time, left to right"
+    },
+    {
+      "id": "st",
+      "type": "database",
+      "label": "Stack",
+      "sublabel": "open brackets not yet closed, newest on top"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 430,
+      "label": "\"{[]}\": everything matches"
+    },
+    {
+      "from": 460,
+      "to": 680,
+      "label": "\"([)]\": closed in the wrong order"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "loop",
+      "to": "st",
+      "y": 175,
+      "label": "push {",
+      "variant": "default",
+      "note": "stack: {"
+    },
+    {
+      "id": "a2",
+      "from": "loop",
+      "to": "st",
+      "y": 225,
+      "label": "push [",
+      "variant": "default",
+      "note": "stack: { ["
+    },
+    {
+      "id": "a3",
+      "from": "st",
+      "to": "loop",
+      "y": 280,
+      "label": "see ]: pop the top [, match",
+      "variant": "return",
+      "note": "stack: {"
+    },
+    {
+      "id": "a4",
+      "from": "st",
+      "to": "loop",
+      "y": 335,
+      "label": "see }: pop the top {, match",
+      "variant": "return"
+    },
+    {
+      "id": "a5",
+      "from": "st",
+      "to": "loop",
+      "y": 390,
+      "label": "end of string, stack empty",
+      "variant": "emphasis",
+      "note": "valid"
+    },
+    {
+      "id": "b1",
+      "from": "loop",
+      "to": "st",
+      "y": 485,
+      "label": "push (",
+      "variant": "default"
+    },
+    {
+      "id": "b2",
+      "from": "loop",
+      "to": "st",
+      "y": 535,
+      "label": "push [",
+      "variant": "default",
+      "note": "stack: ( ["
+    },
+    {
+      "id": "b3",
+      "from": "st",
+      "to": "loop",
+      "y": 595,
+      "label": "see ): the top is [, no match",
+      "variant": "emphasis",
+      "note": "invalid at once, no need to read on"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Last in, first out",
+      "items": [
+        "A closer matches the nearest opener",
+        "Nearest = top of the stack",
+        "push and pop are both O(1)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Counting is not enough",
+      "items": [
+        "One counter: \"(]\" slips through",
+        "Three counters: \"([)]\" slips through",
+        "You must remember the opening order"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Two things people forget",
+      "items": [
+        "Popping an empty stack",
+        "Openers left at the end",
+        "\"((\" is not valid"
+      ]
+    }
+  ]
+}

@@ -17,8 +17,9 @@ stations:
   - name: "Two Pointers"
     concepts: [Search Space Pruning, k-Sum Reduction, Duplicate Skipping, Prefix Maximum]
   - name: "Sliding Window"
-    concepts: [Sliding Window, Window Invariant, Last-seen Index, Running Minimum, Fixed-size Window, Monotonic Deque]
+    concepts: [Sliding Window, Window Invariant, Last-seen Index, Running Minimum, Fixed-size Window, Monotonic Deque, Non-shrinking Window]
   - name: "Stack"
+    concepts: [Stack, Bracket Matching, Auxiliary Min Stack, Reverse Polish Notation, Backtracking]
   - name: "Monotonic Stack"
 ---
 

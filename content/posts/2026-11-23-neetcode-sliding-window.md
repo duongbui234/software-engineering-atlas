@@ -83,10 +83,10 @@ Vòng `while` nằm trong `for` nhưng tổng số lần `left` tiến không qu
 |---|---|---|---|
 | [[problems/best-time-to-buy-and-sell-stock\|Best Time to Buy and Sell Stock]] | `left` là ngày giá thấp nhất tới giờ | co giãn | một số: giá ở `left` |
 | [[problems/longest-substring-without-repeating-characters\|Longest Substring Without Repeating Characters]] | không ký tự nào lặp | co giãn, tìm dài nhất | sổ vị trí gần nhất của mỗi ký tự |
-| Longest Repeating Character Replacement | độ dài − số lần chữ nhiều nhất ≤ k | co giãn, tìm dài nhất | bảng đếm 26 chữ và `maxFreq` |
-| Permutation in String | cửa sổ là một hoán vị của s1 | cố định, dài \|s1\| | hai bảng đếm và số chữ khớp |
-| Minimum Window Substring | cửa sổ chứa đủ mọi chữ của t | co giãn, tìm **ngắn** nhất | bảng "còn thiếu" và số chữ còn thiếu |
-| Sliding Window Maximum | (trả max của mọi cửa sổ dài k) | cố định, dài k | hàng đợi chỉ số, giá trị giảm dần |
+| [[problems/longest-repeating-character-replacement\|Longest Repeating Character Replacement]] | độ dài − số lần chữ nhiều nhất ≤ k | co giãn, tìm dài nhất | bảng đếm 26 chữ và `maxFreq` |
+| [[problems/permutation-in-string\|Permutation in String]] | cửa sổ là một hoán vị của s1 | cố định, dài \|s1\| | hai bảng đếm và số chữ khớp |
+| [[problems/minimum-window-substring\|Minimum Window Substring]] | cửa sổ chứa đủ mọi chữ của t | co giãn, tìm **ngắn** nhất | bảng "còn thiếu" và số chữ còn thiếu |
+| [[problems/sliding-window-maximum\|Sliding Window Maximum]] | (trả max của mọi cửa sổ dài k) | cố định, dài k | hàng đợi chỉ số, giá trị giảm dần |
 
 Hai hướng tìm khác nhau đáng để ý:
 - **Tìm dài nhất** (Longest Substring, Character Replacement): mở rộng cho tới khi hỏng, co cho tới khi tốt lại, cập nhật đáp án **sau** khi co.
@@ -97,6 +97,8 @@ Hai hướng tìm khác nhau đáng để ý:
 **Character Replacement không cần giảm `maxFreq`.** Khi `left` tiến, số lần của chữ nhiều nhất có thể giảm, nhưng code vẫn giữ `maxFreq` cũ. Điều đó không sai vì đáp án chỉ tăng khi tìm được cửa sổ có `maxFreq` **lớn hơn** kỷ lục; `maxFreq` cũ chỉ làm cửa sổ trượt với độ dài không đổi thay vì co lại, mà cửa sổ ngắn hơn thì không bao giờ là đáp án mới. Vì vậy ở bài này `if` là đủ, không cần `while`: cửa sổ không bao giờ co, chỉ trượt hoặc dài ra.
 
 **Sliding Window Maximum cần một hàng đợi đơn điệu.** Bảng đếm không trả lời được "max của cửa sổ" khi phần tử lớn nhất trượt ra. [[concepts/monotonic-deque|Hàng đợi đơn điệu]] giữ chỉ số theo giá trị giảm dần: phần tử mới đẩy bỏ mọi phần tử nhỏ hơn ở cuối (chúng không bao giờ còn là max khi phần tử mới còn trong cửa sổ), và đầu hàng bị bỏ khi trượt ra ngoài. Đầu hàng luôn là max. Mỗi chỉ số vào và ra hàng đợi một lần: O(n).
+
+Trang của từng bài đi sâu hơn: [[problems/longest-repeating-character-replacement|Longest Repeating Character Replacement]] giữ một [[concepts/non-shrinking-window|cửa sổ không co]] và chứng minh vì sao `maxFreq` không cần giảm; [[problems/permutation-in-string|Permutation in String]] trượt một cửa sổ cố định dài \|s1\| và so bảng đếm, hoặc đếm số ô khớp; [[problems/minimum-window-substring|Minimum Window Substring]] đo biến `missing` nhanh hơn so cả bảng đếm khoảng 45 lần; [[problems/sliding-window-maximum|Sliding Window Maximum]] chứng minh hàng đợi đơn điệu là O(n) bằng phân tích gộp và đo `shift()` của JS chậm gần 900 lần ở ca tệ nhất.
 
 ## Ví dụ chạy được
 
@@ -281,7 +283,7 @@ Python, Go, Java và JavaScript chạy cùng 12 ca và đều in `12/12 ca đún
 - **Để đầu trái lùi lại.** Nhảy `left` tới lần gặp trước mà không kiểm lần đó còn trong cửa sổ: `"abba"` ra 3. Dùng `left = max(left, …)`.
 - **Dùng `if` khi cần `while`, hoặc ngược lại.** Longest Substring với Set và Minimum Window phải co nhiều bước; Character Replacement co đúng một bước.
 - **Cập nhật đáp án sai chỗ.** Tìm dài nhất thì cập nhật sau khi co; tìm ngắn nhất thì cập nhật trong lúc co, trước khi bỏ `s[left]`.
-- **Dùng cửa sổ cho bài không có tính đơn điệu.** Tìm đoạn có tổng bằng k khi mảng có số âm: thêm phần tử có thể làm tổng giảm, nên "hỏng thì dài hơn cũng hỏng" không còn đúng. Bài đó cần tổng tiền tố và bảng băm.
+- **Dùng cửa sổ cho bài không có tính đơn điệu.** Tìm đoạn có tổng bằng k khi mảng có số âm: thêm phần tử có thể làm tổng giảm, nên "hỏng thì dài hơn cũng hỏng" không còn đúng. Bài đó cần [[concepts/prefix-sum|tổng tiền tố]] và bảng băm. File [negative-numbers.ts](../code/neetcode-sliding-window/negative-numbers.ts) đếm số đoạn có tổng đúng bằng k: với `[3, 4, 7, 2, -3, 1, 4, 2]` và k = 7, vét cạn và tổng tiền tố đều ra 4, cửa sổ chỉ ra 2; với `[1, -1, 0]` và k = 0, đáp án là 3, cửa sổ ra 1. Với mảng toàn số dương như `[1, 2, 3]`, cả ba cách cùng ra 2.
 - **`shift()` trên mảng JS làm hàng đợi.** `shift` là O(n) mỗi lần; dùng một con trỏ đầu như trong code trên, hoặc `deque` của Python, `ArrayDeque` của Java.
 
 ## Câu hỏi tự kiểm tra

@@ -2,7 +2,7 @@
 name: deep-dive
 description: Tự nghiên cứu trọn một chủ đề kỹ thuật, viết thành bài (hoặc cả series) thật chi tiết, rồi tự mở PR, chờ CI xanh, tự merge và xóa nhánh.
 disable-model-invocation: true
-argument-hint: "<chủ đề> [--repo <đường dẫn dự án>]"
+argument-hint: "<chủ đề> [--repo <đường dẫn dự án>] | neetcode [next|<mã ga, vd ARR-03>]"
 ---
 
 # /deep-dive
@@ -13,7 +13,8 @@ Content rules live in `CLAUDE.md` (content model, writing conventions, archify c
 
 ## 1. Scope the topic
 
-- The argument names the topic. With `--repo <path>`, the topic is a flow in the owner's own code and posts get `type: code`.
+- `neetcode [next|<CODE-NN>]` is a **NeetCode run**: the topic is one station of NeetCode 150. Pick it and list its problems as **NeetCode stations** in `/publish` says (`.claude/skills/publish/SKILL.md`). The slug is `neetcode-<pattern-slug>`. Research covers the pattern and every problem on the station, including each language's traps.
+- Otherwise the argument names the topic. With `--repo <path>`, the topic is a flow in the owner's own code and posts get `type: code`.
 - Derive `<slug>` (kebab-case, ASCII, no date).
 - Check `content/series/`, `content/posts/` and `content/concepts/` for overlap. Link to what exists; write only what is new.
 
@@ -34,6 +35,7 @@ Done when the inventory has no concept you would have to hand-wave, every concep
 
 ## 3. Shape the output
 
+- **NeetCode run:** the shape is fixed: one station post plus one problem page per catalog problem of the station. Skip the rest of this step.
 - **Fits one post** (about 4–6 concepts): one post, `NOTE-<NNN>` code, or a station on an existing hub.
 - **Bigger**: a new series hub `content/series/<id>.md` with ~6–8 stations of 4–6 concepts each, ordered so each station uses only the vocabulary of earlier ones. Write **every** station in this run.
 
@@ -51,7 +53,9 @@ For each post, follow `/publish` steps 3–7 (`.claude/skills/publish/SKILL.md`)
 
 With `--repo`, publish only diagrams and trimmed, renamed snippets.
 
-Done when every concept in the inventory is explained in a post and has a `content/concepts/` note, and each of those files has its `content/en/` counterpart.
+For a NeetCode run, also follow **NeetCode stations** in `/publish`: every problem page, all five languages, every file run.
+
+Done when every concept in the inventory is explained in a post and has a `content/concepts/` note, and each of those files has its `content/en/` counterpart. On a NeetCode run, also when every problem of the station has its VI and EN page.
 
 ## 5. Verify
 
@@ -78,7 +82,7 @@ git switch main && git pull --ff-only
 git branch -D post/<slug> 2>/dev/null; git fetch --prune
 ```
 
-Then watch the deploy on `main` (`gh run list -R duongbui234/software-engineering-atlas --branch main --limit 1`, then `gh run watch <id> --exit-status`) and open the live post URLs `https://duongbui234.github.io/software-engineering-atlas/posts/<file-slug>` and `…/en/posts/<file-slug>` to confirm both serve.
+Then watch the deploy on `main` (`gh run list -R duongbui234/software-engineering-atlas --branch main --limit 1`, then `gh run watch <id> --exit-status`) and open the live post URLs `https://duongbui234.github.io/software-engineering-atlas/posts/<file-slug>` and `…/en/posts/<file-slug>` to confirm both serve. On a NeetCode run, also open one problem page in each language and `problems/`, and confirm the progress count went up by the number of problems added.
 
 Done when the deploy run is green, both post URLs load, and neither the local nor the remote `post/<slug>` branch exists. Move the log to `.learn/published/<slug>.md`.
 

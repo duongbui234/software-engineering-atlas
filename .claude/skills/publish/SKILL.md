@@ -70,7 +70,7 @@ Invoke the `archify` skill with the logged diagram idea. Write the candidate to 
 
 Label it as the archify contract in `CLAUDE.md` says: plain-Vietnamese roles in `label`, class and tool names in `sublabel`, commands and routes in message `note`s.
 
-Embed it with the snippet from the archify contract. Set `--ar` so the whole diagram plus the archify toolbar fits (`1 / 1` is a safe start for sequence diagrams). Write a caption sentence that states what the diagram proves.
+Embed it with the snippet from the archify contract. Set `--ar` close to the diagram's shape (`1 / 1` for architecture, `3 / 4` for tall sequence diagrams); it is only the placeholder size, since `ARCHIFY_SCRIPT` resizes the frame to the rendered diagram. Write a caption sentence that states what the diagram proves.
 
 Use at most one archify diagram per post. Any secondary flow becomes a Mermaid block.
 

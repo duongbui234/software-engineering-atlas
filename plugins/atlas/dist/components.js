@@ -31,10 +31,42 @@ const sym = (type, label) =>
   })
 
 // ── Đồng bộ theme cho iframe archify (?embed=1&theme=light|dark) ─────────────
+// Viewer archify co sơ đồ cho vừa bề ngang và đặt body overflow:hidden, nên sơ đồ cao
+// (sequence) bị cắt mất phần dưới nếu khung iframe thấp hơn. Viewer cùng origin với trang,
+// nên đo chiều cao thật của nội dung và đặt chiều cao iframe theo đó; theo dõi lại khi bề
+// ngang đổi. Không đọc được (file://, khác origin) thì giữ tỉ lệ --ar như cũ.
 export const ARCHIFY_SCRIPT = `
+function atlasArchifyFit(f) {
+  try {
+    var d = f.contentDocument;
+    var c = d && (d.querySelector(".container") || d.body);
+    var svg = d && d.querySelector("svg");
+    if (!c || !svg) return;
+    var h = Math.ceil(c.getBoundingClientRect().height);
+    if (h < 120) return;
+    f.style.aspectRatio = "auto";
+    f.style.minHeight = "0";
+    f.style.maxHeight = "none";
+    f.style.height = h + "px";
+  } catch (e) {}
+}
+function atlasArchifyWatch(f) {
+  if (f.dataset.atlasFit) return;
+  f.dataset.atlasFit = "1";
+  f.addEventListener("load", function () {
+    atlasArchifyFit(f);
+    try {
+      var w = f.contentWindow, d = f.contentDocument;
+      var c = d.querySelector(".container") || d.body;
+      if (w.ResizeObserver) new w.ResizeObserver(function () { atlasArchifyFit(f); }).observe(c);
+      if (d.fonts) d.fonts.ready.then(function () { atlasArchifyFit(f); });
+    } catch (e) {}
+  });
+}
 function atlasArchifySync() {
   var theme = document.documentElement.getAttribute("saved-theme") === "dark" ? "dark" : "light";
   document.querySelectorAll("iframe[data-archify]").forEach(function (f) {
+    atlasArchifyWatch(f);
     var path = f.getAttribute("data-archify");
     var src = path + "?embed=1&theme=" + theme;
     if (f.getAttribute("src") !== src) f.setAttribute("src", src);

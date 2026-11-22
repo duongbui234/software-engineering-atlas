@@ -92,6 +92,9 @@ def main():
     files = sys.argv[1:] or sorted(glob.glob(os.path.join(CONTENT, "en", "**", "*.md"), recursive=True))
     allerr = []
     for f in files:
+        if not os.path.isfile(f):
+            allerr.append(f"{f}: file not found (expected an English file under content/en/)")
+            continue
         allerr += check(os.path.abspath(f))
     for w in WARN:
         print("warn:", w)

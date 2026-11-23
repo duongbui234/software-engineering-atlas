@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Median of the stream 5, 2, 8, 1, 9 with two heaps",
+    "output": "content/diagrams/neetcode-two-heaps/running-median.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "stream",
+      "type": "frontend",
+      "label": "Number stream",
+      "sublabel": "addNum(x), findMedian()"
+    },
+    {
+      "id": "lower",
+      "type": "backend",
+      "label": "Lower half",
+      "sublabel": "max-heap: top is the largest of the lower half"
+    },
+    {
+      "id": "upper",
+      "type": "database",
+      "label": "Upper half",
+      "sublabel": "min-heap: top is the smallest of the upper half"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 400,
+      "label": "each number: into the lower half, top to the upper half, rebalance sizes"
+    },
+    {
+      "from": 420,
+      "to": 930,
+      "label": "the median only reads two tops, O(1)"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "stream",
+      "to": "lower",
+      "y": 175,
+      "label": "add 5: into the lower half first",
+      "variant": "default",
+      "note": "lower [5]"
+    },
+    {
+      "id": "m1",
+      "from": "lower",
+      "to": "upper",
+      "y": 235,
+      "label": "top 5 moves to the upper half",
+      "variant": "default",
+      "note": "keeps max(lower) ≤ min(upper)"
+    },
+    {
+      "id": "m2",
+      "from": "upper",
+      "to": "lower",
+      "y": 295,
+      "label": "upper is bigger: 5 goes back",
+      "variant": "default",
+      "note": "lower [5], upper []"
+    },
+    {
+      "id": "m3",
+      "from": "lower",
+      "to": "stream",
+      "y": 355,
+      "label": "odd: the median is the lower top = 5",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "stream",
+      "to": "lower",
+      "y": 445,
+      "label": "add 2: lower [5, 2], top 5 to upper",
+      "variant": "default",
+      "note": "lower [2], upper [5]"
+    },
+    {
+      "id": "m5",
+      "from": "upper",
+      "to": "stream",
+      "y": 505,
+      "label": "even: (2 + 5) / 2 = 3.5",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "stream",
+      "to": "lower",
+      "y": 570,
+      "label": "add 8: lower [8, 2], top 8 to upper",
+      "variant": "default",
+      "note": "upper [5, 8] is bigger"
+    },
+    {
+      "id": "m7",
+      "from": "upper",
+      "to": "lower",
+      "y": 630,
+      "label": "rebalance: 5 back to the lower half",
+      "variant": "default",
+      "note": "lower [5, 2], upper [8]: median 5"
+    },
+    {
+      "id": "m8",
+      "from": "stream",
+      "to": "lower",
+      "y": 700,
+      "label": "add 1: top 5 to upper",
+      "variant": "default",
+      "note": "lower [2, 1], upper [5, 8]: (2 + 5) / 2 = 3.5"
+    },
+    {
+      "id": "m9",
+      "from": "stream",
+      "to": "lower",
+      "y": 770,
+      "label": "add 9: into lower, becomes the top, to upper",
+      "variant": "default",
+      "note": "upper [5, 8, 9] is bigger"
+    },
+    {
+      "id": "m10",
+      "from": "upper",
+      "to": "lower",
+      "y": 835,
+      "label": "rebalance: 5 back to the lower half",
+      "variant": "default",
+      "note": "lower [5, 2, 1], upper [8, 9]"
+    },
+    {
+      "id": "m11",
+      "from": "lower",
+      "to": "stream",
+      "y": 900,
+      "label": "median 5 = middle of 1 2 5 8 9",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Two invariants",
+      "items": [
+        "Lower has as many as upper, or one more",
+        "Every lower number ≤ every upper number",
+        "The median sits at one or two tops"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cost",
+      "items": [
+        "addNum: at most three pushes/pops, O(log n)",
+        "findMedian: read two tops, O(1)",
+        "Sorted array: insert is O(n) because it shifts"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Common traps",
+      "items": [
+        "Alternating without crossing heaps: order breaks",
+        "No rebalancing: the median drifts",
+        "Integer (a + b) / 2: loses the .5"
+      ]
+    }
+  ]
+}

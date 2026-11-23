@@ -14,6 +14,7 @@ stations:
   - name: "Heaps and Top K"
     concepts: [Sift Up and Sift Down, Heapify, Size-K Heap, Three-way Partition]
   - name: "Two Heaps and Scheduling"
+    concepts: [Two Heaps, Running Median, K-way Merge, Idle Slot Counting]
 ---
 
 ## If you are just starting

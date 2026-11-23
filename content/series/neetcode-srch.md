@@ -13,6 +13,7 @@ stations:
   - name: "Heap và top K"
     concepts: [Sift Up and Sift Down, Heapify, Size-K Heap, Three-way Partition]
   - name: "Hai heap và lập lịch"
+    concepts: [Two Heaps, Running Median, K-way Merge, Idle Slot Counting]
 ---
 
 ## Nếu bạn mới bắt đầu

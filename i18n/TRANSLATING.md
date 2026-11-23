@@ -339,6 +339,24 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | bình phương khoảng cách | squared distance |
 | đếm theo cân nặng | counting by weight |
 | sắp xếp mỗi lượt | re-sort every round |
+| hai heap | two heaps |
+| nửa nhỏ, nửa lớn | lower half, upper half |
+| trung vị chạy | running median |
+| trộn k đường, trộn k danh sách | k-way merge |
+| cân lại cỡ | rebalance |
+| xóa trễ | lazy deletion |
+| chèn mảng đã sắp | sorted insert |
+| nhịp | interval |
+| nghỉ | idle |
+| thời gian nguội | cooldown |
+| hàng chờ nguội | cooldown queue |
+| khung, công thức khung | frame, frame formula |
+| bảng tin | news feed, timeline |
+| gom rồi sắp | collect then sort |
+| đồng hồ toàn cục | global clock |
+| đẩy lúc ghi | fan-out on write |
+| đọc lúc cần | fan-out on read |
+| sắp ổn định | stable sort |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

@@ -18,8 +18,9 @@ stations:
   - name: "Cửa sổ trượt"
     concepts: [Sliding Window, Window Invariant, Last-seen Index, Running Minimum, Fixed-size Window, Monotonic Deque, Non-shrinking Window]
   - name: "Ngăn xếp"
-    concepts: [Stack, Bracket Matching, Auxiliary Min Stack, Reverse Polish Notation, Backtracking]
+    concepts: [Stack, Bracket Matching, Auxiliary Min Stack, Reverse Polish Notation, Backtracking, Catalan Number]
   - name: "Ngăn xếp đơn điệu"
+    concepts: [Monotonic Stack, Next Greater Element, Sentinel Value]
 ---
 
 ## Nếu bạn mới bắt đầu

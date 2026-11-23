@@ -189,6 +189,8 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
   .problem-table.full td.grp, .problem-table.full th:nth-child(5) { display: none; }
   .problem-table td.st { font-size: .75rem; white-space: nowrap; }
   .problem-table td.st .st-name { display: none; }
+  .problem-table td, .problem-table th { padding-left: .3rem; padding-right: .3rem; }
+  .problem-table td.diff { white-space: normal; }
 }
 /* Sơ đồ Mermaid (MERMAID_SCRIPT render): cùng khung với khối code */
 .atlas-mermaid {

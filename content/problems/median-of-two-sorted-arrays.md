@@ -17,9 +17,9 @@ sources:
 > [!tldr] Đọc nhanh
 > - Đề: hai mảng tăng dần `a` (m phần tử) và `b` (n phần tử). Trả **trung vị** của cả hai gộp lại, trong O(log(m + n)).
 > - Ý chính: không cần trộn. Cắt `a` ở vị trí `i` và `b` ở `j = half − i` sao cho nửa trái có đúng `half = ⌈(m + n) / 2⌉` phần tử. Vết cắt đúng khi `aL ≤ bR` và `bL ≤ aR`. Câu hỏi "`aL > bR`?" đổi từ "không" sang "có" đúng một lần khi `i` tăng, nên [[concepts/binary-search|chia đôi]] được trên `i`.
-> - Phải chia đôi trên mảng **ngắn hơn**: nếu không, `j` ra khỏi `[0, n]`. Bản không đổi chỗ ném `ArrayIndexOutOfBoundsException` trong Java và sai 13 439 trên 100 000 cặp ngẫu nhiên.
-> - Cạnh rỗng dùng [[concepts/sentinel-value|phần tử canh]] `−∞`/`+∞`. Dùng 0 thay vào sai 8 162 cặp. Chia nguyên khi tổng chẵn (`/` giữa hai `int` trong Java, Go; `//` trong Python) sai khoảng một phần tư số cặp.
-> - Đo ở m = n = 10⁶: trộn 27,6 ms, hai con trỏ 2,2 ms, loại bỏ tìm phần tử thứ k 0,10 µs, cắt 0,08 µs. Với m = 10, n = 10⁶, cách cắt chỉ cần 2 vòng.
+> - Phải chia đôi trên mảng **ngắn hơn**: nếu không, `j` ra khỏi `[0, n]`. Bản không đổi chỗ ném `ArrayIndexOutOfBoundsException` trong Java và sai 13 477 trên 100 000 cặp ngẫu nhiên.
+> - Cạnh rỗng dùng [[concepts/sentinel-value|phần tử canh]] `−∞`/`+∞`. Dùng 0 thay vào sai 9 800 cặp. Chia nguyên khi tổng chẵn (`/` giữa hai `int` trong Java, Go; `//` trong Python) sai khoảng một phần tư số cặp.
+> - Đo ở m = n = 10⁶: trộn 36,8 ms, hai con trỏ 5,2 ms, loại bỏ tìm phần tử thứ k 0,12 µs, cắt 0,07 µs. Với m = 10, n = 10⁶, cách cắt chỉ cần 1 vòng (tối đa 4, vì chỉ có 11 vị trí cắt).
 
 > [!info] Bối cảnh
 > Bài LeetCode 4, bài khó nhất của [[posts/2026-11-23-neetcode-binary-search-answer|ga 2: Tìm kiếm nhị phân trên đáp án]] trên **tuyến NeetCode: Tìm kiếm và heap**. Ở [[posts/2026-11-23-neetcode-binary-search|ga 1]] ta chia đôi trên các ô của một mảng; ở đây ta chia đôi trên **các vị trí cắt có thể**, tức là trên không gian đáp án, đúng tinh thần của ga 2. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn cần biết vòng lặp, mảng và đã đọc [[problems/binary-search|Binary Search]].
@@ -91,7 +91,7 @@ Trộn như bước cuối của merge sort, rồi đọc ô giữa. Dễ đúng
 
 ### Cách 2, hai con trỏ: O(m + n) thời gian, O(1) bộ nhớ
 
-Vẫn trộn, nhưng không lưu: đi `⌊t/2⌋ + 1` bước, chỉ nhớ hai giá trị cuối (`prev`, `cur`). Nhanh hơn cách 1 khoảng 10 lần trong phép đo vì không cấp phát mảng và chỉ đi tới giữa, nhưng vẫn tuyến tính.
+Vẫn trộn, nhưng không lưu: đi `⌊t/2⌋ + 1` bước, chỉ nhớ hai giá trị cuối (`prev`, `cur`). Nhanh hơn cách 1 khoảng 6 tới 20 lần trong phép đo vì không cấp phát mảng và chỉ đi tới giữa, nhưng vẫn tuyến tính.
 
 ### Cách 3, loại bỏ để tìm phần tử thứ k: O(log(m + n))
 
@@ -128,7 +128,7 @@ Hai điều kiện không thể hỏng cùng lúc: `aL > bR ≥ bL > aR` mâu th
 - Nếu `m ≤ n`: `half − m = ⌈(m + n)/2⌉ − m ≥ 0` vì n ≥ m, và `half ≤ n` cũng vì n ≥ m. `j` luôn hợp lệ.
 - Nếu `m > n`: với `a = [1, 2, 3, 4, 5, 6]`, `b = [7]`, `half = 4`, khi `i = 5` thì `j = −1`; với `a = [2]`, `b = []` thì `i = 0` cho `j = 1 > n`.
 
-File TypeScript chạy bản không đổi chỗ và in đúng hai ca đó: `j = -1 ra ngoài b`. Java ném `ArrayIndexOutOfBoundsException`. Trên 100 000 cặp ngẫu nhiên, bản này sai 13 439 cặp (TS) và 13 357 cặp (Java, bộ sinh ngẫu nhiên khác). Lợi ích thứ hai: số vòng chỉ phụ thuộc mảng ngắn. Với m = 10, n = 10⁶, cách cắt mất 2 vòng; loại bỏ tìm phần tử thứ k mất 40.
+File TypeScript chạy bản không đổi chỗ và in đúng hai ca đó: `j = -1 ra ngoài b`. Java ném `ArrayIndexOutOfBoundsException`. Trên 100 000 cặp ngẫu nhiên, bản này sai 13 477 cặp (TS) và 13 357 cặp (Java, bộ sinh ngẫu nhiên khác). Lợi ích thứ hai: số vòng chỉ phụ thuộc mảng ngắn. Với m = 10, n = 10⁶, cách cắt mất 1 vòng (tối đa 4); loại bỏ tìm phần tử thứ k mất 40.
 
 ### Tổng lẻ, tổng chẵn, và chia nguyên
 
@@ -141,13 +141,13 @@ Trung vị của tổng chẵn có thể là `.5`. Ba ngôn ngữ trong năm có
 | Python | `/` cho `2.5`; `//` cho `2` (làm tròn xuống) | `-3 // 2 = -2` | dùng `/` |
 | TS, JS | `2.5` (mọi số là double) | `-1.5` | không cần gì |
 
-Bản chia nguyên sai 8/10 ca test, và khoảng một phần tư số cặp ngẫu nhiên: 25 126 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java). Một phần tư là hợp lý: nó chỉ sai khi tổng chẵn **và** hai ô giữa có tổng lẻ.
+Bản chia nguyên sai 8/10 ca test, và khoảng một phần tư số cặp ngẫu nhiên: 24 681 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java). Một phần tư là hợp lý: nó chỉ sai khi tổng chẵn **và** hai ô giữa có tổng lẻ.
 
 Trong Java còn một bẫy nữa: `(x + y) / 2.0` cộng **trước** trong `int`, rồi mới đổi sang double. Với `x = y = 2 000 000 000`, file Java in `-1.47483648E8`; `((long) x + y) / 2.0` in `2.0E9`. Giới hạn `|x| ≤ 10⁶` của đề làm lỗi này không lộ trên LeetCode, nhưng code dùng lại ở chỗ khác thì có.
 
 ### Phần tử canh: chọn sai giá trị
 
-Bản dùng `0` thay cho `−∞` đúng khi mọi số đều dương, và sai khi một mảng không góp phần tử nào vào nửa trái còn phần của mảng kia toàn số âm: với `[-2, -1]`, `[3]`, vết cắt đúng là `i = 0` trên `[3]`, nên `aL` là phần tử canh 0 và thắng `bL = -1`, cho `0` thay vì `-1`. Trên 100 000 cặp ngẫu nhiên (giá trị trong `[-50, 50]`), nó sai 8 162 cặp.
+Bản dùng `0` thay cho `−∞` đúng khi mọi số đều dương, và sai khi một mảng không góp phần tử nào vào nửa trái còn phần của mảng kia toàn số âm: với `[-2, -1]`, `[3]`, vết cắt đúng là `i = 0` trên `[3]`, nên `aL` là phần tử canh 0 và thắng `bL = -1`, cho `0` thay vì `-1`. Trên 100 000 cặp ngẫu nhiên (giá trị trong `[-50, 50]`), nó sai 9 800 cặp.
 
 Trong Java và Go, phần tử canh là `Integer.MIN_VALUE`/`MAX_VALUE` và `math.MinInt`/`math.MaxInt`. Chúng an toàn vì chỉ được **so sánh**, không bao giờ bị **cộng**: khi tổng chẵn và t ≥ 2, `max(aL, bL)` và `min(aR, bR)` luôn là phần tử thật (nửa trái và nửa phải đều không rỗng). Nếu bạn đổi công thức, ví dụ tính `aL + bR` để so sánh, thì phần tử canh sẽ làm tràn số.
 
@@ -157,12 +157,12 @@ TypeScript, hai mảng số nguyên ngẫu nhiên đã sắp xếp, trung vị 7
 
 | m | n | trộn | hai con trỏ | thứ k | cắt | vòng thứ k | vòng cắt |
 |---|---|---|---|---|---|---|---|
-| 1 000 | 1 000 | 14,2 | 2,2 | 0,055 | 0,052 | 22 | 10 |
-| 100 000 | 100 000 | 2 476,7 | 242,4 | 0,088 | 0,062 | 36 | 13 |
-| 1 000 000 | 1 000 000 | 27 622,5 | 2 212,9 | 0,102 | 0,082 | 42 | 18 |
-| 10 | 1 000 000 | 12 120,3 | 1 045,1 | 0,098 | 0,014 | 40 | 2 |
+| 1 000 | 1 000 | 12,3 | 1,3 | 0,059 | 0,033 | 22 | 9 |
+| 100 000 | 100 000 | 3 183,4 | 518,4 | 0,103 | 0,064 | 36 | 16 |
+| 1 000 000 | 1 000 000 | 36 810,2 | 5 192,1 | 0,121 | 0,069 | 42 | 19 |
+| 10 | 1 000 000 | 11 479,5 | 547,8 | 0,103 | 0,009 | 40 | 1 |
 
-Hai cách tuyến tính tăng gấp khoảng 10 khi n gấp 10. Hai cách logarit gần như đứng yên, và ở hàng cuối cách cắt nhanh gấp 7 lần cách thứ k vì nó chỉ chia đôi trên 11 vị trí cắt của mảng 10 phần tử. Hai con trỏ ở hàng cuối cũng nhanh hơn trộn khoảng 12 lần: nó chỉ đi tới giữa và không cấp phát mảng 10⁶ phần tử.
+Hai cách tuyến tính tăng gấp khoảng 10 khi n gấp 10. Hai cách logarit gần như đứng yên, và ở hàng cuối cách cắt nhanh gấp khoảng 11 lần cách thứ k vì nó chỉ chia đôi trên 11 vị trí cắt của mảng 10 phần tử. Hai con trỏ ở hàng cuối cũng nhanh hơn trộn khoảng 21 lần: nó chỉ đi tới giữa và không cấp phát mảng 10⁶ phần tử.
 
 Ngoài 10 ca test, mỗi file đối chiếu bốn cách với "nối rồi sort" trên 100 000 cặp ngẫu nhiên (mỗi mảng 0 tới 20 phần tử, giá trị trong `[-50, 50]`, nên có rất nhiều số trùng và mảng rỗng). Cả bốn cách sai 0 cặp ở cả năm ngôn ngữ.
 
@@ -454,15 +454,15 @@ mergeThenPick         sai 0 cặp
 twoPointer            sai 0 cặp
 kthElimination        sai 0 cặp
 partition             sai 0 cặp
-partitionNoSwap       sai 13439 cặp
-partitionZeroSentinel sai 8162 cặp
-partitionIntMedian    sai 25126 cặp
+partitionNoSwap       sai 13477 cặp
+partitionZeroSentinel sai 9800 cặp
+partitionIntMedian    sai 24681 cặp
 
 m          n          trộn (µs)  hai con trỏ (µs)  thứ k (µs)  cắt (µs)  bước thứ k  bước cắt
-1000       1000            14.2               2.2       0.055     0.052          22        10
-100000     100000        2476.7             242.4       0.088     0.062          36        13
-1000000    1000000      27622.5            2212.9       0.102     0.082          42        18
-10         1000000      12120.3            1045.1       0.098     0.014          40         2
+1000       1000            12.3               1.3       0.059     0.033          22         9
+100000     100000        3183.4             518.4       0.103     0.064          36        16
+1000000    1000000      36810.2            5192.1       0.121     0.069          42        19
+10         1000000      11479.5             547.8       0.103     0.009          40         1
 ```
 
 File Java in thêm phép cộng tràn:

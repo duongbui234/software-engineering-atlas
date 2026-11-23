@@ -60,7 +60,7 @@ flowchart TB
 
 ## Vấn đề
 
-Cách thẳng nhất là thử k = 1, 2, 3… và dừng ở tốc độ đầu tiên kịp. Mỗi lần thử đọc cả n đống, và đáp án có thể tới `max(piles)` = 10⁹, nên ca tệ nhất là 10⁹ · 10⁴ phép tính. Đo với n = 1 000 đống và h = 2 000: đáp án 331 mất 0,4 ms, đáp án 33 125 mất 32,7 ms, tăng đúng theo đáp án. Với đống tới 10⁹, đáp án là 340 737 701; ngoại suy từ hai số trên, thử lần lượt sẽ mất khoảng 5–6 phút (không chạy).
+Cách thẳng nhất là thử k = 1, 2, 3… và dừng ở tốc độ đầu tiên kịp. Mỗi lần thử đọc cả n đống, và đáp án có thể tới `max(piles)` = 10⁹, nên ca tệ nhất là 10⁹ · 10⁴ phép tính. Đo với n = 1 000 đống và h = 2 000: đáp án 333 mất 0,4 ms, đáp án 32 496 mất 35,2 ms, tăng đúng theo đáp án (khoảng 1,1 µs mỗi lần thử). Với đống tới 10⁹, đáp án là 330 436 692; ngoại suy từ các số trên, thử lần lượt sẽ mất khoảng 6 phút (không chạy).
 
 Không có mảng nào đã sắp ở đây, nhưng có một thứ tự: nếu tốc độ k kịp thì k + 1 cũng kịp, vì mỗi đống mất không nhiều giờ hơn. Dọc theo k = 1, 2, …, max, câu trả lời có dạng "trễ, trễ, …, trễ, kịp, kịp, …, kịp". Tìm chữ "kịp" đầu tiên là bài [[concepts/lower-bound|cận dưới]] của ga 1, chỉ khác là "mảng" giờ là một hàm tính khi cần.
 
@@ -139,10 +139,10 @@ TypeScript, n = 1 000 đống, h = 2 000, trung vị 5 lần chạy:
 
 | Đống tới | Đáp án | Thử lần lượt | Tìm nhị phân |
 |---|---|---|---|
-| 1 000 | 331 | 0,4 ms | 0,013 ms |
-| 10 000 | 3 326 | 3,6 ms | 0,016 ms |
-| 100 000 | 33 125 | 32,7 ms | 0,019 ms |
-| 10⁹ | 340 737 701 | (không chạy) | 0,035 ms |
+| 1 000 | 333 | 0,4 ms | 0,013 ms |
+| 10 000 | 3 301 | 3,5 ms | 0,017 ms |
+| 100 000 | 32 496 | 35,2 ms | 0,023 ms |
+| 10⁹ | 330 436 692 | (không chạy) | 0,039 ms |
 
 Thử lần lượt tăng đúng theo đáp án, gấp 10 lần mỗi hàng. Tìm nhị phân gần như phẳng: số lần thử chỉ tăng từ 10 lên 30.
 

@@ -97,7 +97,9 @@ for (const [name, make] of impls) {
 
 // Đo: n lần push ngẫu nhiên, mỗi lần push gọi getMin một lần.
 let seed = 42;
-const rand = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31);
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a: number): number { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rand = () => ((seed = (seed + 0x6d2b79f5) | 0), mix32(seed) >>> 1);
 const time = (make: () => MinStackLike, n: number, runs: number) => {
   const xs = Array.from({ length: n }, () => rand() - 2 ** 30);
   const ts: number[] = [];

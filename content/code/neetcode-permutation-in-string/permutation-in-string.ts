@@ -79,7 +79,9 @@ for (const fn of [sortEachWindow, slideCompare26, matchesCounter, wrongSetOnly, 
   console.log(`${fn.name.padEnd(16)} ${cases.length - bad.length}/${cases.length} ca đúng${bad.length ? "; sai ở " + bad.map(([a, b]) => `(${a}, ${b})`).join(" ") : ""}`);
 }
 
-const rand = (() => { let x = 5; return () => (x = (x * 1103515245 + 12345) % 2 ** 31) / 2 ** 31; })();
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a: number): number { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rand = (() => { let x = 5; return () => ((x = (x + 0x6d2b79f5) | 0), mix32(x) >>> 1) / 2 ** 31; })();
 const make = (n: number) => Array.from({ length: n }, () => String.fromCharCode(97 + Math.floor(rand() * 26))).join("");
 const time = (f: () => unknown, runs: number) => {
   const ts: number[] = [];

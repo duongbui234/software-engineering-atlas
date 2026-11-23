@@ -61,7 +61,7 @@ flowchart TB
 
 ## The problem
 
-The most direct way is to try k = 1, 2, 3… and stop at the first speed that is in time. Each try reads all n piles, and the answer can reach `max(piles)` = 10⁹, so the worst case is 10⁹ · 10⁴ operations. Measured with n = 1,000 piles and h = 2,000: an answer of 331 takes 0.4 ms, an answer of 33,125 takes 32.7 ms, growing exactly with the answer. With piles up to 10⁹ the answer is 340,737,701; extrapolating from those two numbers, trying each speed would take about 5–6 minutes (not run).
+The most direct way is to try k = 1, 2, 3… and stop at the first speed that is in time. Each try reads all n piles, and the answer can reach `max(piles)` = 10⁹, so the worst case is 10⁹ · 10⁴ operations. Measured with n = 1,000 piles and h = 2,000: an answer of 333 takes 0.4 ms, an answer of 32,496 takes 35.2 ms, growing exactly with the answer (about 1.1 µs per try). With piles up to 10⁹ the answer is 330,436,692; extrapolating from these numbers, trying each speed would take about 6 minutes (not run).
 
 There is no sorted array here, but there is an order: if speed k is in time, so is k + 1, because no pile takes more hours. Along k = 1, 2, …, max, the answers read "too slow, too slow, …, too slow, in time, in time, …, in time". Finding the first "in time" is the [[en/concepts/lower-bound|lower bound]] problem from station 1, except the "array" is now a function computed on demand.
 
@@ -142,10 +142,10 @@ TypeScript, n = 1,000 piles, h = 2,000, median of 5 runs:
 
 | Piles up to | Answer | Trying each speed | Binary search |
 |---|---|---|---|
-| 1,000 | 331 | 0.4 ms | 0.013 ms |
-| 10,000 | 3,326 | 3.6 ms | 0.016 ms |
-| 100,000 | 33,125 | 32.7 ms | 0.019 ms |
-| 10⁹ | 340,737,701 | (not run) | 0.035 ms |
+| 1,000 | 333 | 0.4 ms | 0.013 ms |
+| 10,000 | 3,301 | 3.5 ms | 0.017 ms |
+| 100,000 | 32,496 | 35.2 ms | 0.023 ms |
+| 10⁹ | 330,436,692 | (not run) | 0.039 ms |
 
 Trying each speed grows exactly with the answer, 10× per row. Binary search is nearly flat: the number of tries only grows from 10 to 30.
 

@@ -1,6 +1,6 @@
 ---
 title: "Min Stack: remembering the min at every level, the missing equals sign, and two traps only Java has"
-description: "Design a stack that returns its smallest element in O(1): every level always remembers the min up to that level; this page compares four approaches (scanning, pairs, two stacks, storing differences), measures scanning thousands of times slower, and reproduces three wrong versions: a missing =, comparing Integers with ==, and a difference overflowing int."
+description: "Design a stack that returns its smallest element in O(1): every level always remembers the min up to that level; this page compares four approaches (scanning, pairs, two stacks, storing differences), measures scanning nearly a thousand times slower, and reproduces three wrong versions: a missing =, comparing Integers with ==, and a difference overflowing int."
 date: 2026-11-23T19:00:00+07:00
 tags: [algorithms, neetcode, stack, design]
 type: problem
@@ -17,7 +17,7 @@ sources:
 
 > [!tldr] Quick read
 > - The problem: a stack with the usual `push`, `pop`, `top`, plus `getMin` returning the smallest element. **Every operation O(1).**
-> - Scanning the whole stack on each `getMin` is O(n): 4 seconds for 40 000 pushes interleaved with getMin.
+> - Scanning the whole stack on each `getMin` is O(n): 0.8 seconds for 40 000 pushes interleaved with getMin, nearly a thousand times slower than the O(1) approaches.
 > - The key: a stack's min only changes on push or pop, and pop always returns the stack to **exactly its previous state**. So each level remembering "the min up to this level" is enough ([[en/concepts/auxiliary-min-stack|auxiliary min stack]]).
 > - The two-stack approach must push when `x <= min`, **with the equals sign**. Without it, two equal minimums plus one pop lose the min.
 > - Java has two traps of its own: comparing `peek()` of two `Deque<Integer>` with `==` (wrong from 128 up), and storing the difference `x − min` in an `int` (overflows at the 32-bit edges).
@@ -100,13 +100,15 @@ n pushes of random numbers, each push followed by one `getMin`, TypeScript, medi
 
 | n | scanning | pairs | two stacks | differences |
 |---|---|---|---|---|
-| 5 000 | 20.2 ms | 0.44 ms | 0.32 ms | 0.32 ms |
-| 10 000 | 270.0 ms | 0.44 ms | 0.27 ms | 0.10 ms |
-| 20 000 | 1 005.4 ms | 0.92 ms | 0.56 ms | 0.27 ms |
-| 40 000 | 4 015.8 ms | 1.76 ms | 0.82 ms | 1.66 ms |
-| 10⁶ | (not run) | 74.08 ms | 24.63 ms | 21.95 ms |
+| 5 000 | 13.2 ms | 0.47 ms | 0.26 ms | 0.32 ms |
+| 10 000 | 154.5 ms | 0.22 ms | 0.28 ms | 0.19 ms |
+| 20 000 | 206.6 ms | 1.04 ms | 0.66 ms | 0.61 ms |
+| 40 000 | 812.4 ms | 0.92 ms | 0.49 ms | 0.53 ms |
+| 10⁶ | (not run) | 64.55 ms | 17.11 ms | 16.83 ms |
 
-From 10 000 up, doubling n makes scanning about 4 times slower: the n² shape of n calls to an O(n) `getMin`. (The step from 5 000 to 10 000 jumps by 13 times; I suspect the JIT compiler, but didn't measure that separately.) At 10⁶, pairs are about 3 times slower than the other two because each level allocates a new `[x, min]` array.
+From 20 000 to 40 000, doubling n makes scanning 3.9 times slower: the n² shape of n calls to an O(n) `getMin`. The first two steps break that shape (12 times, then only 1.3 times, the same on all three runs); I suspect the JIT compiler optimizing the scan loop partway through, but didn't measure that separately. At 10⁶, pairs are nearly 4 times slower than the other two because each level allocates a new `[x, min]` array.
+
+An earlier version of this page gave 4 seconds for scanning at 40 000. That was measured on data from the old random generator (`seed * 1103515245` computed in floating point), which lost precision and repeated after about 10 thousand values; why the repeated data made the scan loop 5 times slower I haven't measured. The file now uses the mulberry32 generator (every multiplication goes through `Math.imul`).
 
 ### Under the hood of the five languages
 
@@ -287,11 +289,11 @@ DiffMinStack        6/6 cases passed
 StrictLessMinStack  5/6 cases passed; wrong on: repeated min
 
 n          scan     pairs   2 stacks  diffs   (ms, median)
-5000         20.2    0.44     0.32    0.32
-10000       270.0    0.44     0.27    0.10
-20000      1005.4    0.92     0.56    0.27
-40000      4015.8    1.76     0.82    1.66
-1000000         —   74.08    24.63   21.95
+5000         13.2    0.47     0.26    0.32
+10000       154.5    0.22     0.28    0.19
+20000       206.6    1.04     0.66    0.61
+40000       812.4    0.92     0.49    0.53
+1000000         —   64.55    17.11   16.83
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*

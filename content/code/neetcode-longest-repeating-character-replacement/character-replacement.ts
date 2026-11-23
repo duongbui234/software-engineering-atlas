@@ -62,7 +62,9 @@ for (const fn of [bruteForce, windowRecount, windowStaleMax, wrongKeepLeftChar])
 }
 
 // maxFreq cũ lớn hơn max thật bao nhiêu lần, mà kết quả vẫn đúng?
-const rand = (() => { let x = 11; return () => (x = (x * 1103515245 + 12345) % 2 ** 31) / 2 ** 31; })();
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a: number): number { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rand = (() => { let x = 11; return () => ((x = (x + 0x6d2b79f5) | 0), mix32(x) >>> 1) / 2 ** 31; })();
 const make = (n: number, letters: number) => Array.from({ length: n }, () => String.fromCharCode(65 + Math.floor(rand() * letters))).join("");
 {
   const s = make(100_000, 4), k = 3, count = new Array(26).fill(0);

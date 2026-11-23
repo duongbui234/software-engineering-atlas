@@ -56,7 +56,7 @@ flowchart TB
 
 ## Vấn đề: không có mảng để tìm
 
-Bài [[problems/koko-eating-bananas|Koko Eating Bananas]] hỏi tốc độ ăn nhỏ nhất để hết n đống chuối trong h giờ. Không có mảng tốc độ nào; chỉ có cách tính "với tốc độ k, mất bao nhiêu giờ". Thử k = 1, 2, 3… thì số lần thử bằng chính đáp án: đo với 1 000 đống, đáp án 33 125 mất 32,7 ms, còn đống tới 10⁹ (đáp án khoảng 3,4 · 10⁸) thì ngoại suy ra vài phút.
+Bài [[problems/koko-eating-bananas|Koko Eating Bananas]] hỏi tốc độ ăn nhỏ nhất để hết n đống chuối trong h giờ. Không có mảng tốc độ nào; chỉ có cách tính "với tốc độ k, mất bao nhiêu giờ". Thử k = 1, 2, 3… thì số lần thử bằng chính đáp án: đo với 1 000 đống, đáp án 32 496 mất 35,2 ms, còn đống tới 10⁹ (đáp án khoảng 3,3 · 10⁸) thì ngoại suy ra khoảng 6 phút.
 
 Nhưng câu trả lời của phép thử có thứ tự: tốc độ k kịp thì k + 1 cũng kịp. Dọc theo k, các câu trả lời là "trễ, …, trễ, kịp, …, kịp". Đó chính là "mảng" `false…false true…true`, chỉ có điều mỗi ô được tính khi cần. Tìm `true` đầu tiên là [[concepts/lower-bound|cận dưới]] của ga 1: 30 lần thử cho khoảng tới 10⁹, đo được 0,035 ms.
 

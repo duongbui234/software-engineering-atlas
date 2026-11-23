@@ -76,7 +76,7 @@ với mỗi i:
 Ba điểm làm khuôn này đúng:
 1. **Lưu chỉ số**, không lưu giá trị: câu trả lời thường là một khoảng cách hay một độ rộng.
 2. **Thứ tự trên ngăn xếp** bảo đảm vòng `while` dừng đúng lúc: phần tử mới không phá thứ tự với đỉnh thì cũng không phá với ai bên dưới.
-3. **Mỗi chỉ số vào một lần, ra tối đa một lần.** Tổng số lần `pop` qua mọi vòng không quá n, nên O(n). Trên 10⁶ ngày ngẫu nhiên, file đo đếm được 986 048 lần pop.
+3. **Mỗi chỉ số vào một lần, ra tối đa một lần.** Tổng số lần `pop` qua mọi vòng không quá n, nên O(n). Trên 10⁶ ngày ngẫu nhiên, file đo đếm được 986 082 lần pop.
 
 ### Ba bài, hai câu hỏi
 

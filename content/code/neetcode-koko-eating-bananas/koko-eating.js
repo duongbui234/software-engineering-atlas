@@ -32,7 +32,9 @@ console.log(`minEatingSpeed  ${cases.length - bad.length}/${cases.length} ca đ�
 // p và k tới 10⁹ (giới hạn của đề): p / k là double làm tròn đúng, nên Math.ceil không bao giờ lệch.
 // Kiểm 10⁶ cặp ngẫu nhiên, nửa số cặp có p chia hết cho k.
 let seed = 7, diff = 0;
-const rand = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a) { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rand = () => ((seed = (seed + 0x6d2b79f5) | 0), mix32(seed) >>> 1) / 2 ** 31;
 for (let t = 0; t < 1_000_000; t++) {
   const k = 1 + Math.floor(rand() * 1e9);
   const p = t % 2 ? k * Math.floor(1 + rand() * (1e9 / k)) : 1 + Math.floor(rand() * 1e9);

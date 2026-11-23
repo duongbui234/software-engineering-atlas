@@ -1,6 +1,6 @@
 ---
 title: "Min Stack: nhớ min theo từng tầng, dấu bằng bị quên, và hai bẫy chỉ Java có"
-description: "Thiết kế ngăn xếp trả phần tử nhỏ nhất trong O(1): mỗi tầng nhớ luôn min tới tầng đó; bài này so bốn cách (duyệt, cặp, hai ngăn xếp, lưu hiệu), đo cách duyệt chậm hơn hàng nghìn lần, và tái hiện ba bản sai: thiếu dấu =, so Integer bằng ==, và hiệu tràn int."
+description: "Thiết kế ngăn xếp trả phần tử nhỏ nhất trong O(1): mỗi tầng nhớ luôn min tới tầng đó; bài này so bốn cách (duyệt, cặp, hai ngăn xếp, lưu hiệu), đo cách duyệt chậm hơn gần nghìn lần, và tái hiện ba bản sai: thiếu dấu =, so Integer bằng ==, và hiệu tràn int."
 date: 2026-11-23T19:00:00+07:00
 tags: [algorithms, neetcode, stack, design]
 type: problem
@@ -16,7 +16,7 @@ sources:
 
 > [!tldr] Đọc nhanh
 > - Đề: một ngăn xếp có `push`, `pop`, `top` như thường, thêm `getMin` trả phần tử nhỏ nhất. **Mọi thao tác O(1).**
-> - Duyệt cả ngăn xếp mỗi lần `getMin` là O(n): 4 giây với 40 000 lần push xen getMin.
+> - Duyệt cả ngăn xếp mỗi lần `getMin` là O(n): 0,8 giây với 40 000 lần push xen getMin, gần nghìn lần chậm hơn các cách O(1).
 > - Mấu chốt: min của một ngăn xếp chỉ đổi khi push hoặc pop, và pop luôn trả ngăn xếp về **đúng trạng thái trước đó**. Nên mỗi tầng nhớ luôn "min tính tới tầng này" là đủ ([[concepts/auxiliary-min-stack|ngăn xếp phụ cho min]]).
 > - Cách hai ngăn xếp phải đẩy khi `x <= min`, **có dấu bằng**. Thiếu dấu bằng, hai số min bằng nhau, pop một cái là mất min.
 > - Java có hai bẫy riêng: so `peek()` của hai `Deque<Integer>` bằng `==` (sai từ 128 trở lên), và lưu hiệu `x − min` bằng `int` (tràn ở biên 32 bit).
@@ -99,13 +99,15 @@ n lần push số ngẫu nhiên, mỗi lần push gọi `getMin` một lần, Ty
 
 | n | duyệt | cặp | hai ngăn xếp | lưu hiệu |
 |---|---|---|---|---|
-| 5 000 | 20,2 ms | 0,44 ms | 0,32 ms | 0,32 ms |
-| 10 000 | 270,0 ms | 0,44 ms | 0,27 ms | 0,10 ms |
-| 20 000 | 1 005,4 ms | 0,92 ms | 0,56 ms | 0,27 ms |
-| 40 000 | 4 015,8 ms | 1,76 ms | 0,82 ms | 1,66 ms |
-| 10⁶ | (không chạy) | 74,08 ms | 24,63 ms | 21,95 ms |
+| 5 000 | 13,2 ms | 0,47 ms | 0,26 ms | 0,32 ms |
+| 10 000 | 154,5 ms | 0,22 ms | 0,28 ms | 0,19 ms |
+| 20 000 | 206,6 ms | 1,04 ms | 0,66 ms | 0,61 ms |
+| 40 000 | 812,4 ms | 0,92 ms | 0,49 ms | 0,53 ms |
+| 10⁶ | (không chạy) | 64,55 ms | 17,11 ms | 16,83 ms |
 
-Từ 10 000 trở lên, n gấp đôi thì cách duyệt chậm gấp khoảng 4 lần: dáng n² của n lần `getMin` O(n). (Bước từ 5 000 lên 10 000 nhảy tới 13 lần; mình đoán là do bộ biên dịch JIT, không đo riêng.) Ở 10⁶, cách cặp chậm hơn hai cách kia khoảng 3 lần vì mỗi tầng cấp phát một mảng `[x, min]` mới.
+Từ 20 000 lên 40 000, n gấp đôi thì cách duyệt chậm gấp 3,9 lần: dáng n² của n lần `getMin` O(n). Hai bước đầu lệch dáng (gấp 12 lần rồi chỉ 1,3 lần, cả ba lần chạy đều vậy); mình đoán là do bộ biên dịch JIT tối ưu vòng duyệt giữa chừng, không đo riêng. Ở 10⁶, cách cặp chậm hơn hai cách kia gần 4 lần vì mỗi tầng cấp phát một mảng `[x, min]` mới.
+
+Bản trước của trang ghi cách duyệt mất 4 giây ở 40 000. Số đó đo trên dữ liệu của bộ sinh ngẫu nhiên cũ (`seed * 1103515245` tính bằng số thực), vốn mất chính xác và lặp lại sau khoảng 10 nghìn giá trị; vì sao dữ liệu lặp lại làm vòng duyệt chậm thêm 5 lần thì mình chưa đo. File giờ dùng bộ sinh mulberry32 (mọi phép nhân qua `Math.imul`).
 
 ### Bên dưới năm ngôn ngữ
 
@@ -286,11 +288,11 @@ DiffMinStack        6/6 ca đúng
 StrictLessMinStack  5/6 ca đúng; sai ở: min lặp lại
 
 n          duyệt    cặp     hai ngăn  hiệu    (ms, trung vị)
-5000         20.2    0.44     0.32    0.32
-10000       270.0    0.44     0.27    0.10
-20000      1005.4    0.92     0.56    0.27
-40000      4015.8    1.76     0.82    1.66
-1000000         —   74.08    24.63   21.95
+5000         13.2    0.47     0.26    0.32
+10000       154.5    0.22     0.28    0.19
+20000       206.6    1.04     0.66    0.61
+40000       812.4    0.92     0.49    0.53
+1000000         —   64.55    17.11   16.83
 ```
 
 File Java tái hiện hai bẫy riêng của nó:

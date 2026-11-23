@@ -17,7 +17,7 @@ sources:
 > - The problem: an uppercase string `s` and a number k. You may change at most k characters; return the length of the longest substring that can become **a single letter** (`"AABABBA"`, k = 1 → 4).
 > - A window works when `length − maxFreq ≤ k`, where `maxFreq` is the count of the most frequent letter in the window: keep that letter, change the rest. This is the [[en/concepts/window-invariant|invariant]] of the [[en/concepts/sliding-window|sliding window]].
 > - The neatest approach is a [[en/concepts/non-shrinking-window|non-shrinking window]]: each step the window grows by 1 or slides as a whole, and `maxFreq` **never drops** even after the left character leaves. The answer is the window's final length.
-> - In the measurement, the stale `maxFreq` is larger than the true value at 99 943 of 100 000 steps, yet the answer is still right. The reason: the window only grows when a letter reaches a **new record** frequency, and at that moment the frequency is real.
+> - In the measurement, the stale `maxFreq` is larger than the true value at 99 973 of 100 000 steps, yet the answer is still right. The reason: the window only grows when a letter reaches a **new record** frequency, and at that moment the frequency is real.
 > - Trap: keeping the letter at the **left end** instead of the most frequent one (`"BAAAB"`, k = 2 gives 4 instead of 5).
 
 > [!info] Context
@@ -91,7 +91,7 @@ Let L be the window's length. At first the window grows every step and nothing i
 - **The window grows only when maxFreq goes up.** Adding a character without changing `maxFreq` gives `L + 1 − maxFreq = k + 1 > k`, so it must slide. `maxFreq` going up means the character **just added** appears exactly `maxFreq` times in the **current** window, and those counts are real. So every length the window reaches belongs to a substring that really works: the answer is never too large.
 - **The answer is never too small.** To find a substring longer than L, it must contain a letter at least `L + 1 − k = maxFreq + 1` times, more than any frequency seen so far. When the window (length L, sliding across that substring) meets that many occurrences, `maxFreq` goes up and the window grows. A `maxFreq` lower than the record helps with nothing, so there is no need to lower it.
 
-In short: `maxFreq` doesn't need to be right for the current window; it only needs to be the **record**, because only a new record can raise the answer. The TypeScript file counts it: on 100 000 random characters, the stale `maxFreq` is above the true value at 99 943 steps, the result still matches the recounting version, and 5 000 random strings checked against brute force show no mismatch.
+In short: `maxFreq` doesn't need to be right for the current window; it only needs to be the **record**, because only a new record can raise the answer. The TypeScript file counts it: on 100 000 random characters, the stale `maxFreq` is above the true value at 99 973 steps, the result still matches the recounting version, and 5 000 random strings checked against brute force show no mismatch.
 
 ### Measured
 
@@ -99,11 +99,11 @@ TypeScript, random letters, k = 2, median:
 
 | n | letters | brute force | shrink + recount | non-shrinking |
 |---|---|---|---|---|
-| 2 000 | 26 | 4.6 ms | 0.38 ms | 0.01 ms |
-| 4 000 | 26 | 17.9 ms | 0.79 ms | 0.01 ms |
-| 8 000 | 26 | 70.5 ms | 1.52 ms | 0.02 ms |
-| 10⁶ | 26 | (not run) | 191.96 ms | 3.04 ms |
-| 10⁶ | 2 | (not run) | 123.92 ms | 3.11 ms |
+| 2 000 | 26 | 5.0 ms | 0.42 ms | 0.01 ms |
+| 4 000 | 26 | 19.8 ms | 0.86 ms | 0.01 ms |
+| 8 000 | 26 | 77.7 ms | 1.70 ms | 0.03 ms |
+| 10⁶ | 26 | (not run) | 212.22 ms | 3.30 ms |
+| 10⁶ | 2 | (not run) | 136.31 ms | 3.20 ms |
 
 At 10⁶ characters, dropping the recount is about 60 times faster: `Math.max(...count)` scans 26 cells and spreads the array into 26 arguments on every call.
 
@@ -263,15 +263,15 @@ windowRecount     8/8 cases passed
 windowStaleMax    8/8 cases passed
 wrongKeepLeftChar 6/8 cases passed; wrong on BAAAB k=2 → 4, ABBB k=2 → 3
 
-n = 100000, 4 letters, k = 3: stale maxFreq above the true max at 99943 steps; windowStaleMax = 15, windowRecount = 15
+n = 100000, 4 letters, k = 3: stale maxFreq above the true max at 99973 steps; windowStaleMax = 15, windowRecount = 15
 checked 5000 random strings against brute force: 0 mismatches
 
 n          letters  brute   shrink + recount  non-shrinking  (ms, median)
-2000        26       4.6           0.38       0.01
-4000        26      17.9           0.79       0.01
-8000        26      70.5           1.52       0.02
-1000000     26         —         191.96       3.04
-1000000      2         —         123.92       3.11
+2000        26       5.0           0.42       0.01
+4000        26      19.8           0.86       0.01
+8000        26      77.7           1.70       0.03
+1000000     26         —         212.22       3.30
+1000000      2         —         136.31       3.20
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*

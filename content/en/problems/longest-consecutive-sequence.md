@@ -20,7 +20,7 @@ sources:
 > - [[en/concepts/brute-force|Brute force]] looks for `x + 1, x + 2…` by rescanning the whole array: O(n³) in the worst case; 2 000 numbers already take 1.5 seconds.
 > - [[en/concepts/sort-then-scan|Sort then scan]]: O(n log n), but **duplicates** must be skipped rather than breaking the run, and JS needs a comparator.
 > - [[en/concepts/hash-set|Hash set]] + **run starts**: count from x only when `x − 1` is not in the set. Each value is stepped over once, so the total is O(n) even with a `while` nested inside a `for` ([[en/concepts/aggregate-analysis|aggregate analysis]]).
-> - Real measurements: with 10⁶ numbers, the hash set beats sorting by 14 times in TypeScript, but by only 1.3 times in Python on random data.
+> - Real measurements: with 10⁶ numbers, the hash set beats sorting by only 1.4–1.5 times in TypeScript and 1.3–2.7 times in Python. O(n) wins, but not by far.
 
 > [!info] Context
 > LeetCode problem 128, part of [[en/posts/2026-11-22-neetcode-hash-lookup|station 1: Hash Lookup]] on **the NeetCode line: Arrays and Strings**. The station post introduced the "write everything into a set, then ask about `x − 1`" template; this page digs into why that template is O(n) and compares it with the other two approaches. The solutions come in TypeScript, Python, Go, Java and JavaScript. All you need to know is loops, arrays and functions.
@@ -78,9 +78,9 @@ For each x, ask "is `x + 1` in the array?" by scanning the whole array (`include
 
 | n | 250 | 500 | 1 000 | 2 000 |
 |---|---|---|---|---|
-| ms (TypeScript) | 3.5 | 24.5 | 190.9 | 1 513.2 |
+| ms (TypeScript) | 3.5 | 24.6 | 182.3 | 1 425.4 |
 
-Doubling n multiplies the time by about 8: exactly the shape of n³.
+Doubling n multiplies the time by about 7–8, approaching 8: exactly the shape of n³.
 
 ### Approach 2, sort then scan: O(n log n)
 
@@ -110,12 +110,14 @@ Two kinds of data: 10⁶ **random** numbers within ±10⁹ (almost no long runs)
 
 | n = 10⁶ | sorting | hash set | hash set faster by |
 |---|---|---|---|
-| TypeScript, random | 209.65 | 14.51 | 14 times |
-| TypeScript, one long run | 247.07 | 136.69 | 1.8 times |
+| TypeScript, random | 225.38 | 150.48 | 1.5 times |
+| TypeScript, one long run | 229.15 | 162.41 | 1.4 times |
 | Python, random | 370.71 | 279.47 | 1.3 times |
 | Python, one long run | 352.89 | 128.51 | 2.7 times |
 
 The hash set wins every cell, but the gap depends heavily on the language and the data. Python's `sorted` is written in C and runs entirely in C; the hash-set loop executes one Python statement per step. Big-O says which curve gets steeper as n grows, not how far apart they are at n = 10⁶.
+
+An earlier version of this page gave 14 times for TypeScript on random data. That number was wrong because of the data: the old random generator (`seed * 1103515245` computed in floating point) lost precision and repeated after about 10 thousand values, so "10⁶ random numbers" really held only about 10 thousand distinct values, and a small set is fast. The file now uses the mulberry32 generator (every multiplication goes through `Math.imul`), which gives 10⁶ almost entirely distinct values.
 
 ### Under the hood of the five languages
 
@@ -296,17 +298,17 @@ sortScanNoComparator      4/7 cases passed; wrong on [100,4,200,1,3,2] [-3,-1,-2
 
 brute force, one shuffled long run (ms, single run)
 n = 250         3.5
-n = 500        24.5
-n = 1000      190.9
-n = 2000     1513.2
+n = 500        24.6
+n = 1000      182.3
+n = 2000     1425.4
 
 n          data              sorting  hash set   (ms, median of 5 runs)
-10000      random ±10⁹           1.67      1.05
-10000      one long run          1.53      0.73
-100000     random ±10⁹          18.81      2.04
-100000     one long run         20.18      9.06
-1000000    random ±10⁹         209.65     14.51
-1000000    one long run        247.07    136.69
+10000      random ±10⁹           1.59      0.97
+10000      one long run          1.28      0.63
+100000     random ±10⁹          19.03      8.91
+100000     one long run         18.29      8.37
+1000000    random ±10⁹         225.38    150.48
+1000000    one long run        229.15    162.41
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
@@ -331,7 +333,7 @@ The two `1001`s are two different `Integer` objects, so `==` treats them as diff
 - **JS: forgetting the comparator in `sort()`.** Negative and multi-digit numbers land in the wrong order; the wrong version passes only 4/7 cases.
 - **Java: comparing `Integer`s with `==`.** Right for small numbers, wrong from 128 up, so tests with small numbers don't catch it. Use `equals`, or sort an `int[]` instead of a `List<Integer>`.
 - **Python: writing `x + 1 in nums` with `nums` a list.** It runs correctly, but each lookup is O(n), and the solution silently becomes O(n²) or worse.
-- **"O(n) is surely much faster than O(n log n)."** In Python on random data, the hash set beats `sorted` by only 1.3 times at 10⁶ elements. Both pass LeetCode's limits; only the problem statement forces O(n).
+- **"O(n) is surely much faster than O(n log n)."** On random data at 10⁶ elements, the hash set beats sorting by only 1.5 times in TypeScript and 1.3 times in Python. Both pass LeetCode's limits; only the problem statement forces O(n).
 
 ## Self-check questions
 

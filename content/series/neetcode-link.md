@@ -7,6 +7,7 @@ region: Vùng Thuật toán
 draft: false
 stations:
   - name: "Con trỏ trên danh sách liên kết"
+    concepts: [Linked List, Dummy Node, Fast and Slow Pointers, In-place Pointer Reversal]
   - name: "Danh sách liên kết nâng cao"
   - name: "Đệ quy trên cây"
   - name: "Cây nhị phân tìm kiếm"

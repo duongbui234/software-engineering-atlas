@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Lật danh sách 1 → 2 → 3 bằng ba con trỏ",
+    "output": "content/diagrams/neetcode-linked-list/pointer-dance.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "prev",
+      "type": "database",
+      "label": "Phần đã lật",
+      "sublabel": "prev: đầu của khúc đã đảo chiều"
+    },
+    {
+      "id": "cur",
+      "type": "backend",
+      "label": "Nút đang lật",
+      "sublabel": "cur: nút đổi hướng mũi tên"
+    },
+    {
+      "id": "next",
+      "type": "frontend",
+      "label": "Phần chưa lật",
+      "sublabel": "next: giữ chỗ trước khi cắt"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 390,
+      "label": "bước 1: nút 1"
+    },
+    {
+      "from": 390,
+      "to": 630,
+      "label": "bước 2: nút 2"
+    },
+    {
+      "from": 630,
+      "to": 930,
+      "label": "bước 3: nút 3 rồi dừng"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "cur",
+      "to": "next",
+      "y": 175,
+      "label": "bước 1: giữ phần còn lại trước",
+      "variant": "default",
+      "note": "next = cur.next → nút 2"
+    },
+    {
+      "id": "m1",
+      "from": "cur",
+      "to": "prev",
+      "y": 235,
+      "label": "lật: nút 1 trỏ ngược về prev",
+      "variant": "default",
+      "note": "cur.next = prev (rỗng)"
+    },
+    {
+      "id": "m2",
+      "from": "prev",
+      "to": "cur",
+      "y": 295,
+      "label": "prev tiến lên nút 1",
+      "variant": "default",
+      "note": "prev = cur"
+    },
+    {
+      "id": "m3",
+      "from": "next",
+      "to": "cur",
+      "y": 355,
+      "label": "cur tiến lên nút 2",
+      "variant": "default",
+      "note": "cur = next; đã lật: 1"
+    },
+    {
+      "id": "m4",
+      "from": "cur",
+      "to": "next",
+      "y": 415,
+      "label": "bước 2: giữ nút 3",
+      "variant": "default",
+      "note": "next = cur.next"
+    },
+    {
+      "id": "m5",
+      "from": "cur",
+      "to": "prev",
+      "y": 475,
+      "label": "lật: nút 2 trỏ về nút 1",
+      "variant": "default",
+      "note": "cur.next = prev"
+    },
+    {
+      "id": "m6",
+      "from": "prev",
+      "to": "cur",
+      "y": 535,
+      "label": "prev tiến lên nút 2",
+      "variant": "default",
+      "note": "prev = cur"
+    },
+    {
+      "id": "m7",
+      "from": "next",
+      "to": "cur",
+      "y": 595,
+      "label": "cur tiến lên nút 3",
+      "variant": "default",
+      "note": "đã lật: 2 → 1"
+    },
+    {
+      "id": "m8",
+      "from": "cur",
+      "to": "next",
+      "y": 655,
+      "label": "bước 3: giữ phần còn lại (rỗng)",
+      "variant": "default",
+      "note": "next = cur.next = null"
+    },
+    {
+      "id": "m9",
+      "from": "cur",
+      "to": "prev",
+      "y": 715,
+      "label": "lật: nút 3 trỏ về nút 2",
+      "variant": "default",
+      "note": "cur.next = prev"
+    },
+    {
+      "id": "m10",
+      "from": "prev",
+      "to": "cur",
+      "y": 775,
+      "label": "prev tiến lên nút 3",
+      "variant": "default",
+      "note": "prev = cur"
+    },
+    {
+      "id": "m11",
+      "from": "next",
+      "to": "cur",
+      "y": 835,
+      "label": "cur = null: hết danh sách",
+      "variant": "default",
+      "note": "vòng lặp dừng"
+    },
+    {
+      "id": "m12",
+      "from": "prev",
+      "to": "cur",
+      "y": 895,
+      "label": "trả prev: đầu mới là nút 3",
+      "variant": "return",
+      "note": "3 → 2 → 1, O(n) thời gian, O(1) bộ nhớ"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Bất biến",
+      "items": [
+        "prev là đầu khúc đã lật, đúng thứ tự ngược",
+        "cur là nút đầu của phần chưa lật",
+        "Hai khúc không nối với nhau"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Chi phí",
+      "items": [
+        "Mỗi nút đổi một con trỏ: O(n)",
+        "Chỉ ba biến: O(1) bộ nhớ",
+        "Đệ quy: n khung gọi hàm, tràn ở vài nghìn tầng"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Bẫy hay gặp",
+      "items": [
+        "Lật trước khi giữ next: mất phần còn lại",
+        "Đệ quy quên head.next = null: tạo vòng",
+        "Trả cur thay vì prev: trả null"
+      ]
+    }
+  ]
+}

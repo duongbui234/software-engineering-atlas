@@ -8,6 +8,7 @@ draft: false
 lang: en
 stations:
   - name: "Linked List Pointers"
+    concepts: [Linked List, Dummy Node, Fast and Slow Pointers, In-place Pointer Reversal]
   - name: "Advanced Linked Lists"
   - name: "Tree Recursion"
   - name: "Binary Search Trees"

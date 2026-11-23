@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Số lớn thứ 3 trong luồng: nums = [4, 5, 8, 2], rồi add 3, 5, 10, 9, 4",
+    "output": "content/diagrams/neetcode-heap-top-k/size-k-heap.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {"id": "stream", "type": "frontend", "label": "Luồng số", "sublabel": "add(val): trả số lớn thứ k"},
+    {"id": "guard", "type": "backend", "label": "Người gác cửa", "sublabel": "so val với đỉnh heap"},
+    {"id": "heap", "type": "database", "label": "Min-heap k = 3 chỗ", "sublabel": "mảng: cha i, con 2i+1, 2i+2"}
+  ],
+  "segments": [
+    {"from": 150, "to": 330, "label": "nạp nums: heap chưa đủ 3 thì nhận hết"},
+    {"from": 350, "to": 900, "label": "mỗi lần add: so với đỉnh, thay đỉnh, chìm xuống"}
+  ],
+  "messages": [
+    {"id": "m0", "from": "stream", "to": "heap", "y": 175, "label": "4, 5, 8: còn chỗ, nhận cả ba", "variant": "default", "note": "heap [4, 5, 8], đỉnh 4"},
+    {"id": "m1", "from": "stream", "to": "guard", "y": 240, "label": "2: heap đã đủ 3", "variant": "default", "note": "2 < đỉnh 4"},
+    {"id": "m2", "from": "guard", "to": "stream", "y": 295, "label": "bỏ 2: không vào top 3", "variant": "return"},
+    {"id": "m3", "from": "stream", "to": "guard", "y": 375, "label": "add(3)", "variant": "default", "note": "3 < 4: bỏ, trả 4"},
+    {"id": "m4", "from": "stream", "to": "guard", "y": 440, "label": "add(5)", "variant": "default", "note": "5 > 4: thay đỉnh"},
+    {"id": "m5", "from": "guard", "to": "heap", "y": 500, "label": "đỉnh 4 thành 5, chìm xuống", "variant": "default", "note": "[5, 5, 8]: con không nhỏ hơn, dừng"},
+    {"id": "m6", "from": "heap", "to": "stream", "y": 560, "label": "trả đỉnh 5", "variant": "return"},
+    {"id": "m7", "from": "stream", "to": "guard", "y": 620, "label": "add(10): 10 > 5", "variant": "default"},
+    {"id": "m8", "from": "guard", "to": "heap", "y": 680, "label": "đỉnh thành 10, đổi với con 5", "variant": "default", "note": "[10, 5, 8] → [5, 10, 8], trả 5"},
+    {"id": "m9", "from": "stream", "to": "guard", "y": 745, "label": "add(9): 9 > 5", "variant": "default"},
+    {"id": "m10", "from": "guard", "to": "heap", "y": 805, "label": "đỉnh thành 9, đổi với con 8", "variant": "default", "note": "[9, 10, 8] → [8, 10, 9], trả 8"},
+    {"id": "m11", "from": "stream", "to": "guard", "y": 865, "label": "add(4): 4 < 8, bỏ", "variant": "default"},
+    {"id": "m12", "from": "heap", "to": "stream", "y": 915, "label": "trả 8: kết quả [4, 5, 5, 8, 8]", "variant": "emphasis"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "Vì sao min-heap", "items": ["Heap giữ k số lớn nhất đã thấy", "Đỉnh là số yếu nhất trong k số đó", "Chính là số lớn thứ k"]},
+    {"dot": "amber", "title": "Chi phí", "items": ["Số nhỏ hơn đỉnh: bỏ, O(1)", "Số lớn hơn: thay đỉnh, chìm O(log k)", "Không phụ thuộc độ dài luồng"]},
+    {"dot": "rose", "title": "Bẫy hay gặp", "items": ["Dùng max-heap: giữ k số nhỏ nhất", "Quên bỏ khi quá k: đỉnh là min cả luồng", "Python heapq chỉ có min-heap"]}
+  ]
+}

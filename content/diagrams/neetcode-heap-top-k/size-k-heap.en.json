@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "3rd largest in a stream: nums = [4, 5, 8, 2], then add 3, 5, 10, 9, 4",
+    "output": "content/diagrams/neetcode-heap-top-k/size-k-heap.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "stream",
+      "type": "frontend",
+      "label": "Number stream",
+      "sublabel": "add(val): returns the k-th largest"
+    },
+    {
+      "id": "guard",
+      "type": "backend",
+      "label": "Doorkeeper",
+      "sublabel": "compares val with the heap top"
+    },
+    {
+      "id": "heap",
+      "type": "database",
+      "label": "Min-heap with k = 3 slots",
+      "sublabel": "array: parent i, children 2i+1, 2i+2"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 330,
+      "label": "load nums: below 3 items the heap takes everything"
+    },
+    {
+      "from": 350,
+      "to": 900,
+      "label": "each add: compare with top, replace top, sift down"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "stream",
+      "to": "heap",
+      "y": 175,
+      "label": "4, 5, 8: room left, take all three",
+      "variant": "default",
+      "note": "heap [4, 5, 8], top 4"
+    },
+    {
+      "id": "m1",
+      "from": "stream",
+      "to": "guard",
+      "y": 240,
+      "label": "2: heap already holds 3",
+      "variant": "default",
+      "note": "2 < top 4"
+    },
+    {
+      "id": "m2",
+      "from": "guard",
+      "to": "stream",
+      "y": 295,
+      "label": "drop 2: not in the top 3",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "stream",
+      "to": "guard",
+      "y": 375,
+      "label": "add(3)",
+      "variant": "default",
+      "note": "3 < 4: drop, return 4"
+    },
+    {
+      "id": "m4",
+      "from": "stream",
+      "to": "guard",
+      "y": 440,
+      "label": "add(5)",
+      "variant": "default",
+      "note": "5 > 4: replace the top"
+    },
+    {
+      "id": "m5",
+      "from": "guard",
+      "to": "heap",
+      "y": 500,
+      "label": "top 4 becomes 5, sift down",
+      "variant": "default",
+      "note": "[5, 5, 8]: no smaller child, stop"
+    },
+    {
+      "id": "m6",
+      "from": "heap",
+      "to": "stream",
+      "y": 560,
+      "label": "return top 5",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "stream",
+      "to": "guard",
+      "y": 620,
+      "label": "add(10): 10 > 5",
+      "variant": "default"
+    },
+    {
+      "id": "m8",
+      "from": "guard",
+      "to": "heap",
+      "y": 680,
+      "label": "top becomes 10, swap with child 5",
+      "variant": "default",
+      "note": "[10, 5, 8] → [5, 10, 8], return 5"
+    },
+    {
+      "id": "m9",
+      "from": "stream",
+      "to": "guard",
+      "y": 745,
+      "label": "add(9): 9 > 5",
+      "variant": "default"
+    },
+    {
+      "id": "m10",
+      "from": "guard",
+      "to": "heap",
+      "y": 805,
+      "label": "top becomes 9, swap with child 8",
+      "variant": "default",
+      "note": "[9, 10, 8] → [8, 10, 9], return 8"
+    },
+    {
+      "id": "m11",
+      "from": "stream",
+      "to": "guard",
+      "y": 865,
+      "label": "add(4): 4 < 8, drop",
+      "variant": "default"
+    },
+    {
+      "id": "m12",
+      "from": "heap",
+      "to": "stream",
+      "y": 915,
+      "label": "return 8: result [4, 5, 5, 8, 8]",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Why a min-heap",
+      "items": [
+        "The heap keeps the k largest seen so far",
+        "Its top is the weakest of those k",
+        "That is exactly the k-th largest"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cost",
+      "items": [
+        "Smaller than the top: drop, O(1)",
+        "Larger: replace the top, sift O(log k)",
+        "Independent of the stream length"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Common traps",
+      "items": [
+        "A max-heap keeps the k smallest",
+        "No trim past k: top is the stream minimum",
+        "Python heapq is min-heap only"
+      ]
+    }
+  ]
+}

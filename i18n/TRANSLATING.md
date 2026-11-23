@@ -322,6 +322,23 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | chia lấy sàn | floor division |
 | cắt về 0 | truncate toward 0 |
 | đối chiếu ngẫu nhiên | random cross-check |
+| nổi lên, chìm xuống | sift up, sift down |
+| đỉnh (heap) | top |
+| thay đỉnh | replace the top |
+| heap k chỗ | size-k heap |
+| ứng viên yếu nhất | weakest candidate |
+| dựng heap | build a heap |
+| khóa âm, đảo dấu | negative key, negate |
+| hàng đợi ưu tiên | priority queue |
+| luồng | stream |
+| hàm so sánh | comparator |
+| chốt | pivot |
+| phân hoạch ba phần, cờ Hà Lan | three-way partition, Dutch national flag |
+| phân hoạch Lomuto, Hoare | Lomuto, Hoare partition |
+| nguyên lý chuồng bồ câu | pigeonhole principle |
+| bình phương khoảng cách | squared distance |
+| đếm theo cân nặng | counting by weight |
+| sắp xếp mỗi lượt | re-sort every round |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

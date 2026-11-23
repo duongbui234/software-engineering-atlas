@@ -7,6 +7,7 @@ region: Vùng Thuật toán
 draft: false
 stations:
   - name: "Tìm kiếm nhị phân trên mảng"
+    concepts: [Binary Search, Loop Invariant, Half-open Interval, Midpoint Overflow, Lower Bound, Rotated Sorted Array]
   - name: "Tìm kiếm nhị phân trên đáp án"
   - name: "Heap và top K"
   - name: "Hai heap và lập lịch"

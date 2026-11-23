@@ -10,6 +10,7 @@ stations:
   - name: "Binary Search on Arrays"
     concepts: [Binary Search, Loop Invariant, Half-open Interval, Midpoint Overflow, Lower Bound, Rotated Sorted Array]
   - name: "Binary Search on the Answer"
+    concepts: [Search on the Answer, Monotonic Predicate, Ceiling Division]
   - name: "Heaps and Top K"
   - name: "Two Heaps and Scheduling"
 ---

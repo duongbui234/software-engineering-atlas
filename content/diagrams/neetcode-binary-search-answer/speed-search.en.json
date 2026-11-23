@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Finding the slowest eating speed: piles [3, 6, 7, 11], h = 8",
+    "output": "content/diagrams/neetcode-binary-search-answer/speed-search.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Speed guesser",
+      "sublabel": "the loop: lo, hi, mid"
+    },
+    {
+      "id": "check",
+      "type": "backend",
+      "label": "On-time check",
+      "sublabel": "feasible(k): sum of ⌈p / k⌉ <= h?"
+    },
+    {
+      "id": "range",
+      "type": "database",
+      "label": "Suspect speed range",
+      "sublabel": "[lo, hi]: hi always finishes in time"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 300,
+      "label": "starting range: 1 to max(piles)"
+    },
+    {
+      "from": 320,
+      "to": 760,
+      "label": "each check drops half the range"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "loop",
+      "to": "range",
+      "y": 175,
+      "label": "set lo = 1, hi = 11",
+      "variant": "default",
+      "note": "speed 11: one hour per pile, surely in time"
+    },
+    {
+      "id": "m1",
+      "from": "loop",
+      "to": "check",
+      "y": 240,
+      "label": "try k = 6",
+      "variant": "default",
+      "note": "1 + 1 + 2 + 2 = 6 hours"
+    },
+    {
+      "id": "m2",
+      "from": "check",
+      "to": "loop",
+      "y": 290,
+      "label": "6 <= 8: in time",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "loop",
+      "to": "range",
+      "y": 340,
+      "label": "keep 6, drop faster speeds",
+      "variant": "default",
+      "note": "hi = mid = 6 → [1, 6]"
+    },
+    {
+      "id": "m4",
+      "from": "loop",
+      "to": "check",
+      "y": 395,
+      "label": "try k = 3",
+      "variant": "default",
+      "note": "1 + 2 + 3 + 4 = 10 hours"
+    },
+    {
+      "id": "m5",
+      "from": "check",
+      "to": "loop",
+      "y": 445,
+      "label": "10 > 8: too slow",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "loop",
+      "to": "range",
+      "y": 495,
+      "label": "drop 3 and every slower speed",
+      "variant": "default",
+      "note": "lo = mid + 1 = 4 → [4, 6]"
+    },
+    {
+      "id": "m7",
+      "from": "loop",
+      "to": "check",
+      "y": 550,
+      "label": "try k = 5: 8 hours, in time",
+      "variant": "default",
+      "note": "1 + 2 + 2 + 3 = 8 → [4, 5]"
+    },
+    {
+      "id": "m8",
+      "from": "loop",
+      "to": "check",
+      "y": 610,
+      "label": "try k = 4: 8 hours, in time",
+      "variant": "default",
+      "note": "1 + 2 + 2 + 3 = 8 → [4, 4]"
+    },
+    {
+      "id": "m9",
+      "from": "loop",
+      "to": "range",
+      "y": 670,
+      "label": "lo = hi = 4: one speed left",
+      "variant": "default"
+    },
+    {
+      "id": "m10",
+      "from": "range",
+      "to": "loop",
+      "y": 720,
+      "label": "answer 4, after 4 checks",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "A monotonic question",
+      "items": [
+        "If speed k is in time, so is k + 1",
+        "Late, late, …, late, on time, on time, …",
+        "Find the first 'on time'"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cost",
+      "items": [
+        "Each check reads all n piles: O(n)",
+        "log₂(max) checks",
+        "max = 10⁹: 30 checks, not 10⁹"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Common traps",
+      "items": [
+        "Rounding down: a speed that is too slow",
+        "In time but hi = mid − 1: answer lost",
+        "Hour sum overflows 32-bit int at small k"
+      ]
+    }
+  ]
+}

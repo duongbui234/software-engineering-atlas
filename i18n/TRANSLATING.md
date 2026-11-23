@@ -301,6 +301,27 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | chỉ số phẳng | flat index |
 | đi bậc thang | staircase walk |
 | thứ tự theo hàng | row-major order |
+| tìm kiếm nhị phân trên đáp án | search on the answer |
+| vị từ đơn điệu | monotonic predicate |
+| chia làm tròn lên | ceiling division |
+| không gian đáp án | answer space |
+| phép thử | check |
+| kịp, trễ | in time, too slow |
+| mốc thời gian | timestamp |
+| lịch sử của key | a key's history |
+| quét lùi | scan backwards |
+| chèn đúng chỗ | in-place insert |
+| giá trị từ tương lai | value from the future |
+| kho nhiều phiên bản | multi-version store |
+| cây đỏ đen | red-black tree |
+| trung vị | median |
+| vị trí cắt, vết cắt | cut position, cut |
+| phần tử thứ k | k-th element |
+| loại bỏ (tìm phần tử thứ k) | elimination |
+| chia nguyên | integer division |
+| chia lấy sàn | floor division |
+| cắt về 0 | truncate toward 0 |
+| đối chiếu ngẫu nhiên | random cross-check |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

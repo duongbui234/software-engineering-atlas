@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tìm tốc độ ăn nhỏ nhất: đống [3, 6, 7, 11], h = 8",
+    "output": "content/diagrams/neetcode-binary-search-answer/speed-search.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {"id": "loop", "type": "frontend", "label": "Người đoán tốc độ", "sublabel": "vòng lặp: lo, hi, mid"},
+    {"id": "check", "type": "backend", "label": "Phép thử kịp giờ", "sublabel": "feasible(k): tổng ⌈p / k⌉ <= h?"},
+    {"id": "range", "type": "database", "label": "Khoảng tốc độ còn nghi", "sublabel": "[lo, hi]: hi luôn kịp"}
+  ],
+  "segments": [
+    {"from": 150, "to": 300, "label": "khoảng ban đầu: 1 tới max(piles)"},
+    {"from": 320, "to": 760, "label": "mỗi lần thử bỏ nửa khoảng"}
+  ],
+  "messages": [
+    {"id": "m0", "from": "loop", "to": "range", "y": 175, "label": "đặt lo = 1, hi = 11", "variant": "default", "note": "tốc độ 11: mỗi đống 1 giờ, chắc chắn kịp"},
+    {"id": "m1", "from": "loop", "to": "check", "y": 240, "label": "thử k = 6", "variant": "default", "note": "1 + 1 + 2 + 2 = 6 giờ"},
+    {"id": "m2", "from": "check", "to": "loop", "y": 290, "label": "6 <= 8: kịp", "variant": "return"},
+    {"id": "m3", "from": "loop", "to": "range", "y": 340, "label": "giữ 6, bỏ tốc độ lớn hơn", "variant": "default", "note": "hi = mid = 6 → [1, 6]"},
+    {"id": "m4", "from": "loop", "to": "check", "y": 395, "label": "thử k = 3", "variant": "default", "note": "1 + 2 + 3 + 4 = 10 giờ"},
+    {"id": "m5", "from": "check", "to": "loop", "y": 445, "label": "10 > 8: trễ", "variant": "return"},
+    {"id": "m6", "from": "loop", "to": "range", "y": 495, "label": "bỏ 3 và mọi tốc độ nhỏ hơn", "variant": "default", "note": "lo = mid + 1 = 4 → [4, 6]"},
+    {"id": "m7", "from": "loop", "to": "check", "y": 550, "label": "thử k = 5: 8 giờ, kịp", "variant": "default", "note": "1 + 2 + 2 + 3 = 8 → [4, 5]"},
+    {"id": "m8", "from": "loop", "to": "check", "y": 610, "label": "thử k = 4: 8 giờ, kịp", "variant": "default", "note": "1 + 2 + 2 + 3 = 8 → [4, 4]"},
+    {"id": "m9", "from": "loop", "to": "range", "y": 670, "label": "lo = hi = 4: còn một tốc độ", "variant": "default"},
+    {"id": "m10", "from": "range", "to": "loop", "y": 720, "label": "đáp án 4, sau 4 lần thử", "variant": "emphasis"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "Câu hỏi đơn điệu", "items": ["Tốc độ k kịp thì k + 1 cũng kịp", "Trễ, trễ, …, trễ, kịp, kịp, …", "Tìm chữ kịp đầu tiên"]},
+    {"dot": "amber", "title": "Chi phí", "items": ["Mỗi lần thử đọc cả n đống: O(n)", "log₂(max) lần thử", "max = 10⁹: 30 lần, không phải 10⁹"]},
+    {"dot": "rose", "title": "Bẫy hay gặp", "items": ["Chia làm tròn xuống: tốc độ quá chậm", "Kịp mà gán hi = mid − 1: mất đáp án", "Tổng giờ vượt int 32 bit ở k nhỏ"]}
+  ]
+}

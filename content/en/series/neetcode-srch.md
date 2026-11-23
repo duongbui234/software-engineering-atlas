@@ -12,6 +12,7 @@ stations:
   - name: "Binary Search on the Answer"
     concepts: [Search on the Answer, Monotonic Predicate, Ceiling Division]
   - name: "Heaps and Top K"
+    concepts: [Sift Up and Sift Down, Heapify, Size-K Heap, Three-way Partition]
   - name: "Two Heaps and Scheduling"
 ---
 

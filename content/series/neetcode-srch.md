@@ -11,6 +11,7 @@ stations:
   - name: "Tìm kiếm nhị phân trên đáp án"
     concepts: [Search on the Answer, Monotonic Predicate, Ceiling Division]
   - name: "Heap và top K"
+    concepts: [Sift Up and Sift Down, Heapify, Size-K Heap, Three-way Partition]
   - name: "Hai heap và lập lịch"
 ---
 

@@ -375,6 +375,24 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | khung gọi hàm | stack frame |
 | bộ gom rác | garbage collector |
 | khoảng cách n + 1 | a gap of n + 1 |
+| danh sách hai chiều | doubly linked list |
+| nút canh | sentinel node |
+| đẩy ra | evict |
+| sức chứa | capacity |
+| đan nút, đan bản sao xen kẽ | node interleaving |
+| mang số nhớ, số nhớ | carry propagation, carry |
+| trộn chia để trị, trộn từng cặp | divide-and-conquer merge, merge in pairs |
+| trộn lần lượt | merge one by one |
+| lật từng khúc | group reversal |
+| khúc cuối | last chunk |
+| LRU xấp xỉ | approximated LRU |
+| sao chép nông, sâu | shallow, deep copy |
+| tràn im lặng | silent overflow |
+| chữ số xếp ngược, xuôi | digits stored backwards, forwards |
+| số nguyên lớn | big integer |
+| đánh dấu âm | mark negative |
+| chuỗi tuần tự, rải rác | sequential, scattered chain |
+| kiểm vét | exhaustive check |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

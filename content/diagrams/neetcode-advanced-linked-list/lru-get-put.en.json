@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "LRU Cache with capacity 2: the hash map finds the node, the doubly linked list keeps the order",
+    "output": "content/diagrams/neetcode-advanced-linked-list/lru-get-put.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "caller",
+      "type": "frontend",
+      "label": "Caller",
+      "sublabel": "get(key), put(key, value)"
+    },
+    {
+      "id": "map",
+      "type": "backend",
+      "label": "Hash map",
+      "sublabel": "Map: key → node, O(1) lookup"
+    },
+    {
+      "id": "list",
+      "type": "database",
+      "label": "Doubly linked list",
+      "sublabel": "head ⇄ … ⇄ tail: newest → oldest"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 390,
+      "label": "step 1: put 1, put 2"
+    },
+    {
+      "from": 390,
+      "to": 570,
+      "label": "step 2: get(1) moves it to the front"
+    },
+    {
+      "from": 570,
+      "to": 810,
+      "label": "step 3: put(3) evicts the oldest key"
+    },
+    {
+      "from": 810,
+      "to": 930,
+      "label": "step 4: get(2)"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "caller",
+      "to": "map",
+      "y": 175,
+      "label": "step 1: put(1, 1), cache empty",
+      "variant": "default",
+      "note": "map.get(1) → missing"
+    },
+    {
+      "id": "m1",
+      "from": "map",
+      "to": "list",
+      "y": 235,
+      "label": "create node 1, link it right after head",
+      "variant": "default",
+      "note": "pushFront: head ⇄ 1 ⇄ tail"
+    },
+    {
+      "id": "m2",
+      "from": "caller",
+      "to": "map",
+      "y": 295,
+      "label": "put(2, 2): not full, keep adding",
+      "variant": "default",
+      "note": "map.size = 1 < 2"
+    },
+    {
+      "id": "m3",
+      "from": "map",
+      "to": "list",
+      "y": 355,
+      "label": "node 2 goes first, node 1 moves back",
+      "variant": "default",
+      "note": "head ⇄ 2 ⇄ 1 ⇄ tail"
+    },
+    {
+      "id": "m4",
+      "from": "caller",
+      "to": "map",
+      "y": 415,
+      "label": "step 2: get(1)",
+      "variant": "default",
+      "note": "map.get(1) → node 1, O(1)"
+    },
+    {
+      "id": "m5",
+      "from": "map",
+      "to": "list",
+      "y": 475,
+      "label": "unlink node 1, relink it after head",
+      "variant": "default",
+      "note": "unlink + pushFront: head ⇄ 1 ⇄ 2 ⇄ tail"
+    },
+    {
+      "id": "m6",
+      "from": "list",
+      "to": "caller",
+      "y": 535,
+      "label": "return 1: node 1 is now the newest",
+      "variant": "return",
+      "note": "the value lives in the node"
+    },
+    {
+      "id": "m7",
+      "from": "caller",
+      "to": "map",
+      "y": 595,
+      "label": "step 3: put(3, 3), cache is full",
+      "variant": "default",
+      "note": "map.size = 2 = capacity"
+    },
+    {
+      "id": "m8",
+      "from": "map",
+      "to": "list",
+      "y": 655,
+      "label": "ask for the oldest: the node before tail",
+      "variant": "default",
+      "note": "old = tail.prev → node 2"
+    },
+    {
+      "id": "m9",
+      "from": "list",
+      "to": "map",
+      "y": 715,
+      "label": "unlink node 2, hand back key 2 to delete",
+      "variant": "default",
+      "note": "unlink(old); map.delete(old.key)"
+    },
+    {
+      "id": "m10",
+      "from": "map",
+      "to": "list",
+      "y": 775,
+      "label": "create node 3, link it after head",
+      "variant": "default",
+      "note": "head ⇄ 3 ⇄ 1 ⇄ tail"
+    },
+    {
+      "id": "m11",
+      "from": "caller",
+      "to": "map",
+      "y": 835,
+      "label": "step 4: get(2)",
+      "variant": "default",
+      "note": "map.get(2) → missing"
+    },
+    {
+      "id": "m12",
+      "from": "map",
+      "to": "caller",
+      "y": 895,
+      "label": "return −1: key 2 was evicted",
+      "variant": "return",
+      "note": "every operation O(1)"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Invariants",
+      "items": [
+        "Each key in the hash map points to exactly one node in the list",
+        "Right after head is the most recently used key",
+        "Right before tail is the least recently used key"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cost",
+      "items": [
+        "get, put: O(1) time",
+        "Unlink: 2 pointer writes; link at the front: 4",
+        "O(capacity) memory: one node and one map slot per key"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Common traps",
+      "items": [
+        "get does not move the node: the wrong key is evicted",
+        "Unlinking without deleting from the map: the map keeps growing",
+        "Updating an existing key without moving it"
+      ]
+    }
+  ]
+}

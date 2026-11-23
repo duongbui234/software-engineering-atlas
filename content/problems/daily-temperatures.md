@@ -84,7 +84,7 @@ Phải lưu **chỉ số**, không lưu nhiệt độ: đáp án là một kho�
 
 ### Vì sao `while` trong `for` vẫn là O(n)
 
-Đếm theo kiểu [[concepts/aggregate-analysis|phân tích gộp]]: mỗi chỉ số được `push` đúng một lần và `pop` tối đa một lần. Tổng số lần `pop` qua **mọi** vòng `while` không quá n, nên tổng công là O(n). File TypeScript đếm thật: với 10⁶ ngày ngẫu nhiên, 986 048 lần pop cộng 13 952 chỉ số còn lại trên ngăn xếp đúng bằng 10⁶.
+Đếm theo kiểu [[concepts/aggregate-analysis|phân tích gộp]]: mỗi chỉ số được `push` đúng một lần và `pop` tối đa một lần. Tổng số lần `pop` qua **mọi** vòng `while` không quá n, nên tổng công là O(n). File TypeScript đếm thật: với 10⁶ ngày ngẫu nhiên, 986 082 lần pop cộng 13 918 chỉ số còn lại trên ngăn xếp đúng bằng 10⁶.
 
 ### Cách 3, đi từ phải và nhảy theo đáp án
 
@@ -96,14 +96,14 @@ TypeScript, trung vị:
 
 | n | dữ liệu | vét cạn | ngăn xếp | nhảy từ phải |
 |---|---|---|---|---|
-| 10 000 | giảm dần | 20,6 ms | 0,12 ms | 0,05 ms |
-| 20 000 | giảm dần | 77,5 ms | 0,27 ms | 0,12 ms |
-| 40 000 | giảm dần | 308,7 ms | 0,72 ms | 0,19 ms |
-| 40 000 | ngẫu nhiên 30..100 | 4,9 ms | 0,55 ms | 0,43 ms |
-| 10⁶ | giảm dần | (không chạy) | 21,10 ms | 5,64 ms |
-| 10⁶ | ngẫu nhiên | (không chạy) | 11,85 ms | 9,78 ms |
+| 10 000 | giảm dần | 21,0 ms | 0,15 ms | 0,04 ms |
+| 20 000 | giảm dần | 85,0 ms | 0,34 ms | 0,13 ms |
+| 40 000 | giảm dần | 317,4 ms | 0,67 ms | 0,19 ms |
+| 40 000 | ngẫu nhiên 30..100 | 4,8 ms | 0,62 ms | 0,52 ms |
+| 10⁶ | giảm dần | (không chạy) | 19,84 ms | 5,20 ms |
+| 10⁶ | ngẫu nhiên | (không chạy) | 16,70 ms | 13,12 ms |
 
-Vét cạn trên dữ liệu giảm dần đi đúng dáng n² (gấp đôi n, gấp khoảng 4 lần thời gian). Trên dữ liệu ngẫu nhiên với chỉ 71 giá trị, ngày ấm hơn thường ở rất gần, nên vét cạn chỉ chậm hơn khoảng 10 lần: test ngẫu nhiên không bắt được ca tệ nhất. Ở 10⁶ ngày giảm dần, ngăn xếp phải giữ cả 10⁶ chỉ số, còn cách nhảy không cấp phát gì, nhanh hơn gần 4 lần.
+Vét cạn trên dữ liệu giảm dần đi đúng dáng n² (gấp đôi n, gấp khoảng 4 lần thời gian). Trên dữ liệu ngẫu nhiên với chỉ 71 giá trị, ngày ấm hơn thường ở rất gần, nên vét cạn chỉ chậm hơn khoảng 8 lần: test ngẫu nhiên không bắt được ca tệ nhất. Ở 10⁶ ngày giảm dần, ngăn xếp phải giữ cả 10⁶ chỉ số, còn cách nhảy không cấp phát gì, nhanh hơn gần 4 lần.
 
 ### Bên dưới năm ngôn ngữ
 
@@ -279,16 +279,16 @@ jumpFromRight   7/7 ca đúng
 popOnEqual      6/7 ca đúng; sai ở [70,70,71] → [1,1,0]
 
 n        dữ liệu      vét cạn   ngăn xếp   nhảy từ phải   (ms, trung vị)
-10000    giảm dần        20.6       0.12           0.05
-10000    ngẫu nhiên       0.3       0.14           0.11
-20000    giảm dần        77.5       0.27           0.12
-20000    ngẫu nhiên       1.4       0.29           0.23
-40000    giảm dần       308.7       0.72           0.19
-40000    ngẫu nhiên       4.9       0.55           0.43
-1000000  giảm dần           —      21.10           5.64
-1000000  ngẫu nhiên         —      11.85           9.78
+10000    giảm dần        21.0       0.15           0.04
+10000    ngẫu nhiên       0.4       0.14           0.11
+20000    giảm dần        85.0       0.34           0.13
+20000    ngẫu nhiên       1.7       0.30           0.26
+40000    giảm dần       317.4       0.67           0.19
+40000    ngẫu nhiên       4.8       0.62           0.52
+1000000  giảm dần           —      19.84           5.20
+1000000  ngẫu nhiên         —      16.70          13.12
 
-n = 1000000 ngẫu nhiên: 986048 lần pop, 13952 chỉ số còn lại trên ngăn xếp (tổng = n)
+n = 1000000 ngẫu nhiên: 986082 lần pop, 13918 chỉ số còn lại trên ngăn xếp (tổng = n)
 ```
 
 Bản `popOnEqual` dùng `>=`: ngày 0 (70°) bị ngày 1 (cũng 70°) lấy ra với đáp án 1, trong khi ngày ấm hơn thật là ngày 2. Sáu ca còn lại không có hai ngày bằng nhau đứng cạnh, nên bản sai vẫn qua.

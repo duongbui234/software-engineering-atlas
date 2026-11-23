@@ -16,7 +16,7 @@ sources:
 > - Đề: chuỗi chữ hoa `s` và số k. Được đổi tối đa k ký tự; trả độ dài đoạn con dài nhất có thể thành **toàn một chữ** (`"AABABBA"`, k = 1 → 4).
 > - Một cửa sổ làm được khi `độ dài − maxFreq ≤ k`, với `maxFreq` là số lần của chữ xuất hiện nhiều nhất trong cửa sổ: giữ chữ đó, đổi phần còn lại. Đây là [[concepts/window-invariant|bất biến]] của [[concepts/sliding-window|cửa sổ trượt]].
 > - Cách gọn nhất là [[concepts/non-shrinking-window|cửa sổ không co]]: mỗi bước cửa sổ dài thêm 1 hoặc trượt nguyên khối, và `maxFreq` **không bao giờ giảm** dù ký tự bên trái đã ra. Đáp án là độ dài cửa sổ lúc cuối.
-> - `maxFreq` cũ lớn hơn giá trị thật ở 99 943/100 000 bước trong phép đo, mà đáp án vẫn đúng. Lý do: cửa sổ chỉ dài thêm khi một chữ đạt tần suất **mới cao nhất**, và lúc đó tần suất ấy là thật.
+> - `maxFreq` cũ lớn hơn giá trị thật ở 99 973/100 000 bước trong phép đo, mà đáp án vẫn đúng. Lý do: cửa sổ chỉ dài thêm khi một chữ đạt tần suất **mới cao nhất**, và lúc đó tần suất ấy là thật.
 > - Bẫy: giữ chữ ở **đầu trái** thay vì chữ nhiều nhất (`"BAAAB"`, k = 2 ra 4 thay vì 5).
 
 > [!info] Bối cảnh
@@ -90,7 +90,7 @@ Gọi L là độ dài cửa sổ. Lúc đầu cửa sổ dài thêm mỗi bư�
 - **Cửa sổ dài thêm chỉ khi maxFreq tăng.** Thêm một ký tự mà `maxFreq` không đổi thì `L + 1 − maxFreq = k + 1 > k`, nên phải trượt. `maxFreq` tăng nghĩa là ký tự **vừa thêm** có đúng `maxFreq` lần trong cửa sổ **hiện tại**, và các số đếm này là thật. Vậy mỗi độ dài mà cửa sổ đạt được đều ứng với một đoạn làm được thật: đáp án không bao giờ quá lớn.
 - **Đáp án không quá nhỏ.** Muốn tìm đoạn dài hơn L, đoạn đó phải có một chữ xuất hiện ít nhất `L + 1 − k = maxFreq + 1` lần, tức nhiều hơn mọi tần suất đã thấy. Khi cửa sổ (dài L, trượt qua đoạn đó) gặp đủ chừng ấy lần, `maxFreq` tăng và cửa sổ dài ra. Một `maxFreq` thấp hơn thật không giúp gì thêm, nên không cần giảm nó.
 
-Nói gọn: `maxFreq` không cần đúng cho cửa sổ hiện tại; nó chỉ cần là **kỷ lục**, vì chỉ một kỷ lục mới làm đáp án tăng. File TypeScript đếm: trên 100 000 ký tự ngẫu nhiên, `maxFreq` cũ lớn hơn giá trị thật ở 99 943 bước, kết quả vẫn bằng bản đếm lại, và 5 000 chuỗi ngẫu nhiên đối chiếu với vét cạn không lệch chuỗi nào.
+Nói gọn: `maxFreq` không cần đúng cho cửa sổ hiện tại; nó chỉ cần là **kỷ lục**, vì chỉ một kỷ lục mới làm đáp án tăng. File TypeScript đếm: trên 100 000 ký tự ngẫu nhiên, `maxFreq` cũ lớn hơn giá trị thật ở 99 973 bước, kết quả vẫn bằng bản đếm lại, và 5 000 chuỗi ngẫu nhiên đối chiếu với vét cạn không lệch chuỗi nào.
 
 ### Đo
 
@@ -98,11 +98,11 @@ TypeScript, chữ ngẫu nhiên, k = 2, trung vị:
 
 | n | số chữ | vét cạn | co + đếm lại | không co |
 |---|---|---|---|---|
-| 2 000 | 26 | 4,6 ms | 0,38 ms | 0,01 ms |
-| 4 000 | 26 | 17,9 ms | 0,79 ms | 0,01 ms |
-| 8 000 | 26 | 70,5 ms | 1,52 ms | 0,02 ms |
-| 10⁶ | 26 | (không chạy) | 191,96 ms | 3,04 ms |
-| 10⁶ | 2 | (không chạy) | 123,92 ms | 3,11 ms |
+| 2 000 | 26 | 5,0 ms | 0,42 ms | 0,01 ms |
+| 4 000 | 26 | 19,8 ms | 0,86 ms | 0,01 ms |
+| 8 000 | 26 | 77,7 ms | 1,70 ms | 0,03 ms |
+| 10⁶ | 26 | (không chạy) | 212,22 ms | 3,30 ms |
+| 10⁶ | 2 | (không chạy) | 136,31 ms | 3,20 ms |
 
 Ở 10⁶ ký tự, bỏ việc đếm lại nhanh hơn khoảng 60 lần: `Math.max(...count)` quét 26 ô và trải mảng thành 26 đối số mỗi lần gọi.
 
@@ -262,15 +262,15 @@ windowRecount     8/8 ca đúng
 windowStaleMax    8/8 ca đúng
 wrongKeepLeftChar 6/8 ca đúng; sai ở BAAAB k=2 → 4, ABBB k=2 → 3
 
-n = 100000, 4 chữ, k = 3: maxFreq cũ lớn hơn max thật ở 99943 bước; windowStaleMax = 15, windowRecount = 15
+n = 100000, 4 chữ, k = 3: maxFreq cũ lớn hơn max thật ở 99973 bước; windowStaleMax = 15, windowRecount = 15
 đối chiếu 5000 chuỗi ngẫu nhiên với vét cạn: 0 chuỗi lệch
 
 n          chữ   vét cạn   co + đếm lại   không co   (ms, trung vị)
-2000        26       4.6           0.38       0.01
-4000        26      17.9           0.79       0.01
-8000        26      70.5           1.52       0.02
-1000000     26         —         191.96       3.04
-1000000      2         —         123.92       3.11
+2000        26       5.0           0.42       0.01
+4000        26      19.8           0.86       0.01
+8000        26      77.7           1.70       0.03
+1000000     26         —         212.22       3.30
+1000000      2         —         136.31       3.20
 ```
 
 Bản sai giữ chữ đầu trái hỏng ở `"BAAAB"`: cửa sổ bắt đầu bằng B nên nó tính phải đổi ba chữ A, dù giữ A chỉ cần đổi hai chữ B. Python, Go, Java và JavaScript in `8/8 ca đúng` cho cả ba cách.

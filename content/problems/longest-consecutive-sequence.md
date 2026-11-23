@@ -19,7 +19,7 @@ sources:
 > - [[concepts/brute-force|Vét cạn]] tìm `x + 1, x + 2…` bằng cách duyệt lại cả mảng: O(n³) ở ca tệ nhất, 2 000 số đã mất 1,5 giây.
 > - [[concepts/sort-then-scan|Sắp xếp rồi quét]]: O(n log n), nhưng số **trùng** phải được bỏ qua chứ không làm đứt dãy, và JS phải có hàm so sánh.
 > - [[concepts/hash-set|Hash set]] + **đầu dãy**: chỉ đếm từ x khi `x − 1` không có trong set. Mỗi giá trị được bước qua một lần, nên tổng O(n) dù có vòng `while` lồng trong `for` ([[concepts/aggregate-analysis|phân tích gộp]]).
-> - Đo thật: với 10⁶ số, hash set nhanh hơn sắp xếp 14 lần trong TypeScript, nhưng chỉ 1,3 lần trong Python khi dữ liệu ngẫu nhiên.
+> - Đo thật: với 10⁶ số, hash set chỉ nhanh hơn sắp xếp 1,4–1,5 lần trong TypeScript và 1,3–2,7 lần trong Python. O(n) thắng, nhưng không xa.
 
 > [!info] Bối cảnh
 > Bài LeetCode 128, thuộc [[posts/2026-11-22-neetcode-hash-lookup|ga 1: Tra cứu bằng hash]] trên **tuyến NeetCode: Mảng và chuỗi**. Post của ga đã giới thiệu khuôn "ghi hết vào set rồi hỏi `x − 1`"; trang này đi sâu vào vì sao khuôn đó là O(n) và so nó với hai cách còn lại. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn chỉ cần biết vòng lặp, mảng và hàm.
@@ -77,9 +77,9 @@ Với mỗi x, hỏi "`x + 1` có trong mảng không?" bằng cách duyệt c�
 
 | n | 250 | 500 | 1 000 | 2 000 |
 |---|---|---|---|---|
-| ms (TypeScript) | 3,5 | 24,5 | 190,9 | 1 513,2 |
+| ms (TypeScript) | 3,5 | 24,6 | 182,3 | 1 425,4 |
 
-n gấp đôi thì thời gian gấp khoảng 8 lần: đúng dáng của n³.
+n gấp đôi thì thời gian gấp khoảng 7–8 lần, tiến dần về 8: đúng dáng của n³.
 
 ### Cách 2, sắp xếp rồi quét: O(n log n)
 
@@ -109,12 +109,14 @@ Hai loại dữ liệu: 10⁶ số **ngẫu nhiên** trong ±10⁹ (gần như k
 
 | n = 10⁶ | sắp xếp | hash set | hash set nhanh hơn |
 |---|---|---|---|
-| TypeScript, ngẫu nhiên | 209,65 | 14,51 | 14 lần |
-| TypeScript, một dãy dài | 247,07 | 136,69 | 1,8 lần |
+| TypeScript, ngẫu nhiên | 225,38 | 150,48 | 1,5 lần |
+| TypeScript, một dãy dài | 229,15 | 162,41 | 1,4 lần |
 | Python, ngẫu nhiên | 370,71 | 279,47 | 1,3 lần |
 | Python, một dãy dài | 352,89 | 128,51 | 2,7 lần |
 
 Hash set thắng ở mọi ô, nhưng khoảng cách phụ thuộc nhiều vào ngôn ngữ và dữ liệu. `sorted` của Python viết bằng C và chạy trọn trong C; vòng lặp hash set thì mỗi bước là một lệnh Python. Big-O nói đường cong nào dốc hơn khi n lớn dần, không nói ở n = 10⁶ chênh bao nhiêu.
+
+Bản trước của trang ghi TypeScript ngẫu nhiên là 14 lần. Con số đó sai vì dữ liệu: bộ sinh số ngẫu nhiên cũ (`seed * 1103515245` tính bằng số thực) mất chính xác và lặp lại sau khoảng 10 nghìn giá trị, nên "10⁶ số ngẫu nhiên" thật ra chỉ có khoảng 10 nghìn giá trị khác nhau, và set nhỏ thì nhanh. File giờ dùng bộ sinh mulberry32 (mọi phép nhân qua `Math.imul`), cho 10⁶ giá trị gần như khác nhau hết.
 
 ### Bên dưới năm ngôn ngữ
 
@@ -295,17 +297,17 @@ sortScanNoComparator      4/7 ca đúng; sai ở [100,4,200,1,3,2] [-3,-1,-2,5] 
 
 vét cạn, một dãy dài xáo trộn (ms, một lần chạy)
 n = 250         3.5
-n = 500        24.5
-n = 1000      190.9
-n = 2000     1513.2
+n = 500        24.6
+n = 1000      182.3
+n = 2000     1425.4
 
 n          dữ liệu           sắp xếp  hash set   (ms, trung vị 5 lần)
-10000      ngẫu nhiên ±10⁹       1.67      1.05
-10000      một dãy dài           1.53      0.73
-100000     ngẫu nhiên ±10⁹      18.81      2.04
-100000     một dãy dài          20.18      9.06
-1000000    ngẫu nhiên ±10⁹     209.65     14.51
-1000000    một dãy dài         247.07    136.69
+10000      ngẫu nhiên ±10⁹       1.59      0.97
+10000      một dãy dài           1.28      0.63
+100000     ngẫu nhiên ±10⁹      19.03      8.91
+100000     một dãy dài          18.29      8.37
+1000000    ngẫu nhiên ±10⁹     225.38    150.48
+1000000    một dãy dài         229.15    162.41
 ```
 
 File Java có thêm một bản sắp xếp `List<Integer>` rồi so số trùng bằng `==`:
@@ -328,7 +330,7 @@ Hai số `1001` là hai object `Integer` khác nhau, nên `==` coi chúng là kh
 - **JS: quên hàm so sánh trong `sort()`.** Số âm và số nhiều chữ số bị xếp sai thứ tự; bản sai chỉ qua 4/7 ca.
 - **Java: so `Integer` bằng `==`.** Đúng với số nhỏ, sai từ 128 trở lên, nên test với số nhỏ không bắt được. Dùng `equals`, hoặc sắp xếp `int[]` thay vì `List<Integer>`.
 - **Python: viết `x + 1 in nums` với `nums` là list.** Chạy đúng, nhưng mỗi lần tra là O(n), và lời giải thành O(n²) hoặc tệ hơn mà không có gì báo.
-- **"O(n) chắc chắn nhanh hơn nhiều O(n log n)."** Trong Python với dữ liệu ngẫu nhiên, hash set chỉ nhanh hơn `sorted` 1,3 lần ở 10⁶ phần tử. Cả hai đều qua giới hạn của LeetCode; chỉ đề bài mới bắt buộc O(n).
+- **"O(n) chắc chắn nhanh hơn nhiều O(n log n)."** Với dữ liệu ngẫu nhiên ở 10⁶ phần tử, hash set chỉ nhanh hơn sắp xếp 1,5 lần trong TypeScript và 1,3 lần trong Python. Cả hai đều qua giới hạn của LeetCode; chỉ đề bài mới bắt buộc O(n).
 
 ## Câu hỏi tự kiểm tra
 

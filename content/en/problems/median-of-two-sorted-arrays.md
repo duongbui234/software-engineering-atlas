@@ -18,9 +18,9 @@ sources:
 > [!tldr] Quick read
 > - The problem: two increasing arrays `a` (m elements) and `b` (n elements). Return the **median** of both together, in O(log(m + n)).
 > - The key idea: no merging. Cut `a` at position `i` and `b` at `j = half − i` so the left half holds exactly `half = ⌈(m + n) / 2⌉` elements. The cut is right when `aL ≤ bR` and `bL ≤ aR`. The question "`aL > bR`?" flips from "no" to "yes" exactly once as `i` grows, so [[en/concepts/binary-search|binary search]] works on `i`.
-> - Search the **shorter** array: otherwise `j` leaves `[0, n]`. The version without the swap throws `ArrayIndexOutOfBoundsException` in Java and gets 13 439 of 100 000 random pairs wrong.
-> - Empty sides use [[en/concepts/sentinel-value|sentinels]] `−∞`/`+∞`. Using 0 instead gets 8 162 pairs wrong. Integer division on an even total (`/` between two `int`s in Java and Go; `//` in Python) gets about a quarter of the pairs wrong.
-> - Measured at m = n = 10⁶: merge 27.6 ms, two pointers 2.2 ms, k-th element elimination 0.10 µs, cut 0.08 µs. With m = 10, n = 10⁶, the cut takes only 2 iterations.
+> - Search the **shorter** array: otherwise `j` leaves `[0, n]`. The version without the swap throws `ArrayIndexOutOfBoundsException` in Java and gets 13 477 of 100 000 random pairs wrong.
+> - Empty sides use [[en/concepts/sentinel-value|sentinels]] `−∞`/`+∞`. Using 0 instead gets 9 800 pairs wrong. Integer division on an even total (`/` between two `int`s in Java and Go; `//` in Python) gets about a quarter of the pairs wrong.
+> - Measured at m = n = 10⁶: merge 36.8 ms, two pointers 5.2 ms, k-th element elimination 0.12 µs, cut 0.07 µs. With m = 10, n = 10⁶, the cut takes only 1 iteration (at most 4, since there are only 11 cut positions).
 
 > [!info] Context
 > LeetCode problem 4, the hardest problem of [[en/posts/2026-11-23-neetcode-binary-search-answer|station 2: Binary Search on the Answer]] on **the NeetCode Line: Search and Heaps**. In [[en/posts/2026-11-23-neetcode-binary-search|station 1]] we binary searched the cells of one array; here we binary search **the possible cut positions**, that is, the space of answers, which is the spirit of station 2. The solutions come in TypeScript, Python, Go, Java and JavaScript. You need loops and arrays, and to have read [[en/problems/binary-search|Binary Search]].
@@ -92,7 +92,7 @@ Merge as in the last step of merge sort, then read the middle cell. Easy to get 
 
 ### Approach 2, two pointers: O(m + n) time, O(1) memory
 
-Still merging, but without storing: walk `⌊t/2⌋ + 1` steps and remember only the last two values (`prev`, `cur`). In the measurements it is about 10 times faster than approach 1 because it allocates no array and only walks to the middle, but it is still linear.
+Still merging, but without storing: walk `⌊t/2⌋ + 1` steps and remember only the last two values (`prev`, `cur`). In the measurements it is about 6 to 20 times faster than approach 1 because it allocates no array and only walks to the middle, but it is still linear.
 
 ### Approach 3, elimination to find the k-th element: O(log(m + n))
 
@@ -129,7 +129,7 @@ The **sentinels** `−∞`/`+∞` make an empty side never block: `−∞ ≤` e
 - If `m ≤ n`: `half − m = ⌈(m + n)/2⌉ − m ≥ 0` because n ≥ m, and `half ≤ n` also because n ≥ m. `j` is always valid.
 - If `m > n`: with `a = [1, 2, 3, 4, 5, 6]`, `b = [7]`, `half = 4`, at `i = 5` we get `j = −1`; with `a = [2]`, `b = []`, `i = 0` gives `j = 1 > n`.
 
-The TypeScript file runs the version without the swap and prints exactly those two cases: `j = -1 ra ngoài b` ("j = -1 is outside b"). Java throws `ArrayIndexOutOfBoundsException`. On 100 000 random pairs this version gets 13 439 pairs wrong (TS) and 13 357 (Java, a different random generator). A second benefit: the iteration count depends only on the short array. With m = 10, n = 10⁶, the cut takes 2 iterations; k-th element elimination takes 40.
+The TypeScript file runs the version without the swap and prints exactly those two cases: `j = -1 ra ngoài b` ("j = -1 is outside b"). Java throws `ArrayIndexOutOfBoundsException`. On 100 000 random pairs this version gets 13 477 pairs wrong (TS) and 13 357 (Java, a different random generator). A second benefit: the iteration count depends only on the short array. With m = 10, n = 10⁶, the cut takes 1 iteration (at most 4); k-th element elimination takes 40.
 
 ### Odd total, even total, and integer division
 
@@ -142,13 +142,13 @@ The median of an even total can end in `.5`. Three of the five languages do inte
 | Python | `/` gives `2.5`; `//` gives `2` (rounds down) | `-3 // 2 = -2` | use `/` |
 | TS, JS | `2.5` (every number is a double) | `-1.5` | nothing needed |
 
-The integer-division version passes 8/10 test cases and gets about a quarter of the random pairs wrong: 25 126 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java). A quarter makes sense: it is wrong only when the total is even **and** the two middle cells have an odd sum.
+The integer-division version passes 8/10 test cases and gets about a quarter of the random pairs wrong: 24 681 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java). A quarter makes sense: it is wrong only when the total is even **and** the two middle cells have an odd sum.
 
 Java has one more trap: `(x + y) / 2.0` adds **first**, in `int`, and only then converts to double. With `x = y = 2 000 000 000`, the Java file prints `-1.47483648E8`; `((long) x + y) / 2.0` prints `2.0E9`. The problem's bound `|x| ≤ 10⁶` keeps this bug hidden on LeetCode, but not in code reused elsewhere.
 
 ### Sentinels: picking the wrong value
 
-The version using `0` instead of `−∞` is right when all numbers are positive, and wrong when one array contributes nothing to the left half while the other array's part is all negative: with `[-2, -1]`, `[3]`, the right cut is `i = 0` on `[3]`, so `aL` is the sentinel 0 and beats `bL = -1`, giving `0` instead of `-1`. On 100 000 random pairs (values in `[-50, 50]`) it gets 8 162 pairs wrong.
+The version using `0` instead of `−∞` is right when all numbers are positive, and wrong when one array contributes nothing to the left half while the other array's part is all negative: with `[-2, -1]`, `[3]`, the right cut is `i = 0` on `[3]`, so `aL` is the sentinel 0 and beats `bL = -1`, giving `0` instead of `-1`. On 100 000 random pairs (values in `[-50, 50]`) it gets 9 800 pairs wrong.
 
 In Java and Go the sentinels are `Integer.MIN_VALUE`/`MAX_VALUE` and `math.MinInt`/`math.MaxInt`. They are safe because they are only **compared**, never **added**: when the total is even and t ≥ 2, `max(aL, bL)` and `min(aR, bR)` are always real elements (neither half is empty). If you change the formula, for example compute `aL + bR` to compare, the sentinels will overflow.
 
@@ -158,12 +158,12 @@ TypeScript, two random sorted integer arrays, median of 7 runs, µs per call; th
 
 | m | n | merge | two pointers | k-th | cut | k-th iterations | cut iterations |
 |---|---|---|---|---|---|---|---|
-| 1 000 | 1 000 | 14.2 | 2.2 | 0.055 | 0.052 | 22 | 10 |
-| 100 000 | 100 000 | 2 476.7 | 242.4 | 0.088 | 0.062 | 36 | 13 |
-| 1 000 000 | 1 000 000 | 27 622.5 | 2 212.9 | 0.102 | 0.082 | 42 | 18 |
-| 10 | 1 000 000 | 12 120.3 | 1 045.1 | 0.098 | 0.014 | 40 | 2 |
+| 1 000 | 1 000 | 12.3 | 1.3 | 0.059 | 0.033 | 22 | 9 |
+| 100 000 | 100 000 | 3 183.4 | 518.4 | 0.103 | 0.064 | 36 | 16 |
+| 1 000 000 | 1 000 000 | 36 810.2 | 5 192.1 | 0.121 | 0.069 | 42 | 19 |
+| 10 | 1 000 000 | 11 479.5 | 547.8 | 0.103 | 0.009 | 40 | 1 |
 
-The two linear approaches grow about 10 times when n grows 10 times. The two logarithmic ones barely move, and on the last row the cut is 7 times faster than the k-th approach because it only binary searches the 11 cut positions of a 10-element array. On the last row two pointers is also about 12 times faster than merging: it only walks to the middle and allocates no 10⁶-element array.
+The two linear approaches grow about 10 times when n grows 10 times. The two logarithmic ones barely move, and on the last row the cut is about 11 times faster than the k-th approach because it only binary searches the 11 cut positions of a 10-element array. On the last row two pointers is also about 21 times faster than merging: it only walks to the middle and allocates no 10⁶-element array.
 
 Besides the 10 test cases, each file cross-checks the four approaches against "concatenate then sort" on 100 000 random pairs (each array 0 to 20 elements, values in `[-50, 50]`, so plenty of duplicates and empty arrays). All four approaches get 0 pairs wrong in all five languages.
 
@@ -455,15 +455,15 @@ mergeThenPick         0 pairs wrong
 twoPointer            0 pairs wrong
 kthElimination        0 pairs wrong
 partition             0 pairs wrong
-partitionNoSwap       13439 pairs wrong
-partitionZeroSentinel 8162 pairs wrong
-partitionIntMedian    25126 pairs wrong
+partitionNoSwap       13477 pairs wrong
+partitionZeroSentinel 9800 pairs wrong
+partitionIntMedian    24681 pairs wrong
 
 m          n         merge (µs)  two ptrs (µs)     k-th (µs)   cut (µs)  k-th iters  cut iters
-1000       1000            14.2               2.2       0.055     0.052          22        10
-100000     100000        2476.7             242.4       0.088     0.062          36        13
-1000000    1000000      27622.5            2212.9       0.102     0.082          42        18
-10         1000000      12120.3            1045.1       0.098     0.014          40         2
+1000       1000            12.3               1.3       0.059     0.033          22         9
+100000     100000        3183.4             518.4       0.103     0.064          36        16
+1000000    1000000      36810.2            5192.1       0.121     0.069          42        19
+10         1000000      11479.5             547.8       0.103     0.009          40         1
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*

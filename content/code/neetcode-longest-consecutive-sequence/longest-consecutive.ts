@@ -83,7 +83,9 @@ function median(fn: () => void): number {
   return t.sort((a, b) => a - b)[2];
 }
 let seed = 42;
-const rand = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a: number): number { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rand = () => (((seed = (seed + 0x6d2b79f5) | 0), mix32(seed) >>> 1) / 2147483648);
 const shuffle = (a: number[]) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 // Vét cạn trên một dãy dài (ca tệ nhất): n gấp đôi thì thời gian gấp khoảng 8, đúng dáng O(n³).

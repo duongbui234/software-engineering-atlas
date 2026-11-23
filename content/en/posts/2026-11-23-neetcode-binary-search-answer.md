@@ -57,7 +57,7 @@ flowchart TB
 
 ## The problem: there is no array to search
 
-[[en/problems/koko-eating-bananas|Koko Eating Bananas]] asks for the slowest eating speed that clears n piles of bananas within h hours. There is no array of speeds; there is only a way to compute "at speed k, how many hours". Trying k = 1, 2, 3… takes as many tries as the answer itself: measured with 1,000 piles, an answer of 33,125 takes 32.7 ms, and piles up to 10⁹ (answer about 3.4 · 10⁸) extrapolate to several minutes.
+[[en/problems/koko-eating-bananas|Koko Eating Bananas]] asks for the slowest eating speed that clears n piles of bananas within h hours. There is no array of speeds; there is only a way to compute "at speed k, how many hours". Trying k = 1, 2, 3… takes as many tries as the answer itself: measured with 1,000 piles, an answer of 32,496 takes 35.2 ms, and piles up to 10⁹ (answer about 3.3 · 10⁸) extrapolate to about 6 minutes.
 
 But the check's answers are ordered: if speed k is in time, so is k + 1. Along k, the answers read "too slow, …, too slow, in time, …, in time". That is exactly the "array" `false…false true…true`, except each cell is computed on demand. Finding the first `true` is the [[en/concepts/lower-bound|lower bound]] from station 1: 30 tries for a range up to 10⁹, measured at 0.035 ms.
 

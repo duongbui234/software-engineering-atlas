@@ -67,7 +67,9 @@ console.log(`  byCountKey tách riêng:           ${JSON.stringify(byCountKey([x
 function words(n: number, k: number): string[] {
   const out: string[] = [];
   let seed = 7;
-  const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  // Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+  function mix32(a: number): number { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+  const rnd = () => ((seed = (seed + 0x6d2b79f5) | 0), mix32(seed) >>> 1) / 2147483648;
   const bases = Array.from({ length: 100 }, () => Array.from({ length: k }, () => String.fromCharCode(97 + Math.floor(rnd() * 26))));
   for (let i = 0; i < n; i++) {
     const w = [...bases[i % 100]];

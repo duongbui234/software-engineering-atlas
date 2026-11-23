@@ -85,7 +85,7 @@ Store **indices**, not temperatures: the answer is a distance, and the temperatu
 
 ### Why a `while` inside a `for` is still O(n)
 
-Count with [[en/concepts/aggregate-analysis|aggregate analysis]]: each index is pushed exactly once and popped at most once. The total number of pops across **all** iterations of the `while` loop is at most n, so the total work is O(n). The TypeScript file counts it: on 10⁶ random days, 986 048 pops plus 13 952 indices left on the stack add up to exactly 10⁶.
+Count with [[en/concepts/aggregate-analysis|aggregate analysis]]: each index is pushed exactly once and popped at most once. The total number of pops across **all** iterations of the `while` loop is at most n, so the total work is O(n). The TypeScript file counts it: on 10⁶ random days, 986 082 pops plus 13 918 indices left on the stack add up to exactly 10⁶.
 
 ### Approach 3, walk from the right and jump along answers
 
@@ -97,14 +97,14 @@ TypeScript, median:
 
 | n | data | brute force | stack | jump from right |
 |---|---|---|---|---|
-| 10 000 | decreasing | 20.6 ms | 0.12 ms | 0.05 ms |
-| 20 000 | decreasing | 77.5 ms | 0.27 ms | 0.12 ms |
-| 40 000 | decreasing | 308.7 ms | 0.72 ms | 0.19 ms |
-| 40 000 | random 30..100 | 4.9 ms | 0.55 ms | 0.43 ms |
-| 10⁶ | decreasing | (not run) | 21.10 ms | 5.64 ms |
-| 10⁶ | random | (not run) | 11.85 ms | 9.78 ms |
+| 10 000 | decreasing | 21.0 ms | 0.15 ms | 0.04 ms |
+| 20 000 | decreasing | 85.0 ms | 0.34 ms | 0.13 ms |
+| 40 000 | decreasing | 317.4 ms | 0.67 ms | 0.19 ms |
+| 40 000 | random 30..100 | 4.8 ms | 0.62 ms | 0.52 ms |
+| 10⁶ | decreasing | (not run) | 19.84 ms | 5.20 ms |
+| 10⁶ | random | (not run) | 16.70 ms | 13.12 ms |
 
-Brute force on decreasing data follows the n² shape exactly (double n, about 4 times the time). On random data with only 71 values, a warmer day is usually very close, so brute force is only about 10 times slower: random tests don't catch the worst case. At 10⁶ decreasing days, the stack has to hold all 10⁶ indices, while the jump approach allocates nothing and is almost 4 times faster.
+Brute force on decreasing data follows the n² shape exactly (double n, about 4 times the time). On random data with only 71 values, a warmer day is usually very close, so brute force is only about 8 times slower: random tests don't catch the worst case. At 10⁶ decreasing days, the stack has to hold all 10⁶ indices, while the jump approach allocates nothing and is almost 4 times faster.
 
 ### Under the hood of the five languages
 
@@ -280,16 +280,16 @@ jumpFromRight   7/7 cases passed
 popOnEqual      6/7 cases passed; wrong on [70,70,71] → [1,1,0]
 
 n        data         brute     stack      jump from right   (ms, median)
-10000    decreasing      20.6       0.12           0.05
-10000    random           0.3       0.14           0.11
-20000    decreasing      77.5       0.27           0.12
-20000    random           1.4       0.29           0.23
-40000    decreasing     308.7       0.72           0.19
-40000    random           4.9       0.55           0.43
-1000000  decreasing         —      21.10           5.64
-1000000  random             —      11.85           9.78
+10000    decreasing      21.0       0.15           0.04
+10000    random           0.4       0.14           0.11
+20000    decreasing      85.0       0.34           0.13
+20000    random           1.7       0.30           0.26
+40000    decreasing     317.4       0.67           0.19
+40000    random           4.8       0.62           0.52
+1000000  decreasing         —      19.84           5.20
+1000000  random             —      16.70          13.12
 
-n = 1000000 random: 986048 pops, 13952 indices left on the stack (sum = n)
+n = 1000000 random: 986082 pops, 13918 indices left on the stack (sum = n)
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*

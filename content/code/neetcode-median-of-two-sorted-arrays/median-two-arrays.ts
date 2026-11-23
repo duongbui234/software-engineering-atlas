@@ -127,7 +127,9 @@ for (const fn of fns) {
 
 // Đối chiếu ngẫu nhiên với cách ngây thơ (nối rồi sort): 10⁵ cặp, mỗi mảng 0..20 phần tử, giá trị trong [-50, 50].
 let seed = 42;
-const rnd = (k: number) => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % k; };
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a: number): number { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rnd = (k: number) => { seed = (seed + 0x6d2b79f5) | 0; return (mix32(seed) >>> 1) % k; };
 const sortedRandom = (len: number) => Array.from({ length: len }, () => rnd(101) - 50).sort((x, y) => x - y);
 // Cách ngây thơ để đối chiếu: nối hai mảng, sort lại, lấy giữa.
 function bruteForce(a: number[], b: number[]): number {

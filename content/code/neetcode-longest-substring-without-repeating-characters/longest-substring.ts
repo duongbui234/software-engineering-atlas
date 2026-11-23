@@ -60,7 +60,9 @@ for (const fn of [bruteForce, windowSet, windowLastSeen, windowJumpBack]) {
 console.log(`\n"a😀😀".length = ${"a😀😀".length}; windowLastSeen("a😀😀") = ${windowLastSeen("a😀😀")} (đúng phải là 2)`);
 
 // Đo: chuỗi ngẫu nhiên trên bảng chữ cái k ký tự.
-const rand = (() => { let x = 5; return () => (x = (x * 1103515245 + 12345) % 2 ** 31) / 2 ** 31; })();
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a: number): number { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rand = (() => { let x = 5; return () => ((x = (x + 0x6d2b79f5) | 0), mix32(x) >>> 1) / 2 ** 31; })();
 const make = (n: number, k: number) => Array.from({ length: n }, () => String.fromCharCode(32 + Math.floor(rand() * k))).join("");
 const time = (fn: (s: string) => number, s: string, runs: number) => {
   const ts: number[] = [];

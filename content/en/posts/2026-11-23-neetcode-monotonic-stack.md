@@ -77,7 +77,7 @@ for each i:
 Three things make this template correct:
 1. **Store indices**, not values: the answer is usually a distance or a width.
 2. **The order on the stack** makes the `while` loop stop at the right moment: a new element that doesn't break the order with the top doesn't break it with anyone below either.
-3. **Each index goes in once and comes out at most once.** The total number of pops across all iterations is at most n, so O(n). On 10⁶ random days, the measuring file counted 986 048 pops.
+3. **Each index goes in once and comes out at most once.** The total number of pops across all iterations is at most n, so O(n). On 10⁶ random days, the measuring file counted 986 082 pops.
 
 ### Three problems, two questions
 

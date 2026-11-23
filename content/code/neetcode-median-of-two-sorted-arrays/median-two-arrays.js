@@ -78,7 +78,9 @@ function bruteForce(a, b) {
   return t % 2 ? all[t >> 1] : (all[t / 2 - 1] + all[t / 2]) / 2;
 }
 let seed = 42;
-const rnd = (k) => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % k; };
+// Bộ sinh ngẫu nhiên mulberry32: trạng thái là số nguyên 32 bit, mọi phép nhân qua Math.imul nên không mất chính xác.
+function mix32(a) { let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (t ^ (t >>> 14)) >>> 0; }
+const rnd = (k) => { seed = (seed + 0x6d2b79f5) | 0; return (mix32(seed) >>> 1) % k; };
 const sortedRandom = (len) => Array.from({ length: len }, () => rnd(101) - 50).sort((x, y) => x - y);
 const PAIRS = 100_000;
 const wrong = fns.map(() => 0);

@@ -357,6 +357,24 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | đẩy lúc ghi | fan-out on write |
 | đọc lúc cần | fan-out on read |
 | sắp ổn định | stable sort |
+| danh sách liên kết | linked list |
+| nút | node |
+| con trỏ next | next pointer |
+| nút giả | dummy node |
+| con trỏ chậm, nhanh | slow, fast pointer |
+| lật con trỏ tại chỗ | in-place pointer reversal |
+| đan hai nửa, đan xen | interleave the halves, interleave |
+| vòng | cycle |
+| đầu vòng | cycle start |
+| rùa và thỏ | tortoise and hare |
+| danh tính, giá trị | identity, value |
+| nửa đầu, nửa sau | first half, second half |
+| giữa thứ hai | second middle |
+| nối lại | splice, relink |
+| bỏ qua một nút | unlink |
+| khung gọi hàm | stack frame |
+| bộ gom rác | garbage collector |
+| khoảng cách n + 1 | a gap of n + 1 |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

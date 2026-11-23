@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Reversing the list 1 → 2 → 3 with three pointers",
+    "output": "content/diagrams/neetcode-linked-list/pointer-dance.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "prev",
+      "type": "database",
+      "label": "Reversed part",
+      "sublabel": "prev: head of the reversed segment"
+    },
+    {
+      "id": "cur",
+      "type": "backend",
+      "label": "Node being flipped",
+      "sublabel": "cur: the node whose arrow turns"
+    },
+    {
+      "id": "next",
+      "type": "frontend",
+      "label": "Unreversed part",
+      "sublabel": "next: holds the rest before the cut"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 390,
+      "label": "step 1: node 1"
+    },
+    {
+      "from": 390,
+      "to": 630,
+      "label": "step 2: node 2"
+    },
+    {
+      "from": 630,
+      "to": 930,
+      "label": "step 3: node 3, then stop"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "cur",
+      "to": "next",
+      "y": 175,
+      "label": "step 1: hold the rest first",
+      "variant": "default",
+      "note": "next = cur.next → node 2"
+    },
+    {
+      "id": "m1",
+      "from": "cur",
+      "to": "prev",
+      "y": 235,
+      "label": "flip: node 1 points back to prev",
+      "variant": "default",
+      "note": "cur.next = prev (null)"
+    },
+    {
+      "id": "m2",
+      "from": "prev",
+      "to": "cur",
+      "y": 295,
+      "label": "prev moves to node 1",
+      "variant": "default",
+      "note": "prev = cur"
+    },
+    {
+      "id": "m3",
+      "from": "next",
+      "to": "cur",
+      "y": 355,
+      "label": "cur moves to node 2",
+      "variant": "default",
+      "note": "cur = next; reversed: 1"
+    },
+    {
+      "id": "m4",
+      "from": "cur",
+      "to": "next",
+      "y": 415,
+      "label": "step 2: hold node 3",
+      "variant": "default",
+      "note": "next = cur.next"
+    },
+    {
+      "id": "m5",
+      "from": "cur",
+      "to": "prev",
+      "y": 475,
+      "label": "flip: node 2 points to node 1",
+      "variant": "default",
+      "note": "cur.next = prev"
+    },
+    {
+      "id": "m6",
+      "from": "prev",
+      "to": "cur",
+      "y": 535,
+      "label": "prev moves to node 2",
+      "variant": "default",
+      "note": "prev = cur"
+    },
+    {
+      "id": "m7",
+      "from": "next",
+      "to": "cur",
+      "y": 595,
+      "label": "cur moves to node 3",
+      "variant": "default",
+      "note": "reversed: 2 → 1"
+    },
+    {
+      "id": "m8",
+      "from": "cur",
+      "to": "next",
+      "y": 655,
+      "label": "step 3: hold the rest (empty)",
+      "variant": "default",
+      "note": "next = cur.next = null"
+    },
+    {
+      "id": "m9",
+      "from": "cur",
+      "to": "prev",
+      "y": 715,
+      "label": "flip: node 3 points to node 2",
+      "variant": "default",
+      "note": "cur.next = prev"
+    },
+    {
+      "id": "m10",
+      "from": "prev",
+      "to": "cur",
+      "y": 775,
+      "label": "prev moves to node 3",
+      "variant": "default",
+      "note": "prev = cur"
+    },
+    {
+      "id": "m11",
+      "from": "next",
+      "to": "cur",
+      "y": 835,
+      "label": "cur = null: end of list",
+      "variant": "default",
+      "note": "the loop stops"
+    },
+    {
+      "id": "m12",
+      "from": "prev",
+      "to": "cur",
+      "y": 895,
+      "label": "return prev: node 3 is the new head",
+      "variant": "return",
+      "note": "3 → 2 → 1, O(n) time, O(1) memory"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Invariant",
+      "items": [
+        "prev heads the reversed segment, in reverse order",
+        "cur is the first node of the unreversed part",
+        "The two segments are not linked to each other"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cost",
+      "items": [
+        "One pointer change per node: O(n)",
+        "Only three variables: O(1) memory",
+        "Recursion: n call frames, overflows at a few thousand levels"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Common traps",
+      "items": [
+        "Flipping before saving next: the rest is lost",
+        "Recursion without head.next = null: creates a cycle",
+        "Returning cur instead of prev: returns null"
+      ]
+    }
+  ]
+}

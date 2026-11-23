@@ -6,6 +6,8 @@
 //   - một sơ đồ archify nhúng bị cắt: khung iframe thấp hơn nội dung (viewer đặt overflow:hidden).
 //
 // Chạy local:  npx quartz build && npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
+// Chỉ một số trang: node scripts/check-render.mjs public --pages pages.txt (danh sách từ scripts/changed-pages.mjs;
+//              file chứa dòng "ALL" thì vẫn kiểm cả site). CI dùng cách này cho PR, kiểm cả site khi push lên main.
 // Chrome:      dùng CHROME_PATH nếu có, không thì /usr/bin/google-chrome hoặc Chromium của Playwright.
 import { chromium } from 'playwright-core';
 import fs from 'node:fs';
@@ -13,7 +15,10 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 
-const ROOT = path.resolve(process.argv[2] || 'public');
+const args = process.argv.slice(2);
+const pagesArg = args.indexOf('--pages');
+const PAGES_FILE = pagesArg >= 0 ? args.splice(pagesArg, 2)[1] : null;
+const ROOT = path.resolve(args[0] || 'public');
 const WIDTHS = [390, 1440];
 const MIN_SCALE = 0.75;
 const CONCURRENCY = 4;
@@ -137,8 +142,18 @@ async function checkPage(page, origin, file, width) {
   return problems;
 }
 
-const pages = listPages(ROOT);
-if (pages.length === 0) { console.error(`Không có trang nào trong ${ROOT}. Chạy npx quartz build trước.`); process.exit(1); }
+const allPages = listPages(ROOT);
+if (allPages.length === 0) { console.error(`Không có trang nào trong ${ROOT}. Chạy npx quartz build trước.`); process.exit(1); }
+let pages = allPages;
+if (PAGES_FILE) {
+  const wanted = fs.readFileSync(PAGES_FILE, 'utf8').split('\n').map((l) => l.trim()).filter(Boolean);
+  if (!wanted.includes('ALL')) {
+    const set = new Set(wanted);
+    pages = allPages.filter((p) => set.has(p));
+    console.log(`Chỉ kiểm ${pages.length}/${allPages.length} trang bị ảnh hưởng (${PAGES_FILE})`);
+    if (pages.length === 0) { console.log('✓ Kiểm tra hiển thị: không có trang nào bị ảnh hưởng'); process.exit(0); }
+  }
+}
 const server = await serve();
 const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ executablePath: findChrome() });

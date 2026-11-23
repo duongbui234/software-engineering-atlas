@@ -37,9 +37,16 @@ jobs:
       - run: npx quartz build
       - name: Kiểm tra hiển thị (cuộn ngang, Mermaid) ở 390px và 1440px
         # Chrome có sẵn trên runner ubuntu; playwright-core cài --no-save để không đụng package.json của Quartz
+        # PR: chỉ kiểm trang bị ảnh hưởng (scripts/changed-pages.mjs; đổi theme/cấu hình/script thì vẫn kiểm cả site).
+        # Push lên main và chạy tay: kiểm cả site trước khi deploy.
         run: |
           npm install --no-save playwright-core@1.49.1
-          node scripts/check-render.mjs
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            node scripts/changed-pages.mjs HEAD^1 HEAD > "$RUNNER_TEMP/pages.txt"
+            node scripts/check-render.mjs public --pages "$RUNNER_TEMP/pages.txt"
+          else
+            node scripts/check-render.mjs
+          fi
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3

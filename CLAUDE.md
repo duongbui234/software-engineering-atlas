@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quartz setup
 
 - `main` is built on top of upstream Quartz history (`upstream` remote → `jackyzha0/quartz`, branch `v5`). Update with `npx quartz upgrade` (`update` is an alias) on a branch, then `npx quartz plugin doctor --fix` (moves plugins absorbed into core, e.g. `quartz-fonts` → `configuration.fonts`) and `npx quartz plugin install --from-config`, then build before merging into `main`. To keep merges clean, avoid editing upstream files (`quartz/`, `docs/`, upstream `.github/` files) unless necessary. Site-specific changes belong in `quartz.config.yaml`, `content/`, our own components and styles, and `.github/workflows/deploy.yml`.
-- Upstream workflows are guarded by `github.repository == 'jackyzha0/quartz'` and do not run here. Our CI is `.github/workflows/deploy.yml`: it builds on PRs and builds and deploys on push to `main`. After the build it runs `scripts/check-render.mjs` (render check, see Commands), so a page that scrolls sideways or an unreadable Mermaid diagram fails the PR. In the repo settings, set Pages → Source to **GitHub Actions**.
+- Upstream workflows are guarded by `github.repository == 'jackyzha0/quartz'` and do not run here. Our CI is `.github/workflows/deploy.yml`: it builds on PRs and builds and deploys on push to `main`. After the build it runs `scripts/check-render.mjs` (render check, see Commands), so a page that scrolls sideways or an unreadable Mermaid diagram fails the PR. On a PR it checks only the pages `scripts/changed-pages.mjs` selects: pages whose source changed, pages that embed a changed diagram or link to a changed page, plus the home, problem-set and hub pages. A change to the theme, config, scripts, CI or dependencies selects the whole site. Push to `main` always checks the whole site before deploying. In the repo settings, set Pages → Source to **GitHub Actions**.
 - `@quartz-community/*` plugins are npm packages installed by `npm ci`. The only non-npm plugin is the local `./plugins/atlas` (see below).
 - Drafts are handled by Quartz core: `draft: true` pages are not emitted. `cname` is disabled because the site runs under the `/software-engineering-atlas` subpath.
 - Comments (giscus) and analytics (GoatCounter) are configured but off. Comments need GitHub Discussions plus `repoId`/`categoryId` from giscus.app. Analytics needs a GoatCounter `websiteId`.
@@ -30,6 +30,8 @@ npm run check                   # tsc + prettier (upstream code)
 # Fails on horizontal page scroll, broken Mermaid, "Unsupported markdown" labels, Mermaid diagrams shrunk below 75%,
 # or an archify iframe shorter than the diagram inside it.
 npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
+# Only the pages a branch affects (what CI does on a PR):
+node scripts/changed-pages.mjs $(git merge-base main HEAD) HEAD > /tmp/pages.txt && node scripts/check-render.mjs public --pages /tmp/pages.txt
 
 # Preview the prototype (iframes and theme sync need http, not file://)
 cd prototype && python3 -m http.server 8765

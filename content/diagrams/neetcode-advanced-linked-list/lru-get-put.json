@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "LRU Cache sức chứa 2: bảng băm tìm nút, danh sách hai chiều giữ thứ tự",
+    "output": "content/diagrams/neetcode-advanced-linked-list/lru-get-put.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "caller",
+      "type": "frontend",
+      "label": "Người gọi",
+      "sublabel": "get(key), put(key, value)"
+    },
+    {
+      "id": "map",
+      "type": "backend",
+      "label": "Bảng băm",
+      "sublabel": "Map: key → nút, tra O(1)"
+    },
+    {
+      "id": "list",
+      "type": "database",
+      "label": "Danh sách hai chiều",
+      "sublabel": "head ⇄ … ⇄ tail: mới → cũ"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 390,
+      "label": "bước 1: put 1, put 2"
+    },
+    {
+      "from": 390,
+      "to": 570,
+      "label": "bước 2: get(1) đưa lên đầu"
+    },
+    {
+      "from": 570,
+      "to": 810,
+      "label": "bước 3: put(3) đẩy key cũ nhất"
+    },
+    {
+      "from": 810,
+      "to": 930,
+      "label": "bước 4: get(2)"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "caller",
+      "to": "map",
+      "y": 175,
+      "label": "bước 1: put(1, 1), cache rỗng",
+      "variant": "default",
+      "note": "map.get(1) → không có"
+    },
+    {
+      "id": "m1",
+      "from": "map",
+      "to": "list",
+      "y": 235,
+      "label": "tạo nút 1, gắn ngay sau head",
+      "variant": "default",
+      "note": "pushFront: head ⇄ 1 ⇄ tail"
+    },
+    {
+      "id": "m2",
+      "from": "caller",
+      "to": "map",
+      "y": 295,
+      "label": "put(2, 2): chưa đầy, thêm tiếp",
+      "variant": "default",
+      "note": "map.size = 1 < 2"
+    },
+    {
+      "id": "m3",
+      "from": "map",
+      "to": "list",
+      "y": 355,
+      "label": "nút 2 lên đầu, nút 1 lùi về sau",
+      "variant": "default",
+      "note": "head ⇄ 2 ⇄ 1 ⇄ tail"
+    },
+    {
+      "id": "m4",
+      "from": "caller",
+      "to": "map",
+      "y": 415,
+      "label": "bước 2: get(1)",
+      "variant": "default",
+      "note": "map.get(1) → nút 1, O(1)"
+    },
+    {
+      "id": "m5",
+      "from": "map",
+      "to": "list",
+      "y": 475,
+      "label": "gỡ nút 1, gắn lại sau head",
+      "variant": "default",
+      "note": "unlink + pushFront: head ⇄ 1 ⇄ 2 ⇄ tail"
+    },
+    {
+      "id": "m6",
+      "from": "list",
+      "to": "caller",
+      "y": 535,
+      "label": "trả 1: nút 1 giờ mới dùng nhất",
+      "variant": "return",
+      "note": "giá trị nằm trong nút"
+    },
+    {
+      "id": "m7",
+      "from": "caller",
+      "to": "map",
+      "y": 595,
+      "label": "bước 3: put(3, 3), cache đã đầy",
+      "variant": "default",
+      "note": "map.size = 2 = sức chứa"
+    },
+    {
+      "id": "m8",
+      "from": "map",
+      "to": "list",
+      "y": 655,
+      "label": "hỏi nút cũ nhất: nút trước tail",
+      "variant": "default",
+      "note": "old = tail.prev → nút 2"
+    },
+    {
+      "id": "m9",
+      "from": "list",
+      "to": "map",
+      "y": 715,
+      "label": "gỡ nút 2, báo key 2 để xóa",
+      "variant": "default",
+      "note": "unlink(old); map.delete(old.key)"
+    },
+    {
+      "id": "m10",
+      "from": "map",
+      "to": "list",
+      "y": 775,
+      "label": "tạo nút 3, gắn sau head",
+      "variant": "default",
+      "note": "head ⇄ 3 ⇄ 1 ⇄ tail"
+    },
+    {
+      "id": "m11",
+      "from": "caller",
+      "to": "map",
+      "y": 835,
+      "label": "bước 4: get(2)",
+      "variant": "default",
+      "note": "map.get(2) → không có"
+    },
+    {
+      "id": "m12",
+      "from": "map",
+      "to": "caller",
+      "y": 895,
+      "label": "trả −1: key 2 đã bị đẩy ra",
+      "variant": "return",
+      "note": "mọi thao tác O(1)"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Bất biến",
+      "items": [
+        "Mỗi key trong bảng băm trỏ đúng một nút trong danh sách",
+        "Ngay sau head là key mới dùng nhất",
+        "Ngay trước tail là key cũ nhất"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Chi phí",
+      "items": [
+        "get, put: O(1) thời gian",
+        "Gỡ nút: sửa 2 con trỏ; gắn lên đầu: 4",
+        "Bộ nhớ O(sức chứa): một nút và một ô băm mỗi key"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Bẫy hay gặp",
+      "items": [
+        "get không đưa nút lên đầu: đẩy nhầm key",
+        "Gỡ nút mà quên xóa trong bảng băm: bảng phình ra",
+        "Cập nhật key cũ mà không đưa lên đầu"
+      ]
+    }
+  ]
+}

@@ -10,6 +10,7 @@ stations:
   - name: "Linked List Pointers"
     concepts: [Linked List, Dummy Node, Fast and Slow Pointers, In-place Pointer Reversal]
   - name: "Advanced Linked Lists"
+    concepts: [Doubly Linked List, Node Interleaving, Carry Propagation, Divide-and-Conquer Merge]
   - name: "Tree Recursion"
   - name: "Binary Search Trees"
   - name: "Level Order and Carried State"

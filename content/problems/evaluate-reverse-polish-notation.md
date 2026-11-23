@@ -110,6 +110,8 @@ Biểu thức `1 1 + 1 + …` với n toán tử, TypeScript, trung vị 5 lần
 | Java | `StackOverflowError` ở 10⁵ tầng (stack mặc định của luồng) |
 | Go | chạy được 10⁶ tầng: stack của goroutine tự nới khi cần |
 
+Độ sâu tối đa đo bằng tìm kiếm nhị phân trên n, với biểu thức `1 1 + 1 + …` (n toán tử, sâu n tầng) ([JS](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.js) · [Java](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.java) · [Python](../code/neetcode-evaluate-reverse-polish-notation/recursion_depth.py)): Node 24 chịu được **9 765** tầng ở cả ba lần chạy; Java 21 chịu được khoảng **8 600–9 400** tầng ở lần đo đầu (đổi theo lần chạy: 8 593 và 9 375) và **29 473** tầng ở hai lần sau, vì khi code đã được JIT biên dịch, mỗi khung gọi hàm nhỏ hơn; Python 3.12 dừng ở **996** tầng (giới hạn 1 000 trừ vài khung của chính chương trình). Với 10⁴ token, biểu thức sâu tới khoảng 5 000 tầng: JS và Java qua, còn Python **không** qua, nên câu "đệ quy vẫn qua LeetCode" ở trên chỉ đúng với JS và Java. Python phải dùng ngăn xếp tường minh hoặc nâng `sys.setrecursionlimit`.
+
 ### Bên dưới năm ngôn ngữ
 
 | | Chia số nguyên | Đọc `"-11"` thành số |

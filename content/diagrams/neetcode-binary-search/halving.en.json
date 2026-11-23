@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Binary search on [-1, 0, 3, 5, 9, 12, 15, 20]",
+    "output": "content/diagrams/neetcode-binary-search/halving.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "loop",
+      "type": "frontend",
+      "label": "Searcher",
+      "sublabel": "loop: lo, hi, mid"
+    },
+    {
+      "id": "arr",
+      "type": "database",
+      "label": "Sorted array",
+      "sublabel": "nums, indices 0..7"
+    },
+    {
+      "id": "range",
+      "type": "database",
+      "label": "Suspect range",
+      "sublabel": "[lo, hi]: target can only be here"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 400,
+      "label": "find 15: found in three looks"
+    },
+    {
+      "from": 430,
+      "to": 720,
+      "label": "find 4: stop when the range is empty"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "loop",
+      "to": "arr",
+      "y": 175,
+      "label": "mid = 3: what is nums[3]?",
+      "variant": "default",
+      "note": "lo = 0, hi = 7"
+    },
+    {
+      "id": "a2",
+      "from": "arr",
+      "to": "loop",
+      "y": 225,
+      "label": "5, less than 15",
+      "variant": "return"
+    },
+    {
+      "id": "a3",
+      "from": "loop",
+      "to": "range",
+      "y": 265,
+      "label": "drop the left half and mid",
+      "variant": "default",
+      "note": "lo = mid + 1 = 4 → [4, 7]"
+    },
+    {
+      "id": "a4",
+      "from": "loop",
+      "to": "arr",
+      "y": 315,
+      "label": "mid = 5: 12 < 15, drop left",
+      "variant": "default",
+      "note": "[6, 7]"
+    },
+    {
+      "id": "a5",
+      "from": "arr",
+      "to": "loop",
+      "y": 370,
+      "label": "mid = 6: it is 15, return 6",
+      "variant": "emphasis"
+    },
+    {
+      "id": "b1",
+      "from": "loop",
+      "to": "arr",
+      "y": 455,
+      "label": "mid = 3: 5 > 4, drop right",
+      "variant": "default",
+      "note": "hi = mid − 1 = 2 → [0, 2]"
+    },
+    {
+      "id": "b2",
+      "from": "loop",
+      "to": "arr",
+      "y": 510,
+      "label": "mid = 1: 0 < 4, drop left",
+      "variant": "default",
+      "note": "[2, 2]: one cell left"
+    },
+    {
+      "id": "b3",
+      "from": "loop",
+      "to": "arr",
+      "y": 565,
+      "label": "mid = 2: 3 < 4, drop left",
+      "variant": "default",
+      "note": "lo = 3, hi = 2"
+    },
+    {
+      "id": "b4",
+      "from": "loop",
+      "to": "range",
+      "y": 620,
+      "label": "lo > hi: range is empty",
+      "variant": "default"
+    },
+    {
+      "id": "b5",
+      "from": "range",
+      "to": "loop",
+      "y": 670,
+      "label": "4 is absent: return −1",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "The range invariant",
+      "items": [
+        "If present, target is in [lo, hi]",
+        "Every pass keeps this true",
+        "An empty range proves absence"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Each pass drops half",
+      "items": [
+        "8 → 4 → 2 → 1 cells",
+        "At most ⌊log₂ n⌋ + 1 looks",
+        "10⁶ elements: 20 looks"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Common traps",
+      "items": [
+        "lo = mid can loop forever",
+        "[lo, hi] goes with lo <= hi",
+        "(lo + hi) / 2 overflows 32-bit int"
+      ]
+    }
+  ]
+}

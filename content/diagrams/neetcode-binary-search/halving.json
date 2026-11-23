@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tìm kiếm nhị phân trên [-1, 0, 3, 5, 9, 12, 15, 20]",
+    "output": "content/diagrams/neetcode-binary-search/halving.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {"id": "loop", "type": "frontend", "label": "Người tìm", "sublabel": "vòng lặp: lo, hi, mid"},
+    {"id": "arr", "type": "database", "label": "Mảng đã sắp", "sublabel": "nums, chỉ số 0..7"},
+    {"id": "range", "type": "database", "label": "Khoảng còn nghi", "sublabel": "[lo, hi]: target chỉ có thể ở đây"}
+  ],
+  "segments": [
+    {"from": 150, "to": 400, "label": "tìm 15: ba lần nhìn là thấy"},
+    {"from": 430, "to": 720, "label": "tìm 4: khoảng rỗng thì dừng"}
+  ],
+  "messages": [
+    {"id": "a1", "from": "loop", "to": "arr", "y": 175, "label": "mid = 3: nums[3] là mấy?", "variant": "default", "note": "lo = 0, hi = 7"},
+    {"id": "a2", "from": "arr", "to": "loop", "y": 225, "label": "5, nhỏ hơn 15", "variant": "return"},
+    {"id": "a3", "from": "loop", "to": "range", "y": 265, "label": "bỏ nửa trái cùng mid", "variant": "default", "note": "lo = mid + 1 = 4 → [4, 7]"},
+    {"id": "a4", "from": "loop", "to": "arr", "y": 315, "label": "mid = 5: 12 < 15, bỏ trái", "variant": "default", "note": "[6, 7]"},
+    {"id": "a5", "from": "arr", "to": "loop", "y": 370, "label": "mid = 6: đúng 15, trả 6", "variant": "emphasis"},
+    {"id": "b1", "from": "loop", "to": "arr", "y": 455, "label": "mid = 3: 5 > 4, bỏ phải", "variant": "default", "note": "hi = mid − 1 = 2 → [0, 2]"},
+    {"id": "b2", "from": "loop", "to": "arr", "y": 510, "label": "mid = 1: 0 < 4, bỏ trái", "variant": "default", "note": "[2, 2]: còn một ô"},
+    {"id": "b3", "from": "loop", "to": "arr", "y": 565, "label": "mid = 2: 3 < 4, bỏ trái", "variant": "default", "note": "lo = 3, hi = 2"},
+    {"id": "b4", "from": "loop", "to": "range", "y": 620, "label": "lo > hi: khoảng rỗng", "variant": "default"},
+    {"id": "b5", "from": "range", "to": "loop", "y": 670, "label": "4 không có mặt: trả −1", "variant": "return"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "Bất biến của khoảng", "items": ["Target có mặt thì ở trong [lo, hi]", "Mỗi vòng giữ đúng câu này", "Khoảng rỗng là bằng chứng không có"]},
+    {"dot": "amber", "title": "Mỗi vòng bỏ nửa", "items": ["8 → 4 → 2 → 1 ô", "Tối đa ⌊log₂ n⌋ + 1 lần nhìn", "10⁶ phần tử: 20 lần"]},
+    {"dot": "rose", "title": "Bẫy hay gặp", "items": ["lo = mid có thể lặp mãi", "[lo, hi] đi với lo <= hi", "(lo + hi) / 2 tràn int 32 bit"]}
+  ]
+}

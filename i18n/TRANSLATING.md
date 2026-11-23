@@ -286,6 +286,21 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | nhân chéo | cross-multiplication |
 | cột thấp hơn gần nhất | nearest smaller bar |
 | chia để trị | divide and conquer |
+| tìm kiếm nhị phân, chia đôi | binary search |
+| bất biến vòng lặp | loop invariant |
+| khoảng nửa mở | half-open interval |
+| khoảng đóng | closed interval |
+| tràn điểm giữa | midpoint overflow |
+| cận dưới, cận trên | lower bound, upper bound |
+| khoảng còn nghi | suspect range |
+| vị trí chèn | insertion point |
+| mảng xoay | rotated sorted array |
+| chỗ gãy, điểm gãy | break, pivot |
+| nửa lành | intact half |
+| một lượt, hai lượt | one pass, two passes |
+| chỉ số phẳng | flat index |
+| đi bậc thang | staircase walk |
+| thứ tự theo hàng | row-major order |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

@@ -8,6 +8,7 @@ draft: false
 lang: en
 stations:
   - name: "Binary Search on Arrays"
+    concepts: [Binary Search, Loop Invariant, Half-open Interval, Midpoint Overflow, Lower Bound, Rotated Sorted Array]
   - name: "Binary Search on the Answer"
   - name: "Heaps and Top K"
   - name: "Two Heaps and Scheduling"

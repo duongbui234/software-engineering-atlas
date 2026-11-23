@@ -111,6 +111,8 @@ At small depths recursion is even faster because it allocates no array. But V8's
 | Java | `StackOverflowError` at 10⁵ levels (the thread's default stack) |
 | Go | runs 10⁶ levels: a goroutine's stack grows as needed |
 
+The maximum depth, measured with a binary search on n over the expression `1 1 + 1 + …` (n operators, n levels deep) ([JS](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.js) · [Java](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.java) · [Python](../code/neetcode-evaluate-reverse-polish-notation/recursion_depth.py)): Node 24 handles **9 765** levels on all three runs; Java 21 handles about **8 600–9 400** levels on the first measurement (it varies between runs: 8 593 and 9 375) and **29 473** on the next two, because once the code is JIT-compiled each call frame is smaller; Python 3.12 stops at **996** levels (the limit of 1 000 minus a few frames of the program itself). With 10⁴ tokens an expression can be about 5 000 levels deep: JS and Java pass, but Python does **not**, so "recursion still passes LeetCode" above holds only for JS and Java. Python needs the explicit stack or a raised `sys.setrecursionlimit`.
+
 ### Under the hood of the five languages
 
 | | Integer division | Reading `"-11"` as a number |

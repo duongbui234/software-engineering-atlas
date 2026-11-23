@@ -269,6 +269,23 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | quay lui | backtracking |
 | làm tròn về 0, làm tròn xuống | truncate toward 0, floor |
 | ngăn xếp gọi hàm | call stack |
+| số Catalan | Catalan number |
+| cây lựa chọn | choice tree |
+| sinh hết rồi lọc | generate then filter |
+| bộ đệm dùng chung | shared buffer |
+| bài thiết kế | design problem |
+| lưu hiệu | storing differences |
+| tràn số | overflow |
+| vế trái, vế phải (toán hạng) | left, right operand |
+| máy ngăn xếp | stack machine |
+| ngăn xếp đơn điệu (tăng, giảm) | monotonic stack (increasing, decreasing) |
+| phần tử lớn hơn kế tiếp | next greater element |
+| phần tử canh, lính canh | sentinel |
+| đoàn xe, nhập đoàn | fleet, join the fleet |
+| biểu đồ cột | histogram |
+| nhân chéo | cross-multiplication |
+| cột thấp hơn gần nhất | nearest smaller bar |
+| chia để trị | divide and conquer |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

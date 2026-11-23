@@ -36,8 +36,8 @@ The dishwasher piles clean plates into a stack. The waiter can only take the **t
 | Putting a plate on top / taking the top plate | `push` / `pop` |
 | The top plate | the top: the most recent unfinished item |
 | Nested boxes that must be closed from the inside out | Valid Parentheses |
-| A note on each plate: "smallest plate from here down" | Min Stack |
-| Gathering ingredients on the counter, and when a recipe step comes, mixing the top two | Evaluate Reverse Polish Notation |
+| A note on each plate: "smallest plate from here down" | [[en/problems/min-stack\|Min Stack]] |
+| Gathering ingredients on the counter, and when a recipe step comes, mixing the top two | [[en/problems/evaluate-reverse-polish-notation\|Evaluate Reverse Polish Notation]] |
 | Trying an item, lifting it off if it doesn't fit and trying another | Generate Parentheses (backtracking) |
 
 ```mermaid
@@ -80,13 +80,13 @@ Each element enters the stack once and leaves at most once, so the whole pass is
 | [[en/problems/valid-parentheses\|Valid Parentheses]] | an opener | on a closer: the top must be the same kind |
 | Min Stack | a pair (value, min up to this level) | on the user's `pop`; the new min is the one stored on the level below |
 | Evaluate Reverse Polish Notation | a number | on an operator: take two numbers, push the result back |
-| Generate Parentheses | the character just tried | once that branch has been explored (backtracking) |
+| [[en/problems/generate-parentheses\|Generate Parentheses]] | the character just tried | once that branch has been explored (backtracking) |
 
-**Min Stack.** The problem wants `getMin` in O(1). A single `min` variable breaks when you `pop` exactly the smallest element: you don't know the new min. The fix: each level also stores the min **up to that level**. After a `pop`, the level below already holds the min of what remains. It costs double the memory, and in return every operation is O(1).
+**[[en/problems/min-stack|Min Stack]].** The problem wants `getMin` in O(1). A single `min` variable breaks when you `pop` exactly the smallest element: you don't know the new min. The fix: each level also stores the min **up to that level**. After a `pop`, the level below already holds the min of what remains. It costs double the memory, and in return every operation is O(1).
 
-**Evaluate Reverse Polish Notation.** `["2", "1", "+", "3", "*"]` is `(2 + 1) · 3 = 9`. On an operator, take the top two numbers: the one popped **first** is the **right** operand. Swapping them is harmless for `+` and `*`, wrong for `-` and `/`. Division must **truncate toward 0** (`-7 / 2 = -3`): Go and Java `int` division does exactly that, JS needs `Math.trunc`, and Python's `//` rounds **down** to `-4`.
+**[[en/problems/evaluate-reverse-polish-notation|Evaluate Reverse Polish Notation]].** `["2", "1", "+", "3", "*"]` is `(2 + 1) · 3 = 9`. On an operator, take the top two numbers: the one popped **first** is the **right** operand. Swapping them is harmless for `+` and `*`, wrong for `-` and `/`. Division must **truncate toward 0** (`-7 / 2 = -3`): Go and Java `int` division does exactly that, JS needs `Math.trunc`, and Python's `//` rounds **down** to `-4`.
 
-**Generate Parentheses.** List every valid string of n bracket pairs. Add `(` while there are fewer than n openers, add `)` while there are fewer closers than openers. Each try is a `push` of one character onto the string being built, and finishing that try is a `pop`. Those two conditions guarantee only valid strings are produced, so there is no need to generate all 2²ⁿ strings and filter. The number of results is a Catalan number: 5 for n = 3, 14 for n = 4.
+**[[en/problems/generate-parentheses|Generate Parentheses]].** List every valid string of n bracket pairs. Add `(` while there are fewer than n openers, add `)` while there are fewer closers than openers. Each try is a `push` of one character onto the string being built, and finishing that try is a `pop`. Those two conditions guarantee only valid strings are produced, so there is no need to generate all 2²ⁿ strings and filter. The number of results is a Catalan number: 5 for n = 3, 14 for n = 4.
 
 ## Runnable example
 

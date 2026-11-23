@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Monotonic stack on [73, 74, 75, 71, 69, 72, 76, 73]",
+    "output": "content/diagrams/neetcode-monotonic-stack/next-warmer.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "day",
+      "type": "frontend",
+      "label": "Day being read",
+      "sublabel": "i, temperature t[i]"
+    },
+    {
+      "id": "stack",
+      "type": "database",
+      "label": "Waiting-days book",
+      "sublabel": "stack of indices, temperatures decreasing"
+    },
+    {
+      "id": "out",
+      "type": "database",
+      "label": "Answer array",
+      "sublabel": "out[j] = days to wait"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 300,
+      "label": "days 0–2: each day warmer than the last"
+    },
+    {
+      "from": 320,
+      "to": 520,
+      "label": "days 3–5: wait, then 72 resolves two days"
+    },
+    {
+      "from": 540,
+      "to": 760,
+      "label": "days 6–7: 76 resolves the whole book"
+    }
+  ],
+  "messages": [
+    {
+      "id": "a1",
+      "from": "day",
+      "to": "stack",
+      "y": 175,
+      "label": "74 > 73: take day 0 out",
+      "variant": "default"
+    },
+    {
+      "id": "a2",
+      "from": "stack",
+      "to": "out",
+      "y": 220,
+      "label": "out[0] = 1 − 0 = 1",
+      "variant": "return"
+    },
+    {
+      "id": "a3",
+      "from": "day",
+      "to": "stack",
+      "y": 265,
+      "label": "75 > 74: out[1] = 1, store day 2",
+      "variant": "default",
+      "note": "book: [2]"
+    },
+    {
+      "id": "b1",
+      "from": "day",
+      "to": "stack",
+      "y": 345,
+      "label": "71 is not warmer: store day 3",
+      "variant": "default"
+    },
+    {
+      "id": "b2",
+      "from": "day",
+      "to": "stack",
+      "y": 390,
+      "label": "69 is not warmer: store day 4",
+      "variant": "default",
+      "note": "book: [2, 3, 4], decreasing 75, 71, 69"
+    },
+    {
+      "id": "b3",
+      "from": "day",
+      "to": "stack",
+      "y": 450,
+      "label": "72 > 69 and 72 > 71: take 2 days out",
+      "variant": "emphasis"
+    },
+    {
+      "id": "b4",
+      "from": "stack",
+      "to": "out",
+      "y": 495,
+      "label": "out[4] = 1, out[3] = 2",
+      "variant": "return",
+      "note": "72 < 75: stop, store day 5"
+    },
+    {
+      "id": "c1",
+      "from": "day",
+      "to": "stack",
+      "y": 580,
+      "label": "76 beats every day in the book",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c2",
+      "from": "stack",
+      "to": "out",
+      "y": 625,
+      "label": "out[5] = 1, out[2] = 4",
+      "variant": "return",
+      "note": "book empty, store day 6"
+    },
+    {
+      "id": "c3",
+      "from": "day",
+      "to": "stack",
+      "y": 690,
+      "label": "73 is not warmer: store day 7",
+      "variant": "default",
+      "note": "end of array: days 6, 7 keep 0"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "The book holds only waiting days",
+      "items": [
+        "Temperatures decrease from bottom to top",
+        "A warmer day resolves from the top down",
+        "Store indices to compute distances"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "The nested loop is still O(n)",
+      "items": [
+        "Each day enters the book once",
+        "and leaves it at most once",
+        "Total pops ≤ n"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The comparison trap",
+      "items": [
+        "Equal is not warmer",
+        "Use >, not >=",
+        "[70, 70, 71] must give [2, 1, 0]"
+      ]
+    }
+  ]
+}

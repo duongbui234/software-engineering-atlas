@@ -35,8 +35,8 @@ Người rửa bát xếp đĩa sạch thành một chồng. Người phục v�
 | Đặt đĩa lên trên / lấy đĩa trên cùng | `push` / `pop` |
 | Đĩa trên cùng | đỉnh: việc dở dang gần nhất |
 | Hộp lồng nhau phải đóng từ trong ra | Valid Parentheses |
-| Dán lên mỗi đĩa tờ giấy "đĩa nhỏ nhất từ đây xuống" | Min Stack |
-| Gom nguyên liệu lên bàn, có công thức thì lấy hai món trên cùng ra trộn | Evaluate Reverse Polish Notation |
+| Dán lên mỗi đĩa tờ giấy "đĩa nhỏ nhất từ đây xuống" | [[problems/min-stack\|Min Stack]] |
+| Gom nguyên liệu lên bàn, có công thức thì lấy hai món trên cùng ra trộn | [[problems/evaluate-reverse-polish-notation\|Evaluate Reverse Polish Notation]] |
 | Đặt thử một món, không hợp thì nhấc ra thử món khác | Generate Parentheses (quay lui) |
 
 ```mermaid
@@ -79,13 +79,13 @@ Mỗi phần tử vào ngăn xếp một lần và ra tối đa một lần, nê
 | [[problems/valid-parentheses\|Valid Parentheses]] | ngoặc mở | gặp ngoặc đóng: đỉnh phải cùng loại |
 | Min Stack | cặp (giá trị, min tới tầng này) | `pop` của người dùng; min mới là min đã lưu ở tầng dưới |
 | Evaluate Reverse Polish Notation | số | gặp toán tử: lấy hai số, đẩy kết quả lại |
-| Generate Parentheses | ký tự vừa thử thêm | sau khi thử xong nhánh đó (quay lui) |
+| [[problems/generate-parentheses\|Generate Parentheses]] | ký tự vừa thử thêm | sau khi thử xong nhánh đó (quay lui) |
 
-**Min Stack.** Đề muốn `getMin` trong O(1). Một biến `min` duy nhất hỏng khi `pop` đúng phần tử nhỏ nhất: không biết min mới là gì. Cách sửa: mỗi tầng lưu kèm min **tính tới tầng đó**. Sau `pop`, tầng bên dưới đã có sẵn min của phần còn lại. Tốn gấp đôi bộ nhớ, đổi lại mọi thao tác O(1).
+**[[problems/min-stack|Min Stack]].** Đề muốn `getMin` trong O(1). Một biến `min` duy nhất hỏng khi `pop` đúng phần tử nhỏ nhất: không biết min mới là gì. Cách sửa: mỗi tầng lưu kèm min **tính tới tầng đó**. Sau `pop`, tầng bên dưới đã có sẵn min của phần còn lại. Tốn gấp đôi bộ nhớ, đổi lại mọi thao tác O(1).
 
-**Evaluate Reverse Polish Notation.** `["2", "1", "+", "3", "*"]` là `(2 + 1) · 3 = 9`. Gặp toán tử thì lấy hai số trên đỉnh: số lấy ra **trước** là vế **phải**. Với `+` và `*` đảo vế không sao, với `-` và `/` thì sai. Phép chia phải **làm tròn về 0** (`-7 / 2 = -3`): Go và Java chia `int` đúng như vậy, JS cần `Math.trunc`, còn Python `//` làm tròn **xuống** ra `-4`.
+**[[problems/evaluate-reverse-polish-notation|Evaluate Reverse Polish Notation]].** `["2", "1", "+", "3", "*"]` là `(2 + 1) · 3 = 9`. Gặp toán tử thì lấy hai số trên đỉnh: số lấy ra **trước** là vế **phải**. Với `+` và `*` đảo vế không sao, với `-` và `/` thì sai. Phép chia phải **làm tròn về 0** (`-7 / 2 = -3`): Go và Java chia `int` đúng như vậy, JS cần `Math.trunc`, còn Python `//` làm tròn **xuống** ra `-4`.
 
-**Generate Parentheses.** Liệt kê mọi chuỗi n cặp ngoặc hợp lệ. Thêm `(` khi số ngoặc mở còn dưới n, thêm `)` khi số ngoặc đóng còn ít hơn số mở. Mỗi lần thử là `push` một ký tự vào chuỗi đang dựng, thử xong là `pop`. Hai điều kiện đó bảo đảm chỉ sinh chuỗi hợp lệ, nên không cần sinh cả 2²ⁿ chuỗi rồi lọc. Số kết quả là số Catalan: 5 với n = 3, 14 với n = 4.
+**[[problems/generate-parentheses|Generate Parentheses]].** Liệt kê mọi chuỗi n cặp ngoặc hợp lệ. Thêm `(` khi số ngoặc mở còn dưới n, thêm `)` khi số ngoặc đóng còn ít hơn số mở. Mỗi lần thử là `push` một ký tự vào chuỗi đang dựng, thử xong là `pop`. Hai điều kiện đó bảo đảm chỉ sinh chuỗi hợp lệ, nên không cần sinh cả 2²ⁿ chuỗi rồi lọc. Số kết quả là số Catalan: 5 với n = 3, 14 với n = 4.
 
 ## Ví dụ chạy được
 

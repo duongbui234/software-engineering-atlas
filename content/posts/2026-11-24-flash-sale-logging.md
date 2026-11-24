@@ -299,9 +299,9 @@ ngưỡng debug: error=ghi warn=ghi info=ghi http=ghi verbose=ghi debug=ghi sill
 
 Chỗ thứ 7 đến từ thứ tự chạy của NestJS: lỗi đi ngược qua interceptor trước (interceptor ghi `HTTP Server Error` có mã), rồi mới tới exception filter (filter ghi thêm `Unhandled exception`, không có mã). Comment trong filter còn viết "để có correlationId", nhưng object được ghi thì không có trường đó.
 
-### Đã sửa (commit `7445e40`, ngày 24/11/2026)
+### Đã sửa (commit `7445e40` và `475ac71`, ngày 24–25/11/2026)
 
-Sau khi bài lên, mình sửa chỗ hở 1, 2, 3 và 7, cùng `LOG_LEVEL` và `durationMs` của chỗ 6. Chỗ 4 và 5 (đường gửi log, Grafana) còn nguyên vì cần đổi hạ tầng chứ không chỉ đổi code. Toàn bộ 966 test của backend đều qua, trong đó có 22 test mới.
+Sau khi bài lên, mình sửa chỗ hở 1, 2, 3 và 7, cùng `LOG_LEVEL` và `durationMs` của chỗ 6. Toàn bộ 966 test của backend đều qua, trong đó có 22 test mới. Một ngày sau, ở commit thứ hai, mình sửa nốt chỗ 4 và 5 (đường gửi log, Grafana); phần này đổi cả hạ tầng nên được kể riêng ở cuối mục.
 
 **Mã request cho mọi dòng log, không sửa class nào.** Cách đầu tiên mình nghĩ tới là một format winston đọc `RequestContext`. Nhưng format chạy trong luồng stream của winston: khi một transport ghi chậm (file, Elasticsearch), dòng log nằm chờ trong bộ đệm và format chạy **sau đó**, lúc ngữ cảnh đã là của request khác hoặc không còn. Như vậy mã có thể sai, và mã sai còn tệ hơn không có mã. Đọc mã nguồn `logger.log()` của winston thì thấy `defaultMeta` được gộp vào dòng log bằng `Object.assign` **ngay trong lệnh gọi**, đồng bộ, trước khi dòng log vào stream. `Object.assign` đọc cả getter, nên chỉ cần:
 
@@ -322,6 +322,14 @@ winston.createLogger({ level: resolveLogLevel(), defaultMeta: requestContextMeta
 **Mỗi lỗi 500 một dòng, và vẫn có stack ở production.** Interceptor đánh dấu lỗi nó đã ghi vào một `WeakSet`. Filter chỉ ghi lỗi 500 chưa được đánh dấu: đó là lỗi ném từ middleware hay guard, những chỗ chạy trước interceptor nên interceptor không thấy. Bỏ hẳn dòng của filter thì sẽ mất các lỗi này. Trước đây ở production chỉ filter ghi stack; giờ interceptor ghi stack cho mọi lỗi 5xx ở mọi môi trường. Stack chỉ nằm trong log, không trả về client, và email trong stack cũng bị che.
 
 **Mức log và thời gian xử lý.** Logger đọc `LOG_LEVEL`; Joi chỉ nhận 7 mức hợp lệ, nên giá trị sai làm app báo lỗi ngay lúc khởi động. Interceptor ghi `durationMs` dạng số thay cho `duration: "12ms"`.
+
+**Chỗ 4: app chỉ ghi stdout (commit `475ac71`).** Ở production app chỉ còn ghi JSON ra stdout; file log chỉ bật khi chạy máy cá nhân. Filebeat chạy trên mỗi node Kubernetes (DaemonSet) và trong docker-compose. Nó chỉ đọc container có label `app=flash-sale-api`, tách dòng JSON thành các trường gốc, đệm trên đĩa (tối đa 2 GB mỗi node) rồi gửi qua Logstash. Elasticsearch chết thì Filebeat chờ và gửi bù, còn app không biết gì.
+
+**Khi vẫn phải tự gửi: có trần và có đếm.** Backend chạy thẳng trên máy (không container, không Filebeat) vẫn gửi qua transport Elasticsearch khi đặt `LOG_ELASTICSEARCH_URL`. Transport giờ luôn có trần (`LOG_ES_BUFFER_LIMIT`, mặc định 10 000 dòng) và đếm mọi dòng bị bỏ vào metric `log_shipping_dropped_lines_total`, theo ba lý do: bộ đệm đầy, lô gửi lỗi bị cắt khi xếp lại, thư viện báo lỗi hẳn. Thư viện vốn bỏ dòng khi chạm trần mà không báo gì. Một bộ đệm có trần mà không có số đếm chỉ đổi "backend hết RAM" thành "mất log mà không ai hay". Transport cũng nuốt sự kiện `error` của thư viện: winston chuyển nó thành `error` của logger, và logger không có listener thì process chết. Lúc viết test mình gặp một lỗi đếm của chính mình: một dòng đã vào bộ đệm vẫn bị tính là "đang chờ" thêm một nhịp, nên transport bỏ sớm một dòng. Sau commit này backend có 977 test, đều qua.
+
+**Chỗ 5: Grafana đọc đúng chỗ.** App tự gửi thì ghi vào data stream `logs-flash-sale-app`; Filebeat qua Logstash ghi vào `logs-flash-sale-YYYY.MM.dd`. Cả hai khớp pattern `logs-flash-sale-*` của Grafana. Tài liệu gửi lên có cùng hình dạng với dòng stdout (`level`, `message`, `correlationId` nằm ở gốc), vì transformer mặc định của thư viện đặt level vào `severity` và Grafana không đọc được. Datasource chuyển tên index từ `database`, trường mà Grafana 10 đã đánh dấu deprecated, sang `jsonData.index`.
+
+**Chưa kiểm khi chạy thật.** Cấu hình Filebeat, Logstash và Grafana mới qua kiểm cú pháp YAML, `docker compose config` và `kubectl kustomize`; mình chưa dựng chúng lên để thấy một dòng log đi hết đường. Còn một rủi ro trong winston-elasticsearch chưa sửa. Lúc khởi động, thư viện kiểm tra kết nối tới Elasticsearch tối đa 400 lần, mỗi lần cách nhau 1 giây cộng thời gian lời gọi treo. Nếu cả 400 lần đều hỏng, một promise tạo trong constructor bị reject mà không ai bắt, và Node dừng process vì unhandled rejection. Muốn chặn phải vá thư viện. Ở Kubernetes không đặt `LOG_ELASTICSEARCH_URL` nên đường này không chạy.
 
 ## Hiểu lầm và bẫy hay gặp
 

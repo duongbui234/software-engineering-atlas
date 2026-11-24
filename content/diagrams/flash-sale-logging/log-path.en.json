@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "One flash-sale log line, from request to log store",
+    "output": "content/diagrams/flash-sale-logging/log-path.en.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "client",
+      "type": "frontend",
+      "label": "Buyer",
+      "sublabel": "browser, app"
+    },
+    {
+      "id": "mw",
+      "type": "security",
+      "label": "Id desk",
+      "sublabel": "Middleware: correlation id"
+    },
+    {
+      "id": "svc",
+      "type": "backend",
+      "label": "Handling code",
+      "sublabel": "Interceptor, Service, Filter"
+    },
+    {
+      "id": "winston",
+      "type": "backend",
+      "label": "Log clerk",
+      "sublabel": "Winston: PII mask, JSON"
+    },
+    {
+      "id": "sinks",
+      "type": "database",
+      "label": "Log storage",
+      "sublabel": "Console, File, Elasticsearch"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 330,
+      "label": "step 1: tag the request"
+    },
+    {
+      "from": 330,
+      "to": 570,
+      "label": "step 2: log while running"
+    },
+    {
+      "from": 570,
+      "to": 810,
+      "label": "step 3: on a 500 error"
+    },
+    {
+      "from": 810,
+      "to": 930,
+      "label": "step 4: hand the id back"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "client",
+      "to": "mw",
+      "y": 175,
+      "label": "send order, maybe with an id",
+      "variant": "default",
+      "note": "header X-Correlation-ID"
+    },
+    {
+      "id": "m1",
+      "from": "mw",
+      "to": "svc",
+      "y": 265,
+      "label": "store the id in request context",
+      "variant": "default",
+      "note": "AsyncLocalStorage.run({ correlationId }, next)"
+    },
+    {
+      "id": "m2",
+      "from": "svc",
+      "to": "winston",
+      "y": 355,
+      "label": "service logs: stock reserved",
+      "variant": "default",
+      "note": "Nest Logger: this line has NO id"
+    },
+    {
+      "id": "m3",
+      "from": "winston",
+      "to": "sinks",
+      "y": 415,
+      "label": "mask PII, write JSON to 3 sinks",
+      "variant": "default",
+      "note": "piiFormat() then json(), once per transport"
+    },
+    {
+      "id": "m4",
+      "from": "svc",
+      "to": "winston",
+      "y": 505,
+      "label": "interceptor logs the summary",
+      "variant": "default",
+      "note": "{ correlationId, statusCode, duration: \"12ms\" }"
+    },
+    {
+      "id": "m5",
+      "from": "svc",
+      "to": "winston",
+      "y": 595,
+      "label": "interceptor logs: server error",
+      "variant": "default",
+      "note": "\"HTTP Server Error\", with id"
+    },
+    {
+      "id": "m6",
+      "from": "svc",
+      "to": "winston",
+      "y": 655,
+      "label": "filter logs one more line",
+      "variant": "default",
+      "note": "\"Unhandled exception\", no id"
+    },
+    {
+      "id": "m7",
+      "from": "winston",
+      "to": "sinks",
+      "y": 745,
+      "label": "Elasticsearch down: piles up in RAM",
+      "variant": "default",
+      "note": "buffering: true, bufferLimit: null"
+    },
+    {
+      "id": "m8",
+      "from": "mw",
+      "to": "client",
+      "y": 865,
+      "label": "return id in header and error body",
+      "variant": "return",
+      "note": "X-Correlation-ID, body.correlationId"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Done right",
+      "items": [
+        "JSON logs with a per-request id",
+        "Id returned to the buyer for bug reports",
+        "PII masked before writing, no body logged"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Still leaking",
+      "items": [
+        "92 classes use Nest Logger without the id",
+        "PII inside the message is not masked",
+        "Error becomes {}, a cycle crashes it"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Fix",
+      "items": [
+        "Logger reads the id from AsyncLocalStorage",
+        "Mask with Reflect.ownKeys, WeakSet, regex",
+        "Write stdout, let an agent ship; durationMs as a number"
+      ]
+    }
+  ]
+}

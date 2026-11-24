@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Diameter of Binary Tree: trả chiều cao lên trên, ghi đường kính vào kỷ lục",
+    "output": "content/diagrams/neetcode-tree-recursion/diameter.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "gọi height xuống con"
+        },
+        "return": {
+          "label": "trả chiều cao lên cha"
+        },
+        "dashed": {
+          "label": "so với kỷ lục, không đổi"
+        },
+        "emphasis": {
+          "label": "kỷ lục đổi, hoặc đáp án"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "n1",
+      "type": "frontend",
+      "label": "Nút 1 (gốc)",
+      "sublabel": "con trái là nút 2, con phải rỗng"
+    },
+    {
+      "id": "n2",
+      "type": "backend",
+      "label": "Nút 2",
+      "sublabel": "con trái 3, con phải 4"
+    },
+    {
+      "id": "l3",
+      "type": "database",
+      "label": "Lá 3",
+      "sublabel": "không có con"
+    },
+    {
+      "id": "l4",
+      "type": "database",
+      "label": "Lá 4",
+      "sublabel": "không có con"
+    },
+    {
+      "id": "best",
+      "type": "security",
+      "label": "Kỷ lục",
+      "sublabel": "biến best ngoài hàm đệ quy"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 560,
+      "label": "bước 1: xuống nhánh trái, lá trả 1"
+    },
+    {
+      "from": 560,
+      "to": 700,
+      "label": "bước 2: nút 2 ghép hai bên"
+    },
+    {
+      "from": 700,
+      "to": 850,
+      "label": "bước 3: gốc, rồi đọc kỷ lục"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "n1",
+      "to": "n2",
+      "y": 180,
+      "label": "height(1) hỏi con trái trước",
+      "variant": "default",
+      "note": "height(node.left)"
+    },
+    {
+      "id": "m1",
+      "from": "n2",
+      "to": "l3",
+      "y": 250,
+      "label": "height(2) hỏi lá 3",
+      "variant": "default",
+      "note": "con trái trước, con phải sau"
+    },
+    {
+      "id": "m2",
+      "from": "l3",
+      "to": "best",
+      "y": 320,
+      "label": "tại lá 3: l + r = 0 + 0",
+      "variant": "dashed",
+      "note": "best = max(0, 0) = 0"
+    },
+    {
+      "id": "m3",
+      "from": "l3",
+      "to": "n2",
+      "y": 390,
+      "label": "lá 3 trả chiều cao 1",
+      "variant": "return",
+      "note": "return 1 + max(0, 0)"
+    },
+    {
+      "id": "m4",
+      "from": "n2",
+      "to": "l4",
+      "y": 460,
+      "label": "height(2) hỏi lá 4",
+      "variant": "default",
+      "note": "height(node.right)"
+    },
+    {
+      "id": "m5",
+      "from": "l4",
+      "to": "n2",
+      "y": 530,
+      "label": "lá 4 trả chiều cao 1",
+      "variant": "return",
+      "note": "best vẫn là 0"
+    },
+    {
+      "id": "m6",
+      "from": "n2",
+      "to": "best",
+      "y": 600,
+      "label": "qua nút 2: l + r = 1 + 1 = 2",
+      "variant": "emphasis",
+      "note": "best = max(0, 2) = 2"
+    },
+    {
+      "id": "m7",
+      "from": "n2",
+      "to": "n1",
+      "y": 670,
+      "label": "nút 2 trả chiều cao 2, không trả số 2 cạnh",
+      "variant": "return",
+      "note": "return 1 + max(1, 1)"
+    },
+    {
+      "id": "m8",
+      "from": "n1",
+      "to": "best",
+      "y": 740,
+      "label": "qua gốc: l + r = 2 + 0 = 2",
+      "variant": "dashed",
+      "note": "con phải rỗng nên r = 0; best giữ 2"
+    },
+    {
+      "id": "m9",
+      "from": "best",
+      "to": "n1",
+      "y": 810,
+      "label": "đáp án là best = 2 (3 → 2 → 4)",
+      "variant": "emphasis",
+      "note": "height(1) trả 3: chiều cao, không phải đáp án"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Hai đại lượng",
+      "items": [
+        "Trả về: chiều cao (số nút trên đường dài nhất đi xuống)",
+        "Ghi lại: l + r, số cạnh của đường dài nhất uốn qua nút này",
+        "Nút cha chỉ cần chiều cao, đáp án nằm trong kỷ lục"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Chi phí",
+      "items": [
+        "Mỗi nút được thăm đúng một lần: O(n)",
+        "Call stack sâu bằng chiều cao cây: O(h)",
+        "Cây lệch thành chuỗi: h = n"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Bẫy hay gặp",
+      "items": [
+        "Trả l + r lên cha: cha không nối tiếp được một đường đã uốn",
+        "Chỉ xét đường qua gốc: sai khi đường dài nhất nằm hẳn trong một nhánh",
+        "Đếm nút thay vì đếm cạnh: lệch 1"
+      ]
+    }
+  ]
+}

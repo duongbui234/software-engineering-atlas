@@ -12,6 +12,7 @@ stations:
   - name: "Advanced Linked Lists"
     concepts: [Doubly Linked List, Node Interleaving, Carry Propagation, Divide-and-Conquer Merge]
   - name: "Tree Recursion"
+    concepts: [Binary Tree, Post-order Traversal, Recursion Depth Limit, Tree Hashing]
   - name: "Binary Search Trees"
   - name: "Level Order and Carried State"
   - name: "Building and Serializing Trees"

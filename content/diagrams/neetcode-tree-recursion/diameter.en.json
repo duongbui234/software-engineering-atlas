@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Diameter of Binary Tree: return the height upward, record the diameter as a running best",
+    "output": "content/diagrams/neetcode-tree-recursion/diameter.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "call height on a child"
+        },
+        "return": {
+          "label": "return the height to the parent"
+        },
+        "dashed": {
+          "label": "compare with the best, no change"
+        },
+        "emphasis": {
+          "label": "best changes, or the answer"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "n1",
+      "type": "frontend",
+      "label": "Node 1 (root)",
+      "sublabel": "left child is node 2, right is empty"
+    },
+    {
+      "id": "n2",
+      "type": "backend",
+      "label": "Node 2",
+      "sublabel": "left child 3, right child 4"
+    },
+    {
+      "id": "l3",
+      "type": "database",
+      "label": "Leaf 3",
+      "sublabel": "no children"
+    },
+    {
+      "id": "l4",
+      "type": "database",
+      "label": "Leaf 4",
+      "sublabel": "no children"
+    },
+    {
+      "id": "best",
+      "type": "security",
+      "label": "Running best",
+      "sublabel": "best, outside the recursive function"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 560,
+      "label": "step 1: down the left side, leaves return 1"
+    },
+    {
+      "from": 560,
+      "to": 700,
+      "label": "step 2: node 2 joins both sides"
+    },
+    {
+      "from": 700,
+      "to": 850,
+      "label": "step 3: the root, then read the best"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "n1",
+      "to": "n2",
+      "y": 180,
+      "label": "height(1) asks its left child first",
+      "variant": "default",
+      "note": "height(node.left)"
+    },
+    {
+      "id": "m1",
+      "from": "n2",
+      "to": "l3",
+      "y": 250,
+      "label": "height(2) asks leaf 3",
+      "variant": "default",
+      "note": "left child first, right child after"
+    },
+    {
+      "id": "m2",
+      "from": "l3",
+      "to": "best",
+      "y": 320,
+      "label": "at leaf 3: l + r = 0 + 0",
+      "variant": "dashed",
+      "note": "best = max(0, 0) = 0"
+    },
+    {
+      "id": "m3",
+      "from": "l3",
+      "to": "n2",
+      "y": 390,
+      "label": "leaf 3 returns height 1",
+      "variant": "return",
+      "note": "return 1 + max(0, 0)"
+    },
+    {
+      "id": "m4",
+      "from": "n2",
+      "to": "l4",
+      "y": 460,
+      "label": "height(2) asks leaf 4",
+      "variant": "default",
+      "note": "height(node.right)"
+    },
+    {
+      "id": "m5",
+      "from": "l4",
+      "to": "n2",
+      "y": 530,
+      "label": "leaf 4 returns height 1",
+      "variant": "return",
+      "note": "best is still 0"
+    },
+    {
+      "id": "m6",
+      "from": "n2",
+      "to": "best",
+      "y": 600,
+      "label": "through node 2: l + r = 1 + 1 = 2",
+      "variant": "emphasis",
+      "note": "best = max(0, 2) = 2"
+    },
+    {
+      "id": "m7",
+      "from": "n2",
+      "to": "n1",
+      "y": 670,
+      "label": "node 2 returns height 2, not its 2 edges",
+      "variant": "return",
+      "note": "return 1 + max(1, 1)"
+    },
+    {
+      "id": "m8",
+      "from": "n1",
+      "to": "best",
+      "y": 740,
+      "label": "through the root: l + r = 2 + 0 = 2",
+      "variant": "dashed",
+      "note": "right child empty so r = 0; best stays 2"
+    },
+    {
+      "id": "m9",
+      "from": "best",
+      "to": "n1",
+      "y": 810,
+      "label": "the answer is best = 2 (3 → 2 → 4)",
+      "variant": "emphasis",
+      "note": "height(1) returns 3: a height, not the answer"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Two quantities",
+      "items": [
+        "Returned: the height (nodes on the longest downward path)",
+        "Recorded: l + r, the edges of the longest path bending at this node",
+        "The parent needs only the height; the answer lives in the running best"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cost",
+      "items": [
+        "Each node is visited exactly once: O(n)",
+        "Call stack as deep as the tree is tall: O(h)",
+        "A tree skewed into a chain: h = n"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Common traps",
+      "items": [
+        "Returning l + r to the parent: the parent cannot extend a path that already bends",
+        "Checking only paths through the root: wrong when the longest path sits inside one subtree",
+        "Counting nodes instead of edges: off by one"
+      ]
+    }
+  ]
+}

@@ -304,6 +304,30 @@ buffer capped at 20000: 20000 lines ≈ 7.6 MB, dropped 100000 lines and counted
 
 Gap 7 comes from NestJS's execution order: the error travels back through the interceptor first (the interceptor logs `HTTP Server Error` with the id), and only then reaches the exception filter (the filter adds `Unhandled exception`, without the id). The filter's comment even says "to get the correlationId", but the object it logs has no such field.
 
+### Fixed (commit `7445e40`, November 24, 2026)
+
+After the post went up, I fixed gaps 1, 2, 3 and 7, plus `LOG_LEVEL` and `durationMs` from gap 6. Gaps 4 and 5 (log shipping, Grafana) remain, because they need infrastructure changes, not just code. All 966 backend tests pass, 22 of them new.
+
+**A request id on every log line, without touching any class.** The first approach I thought of was a winston format that reads `RequestContext`. But formats run inside winston's stream pipeline: when a transport writes slowly (a file, Elasticsearch), the log line waits in a buffer and the format runs **later**, when the context belongs to another request or is gone. The id could then be wrong, and a wrong id is worse than none. Reading the source of winston's `logger.log()` shows that `defaultMeta` is merged into the log line with `Object.assign` **inside the call itself**, synchronously, before the line enters the stream. `Object.assign` reads getters too, so this is all it takes:
+
+```ts
+// trimmed from flash-sale's logger config
+export const requestContextMeta = {
+  get correlationId() {
+    return RequestContext.get()?.correlationId;   // read at the call site, inside the right request
+  },
+};
+winston.createLogger({ level: resolveLogLevel(), defaultMeta: requestContextMeta, transports });
+```
+
+The 92 classes using the Nest Logger now get the id automatically. An id passed by hand in the meta (say, a consumer taking the id from a message) still wins, because winston merges the meta after `defaultMeta`. Outside a request the getter returns `undefined` and JSON drops the field. Tests for two interleaved requests and for the NestJS logger both print the right id.
+
+**A PII masker that never throws.** The new version does what the example above does (`Reflect.ownKeys`, reading `Error` explicitly, scanning emails in every string including stacks), with one difference: the `WeakSet` holds only **the ancestors on the current path**. An object is added on the way down and removed on the way back up. Keeping every visited object, as the example does, would turn `payer` in `{ buyer: user, payer: user }` into `[Circular]` even though there is no cycle. The masker is shared with the audit table, so emails inside strings in `oldValue`/`newValue` are now masked too.
+
+**One line per 500 error, with a stack in production.** The interceptor marks each error it logged in a `WeakSet`. The filter only logs 500 errors that are not marked: errors thrown from middleware or guards, which run before the interceptor so it never sees them. Dropping the filter's line entirely would lose those errors. In production only the filter used to log the stack; now the interceptor logs the stack for every 5xx in every environment. The stack stays in the logs, is never sent to the client, and emails inside it are masked as well.
+
+**Log level and handling time.** The logger reads `LOG_LEVEL`; Joi accepts only the 7 valid levels, so a wrong value makes the app fail right at startup. The interceptor writes a numeric `durationMs` instead of `duration: "12ms"`.
+
 ## Misconceptions and common traps
 
 - **"JSON logs are structured enough."** JSON is only a format. Structured means **the same fact always lives in the same field, with the same type**. `"12ms"` on one line and `12` on another cannot be aggregated by the log store.

@@ -299,6 +299,30 @@ ngưỡng debug: error=ghi warn=ghi info=ghi http=ghi verbose=ghi debug=ghi sill
 
 Chỗ thứ 7 đến từ thứ tự chạy của NestJS: lỗi đi ngược qua interceptor trước (interceptor ghi `HTTP Server Error` có mã), rồi mới tới exception filter (filter ghi thêm `Unhandled exception`, không có mã). Comment trong filter còn viết "để có correlationId", nhưng object được ghi thì không có trường đó.
 
+### Đã sửa (commit `7445e40`, ngày 24/11/2026)
+
+Sau khi bài lên, mình sửa chỗ hở 1, 2, 3 và 7, cùng `LOG_LEVEL` và `durationMs` của chỗ 6. Chỗ 4 và 5 (đường gửi log, Grafana) còn nguyên vì cần đổi hạ tầng chứ không chỉ đổi code. Toàn bộ 966 test của backend đều qua, trong đó có 22 test mới.
+
+**Mã request cho mọi dòng log, không sửa class nào.** Cách đầu tiên mình nghĩ tới là một format winston đọc `RequestContext`. Nhưng format chạy trong luồng stream của winston: khi một transport ghi chậm (file, Elasticsearch), dòng log nằm chờ trong bộ đệm và format chạy **sau đó**, lúc ngữ cảnh đã là của request khác hoặc không còn. Như vậy mã có thể sai, và mã sai còn tệ hơn không có mã. Đọc mã nguồn `logger.log()` của winston thì thấy `defaultMeta` được gộp vào dòng log bằng `Object.assign` **ngay trong lệnh gọi**, đồng bộ, trước khi dòng log vào stream. `Object.assign` đọc cả getter, nên chỉ cần:
+
+```ts
+// rút gọn từ cấu hình logger của flash-sale
+export const requestContextMeta = {
+  get correlationId() {
+    return RequestContext.get()?.correlationId;   // đọc tại chỗ gọi, trong đúng request
+  },
+};
+winston.createLogger({ level: resolveLogLevel(), defaultMeta: requestContextMeta, transports });
+```
+
+92 class dùng Nest Logger giờ tự có mã. Mã truyền tay qua meta (ví dụ consumer lấy mã từ message) vẫn thắng, vì winston gộp meta sau `defaultMeta`. Ngoài request thì getter trả `undefined` và JSON bỏ trường đó. Test cho hai request xen kẽ và cho logger của NestJS đều in đúng mã.
+
+**Bộ che PII không bao giờ ném lỗi.** Bản mới làm đúng như ví dụ ở trên (`Reflect.ownKeys`, đọc riêng `Error`, quét email trong mọi chuỗi kể cả stack), với một chỗ khác: `WeakSet` chỉ giữ **tổ tiên trên đường đang duyệt**. Object được thêm vào lúc đi xuống và xóa đi lúc quay lên. Nếu giữ mọi object đã thăm như bản trong ví dụ, thì `{ buyer: user, payer: user }` sẽ có `payer` bị ghi thành `[Circular]`, dù không có vòng nào. Bộ che cũng dùng chung cho bảng audit, nên email nằm trong chuỗi ở `oldValue`/`newValue` giờ cũng bị che.
+
+**Mỗi lỗi 500 một dòng, và vẫn có stack ở production.** Interceptor đánh dấu lỗi nó đã ghi vào một `WeakSet`. Filter chỉ ghi lỗi 500 chưa được đánh dấu: đó là lỗi ném từ middleware hay guard, những chỗ chạy trước interceptor nên interceptor không thấy. Bỏ hẳn dòng của filter thì sẽ mất các lỗi này. Trước đây ở production chỉ filter ghi stack; giờ interceptor ghi stack cho mọi lỗi 5xx ở mọi môi trường. Stack chỉ nằm trong log, không trả về client, và email trong stack cũng bị che.
+
+**Mức log và thời gian xử lý.** Logger đọc `LOG_LEVEL`; Joi chỉ nhận 7 mức hợp lệ, nên giá trị sai làm app báo lỗi ngay lúc khởi động. Interceptor ghi `durationMs` dạng số thay cho `duration: "12ms"`.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Log JSON là đủ có cấu trúc."** JSON chỉ là định dạng. Có cấu trúc nghĩa là **cùng một ý luôn nằm ở cùng một trường, cùng một kiểu**. `"12ms"` ở dòng này và `12` ở dòng khác thì kho log không gộp được.

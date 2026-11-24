@@ -131,6 +131,7 @@ Mention another line as "the Caching line", "the RabbitMQ line" and so on in run
 | Vùng Database | Database Region |
 | Vùng Thuật toán | Algorithms Region |
 | Vùng Flash sale | Flash Sale Region |
+| Vùng Vận hành | Operations Region |
 
 ## Concept titles
 
@@ -393,6 +394,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | đánh dấu âm | mark negative |
 | chuỗi tuần tự, rải rác | sequential, scattered chain |
 | kiểm vét | exhaustive check |
+| log có cấu trúc | structured logging, structured logs |
+| mức log, ngưỡng log | log level, threshold |
+| mã theo dõi request | correlation id, request id |
+| ngữ cảnh request | request context |
+| che dữ liệu cá nhân, che PII | PII redaction, PII masking |
+| đường gửi log | log shipping |
+| kho log | log store |
+| vòng tham chiếu | circular reference |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Một dòng log của flash-sale đi từ request tới kho log",
+    "output": "content/diagrams/flash-sale-logging/log-path.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "frontend", "label": "Người mua", "sublabel": "trình duyệt, app" },
+    { "id": "mw", "type": "security", "label": "Quầy phát mã", "sublabel": "Middleware: correlation id" },
+    { "id": "svc", "type": "backend", "label": "Code xử lý", "sublabel": "Interceptor, Service, Filter" },
+    { "id": "winston", "type": "backend", "label": "Thư ký log", "sublabel": "Winston: che PII, JSON" },
+    { "id": "sinks", "type": "database", "label": "Nơi lưu log", "sublabel": "Console, File, Elasticsearch" }
+  ],
+  "segments": [
+    { "from": 150, "to": 330, "label": "bước 1: gắn mã cho request" },
+    { "from": 330, "to": 570, "label": "bước 2: ghi log lúc chạy" },
+    { "from": 570, "to": 810, "label": "bước 3: khi có lỗi 500" },
+    { "from": 810, "to": 930, "label": "bước 4: trả mã cho người mua" }
+  ],
+  "messages": [
+    { "id": "m0", "from": "client", "to": "mw", "y": 175, "label": "gửi đơn, có thể kèm sẵn mã", "variant": "default", "note": "header X-Correlation-ID" },
+    { "id": "m1", "from": "mw", "to": "svc", "y": 265, "label": "cất mã vào ngữ cảnh request", "variant": "default", "note": "AsyncLocalStorage.run({ correlationId }, next)" },
+    { "id": "m2", "from": "svc", "to": "winston", "y": 355, "label": "service ghi: giữ kho xong", "variant": "default", "note": "Nest Logger: dòng này KHÔNG có mã" },
+    { "id": "m3", "from": "winston", "to": "sinks", "y": 415, "label": "che PII, ghi JSON ra 3 nơi", "variant": "default", "note": "piiFormat() rồi json(), mỗi transport một lần" },
+    { "id": "m4", "from": "svc", "to": "winston", "y": 505, "label": "interceptor ghi dòng tổng kết", "variant": "default", "note": "{ correlationId, statusCode, duration: \"12ms\" }" },
+    { "id": "m5", "from": "svc", "to": "winston", "y": 595, "label": "interceptor ghi: lỗi server", "variant": "default", "note": "\"HTTP Server Error\", có mã" },
+    { "id": "m6", "from": "svc", "to": "winston", "y": 655, "label": "filter ghi thêm một dòng nữa", "variant": "default", "note": "\"Unhandled exception\", thiếu mã" },
+    { "id": "m7", "from": "winston", "to": "sinks", "y": 745, "label": "Elasticsearch chết: dồn trong RAM", "variant": "default", "note": "buffering: true, bufferLimit: null" },
+    { "id": "m8", "from": "mw", "to": "client", "y": 865, "label": "trả mã trong header và body lỗi", "variant": "return", "note": "X-Correlation-ID, body.correlationId" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Đã làm đúng", "items": ["Log dạng JSON, có mã theo từng request", "Mã trả lại cho người mua để báo lỗi", "Che PII trước khi ghi, không log body"] },
+    { "dot": "rose", "title": "Còn lọt", "items": ["92 chỗ gọi Nest Logger không có mã", "PII trong câu message không bị che", "Error thành {}, vòng tham chiếu làm sập"] },
+    { "dot": "amber", "title": "Sửa", "items": ["Logger tự đọc mã từ AsyncLocalStorage", "Che bằng Reflect.ownKeys, WeakSet, regex", "Ghi stdout, để agent gửi đi; durationMs là số"] }
+  ]
+}

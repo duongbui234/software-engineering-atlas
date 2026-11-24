@@ -393,6 +393,19 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | số nguyên lớn | big integer |
 | đánh dấu âm | mark negative |
 | chuỗi tuần tự, rải rác | sequential, scattered chain |
+| cây nhị phân | binary tree |
+| duyệt hậu thứ tự | post-order traversal |
+| giới hạn độ sâu đệ quy | recursion depth limit |
+| băm cây | tree hashing |
+| cây lệch | skewed tree |
+| chiều cao, độ sâu | height, depth |
+| đường kính | diameter |
+| kỷ lục (biến best) | running best |
+| ngăn xếp tự quản lý | explicit stack |
+| cây con | subtree |
+| lá | leaf |
+| mảng theo tầng | level-order array |
+| đánh số chuẩn | canonical numbering |
 | kiểm vét | exhaustive check |
 | log có cấu trúc | structured logging, structured logs |
 | mức log, ngưỡng log | log level, threshold |

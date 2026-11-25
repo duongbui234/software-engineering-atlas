@@ -15,6 +15,7 @@ stations:
   - name: "Cây nhị phân tìm kiếm"
     concepts: [Binary Search Tree, In-order Traversal, Bounds Propagation, Lowest Common Ancestor]
   - name: "Duyệt theo tầng và mang trạng thái"
+    concepts: [Breadth-First Search, Level Size Snapshot, Pre-order Traversal, Path State]
   - name: "Dựng và mã hóa cây"
   - name: "Trie"
 ---

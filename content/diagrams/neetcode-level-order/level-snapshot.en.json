@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Binary Tree Level Order Traversal: snapshot the queue length to split levels",
+    "output": "content/diagrams/neetcode-level-order/level-snapshot.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "snapshot the level size"
+        },
+        "return": {
+          "label": "take a node out, push its children"
+        },
+        "emphasis": {
+          "label": "one level recorded"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "queue",
+      "type": "database",
+      "label": "Queue",
+      "sublabel": "deque, or array + head index"
+    },
+    {
+      "id": "loop",
+      "type": "backend",
+      "label": "Level loop",
+      "sublabel": "while the queue has nodes: for i < size"
+    },
+    {
+      "id": "res",
+      "type": "frontend",
+      "label": "Result",
+      "sublabel": "res: list of levels"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 360,
+      "label": "level 0: tree [1, 2, 3, 4, null, 5, 6, null, 7]"
+    },
+    {
+      "from": 370,
+      "to": 580,
+      "label": "level 1"
+    },
+    {
+      "from": 590,
+      "to": 800,
+      "label": "level 2"
+    },
+    {
+      "from": 810,
+      "to": 1010,
+      "label": "level 3"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "loop",
+      "to": "queue",
+      "y": 180,
+      "label": "snapshot size = 1",
+      "variant": "default",
+      "note": "queue: [1]"
+    },
+    {
+      "id": "m1",
+      "from": "queue",
+      "to": "loop",
+      "y": 250,
+      "label": "take 1; push 2, 3 at the back",
+      "variant": "return",
+      "note": "queue: [2, 3]"
+    },
+    {
+      "id": "m2",
+      "from": "loop",
+      "to": "res",
+      "y": 320,
+      "label": "add level [1]",
+      "variant": "emphasis",
+      "note": "took size = 1 nodes, so stop"
+    },
+    {
+      "id": "m3",
+      "from": "loop",
+      "to": "queue",
+      "y": 400,
+      "label": "snapshot size = 2",
+      "variant": "default",
+      "note": "queue: [2, 3]"
+    },
+    {
+      "id": "m4",
+      "from": "queue",
+      "to": "loop",
+      "y": 470,
+      "label": "take 2 (push 4), take 3 (push 5, 6)",
+      "variant": "return",
+      "note": "queue: [4, 5, 6]"
+    },
+    {
+      "id": "m5",
+      "from": "loop",
+      "to": "res",
+      "y": 540,
+      "label": "add level [2, 3]",
+      "variant": "emphasis",
+      "note": "4, 5, 6 came after the snapshot, so they wait"
+    },
+    {
+      "id": "m6",
+      "from": "loop",
+      "to": "queue",
+      "y": 620,
+      "label": "snapshot size = 3",
+      "variant": "default",
+      "note": "queue: [4, 5, 6]"
+    },
+    {
+      "id": "m7",
+      "from": "queue",
+      "to": "loop",
+      "y": 690,
+      "label": "take 4 (push 7), take 5, take 6",
+      "variant": "return",
+      "note": "queue: [7]"
+    },
+    {
+      "id": "m8",
+      "from": "loop",
+      "to": "res",
+      "y": 760,
+      "label": "add level [4, 5, 6]",
+      "variant": "emphasis",
+      "note": "problem 199 keeps only the last node: 6"
+    },
+    {
+      "id": "m9",
+      "from": "loop",
+      "to": "queue",
+      "y": 840,
+      "label": "snapshot size = 1",
+      "variant": "default",
+      "note": "queue: [7]"
+    },
+    {
+      "id": "m10",
+      "from": "queue",
+      "to": "loop",
+      "y": 910,
+      "label": "take 7, no children",
+      "variant": "return",
+      "note": "queue empty: the while loop stops"
+    },
+    {
+      "id": "m11",
+      "from": "loop",
+      "to": "res",
+      "y": 980,
+      "label": "add level [7], return result",
+      "variant": "emphasis",
+      "note": "[[1], [2, 3], [4, 5, 6], [7]]"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Why snapshot",
+      "items": [
+        "The children of this level go into the same queue, right behind the nodes still waiting",
+        "The size taken at the top of the loop is the boundary: take exactly size nodes and the level is done",
+        "Without it, the for loop also takes the children it just pushed, and every node lands in one level"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Cost",
+      "items": [
+        "Each node enters and leaves the queue exactly once: O(n)",
+        "The queue peaks at the widest level: 524,288 nodes in a perfect tree of 2^20 - 1",
+        "Taking a node out must be O(1): JS array shift() and Python list.pop(0) move the whole array"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Two problems, same template",
+      "items": [
+        "Right Side View: keep only node i = size - 1 of each level, giving [1, 3, 6, 7]",
+        "Count Good Nodes: no levels needed, only the path max carried down with each node"
+      ]
+    }
+  ]
+}

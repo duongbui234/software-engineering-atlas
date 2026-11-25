@@ -14,6 +14,7 @@ stations:
   - name: "Tree Recursion"
     concepts: [Binary Tree, Post-order Traversal, Recursion Depth Limit, Tree Hashing]
   - name: "Binary Search Trees"
+    concepts: [Binary Search Tree, In-order Traversal, Bounds Propagation, Lowest Common Ancestor]
   - name: "Level Order and Carried State"
   - name: "Building and Serializing Trees"
   - name: "Tries"

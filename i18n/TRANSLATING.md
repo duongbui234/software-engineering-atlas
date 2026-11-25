@@ -432,6 +432,25 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | kích thước cây con | subtree size |
 | cây thống kê thứ tự | order-statistic tree |
 | cây tự cân bằng | self-balancing tree |
+| duyệt theo chiều rộng | breadth-first search (BFS) |
+| chụp cỡ tầng, chụp kích thước tầng | level size snapshot |
+| tầng, độ sâu | level, depth |
+| duyệt tiền thứ tự | pre-order traversal |
+| góc nhìn bên phải, bên trái | right side view, left side view |
+| cây đầy đủ | complete tree; perfect tree when every level is full |
+| cây đầy | full tree |
+| lấy đầu hàng đợi | take the front of the queue |
+| chỉ số đầu hàng | head index |
+| tầng rộng nhất | widest level |
+| vạch ngăn tầng | level marker |
+| duyệt theo chiều sâu | depth-first search (DFS) |
+| mang trạng thái xuống | carry state down |
+| nút tốt | good node |
+| trạng thái đường đi | path state |
+| kỷ lục của đường đi | path maximum, the path's record |
+| khôi phục khi quay về | restore on return |
+| chuỗi không giảm, không tăng | non-decreasing chain, non-increasing chain |
+| truyền theo giá trị | pass by value |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

@@ -13,6 +13,7 @@ stations:
   - name: "Đệ quy trên cây"
     concepts: [Binary Tree, Post-order Traversal, Recursion Depth Limit, Tree Hashing]
   - name: "Cây nhị phân tìm kiếm"
+    concepts: [Binary Search Tree, In-order Traversal, Bounds Propagation, Lowest Common Ancestor]
   - name: "Duyệt theo tầng và mang trạng thái"
   - name: "Dựng và mã hóa cây"
   - name: "Trie"

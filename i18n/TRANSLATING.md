@@ -415,6 +415,23 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | đường gửi log | log shipping |
 | kho log | log store |
 | vòng tham chiếu | circular reference |
+| cây nhị phân tìm kiếm | binary search tree (BST) |
+| duyệt trung thứ tự | in-order traversal |
+| truyền khoảng, mang khoảng xuống | bounds propagation, pass the bounds down |
+| khoảng mở | open interval, open range |
+| cận dưới, cận trên | lower bound, upper bound |
+| tổ tiên chung thấp nhất | lowest common ancestor |
+| tổ tiên, hậu duệ | ancestor, descendant |
+| điểm tách | split point |
+| đi một đường | walk one path |
+| so ngặt, tăng ngặt | strict comparison, strictly increasing |
+| chuỗi tăng, chuỗi lệch phải | increasing chain, right chain |
+| đệ quy đuôi | tail recursion |
+| sợi nối, sợi chỉ (Morris) | thread (Morris) |
+| dừng sớm | early stop |
+| kích thước cây con | subtree size |
+| cây thống kê thứ tự | order-statistic tree |
+| cây tự cân bằng | self-balancing tree |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

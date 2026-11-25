@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "diagram_type": "tree",
+  "meta": {
+    "title": "Validate BST: the range narrows on the way down",
+    "subtitle": "Every node receives an open range (lo, hi) set by all of its ancestors. Node 9 passes when compared only with its parent 12, but it sits in the right branch of the root 10, so it must be greater than 10.",
+    "output": "content/diagrams/neetcode-binary-search-tree/bounds.en.html",
+    "quality_profile": "showcase"
+  },
+  "nodes": [
+    { "id": "n10", "label": "10 · root", "sublabel": "range (−∞, +∞) ✓" },
+    { "id": "n5", "label": "5 · left child of 10", "parent": "n10", "sublabel": "range (−∞, 10) ✓" },
+    { "id": "n15", "label": "15 · right child of 10", "parent": "n10", "sublabel": "range (10, +∞) ✓" },
+    { "id": "n2", "label": "2 · left of 5", "parent": "n5", "sublabel": "range (−∞, 5) ✓" },
+    { "id": "n7", "label": "7 · right of 5", "parent": "n5", "sublabel": "range (5, 10) ✓" },
+    { "id": "n12", "label": "12 · left of 15", "parent": "n15", "sublabel": "range (10, 15) ✓" },
+    { "id": "n20", "label": "20 · right of 15", "parent": "n15", "sublabel": "range (15, +∞) ✓" },
+    { "id": "n9", "label": "9 · left of 12 ✗", "parent": "n12", "sublabel": "must be in (10, 12), but 9 < 10" },
+    { "id": "nEmpty", "label": "(empty)", "parent": "n12", "sublabel": "right child slot of 12" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Compare with the parent only: wrong",
+      "items": [
+        "9 < 12, so the parent check lets it through",
+        "9 is in the right branch of 10 and should be greater than 10",
+        "300 trees with one node changed at random: this check accepts 66 of the 238 broken ones"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Carry the range down: right",
+      "items": [
+        "go left: the upper bound drops to the node's value",
+        "go right: the lower bound rises to the node's value",
+        "each node is compared once with (lo, hi): O(n) time, O(h) memory"
+      ]
+    }
+  ]
+}

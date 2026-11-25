@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "diagram_type": "tree",
+  "meta": {
+    "title": "Validate BST: khoảng hẹp dần khi đi xuống",
+    "subtitle": "Mỗi nút nhận một khoảng mở (lo, hi) do mọi tổ tiên phía trên đặt ra. Nút 9 hợp lệ khi chỉ so với cha 12, nhưng nằm ở nhánh phải của gốc 10 nên phải lớn hơn 10.",
+    "output": "content/diagrams/neetcode-binary-search-tree/bounds.html",
+    "quality_profile": "showcase"
+  },
+  "nodes": [
+    { "id": "n10", "label": "10 · gốc", "sublabel": "khoảng (−∞, +∞) ✓" },
+    { "id": "n5", "label": "5 · con trái của 10", "parent": "n10", "sublabel": "khoảng (−∞, 10) ✓" },
+    { "id": "n15", "label": "15 · con phải của 10", "parent": "n10", "sublabel": "khoảng (10, +∞) ✓" },
+    { "id": "n2", "label": "2 · trái của 5", "parent": "n5", "sublabel": "khoảng (−∞, 5) ✓" },
+    { "id": "n7", "label": "7 · phải của 5", "parent": "n5", "sublabel": "khoảng (5, 10) ✓" },
+    { "id": "n12", "label": "12 · trái của 15", "parent": "n15", "sublabel": "khoảng (10, 15) ✓" },
+    { "id": "n20", "label": "20 · phải của 15", "parent": "n15", "sublabel": "khoảng (15, +∞) ✓" },
+    { "id": "n9", "label": "9 · trái của 12 ✗", "parent": "n12", "sublabel": "cần trong (10, 12), nhưng 9 < 10" },
+    { "id": "nEmpty", "label": "(trống)", "parent": "n12", "sublabel": "chỗ con phải của 12" }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Chỉ so với cha: nhận nhầm",
+      "items": [
+        "9 < 12, nên phép so với cha cho qua",
+        "9 nằm trong nhánh phải của 10, đáng lẽ phải lớn hơn 10",
+        "300 cây bị sửa bừa một nút: cách này nhận nhầm 66 trong 238 cây hỏng"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Mang khoảng xuống: đúng",
+      "items": [
+        "rẽ trái: cận trên hạ xuống bằng giá trị nút",
+        "rẽ phải: cận dưới nâng lên bằng giá trị nút",
+        "mỗi nút so một lần với (lo, hi): O(n) thời gian, O(h) bộ nhớ"
+      ]
+    }
+  ]
+}

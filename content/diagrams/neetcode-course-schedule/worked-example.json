@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Course Schedule: Kahn học được một môn rồi kẹt",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-course-schedule/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Một bước của Kahn"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Bậc vào và hàng đợi"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đếm bậc vào của 4 môn",
+      "variant": "default",
+      "note": "bậc vào = [0, 2, 1, 1]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Môn 0 không chờ ai: xếp vào hàng",
+      "variant": "default",
+      "note": "hàng đợi: [0]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Học môn 0, trừ bậc vào của môn 1",
+      "variant": "default",
+      "note": "đã học 1 môn; môn 1: 2 → 1"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Môn 1 vẫn chờ môn 3: không ai vào hàng",
+      "variant": "default",
+      "note": "hàng đợi: []"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "1 chờ 3, 3 chờ 2, 2 chờ 1: một vòng",
+      "variant": "default",
+      "note": "bậc vào còn lại = [0, 1, 1, 1]"
+    },
+    {
+      "id": "step-6",
+      "from": "state",
+      "to": "algorithm",
+      "y": 555,
+      "label": "Chỉ học được 1 trên 4 môn",
+      "variant": "return",
+      "note": "1 < 4 → false"
+    }
+  ]
+}

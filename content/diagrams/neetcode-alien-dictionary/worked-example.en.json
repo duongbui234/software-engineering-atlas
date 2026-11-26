@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Alien Dictionary: edges from adjacent words, then Kahn",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-alien-dictionary/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "One step"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Edges, in-degrees, queue"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Compare bcae, bcd: a vs d",
+      "variant": "default",
+      "note": "edge a → d"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Compare bcd, cb: b vs c",
+      "variant": "default",
+      "note": "edge b → c"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Compare cb, cab: b vs a",
+      "variant": "default",
+      "note": "edge b → a"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Compare cab, ad: c vs a",
+      "variant": "default",
+      "note": "edge c → a"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "Count in-degrees, queue the zeros",
+      "variant": "default",
+      "note": "a:2 c:1 d:1 b:0 e:0, queue [b, e]"
+    },
+    {
+      "id": "step-6",
+      "from": "algorithm",
+      "to": "state",
+      "y": 555,
+      "label": "Write b, lower c and a",
+      "variant": "default",
+      "note": "c drops to 0, a to 1, queue [e, c]"
+    },
+    {
+      "id": "step-7",
+      "from": "algorithm",
+      "to": "state",
+      "y": 633,
+      "label": "Write e, a letter with no edges",
+      "variant": "default",
+      "note": "written: be"
+    },
+    {
+      "id": "step-8",
+      "from": "algorithm",
+      "to": "state",
+      "y": 711,
+      "label": "Write c, lower a",
+      "variant": "default",
+      "note": "a drops to 0, queue [a]"
+    },
+    {
+      "id": "step-9",
+      "from": "algorithm",
+      "to": "state",
+      "y": 789,
+      "label": "Write a, lower d",
+      "variant": "default",
+      "note": "d drops to 0, queue [d]"
+    },
+    {
+      "id": "step-10",
+      "from": "state",
+      "to": "algorithm",
+      "y": 867,
+      "label": "Write d: all 5 letters, no cycle",
+      "variant": "return",
+      "note": "answer: becad"
+    }
+  ]
+}

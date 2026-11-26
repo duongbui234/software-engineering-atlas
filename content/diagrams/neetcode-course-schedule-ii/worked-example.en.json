@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Course Schedule II: Kahn orders six courses by in-degree",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-course-schedule-ii/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Take one course off the queue"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "In-degrees and queue"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Count in-degrees from 6 prerequisites",
+      "variant": "default",
+      "note": "in-degree: 0→0 1→1 2→2 3→0 4→2 5→1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Queue every course with in-degree 0",
+      "variant": "default",
+      "note": "queue: [0, 3]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Take 0, course 4 drops to 1",
+      "variant": "default",
+      "note": "order: [0]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Take 3, course 4 drops to 0",
+      "variant": "default",
+      "note": "order: [0, 3], queue: [4]"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "Take 4, unlocking both 1 and 5",
+      "variant": "default",
+      "note": "order: [0, 3, 4], queue: [1, 5]"
+    },
+    {
+      "id": "step-6",
+      "from": "algorithm",
+      "to": "state",
+      "y": 555,
+      "label": "Take 1, course 2 drops to 1",
+      "variant": "default",
+      "note": "order: [0, 3, 4, 1]"
+    },
+    {
+      "id": "step-7",
+      "from": "algorithm",
+      "to": "state",
+      "y": 633,
+      "label": "Take 5, course 2 drops to 0",
+      "variant": "default",
+      "note": "order: [0, 3, 4, 1, 5], queue: [2]"
+    },
+    {
+      "id": "step-8",
+      "from": "state",
+      "to": "algorithm",
+      "y": 711,
+      "label": "Take 2: all 6/6 courses, no cycle",
+      "variant": "return",
+      "note": "answer: [0, 3, 4, 1, 5, 2]"
+    }
+  ]
+}

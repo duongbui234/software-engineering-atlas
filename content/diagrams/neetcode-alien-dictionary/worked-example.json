@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Alien Dictionary: rút cạnh từ cặp từ kề nhau rồi chạy Kahn",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-alien-dictionary/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Một bước"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Cạnh, bậc vào, hàng đợi"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "So bcae với bcd: khác ở a, d",
+      "variant": "default",
+      "note": "cạnh a → d"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "So bcd với cb: khác ở b, c",
+      "variant": "default",
+      "note": "cạnh b → c"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "So cb với cab: khác ở b, a",
+      "variant": "default",
+      "note": "cạnh b → a"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "So cab với ad: khác ở c, a",
+      "variant": "default",
+      "note": "cạnh c → a"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "Đếm bậc vào, xếp chữ bậc 0",
+      "variant": "default",
+      "note": "a:2 c:1 d:1 b:0 e:0, hàng đợi [b, e]"
+    },
+    {
+      "id": "step-6",
+      "from": "algorithm",
+      "to": "state",
+      "y": 555,
+      "label": "Viết b, hạ bậc c và a",
+      "variant": "default",
+      "note": "c về 0, a còn 1, hàng đợi [e, c]"
+    },
+    {
+      "id": "step-7",
+      "from": "algorithm",
+      "to": "state",
+      "y": 633,
+      "label": "Viết e, chữ không có cạnh nào",
+      "variant": "default",
+      "note": "đã viết: be"
+    },
+    {
+      "id": "step-8",
+      "from": "algorithm",
+      "to": "state",
+      "y": 711,
+      "label": "Viết c, hạ bậc a",
+      "variant": "default",
+      "note": "a về 0, hàng đợi [a]"
+    },
+    {
+      "id": "step-9",
+      "from": "algorithm",
+      "to": "state",
+      "y": 789,
+      "label": "Viết a, hạ bậc d",
+      "variant": "default",
+      "note": "d về 0, hàng đợi [d]"
+    },
+    {
+      "id": "step-10",
+      "from": "state",
+      "to": "algorithm",
+      "y": 867,
+      "label": "Viết d: đủ 5 chữ, không có vòng",
+      "variant": "return",
+      "note": "đáp án: becad"
+    }
+  ]
+}

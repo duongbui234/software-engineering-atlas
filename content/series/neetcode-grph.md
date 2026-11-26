@@ -11,6 +11,7 @@ stations:
   - name: "Duyệt đồ thị và BFS"
     concepts: [Adjacency List, Clone Map, Reverse Reachability, Implicit Graph, Bidirectional BFS]
   - name: "Sắp xếp topo"
+    concepts: [Directed Acyclic Graph, Topological Sort, In-degree, Three-Color DFS, Precedence Constraint]
   - name: "Union-Find"
   - name: "Đường đi ngắn nhất"
   - name: "Cây khung và hành trình"

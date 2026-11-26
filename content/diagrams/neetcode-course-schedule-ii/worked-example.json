@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Course Schedule II: Kahn xếp sáu môn theo bậc vào",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-course-schedule-ii/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Lấy một môn khỏi hàng đợi"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Bậc vào và hàng đợi"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đếm bậc vào từ 6 điều kiện",
+      "variant": "default",
+      "note": "bậc vào: 0→0 1→1 2→2 3→0 4→2 5→1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Xếp hàng mọi môn có bậc vào 0",
+      "variant": "default",
+      "note": "hàng đợi: [0, 3]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Lấy 0, bậc vào của 4 còn 1",
+      "variant": "default",
+      "note": "thứ tự: [0]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Lấy 3, bậc vào của 4 về 0",
+      "variant": "default",
+      "note": "thứ tự: [0, 3], hàng đợi: [4]"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "Lấy 4, mở khóa cả 1 và 5",
+      "variant": "default",
+      "note": "thứ tự: [0, 3, 4], hàng đợi: [1, 5]"
+    },
+    {
+      "id": "step-6",
+      "from": "algorithm",
+      "to": "state",
+      "y": 555,
+      "label": "Lấy 1, bậc vào của 2 còn 1",
+      "variant": "default",
+      "note": "thứ tự: [0, 3, 4, 1]"
+    },
+    {
+      "id": "step-7",
+      "from": "algorithm",
+      "to": "state",
+      "y": 633,
+      "label": "Lấy 5, bậc vào của 2 về 0",
+      "variant": "default",
+      "note": "thứ tự: [0, 3, 4, 1, 5], hàng đợi: [2]"
+    },
+    {
+      "id": "step-8",
+      "from": "state",
+      "to": "algorithm",
+      "y": 711,
+      "label": "Lấy 2: đủ 6/6 môn, không có vòng",
+      "variant": "return",
+      "note": "đáp án: [0, 3, 4, 1, 5, 2]"
+    }
+  ]
+}

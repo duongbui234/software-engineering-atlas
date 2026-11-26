@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Kahn's algorithm on seven items of clothing",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-topological-sort/kahn-trace.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Wear one item, update the log"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "plan",
+      "type": "backend",
+      "label": "The dresser",
+      "sublabel": "Kahn loop"
+    },
+    {
+      "id": "seen",
+      "type": "database",
+      "label": "Waiting log",
+      "sublabel": "in-degree + queue Q"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "plan",
+      "to": "seen",
+      "y": 165,
+      "label": "Count how many items each one waits for",
+      "variant": "default",
+      "note": "in-degree: socks 0, trousers 0, shirt 0, shoes 2, belt 2, tie 1, jacket 2"
+    },
+    {
+      "id": "step-2",
+      "from": "seen",
+      "to": "plan",
+      "y": 243,
+      "label": "Items waiting on nothing join the line",
+      "variant": "return",
+      "note": "Q = [socks, trousers, shirt]"
+    },
+    {
+      "id": "step-3",
+      "from": "plan",
+      "to": "seen",
+      "y": 321,
+      "label": "Put on socks: shoes wait for one fewer",
+      "variant": "default",
+      "note": "shoes 2 → 1; Q = [trousers, shirt]"
+    },
+    {
+      "id": "step-4",
+      "from": "plan",
+      "to": "seen",
+      "y": 399,
+      "label": "Put on trousers: shoes and belt wait less",
+      "variant": "default",
+      "note": "shoes 1 → 0 (joins); belt 2 → 1"
+    },
+    {
+      "id": "step-5",
+      "from": "plan",
+      "to": "seen",
+      "y": 477,
+      "label": "Put on shirt: belt and tie are free",
+      "variant": "default",
+      "note": "Q = [shoes, belt, tie]"
+    },
+    {
+      "id": "step-6",
+      "from": "plan",
+      "to": "seen",
+      "y": 555,
+      "label": "Put on shoes: nothing waits for shoes",
+      "variant": "default",
+      "note": "Q = [belt, tie]"
+    },
+    {
+      "id": "step-7",
+      "from": "plan",
+      "to": "seen",
+      "y": 633,
+      "label": "Belt: the jacket waits for one fewer",
+      "variant": "default",
+      "note": "jacket 2 → 1; Q = [tie]"
+    },
+    {
+      "id": "step-8",
+      "from": "plan",
+      "to": "seen",
+      "y": 711,
+      "label": "Tie: the jacket is free",
+      "variant": "default",
+      "note": "jacket 1 → 0; Q = [jacket]"
+    },
+    {
+      "id": "step-9",
+      "from": "plan",
+      "to": "seen",
+      "y": 789,
+      "label": "Put on the jacket; the line is empty",
+      "variant": "default",
+      "note": "7 items worn"
+    },
+    {
+      "id": "step-10",
+      "from": "seen",
+      "to": "plan",
+      "y": 867,
+      "label": "All 7 of 7 worn: no waiting loop",
+      "variant": "return",
+      "note": "socks, trousers, shirt, shoes, belt, tie, jacket"
+    }
+  ]
+}

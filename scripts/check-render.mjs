@@ -21,7 +21,7 @@ const PAGES_FILE = pagesArg >= 0 ? args.splice(pagesArg, 2)[1] : null;
 const ROOT = path.resolve(args[0] || 'public');
 const WIDTHS = [390, 1440];
 const MIN_SCALE = 0.75;
-const CONCURRENCY = 4;
+const CONCURRENCY = 8;
 // Thư mục chép nguyên văn (viewer archify, file code), không phải trang của site
 const SKIP_DIRS = new Set(['diagrams', 'code', 'static']);
 

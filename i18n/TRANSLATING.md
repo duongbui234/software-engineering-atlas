@@ -472,6 +472,15 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | rẽ nhánh tại dấu chấm, phân nhánh theo ký tự đại diện | wildcard branching |
 | cắt nhánh theo tiền tố, cắt theo tiền tố | trie prefix pruning |
 | nhóm theo độ dài | length bucket |
+| đồ thị lưới | grid graph |
+| kề bốn hướng | four-way adjacency |
+| tô vùng, loang vùng | flood fill |
+| mầm, ô bắt đầu | seed, starting cell |
+| thành phần liên thông | connected component |
+| đánh dấu khi vào hàng đợi, đánh dấu khi xếp hàng | mark on enqueue |
+| BFS đa nguồn | multi-source BFS |
+| lớp, đợt lan | layer, wave |
+| phòng không tới được | unreachable room |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

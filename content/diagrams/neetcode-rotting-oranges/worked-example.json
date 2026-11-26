@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Hai nguồn cam thối lan cùng phút",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-rotting-oranges/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Các lớp BFS"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Ghi cả hai nguồn ở phút 0",
+      "variant": "default",
+      "note": "(0,0), (0,4)"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Hai nguồn chạm hai ô ở phút 1",
+      "variant": "default",
+      "note": "(0,1), (1,4)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Lớp phút 2 có ba ô mới",
+      "variant": "default",
+      "note": "(0,2), (1,1), (1,3)"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Ba hướng gặp cùng một ô",
+      "variant": "default",
+      "note": "(1,2), d = 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Ô cuối chỉ vào hàng một lần",
+      "variant": "return",
+      "note": "minutes = 3"
+    }
+  ]
+}

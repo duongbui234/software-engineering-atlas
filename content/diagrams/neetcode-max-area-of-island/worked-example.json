@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cộng diện tích cho từng đảo riêng",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-max-area-of-island/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Diện tích đảo"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Bắt đầu (0,0), đảo có một ô",
+      "variant": "default",
+      "note": "area = 1; best = 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Bắt đầu lại bộ đếm tại (0,3)",
+      "variant": "default",
+      "note": "area = 0"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Lượt tô thứ hai thăm năm ô",
+      "variant": "default",
+      "note": "area = 5; best = 5"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Đảo cuối tại (2,1) có ba ô",
+      "variant": "default",
+      "note": "area = 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Giữ số lớn nhất từng đo",
+      "variant": "return",
+      "note": "max(1, 5, 3) = 5"
+    }
+  ]
+}

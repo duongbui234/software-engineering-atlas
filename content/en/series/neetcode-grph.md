@@ -8,6 +8,7 @@ draft: false
 lang: en
 stations:
   - name: "Grid Traversal"
+    concepts: [Grid Graph, Flood Fill, Connected Component, Multi-source BFS, Mark on Enqueue]
   - name: "Graph Traversal and BFS"
   - name: "Topological Sort"
   - name: "Union-Find"

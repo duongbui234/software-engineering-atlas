@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Ghi khoảng cách từ cổng tới trước",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-walls-and-gates/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Phòng và cổng"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đưa cả hai cổng vào lớp 0",
+      "variant": "default",
+      "note": "(0,0), (0,4)"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Bước một đến ba phòng",
+      "variant": "default",
+      "note": "(1,0), (1,4), (0,3)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Hai cổng cùng tới được (1,2)",
+      "variant": "default",
+      "note": "min(3, 3) = 3"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Phòng ở (3,4) bị tường cô lập",
+      "variant": "default",
+      "note": "room[3][4] = INF"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Chỉ thay phòng có đường tới cổng",
+      "variant": "return",
+      "note": "(1,2) = 3; (3,4) = INF"
+    }
+  ]
+}

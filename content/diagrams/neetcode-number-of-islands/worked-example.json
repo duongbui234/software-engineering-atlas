@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đếm đảo bằng số lần mở lượt tô",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-number-of-islands/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Lưới đất và nước"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Quét theo hàng, gặp mầm đầu tiên",
+      "variant": "default",
+      "note": "(0,0) → 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Tô đảo thứ hai từ (0,3)",
+      "variant": "default",
+      "note": "2; area = 5"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Gặp đất đã đánh dấu thì bỏ qua",
+      "variant": "default",
+      "note": "(1,3), (1,4)"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Mở lượt thứ ba tại (2,1)",
+      "variant": "default",
+      "note": "3; area = 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Hết lưới, đã mở đúng ba lượt",
+      "variant": "return",
+      "note": "count = 3"
+    }
+  ]
+}

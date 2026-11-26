@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Both rotten oranges spread from minute zero",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-rotting-oranges/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "BFS layers"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Seed both sources at minute zero",
+      "variant": "default",
+      "note": "(0,0), (0,4)"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Both sources reach cells in minute one",
+      "variant": "default",
+      "note": "(0,1), (1,4)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Minute two reaches three new cells",
+      "variant": "default",
+      "note": "(0,2), (1,1), (1,3)"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Three directions reach the same cell",
+      "variant": "default",
+      "note": "(1,2), d = 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "The final cell is enqueued once",
+      "variant": "return",
+      "note": "minutes = 3"
+    }
+  ]
+}

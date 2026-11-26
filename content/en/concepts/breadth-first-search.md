@@ -14,3 +14,5 @@ Each node enters and leaves the queue exactly once, so BFS takes O(n) time. The 
 Taking from the front must cost O(1). JavaScript's array `shift()` and Python's list `pop(0)` move the whole array every time, so on a large tree BFS becomes O(n²); use a front index or `collections.deque`. To split the output into levels you also need a [[en/concepts/level-size-snapshot|level size snapshot]].
 
 Read more in [[en/posts/2026-11-25-neetcode-level-order|station 5: Level Order and Carried State]].
+
+Read more in [[en/posts/2026-11-26-neetcode-grid-traversal|station 1: Grid Traversal]], where all starting cells share the same layer zero.

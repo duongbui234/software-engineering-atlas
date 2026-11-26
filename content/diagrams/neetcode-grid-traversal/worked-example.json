@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đánh dấu khi cho ô vào hàng",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-grid-traversal/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hàng đợi"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Bắt đầu đảo thứ hai và ghi dấu",
+      "variant": "default",
+      "note": "Q = [(0,3)]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Lấy (0,3) và thêm hai ô mới",
+      "variant": "default",
+      "note": "Q = [(1,3), (0,4)]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Lấy (1,3) rồi đánh dấu hai ô",
+      "variant": "default",
+      "note": "Q = [(0,4), (2,3), (1,4)]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Từ (0,4) gặp lại (1,4) đã đánh dấu",
+      "variant": "default",
+      "note": "dist[1][4] = 2"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Duyệt đủ năm ô, mỗi ô đúng một lượt",
+      "variant": "return",
+      "note": "area = 5"
+    }
+  ]
+}

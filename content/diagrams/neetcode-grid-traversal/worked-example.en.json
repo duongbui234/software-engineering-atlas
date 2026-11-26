@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Mark each cell as it enters the queue",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-grid-traversal/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Queue"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Start the second island and mark its seed",
+      "variant": "default",
+      "note": "Q = [(0,3)]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Pop (0,3) and add two new cells",
+      "variant": "default",
+      "note": "Q = [(1,3), (0,4)]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Pop (1,3) and mark two more cells",
+      "variant": "default",
+      "note": "Q = [(0,4), (2,3), (1,4)]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "From (0,4), find (1,4) already marked",
+      "variant": "default",
+      "note": "dist[1][4] = 2"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Visit all five cells exactly once",
+      "variant": "return",
+      "note": "area = 5"
+    }
+  ]
+}

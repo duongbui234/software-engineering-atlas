@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Count the area of each island separately",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-max-area-of-island/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Island area"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Start at (0,0) for a one-cell island",
+      "variant": "default",
+      "note": "area = 1; best = 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Reset the counter at (0,3)",
+      "variant": "default",
+      "note": "area = 0"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The second fill visits five cells",
+      "variant": "default",
+      "note": "area = 5; best = 5"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "The last island at (2,1) has three cells",
+      "variant": "default",
+      "note": "area = 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Keep the largest area seen",
+      "variant": "return",
+      "note": "max(1, 5, 3) = 5"
+    }
+  ]
+}

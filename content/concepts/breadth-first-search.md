@@ -13,3 +13,5 @@ Mỗi nút vào và ra hàng đợi đúng một lần, nên BFS tốn O(n) th�
 Lấy ra ở đầu phải tốn O(1). `shift()` của mảng JavaScript và `pop(0)` của list Python dịch cả mảng mỗi lần, nên trên cây lớn BFS thành O(n²); dùng chỉ số đầu hàng hoặc `collections.deque`. Muốn tách theo tầng thì cần thêm [[concepts/level-size-snapshot|chụp kích thước tầng]].
 
 Đọc thêm trong bài [[posts/2026-11-25-neetcode-level-order|ga 5: Duyệt theo tầng và mang trạng thái]].
+
+Đọc thêm trong bài [[posts/2026-11-26-neetcode-grid-traversal|ga 1: Duyệt lưới]], nơi mọi nguồn dùng chung lớp 0.

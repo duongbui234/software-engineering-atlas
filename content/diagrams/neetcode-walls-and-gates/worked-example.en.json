@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Record the distance from the first gate to arrive",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-walls-and-gates/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Rooms and gates"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Queue both gates at distance zero",
+      "variant": "default",
+      "note": "(0,0), (0,4)"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "One step reaches three rooms",
+      "variant": "default",
+      "note": "(1,0), (1,4), (0,3)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Both gates can reach (1,2)",
+      "variant": "default",
+      "note": "min(3, 3) = 3"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Walls isolate room (3,4)",
+      "variant": "default",
+      "note": "room[3][4] = INF"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Update only rooms reached from a gate",
+      "variant": "return",
+      "note": "(1,2) = 3; (3,4) = INF"
+    }
+  ]
+}

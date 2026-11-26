@@ -7,6 +7,7 @@ region: Vùng Thuật toán
 draft: false
 stations:
   - name: "Duyệt lưới"
+    concepts: [Grid Graph, Flood Fill, Connected Component, Multi-source BFS, Mark on Enqueue]
   - name: "Duyệt đồ thị và BFS"
   - name: "Sắp xếp topo"
   - name: "Union-Find"

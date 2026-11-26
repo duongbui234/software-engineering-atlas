@@ -19,6 +19,7 @@ stations:
   - name: "Dựng và mã hóa cây"
     concepts: [Tree Reconstruction, Inorder Interval, Null Marker, Tree Serialization, Downward Path Gain]
   - name: "Trie"
+    concepts: [Trie, Terminal Marker, Wildcard Branching, Trie Prefix Pruning, Sparse Trie Children]
 ---
 
 ## Nếu bạn mới bắt đầu

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "diagram_type": "tree",
+  "meta": {
+    "title": "Đường đi tới car và dấu hết từ tại cart",
+    "output": "content/diagrams/neetcode-trie/prefix-and-word.html",
+    "quality_profile": "showcase"
+  },
+  "layout": {
+    "direction": "down",
+    "gapX": 34,
+    "gapY": 38,
+    "nodeW": 146
+  },
+  "nodes": [
+    {
+      "id": "root",
+      "label": "Gốc rỗng",
+      "sublabel": "\"\""
+    },
+    {
+      "id": "c",
+      "parent": "root",
+      "label": "Tiền tố c",
+      "sublabel": "end = false"
+    },
+    {
+      "id": "ca",
+      "parent": "c",
+      "label": "Tiền tố ca",
+      "sublabel": "end = false"
+    },
+    {
+      "id": "car",
+      "parent": "ca",
+      "label": "Tiền tố car",
+      "sublabel": "end = false"
+    },
+    {
+      "id": "cat",
+      "parent": "ca",
+      "label": "Từ cat",
+      "sublabel": "end = true"
+    },
+    {
+      "id": "cart",
+      "parent": "car",
+      "label": "Từ cart",
+      "sublabel": "end = true"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Hai phép tra khác nhau ở đâu",
+      "items": [
+        "startsWith(\"car\") đúng vì đường đi tới được car.",
+        "search(\"car\") sai vì end ở car đang là false.",
+        "Thêm car chỉ bật cờ end ở đó, không tạo thêm cạnh."
+      ]
+    }
+  ]
+}

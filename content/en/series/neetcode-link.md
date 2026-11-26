@@ -20,6 +20,7 @@ stations:
   - name: "Building and Serializing Trees"
     concepts: [Tree Reconstruction, Inorder Interval, Null Marker, Tree Serialization, Downward Path Gain]
   - name: "Tries"
+    concepts: [Trie, Terminal Marker, Wildcard Branching, Trie Prefix Pruning, Sparse Trie Children]
 ---
 
 ## If you are just starting

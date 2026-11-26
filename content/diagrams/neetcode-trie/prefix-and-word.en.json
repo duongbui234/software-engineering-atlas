@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "diagram_type": "tree",
+  "meta": {
+    "title": "A path for car, a word at cart",
+    "output": "content/diagrams/neetcode-trie/prefix-and-word.en.html",
+    "quality_profile": "showcase"
+  },
+  "layout": {
+    "direction": "down",
+    "gapX": 34,
+    "gapY": 38,
+    "nodeW": 146
+  },
+  "nodes": [
+    {
+      "id": "root",
+      "label": "Empty root",
+      "sublabel": "\"\""
+    },
+    {
+      "id": "c",
+      "parent": "root",
+      "label": "Prefix c",
+      "sublabel": "end = false"
+    },
+    {
+      "id": "ca",
+      "parent": "c",
+      "label": "Prefix ca",
+      "sublabel": "end = false"
+    },
+    {
+      "id": "car",
+      "parent": "ca",
+      "label": "Prefix car",
+      "sublabel": "end = false"
+    },
+    {
+      "id": "cat",
+      "parent": "ca",
+      "label": "Word cat",
+      "sublabel": "end = true"
+    },
+    {
+      "id": "cart",
+      "parent": "car",
+      "label": "Word cart",
+      "sublabel": "end = true"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Where the two checks differ",
+      "items": [
+        "startsWith(\"car\") succeeds because the path reaches car.",
+        "search(\"car\") fails because end is false at car.",
+        "Inserting car flips its end flag without adding an edge."
+      ]
+    }
+  ]
+}

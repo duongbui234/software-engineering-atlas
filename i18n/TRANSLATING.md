@@ -463,6 +463,15 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | nút cao nhất trên đường đi | highest node on the path |
 | khung ngăn xếp | stack frame |
 | tổng đường hoàn chỉnh | complete path score |
+| cây tiền tố | trie, prefix tree |
+| dấu hết từ, dấu kết thúc từ | terminal marker |
+| cạnh theo ký tự | character edge |
+| bảng con thưa, map con thưa | sparse child map |
+| mảng con cố định | fixed child array |
+| ký tự đại diện | wildcard |
+| rẽ nhánh tại dấu chấm, phân nhánh theo ký tự đại diện | wildcard branching |
+| cắt nhánh theo tiền tố, cắt theo tiền tố | trie prefix pruning |
+| nhóm theo độ dài | length bucket |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

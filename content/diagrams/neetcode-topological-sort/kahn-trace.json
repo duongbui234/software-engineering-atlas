@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Thuật toán Kahn trên bảy món đồ buổi sáng",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-topological-sort/kahn-trace.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Mặc một món, cập nhật sổ"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "plan",
+      "type": "backend",
+      "label": "Người mặc đồ",
+      "sublabel": "vòng lặp Kahn"
+    },
+    {
+      "id": "seen",
+      "type": "database",
+      "label": "Sổ món còn chờ",
+      "sublabel": "bậc vào + hàng đợi Q"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "plan",
+      "to": "seen",
+      "y": 165,
+      "label": "Đếm mỗi món còn chờ mấy món",
+      "variant": "default",
+      "note": "indeg: tất 0, quần 0, áo 0, giày 2, thắt lưng 2, cà vạt 1, áo khoác 2"
+    },
+    {
+      "id": "step-2",
+      "from": "seen",
+      "to": "plan",
+      "y": 243,
+      "label": "Món chờ 0 món: xếp vào hàng",
+      "variant": "return",
+      "note": "Q = [tất, quần, áo]"
+    },
+    {
+      "id": "step-3",
+      "from": "plan",
+      "to": "seen",
+      "y": 321,
+      "label": "Mặc tất: giày bớt một món chờ",
+      "variant": "default",
+      "note": "giày 2 → 1; Q = [quần, áo]"
+    },
+    {
+      "id": "step-4",
+      "from": "plan",
+      "to": "seen",
+      "y": 399,
+      "label": "Mặc quần: giày và thắt lưng bớt chờ",
+      "variant": "default",
+      "note": "giày 1 → 0 (vào hàng); thắt lưng 2 → 1"
+    },
+    {
+      "id": "step-5",
+      "from": "plan",
+      "to": "seen",
+      "y": 477,
+      "label": "Mặc áo: thắt lưng, cà vạt hết chờ",
+      "variant": "default",
+      "note": "Q = [giày, thắt lưng, cà vạt]"
+    },
+    {
+      "id": "step-6",
+      "from": "plan",
+      "to": "seen",
+      "y": 555,
+      "label": "Mặc giày: không món nào chờ giày",
+      "variant": "default",
+      "note": "Q = [thắt lưng, cà vạt]"
+    },
+    {
+      "id": "step-7",
+      "from": "plan",
+      "to": "seen",
+      "y": 633,
+      "label": "Thắt lưng: áo khoác bớt một món chờ",
+      "variant": "default",
+      "note": "áo khoác 2 → 1; Q = [cà vạt]"
+    },
+    {
+      "id": "step-8",
+      "from": "plan",
+      "to": "seen",
+      "y": 711,
+      "label": "Cà vạt: áo khoác hết chờ",
+      "variant": "default",
+      "note": "áo khoác 1 → 0; Q = [áo khoác]"
+    },
+    {
+      "id": "step-9",
+      "from": "plan",
+      "to": "seen",
+      "y": 789,
+      "label": "Mặc áo khoác, hàng rỗng",
+      "variant": "default",
+      "note": "đã mặc 7 món"
+    },
+    {
+      "id": "step-10",
+      "from": "seen",
+      "to": "plan",
+      "y": 867,
+      "label": "Mặc đủ 7/7 món: không có vòng chờ",
+      "variant": "return",
+      "note": "tất, quần, áo, giày, thắt lưng, cà vạt, áo khoác"
+    }
+  ]
+}

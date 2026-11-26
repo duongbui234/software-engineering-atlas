@@ -505,6 +505,26 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | BFS đa nguồn | multi-source BFS |
 | lớp, đợt lan | layer, wave |
 | phòng không tới được | unreachable room |
+| đồ thị có hướng không chu trình | directed acyclic graph (DAG) |
+| thứ tự topo, sắp xếp topo | topological order, topological sort |
+| bậc vào | in-degree |
+| môn tiên quyết | prerequisite |
+| chu trình, vòng | cycle |
+| DFS ba màu (trắng, xám, đen) | three-color DFS (white, gray, black) |
+| thứ tự hoàn thành đảo ngược | reverse postorder |
+| ràng buộc thứ tự | precedence constraint |
+| cạnh có hướng | directed edge |
+| quét lại | rescan |
+| lượt quét | pass |
+| lần nhìn cạnh | edge looks |
+| DFS tự giữ ngăn xếp | DFS with an explicit stack |
+| quét lặp | repeated scan |
+| ngăn xếp tự quản | hand-managed stack |
+| chuỗi xuôi, chuỗi ngược | forward chain, backward chain |
+| mở khóa (môn học) | unlock (a course) |
+| thứ tự từ điển | lexicographic order |
+| manh mối | clue |
+| danh bạ | phone book |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

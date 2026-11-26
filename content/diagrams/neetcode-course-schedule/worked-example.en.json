@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Course Schedule: Kahn takes one course, then gets stuck",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-course-schedule/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "One Kahn step"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "In-degrees and queue"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Count the in-degree of 4 courses",
+      "variant": "default",
+      "note": "in-degree = [0, 2, 1, 1]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Course 0 waits for no one: enqueue it",
+      "variant": "default",
+      "note": "queue: [0]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Take course 0, decrement course 1",
+      "variant": "default",
+      "note": "taken: 1; course 1: 2 → 1"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Course 1 still waits for 3: nobody enters",
+      "variant": "default",
+      "note": "queue: []"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "1 waits for 3, 3 for 2, 2 for 1: a cycle",
+      "variant": "default",
+      "note": "remaining in-degree = [0, 1, 1, 1]"
+    },
+    {
+      "id": "step-6",
+      "from": "state",
+      "to": "algorithm",
+      "y": 555,
+      "label": "Only 1 of 4 courses taken",
+      "variant": "return",
+      "note": "1 < 4 → false"
+    }
+  ]
+}

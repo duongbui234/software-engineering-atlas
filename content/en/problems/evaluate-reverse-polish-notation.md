@@ -128,7 +128,7 @@ At small depths recursion is even faster because it allocates no array. But V8's
 
 The maximum depth, measured with a binary search on n over the expression `1 1 + 1 + …` (n operators, n levels deep) ([JS](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.js) · [Java](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.java) · [Python](../code/neetcode-evaluate-reverse-polish-notation/recursion_depth.py)): Node 24 handles **9 765** levels on all three runs; Java 21 handles about **8 600–9 400** levels on the first measurement (it varies between runs: 8 593 and 9 375) and **29 473** on the next two, because once the code is JIT-compiled each call frame is smaller; Python 3.12 stops at **996** levels (the limit of 1 000 minus a few frames of the program itself). With 10⁴ tokens an expression can be about 5 000 levels deep: JS and Java pass, but Python does **not**, so "recursion still passes LeetCode" above holds only for JS and Java. Python needs the explicit stack or a raised `sys.setrecursionlimit`.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Integer division | Reading `"-11"` as a number |
 |---|---|---|
@@ -136,10 +136,12 @@ The maximum depth, measured with a binary search on n over the expression `1 1 +
 | Python | `//` rounds **down**; use `int(a / b)` (exact enough for 32-bit numbers) | `int(t)` |
 | Go | `/` on `int` truncates toward 0 | `strconv.Atoi(t)` |
 | Java | `/` on `int` truncates toward 0; `Math.floorDiv` rounds down | `Integer.parseInt(t)`; compare strings with `equals`, not `==` |
+| PHP | `/` returns a **float** when the division is not exact (`-7 / 2` is `-3.5`); `intdiv` truncates toward 0 | `(int) $t`; spot operators with `isset(OPS[$t])` |
+| Rust | `/` on `i32` truncates toward 0; `div_euclid` differs when the dividend is negative | `t.parse::<i32>()`; a `match` on `&str` compares the whole token |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.ts) · [Python](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.py) · [Go](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.go) · [Java](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.java) · [JavaScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.js)
+[TypeScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.ts) · [Python](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.py) · [Go](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.go) · [Java](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.java) · [JavaScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.js) · [PHP](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.php) · [Rust](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.rs)
 
 Each file has the stack and the recursion and runs 7 cases, including `-` and `/` with negative numbers. Below is the stack approach.
 
@@ -258,6 +260,57 @@ function evalStack(tokens) {
 }
 ```
 
+```php
+function apply(string $op, int $a, int $b): int {
+    return match ($op) {
+        '+' => $a + $b,
+        '-' => $a - $b,
+        '*' => $a * $b,
+        default => intdiv($a, $b), // intdiv truncates toward 0; $a / $b returns a float when the division is not exact
+    };
+}
+
+// Approach 1: a stack. The number popped SECOND is the left operand.
+function evalStack(array $tokens): int {
+    $st = [];
+    foreach ($tokens as $t) {
+        if (isset(OPS[$t])) { // compare the whole token: "-11" is not a key of OPS
+            $b = array_pop($st);
+            $a = array_pop($st);
+            $st[] = apply($t, $a, $b);
+        } else {
+            $st[] = (int) $t;
+        }
+    }
+    return $st[0];
+}
+```
+
+```rust
+fn apply(op: &str, a: i32, b: i32) -> i32 {
+    match op {
+        "+" => a + b,
+        "-" => a - b,
+        "*" => a * b,
+        _ => a / b, // Rust's i32 division truncates toward 0; div_euclid differs for negatives
+    }
+}
+
+// Approach 1: a stack. The number popped SECOND is the left operand.
+fn eval_stack(tokens: &[&str]) -> i32 {
+    let mut st: Vec<i32> = Vec::new();
+    for &t in tokens {
+        if is_op(t) {
+            let b = st.pop().unwrap();
+            let a = st.pop().unwrap();
+            st.push(apply(t, a, b));
+        } else {
+            st.push(t.parse().unwrap()); // parse::<i32>() also reads "-11"
+        }
+    }
+    st[0]
+}
+```
 
 The TypeScript file also runs three wrong versions, then measures:
 
@@ -303,9 +356,28 @@ evalStack      7/7 cases passed
 evalRecursive  7/7 cases passed
 
 recursion 10⁶ levels: 1000001
+
+$ php -d xdebug.mode=off eval-rpn.php
+evalStack      7/7 cases passed
+evalRecursive  7/7 cases passed
+evalFloorDiv   4/7 cases passed; wrong on [10 6 9 3 + -11 * / * 17 + 5 +] → 12, [7 -2 /] → -4, [-7 2 /] → -4
+evalSlash      3/7 cases passed; wrong on [4 13 5 / +] → TypeError, [10 6 9 3 + -11 * / * 17 + 5 +] → TypeError, [7 -2 /] → TypeError, [-7 2 /] → TypeError
+
+-7 / 2 = -3.5, intdiv(-7, 2) = -3, (int) floor(-7 / 2) = -4
+recursion 10⁵ levels: 100001
+stack 10⁵ levels: 100001
+
+$ rustc --edition 2021 -O eval_rpn.rs -o eval_rpn && ./eval_rpn
+eval_stack     7/7 cases passed
+eval_recursive 7/7 cases passed
+eval_euclid    6/7 cases passed; wrong on [-7 2 /] → -4
+
+-7 / 2 = -3, (-7i32).div_euclid(2) = -4, 7 / -2 = -3, 7i32.div_euclid(-2) = -3
+recursion 10⁵ levels: 100001
+stack 10⁵ levels: 100001
 ```
 
-JavaScript prints `7/7 ca đúng` ("7/7 cases passed") for both approaches.
+JavaScript prints `7/7 ca đúng` ("7/7 cases passed") for both approaches. PHP runs with `-d xdebug.mode=off` because Xdebug, when loaded, stops recursion at 512 levels.
 
 ## Misconceptions and common traps
 
@@ -314,6 +386,8 @@ JavaScript prints `7/7 ca đúng` ("7/7 cases passed") for both approaches.
 - **JS: forgetting to round.** `13 / 5` gives `2.6`, and the error spreads into later operations. `Math.trunc`, not `Math.floor`.
 - **Spotting operators by the first character, or by "not a digit".** `"-11"` starts with `-`. Compare the whole token with the set of four operators.
 - **Java: comparing strings with `==`.** `t == "+"` compares references; a token read from the array need not be the same object as the constant `"+"`. Use `equals` or a `switch` on the string.
+- **PHP: using `/` for the division.** `13 / 5` gives `2.6` (a float), not `2`. Under `declare(strict_types=1)`, passing that float to a function that takes `int` throws `TypeError`. Use `intdiv($a, $b)`. Recursion 10⁵ levels deep still runs because PHP 8.2 allocates call frames on the heap, but if the machine loads Xdebug, it stops at 512 levels (`xdebug.max_nesting_level`).
+- **Rust: assuming `div_euclid` is "proper" integer division.** `/` on `i32` already truncates toward 0, as the problem asks. `div_euclid` keeps the remainder non-negative, so `(-7).div_euclid(2)` gives `-4` while `7.div_euclid(-2)` still gives `-3`: the bug only shows when the dividend is negative. Also, `i32::MIN / -1` panics on overflow (the problem guarantees it never happens).
 - **Recursion with unbounded depth.** It passes the problem's limit (≤ 10⁴ tokens) and breaks on deeper data. An explicit stack has no such limit.
 
 ## Self-check questions
@@ -324,8 +398,8 @@ JavaScript prints `7/7 ca đúng` ("7/7 cases passed") for both approaches.
 > [!question]- Why does the swapped-operand version still pass `["2","1","+","3","*"]`?
 > The expression has only `+` and `*`, both commutative: `a + b = b + a`. Swapping only shows up with `-` and `/`.
 
-> [!question]- What does `-7 / 2` give in the five languages, for each way of writing it?
-> Java, Go (`int`): −3. Python `-7 // 2`: −4, `int(-7 / 2)`: −3. JS `-7 / 2`: −3.5; `Math.trunc`: −3; `Math.floor`: −4.
+> [!question]- What does `-7 / 2` give in the seven languages, for each way of writing it?
+> Java, Go (`int`), Rust (`i32`): −3. Python `-7 // 2`: −4, `int(-7 / 2)`: −3. JS `-7 / 2`: −3.5; `Math.trunc`: −3; `Math.floor`: −4. PHP `-7 / 2`: −3.5 (a float); `intdiv(-7, 2)`: −3. Rust `(-7).div_euclid(2)`: −4.
 
 > [!question]- Write `(1 + 2) × (3 − 4)` in RPN.
 > `1 2 + 3 4 - *`. Both subexpressions are written in full first, and the operator joining them comes last.

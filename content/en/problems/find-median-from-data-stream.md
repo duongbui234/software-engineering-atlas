@@ -144,9 +144,9 @@ The problem limits numbers to [−10⁵, 10⁵], so `a + b` does not overflow he
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-find-median-from-data-stream/find-median-stream.ts) · [Python](../code/neetcode-find-median-from-data-stream/find_median_stream.py) · [Go](../code/neetcode-find-median-from-data-stream/find_median_stream.go) · [Java](../code/neetcode-find-median-from-data-stream/find-median-stream.java) · [JavaScript](../code/neetcode-find-median-from-data-stream/find-median-stream.js)
+[TypeScript](../code/neetcode-find-median-from-data-stream/find-median-stream.ts) · [Python](../code/neetcode-find-median-from-data-stream/find_median_stream.py) · [Go](../code/neetcode-find-median-from-data-stream/find_median_stream.go) · [Java](../code/neetcode-find-median-from-data-stream/find-median-stream.java) · [JavaScript](../code/neetcode-find-median-from-data-stream/find-median-stream.js) · [PHP](../code/neetcode-find-median-from-data-stream/find-median-stream.php) · [Rust](../code/neetcode-find-median-from-data-stream/find_median_stream.rs)
 
-Each file runs 8 cases (Java adds a 9th at the `int` bounds): the problem example's sequence `1, 2, 3`, one number, descending, ascending, four 7s, negatives, an interleaved sequence of 11 numbers, and four numbers at the problem bounds ±10⁵. After **every** insert, `findMedian` is compared against the median computed by re-sorting. The TypeScript version also cross-checks 2,000 random sequences (mulberry32) and measures three approaches.
+Each of the original five files runs 8 cases (Java adds a 9th at the `int` bounds): the problem example's sequence `1, 2, 3`, one number, descending, ascending, four 7s, negatives, an interleaved sequence of 11 numbers, and four numbers at the problem bounds ±10⁵. After **every** insert, `findMedian` is compared against the median computed by re-sorting. The TypeScript version also cross-checks 2,000 random sequences (mulberry32) and measures three approaches.
 
 ```ts
 // Number min-heap: parent at i, children at 2i + 1 and 2i + 2. For a max-heap, push negated numbers.
@@ -330,6 +330,70 @@ class MedianFinder {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class MedianFinder
+{
+    private SplMaxHeap $lower;
+    private SplMinHeap $upper;
+
+    public function __construct()
+    {
+        $this->lower = new SplMaxHeap();
+        $this->upper = new SplMinHeap();
+    }
+
+    public function addNum(int $num): void
+    {
+        $this->lower->insert($num);
+        $this->upper->insert($this->lower->extract());
+        if ($this->lower->count() < $this->upper->count()) {
+            $this->lower->insert($this->upper->extract());
+        }
+    }
+
+    public function findMedian(): float
+    {
+        if ($this->lower->count() > $this->upper->count()) {
+            return (float) $this->lower->top();
+        }
+        return ($this->lower->top() + $this->upper->top()) / 2.0;
+    }
+}
+```
+
+```rust
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
+
+#[derive(Default)]
+struct MedianFinder {
+    lower: BinaryHeap<i32>,
+    upper: BinaryHeap<Reverse<i32>>,
+}
+
+impl MedianFinder {
+    fn add_num(&mut self, num: i32) {
+        self.lower.push(num);
+        self.upper.push(Reverse(self.lower.pop().unwrap()));
+        if self.lower.len() < self.upper.len() {
+            self.lower.push(self.upper.pop().unwrap().0);
+        }
+    }
+
+    fn find_median(&self) -> f64 {
+        let lower = f64::from(*self.lower.peek().unwrap());
+        if self.lower.len() > self.upper.len() {
+            return lower;
+        }
+        let upper = f64::from(self.upper.peek().unwrap().0);
+        (lower + upper) / 2.0
+    }
+}
+```
+
 
 Output of `node find-median-stream.ts`, including the sorted insert, two wrong versions, the count array, the random cross-check and the measurements:
 
@@ -393,6 +457,8 @@ DefaultSortFinder 7/8 cases correct; wrong on: interleaved → [6, 8, 2, 4, 5, 3
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 Python is slower than TypeScript in both approaches, but the shape is the same: `bisect.insort` finds the spot in C and shifts with `memmove`, still growing like n² (378.4 ms at 10⁵, 5,786.5 ms at 3·10⁵), while two heaps grow linearly (737.7 ms at 10⁶). Go and Java run 10⁶ inserts and queries in 331.5 ms and 280.2 ms.
+
+Both files check the median after each insertion. Rust converts both heap roots to `f64` before adding to avoid `i32` overflow. PHP prints `8/8 ca đúng` and Rust prints `9/9 ca đúng`.
 
 ## Misconceptions and common traps
 

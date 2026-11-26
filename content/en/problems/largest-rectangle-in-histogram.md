@@ -154,9 +154,9 @@ On random data, divide and conquer is only a few times slower than the stack. On
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.ts) · [Python](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.py) · [Go](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.go) · [Java](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.java) · [JavaScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.js)
+[TypeScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.ts) · [Python](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.py) · [Go](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.go) · [Java](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.java) · [JavaScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.js) · [PHP](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.php) · [Rust](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.rs)
 
-Each file has brute force, divide and conquer and the stack, and runs 9 cases (including increasing, decreasing and equal bars, and bars of height 0). Below are divide and conquer and the stack.
+Each of the original five files has brute force, divide and conquer and the stack, and runs 9 cases (including increasing, decreasing and equal bars, and bars of height 0). Below are divide and conquer and the stack.
 
 ```ts
 // Divide and conquer: the largest rectangle either spans the lowest bar (the full range wide), or lies entirely to its left/right.
@@ -290,6 +290,42 @@ function monotonicStack(h) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function largestRectangleArea(array $height): int {
+    $stack = [];
+    $best = 0;
+    $height[] = 0;
+    foreach ($height as $right => $current) {
+        while ($stack && $height[end($stack)] > $current) {
+            $h = $height[array_pop($stack)];
+            $left = $stack ? end($stack) : -1;
+            $best = max($best, $h * ($right - $left - 1));
+        }
+        $stack[] = $right;
+    }
+    return $best;
+}
+```
+
+```rust
+fn largest_rectangle_area(height: &[i32]) -> i32 {
+    let mut stack: Vec<usize> = Vec::new();
+    let mut best = 0;
+    for (right, current) in height.iter().copied().chain(std::iter::once(0)).enumerate() {
+        while stack.last().is_some_and(|&i| height[i] > current) {
+            let h = height[stack.pop().unwrap()];
+            let start = stack.last().map_or(0, |&i| i + 1);
+            best = best.max(h * (right - start) as i32);
+        }
+        stack.push(right);
+    }
+    best
+}
+```
+
 
 The TypeScript file also runs the two-array approach (`prevNextSmaller`: one pass finds the left side, one the right) and two wrong versions, then measures:
 
@@ -351,6 +387,8 @@ monotonicStack on the same data: 100000
 ```
 
 Go finishes 10⁵ levels of recursion (about 2.9 seconds including compilation, because it is still O(n²)). The Java line uses 10⁵ **equal** bars: the comparison `h[i] < h[m]` is strict, so m is always the first bar of the range and the recursion goes n levels deep, just as with increasing bars. JavaScript prints `9/9 ca đúng` ("9/9 cases passed") for all three approaches.
+
+The added versions use a monotonic stack. Rust appends the sentinel through an iterator, keeping the input slice intact. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

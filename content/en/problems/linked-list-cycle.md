@@ -247,7 +247,7 @@ With an even node count the hare goes `head → 3 → 5 → null` and stops clea
 
 The third version is remembering values instead of nodes, already run under Approach 1.
 
-### Under the five languages
+### Under the six languages
 
 | | Set of nodes | Comparing two pointers | Language-specific trap |
 |---|---|---|---|
@@ -255,6 +255,7 @@ The third version is remembering values instead of nodes, already run under Appr
 | Python | `set()`, plain objects hash by `id` | `is` | `@dataclass` defaults to `eq=True`: unhashable (`TypeError` on 9/10 cases), and `slow == fast` compares `(val, next)` so it recurses forever in an all-zero cycle (`RecursionError`) |
 | Go | `map[*ListNode]bool`, the key is the address | `==` on pointers | forgetting `fast.Next != nil` panics with a nil pointer on odd lists |
 | Java | `HashSet<ListNode>`, default `Object.equals` is `==` | `==` | a node class overriding `equals`/`hashCode` by `val` turns the HashSet into a set of values: wrong on `[1, 1, 1]`; Floyd uses `==` and stays correct |
+| PHP | `SplObjectStorage`, keyed by the object itself | `===` | `==` compares properties in declaration order and follows `->next` forever inside a cycle: Fatal `Nesting level too deep`; forgetting the `->next` check only warns and misreports a one-node list |
 
 The Python trap deserves a closer look, because many people write `ListNode` as a `@dataclass` to save lines. A dataclass by default generates an `__eq__` that compares each field and sets `__hash__ = None`. The consequences, run in the [Python file](../code/neetcode-linked-list-cycle/list_cycle.py): `set().add(node)` throws `TypeError: unhashable type`, and Floyd written as `slow == fast`, faced with two different nodes holding the same value, makes Python compare their `next`, then the `next` of the `next`… the cycle has no end, so it throws `RecursionError`. Writing `slow is fast` gets all 10/10 cases right even with dataclass nodes.
 
@@ -277,7 +278,7 @@ The other languages at 10⁶ nodes (no cycle / mid-list cycle): Python set 46.2 
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-linked-list-cycle/list-cycle.ts) · [Python](../code/neetcode-linked-list-cycle/list_cycle.py) · [Go](../code/neetcode-linked-list-cycle/list_cycle.go) · [Java](../code/neetcode-linked-list-cycle/list-cycle.java) · [JavaScript](../code/neetcode-linked-list-cycle/list-cycle.js)
+[TypeScript](../code/neetcode-linked-list-cycle/list-cycle.ts) · [Python](../code/neetcode-linked-list-cycle/list_cycle.py) · [Go](../code/neetcode-linked-list-cycle/list_cycle.go) · [Java](../code/neetcode-linked-list-cycle/list-cycle.java) · [JavaScript](../code/neetcode-linked-list-cycle/list-cycle.js) · [PHP](../code/neetcode-linked-list-cycle/list-cycle.php)
 
 Each file runs 10 shared cases: the three examples of the problem, an empty list, one node pointing to itself, `[1, 1, 1]` without a cycle (catches remembering values), even and odd acyclic lists (catch the missing `fast.next` check), the last node pointing to itself, and `[0, 0, 0, 0, 0]` with a cycle (catches the dataclass `==`). LeetCode gives `pos` to describe the cycle but does not pass it to the function; the files use `pos` only to build the list.
 
@@ -342,6 +343,19 @@ function hasCycleSet(head) {
     seen.add(cur);
   }
   return false;
+}
+```
+
+```php
+// Approach 1: SplObjectStorage is a set of objects by identity (the key is the object itself, not its value).
+function hasCycleSet(?ListNode $head): bool
+{
+    $seen = new SplObjectStorage();
+    for ($cur = $head; $cur !== null; $cur = $cur->next) {
+        if ($seen->contains($cur)) return true;
+        $seen->attach($cur);
+    }
+    return false;
 }
 ```
 
@@ -411,6 +425,20 @@ function hasCycleFloyd(head) {
     if (slow === fast) return true;
   }
   return false;
+}
+```
+
+```php
+// Approach 2: tortoise 1 step, hare 2 steps. === compares object identity.
+function hasCycleFloyd(?ListNode $head): bool
+{
+    $slow = $fast = $head;
+    while ($fast !== null && $fast->next !== null) {
+        $slow = $slow->next;
+        $fast = $fast->next->next;
+        if ($slow === $fast) return true;
+    }
+    return false;
 }
 ```
 
@@ -501,6 +529,24 @@ function detectCycle(head) {
     }
   }
   return null;
+}
+```
+
+```php
+// LC 142: after they meet, send one back to the head; both walk 1 step, and where they meet again is the cycle start.
+function detectCycle(?ListNode $head): ?ListNode
+{
+    $slow = $fast = $head;
+    while ($fast !== null && $fast->next !== null) {
+        $slow = $slow->next;
+        $fast = $fast->next->next;
+        if ($slow === $fast) {
+            $a = $head;
+            while ($a !== $slow) { $a = $a->next; $slow = $slow->next; }
+            return $a;
+        }
+    }
+    return null;
 }
 ```
 
@@ -596,6 +642,25 @@ object key of one node: ["[object Object]"]
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
+PHP (`php -d xdebug.mode=off list-cycle.php`). `wrongLooseEquals` writes `==` instead of `===`; each of its cases runs in a separate child process, because its error is a Fatal error that `try` cannot catch:
+
+```text
+hasCycleSet       10/10 cases correct
+hasCycleFloyd     10/10 cases correct
+hasCycleBrent     10/10 cases correct
+wrongValueSet     9/10 cases correct; wrong on duplicate values, no cycle → true
+wrongCompareFirst 7/10 cases correct; wrong on duplicate values, no cycle → true, even, no cycle → true, odd, no cycle → true
+wrongNoNextCheck  9/10 cases correct; wrong on example 3 from the problem → true; 3 warnings reading a property of null
+wrongLooseEquals  7/10 cases correct; wrong on example 1 from the problem → Fatal error: Nesting level too deep, example 2 from the problem → Fatal error: Nesting level too deep, all zeros, with cycle → Fatal error: Nesting level too deep
+detectCycle       10/10 cases correct (LC 142: returns the cycle start node)
+n = 100000, cycle in the middle: hasCycleSet 7.82 ms, hasCycleFloyd 1.05 ms, hasCycleBrent 2.22 ms
+n = 1000000, cycle in the middle: hasCycleSet 176.51 ms, hasCycleFloyd 44.74 ms, hasCycleBrent 55.95 ms
+```
+
+LeetCode offers no Rust for this problem: the input has a node that **two** pointers point at (the node before it and the last node of the cycle), and `Option<Box<ListNode>>` gives each node a single owner. That's why this page has six languages and no Rust tab.
+
+PHP shows two things. First, forgetting `$fast->next !== null` doesn't stop PHP: reading `->next` of `null` is only a warning and returns `null`, so on a one-node list `$slow` and `$fast` both become `null`, `null === null` is `true`, and the function reports a cycle. Second, `==` on objects compares each property in declaration order; the class here declares `$next` before `$val`, so PHP compares `->next` first, then `->next->next`…, and inside a cycle it dies with the Fatal error `Nesting level too deep`. The two self-pointing cases still pass because there `$slow` and `$fast` are the same object.
+
 ## Misconceptions and common traps
 
 - **"Seeing a value again means a cycle."** Values may repeat. A cycle means meeting **the same node** again.
@@ -605,6 +670,7 @@ object key of one node: ["[object Object]"]
 - **Checking only `fast`.** The hare crosses two arrows at once, so `fast.next` must be checked too; without it, odd lists throw.
 - **Equality overridden by value.** A Python dataclass, a hand-written `equals` in Java: the Set and `==` then compare values, not identity.
 - **Mutating the list to mark nodes** (for example setting `val` to a sentinel value). It works with O(1) memory, but it destroys the caller's data, and it is wrong if that sentinel value happens to be in the list.
+- **PHP: comparing two nodes with `==`.** `==` on objects compares property values, recursing through `->next`; on a list with a cycle it kills the whole process (`Nesting level too deep`) without throwing anything you can catch. Identity needs `===`, and the visited set is a `SplObjectStorage` (or an array keyed by `spl_object_id($node)`), not an array keyed by `$node->val`.
 
 ## Self-check questions
 

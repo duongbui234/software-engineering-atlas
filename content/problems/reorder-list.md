@@ -203,7 +203,7 @@ function wrongNoCut(head: ListNode | null): void {
 
 Không có `slow.next = null`, nút giữa vẫn trỏ sang nút đầu tiên của nửa sau cũ, mà nút đó sau khi đảo đã thành **đuôi** của nửa sau và được đan vào cạnh nút giữa. Với `1 2 3 4 5`: kết quả đọc được `1 5 2 4 3`, nhưng 3 vẫn trỏ sang 4, nên 3 → 4 → 3 thành vòng. Với `1 2 3 4` còn gọn hơn: lần đan cuối gán `3.next` bằng `2.next` cũ, mà `2.next` cũ chính là 3, nên nút 3 tự trỏ vào mình. File đọc kết quả với giới hạn 2n + 2 bước và thấy vòng ở 6/8 ca; chỉ hai ca 0 và 1 nút (không vào nhánh xử lý) là thoát. Lỗi này nguy hiểm vì hàm vẫn trả về bình thường; người gọi chỉ treo khi đi hết danh sách.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Nhớ các nút | Bẫy riêng |
 |---|---|---|
@@ -211,6 +211,8 @@ Không có `slow.next = null`, nút giữa vẫn trỏ sang nút đầu tiên c�
 | Python | `collections.deque`, `popleft()` và `pop()` O(1) | đảo bằng `prev, cur, cur.next = cur, cur.next, prev`: sai thứ tự gán, ném `AttributeError` ở 6/8 ca; dựng danh sách mới rồi gán `head = …`: người gọi không thấy gì đổi, sai 5/8 |
 | Go | slice `[]*ListNode` | slice tự nới gấp đôi nên tổng cấp phát lớn hơn n con trỏ: 44,9 MB cho 10⁶ nút |
 | Java | `ArrayDeque<ListNode>`, `pollFirst`/`pollLast` | cắt sai làm nửa sau dài hơn: `NullPointerException` ở độ dài lẻ |
+| PHP | mảng với hai chỉ số | `array_shift` đúng 8/8 nhưng đánh số lại cả mảng mỗi lần: 2,3 giây ở 10⁵ nút |
+| Rust | `Vec<Box<ListNode>>` sau khi tháo từng nút bằng `take()` | rùa và thỏ cần hai lần mượn chồng nhau; đếm độ dài rồi đi tới giữa |
 
 Bẫy gán nhiều biến của Python đáng giải thích. Câu lệnh `a, b, c = x, y, z` tính **hết vế phải trước**, rồi gán **từ trái sang phải**. Với `prev, cur, cur.next = cur, cur.next, prev`, vế phải là (nút hiện tại, nút kế, prev cũ); gán `prev` rồi gán `cur` thành nút kế, và tới lượt `cur.next` thì `cur` đã là **nút kế**: ta sửa nhầm mũi tên của nút khác. Tới nút cuối, `cur` thành `None` và `cur.next = …` ném `AttributeError`. Viết `cur.next, prev, cur = prev, cur, cur.next` (gán `cur.next` trước khi `cur` đổi) thì đúng; [file Python](../code/neetcode-reorder-list/reorder_list.py) dùng thứ tự này.
 
@@ -230,7 +232,7 @@ Các ngôn ngữ khác ở 10⁶ nút: Python ba bước 32,2 ms, deque 47,2 ms 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-reorder-list/reorder-list.ts) · [Python](../code/neetcode-reorder-list/reorder_list.py) · [Go](../code/neetcode-reorder-list/reorder_list.go) · [Java](../code/neetcode-reorder-list/reorder-list.java) · [JavaScript](../code/neetcode-reorder-list/reorder-list.js)
+[TypeScript](../code/neetcode-reorder-list/reorder-list.ts) · [Python](../code/neetcode-reorder-list/reorder_list.py) · [Go](../code/neetcode-reorder-list/reorder_list.go) · [Java](../code/neetcode-reorder-list/reorder-list.java) · [JavaScript](../code/neetcode-reorder-list/reorder-list.js) · [PHP](../code/neetcode-reorder-list/reorder-list.php) · [Rust](../code/neetcode-reorder-list/reorder_list.rs)
 
 Mỗi file chạy 8 ca chung: hai ví dụ của đề (`1 2 3 4` và `1 2 3 4 5`), danh sách 1, 2, 3 nút, danh sách rỗng, 6 nút, và `7 7 7 8 8` (giá trị trùng). Kết quả được đọc lại với giới hạn 2n + 2 bước để bắt vòng thay vì treo.
 
@@ -329,6 +331,66 @@ function reorderThreeSteps(head) {
 }
 ```
 
+```php
+// Cách 1: ba bước, O(1) bộ nhớ thêm.
+function reorderThreeSteps(?ListNode $head): void
+{
+    if ($head === null || $head->next === null) return;
+    // bước 1: slow dừng ở cuối nửa đầu
+    $slow = $fast = $head;
+    while ($fast->next !== null && $fast->next->next !== null) { $slow = $slow->next; $fast = $fast->next->next; }
+    // bước 2: cắt rồi đảo nửa sau
+    $second = reverse($slow->next);
+    $slow->next = null;
+    // bước 3: đan xen
+    $first = $head;
+    while ($second !== null) {
+        $n1 = $first->next;
+        $n2 = $second->next;
+        $first->next = $second;
+        $second->next = $n1;
+        $first = $n1;
+        $second = $n2;
+    }
+}
+```
+
+```rust
+// Cách 1: ba bước. Box không cho giữ hai con trỏ slow, fast cùng đi trên một danh sách
+// (fast mượn cả chuỗi, slow lại muốn sửa giữa chuỗi), nên bước 1 đếm độ dài rồi đi tới giữa.
+pub fn reorder_three_steps(head: &mut List) {
+    let mut n = 0;
+    let mut p = head.as_ref();
+    while let Some(x) = p {
+        n += 1;
+        p = x.next.as_ref();
+    }
+    if n < 3 {
+        return;
+    }
+    // bước 1: đi tới nút cuối của nửa đầu ((n + 1) / 2 nút)
+    let mut mid = head.as_mut().unwrap();
+    for _ in 1..(n + 1) / 2 {
+        mid = mid.next.as_mut().unwrap();
+    }
+    // bước 2: take() vừa cắt vừa lấy nửa sau, rồi đảo nó
+    let mut second = reverse(mid.next.take());
+    // bước 3: đan xen, tail là ô next cuối của kết quả
+    let mut first = head.take();
+    let mut tail = head;
+    while let Some(mut a) = first {
+        first = a.next.take();
+        *tail = Some(a);
+        tail = &mut tail.as_mut().unwrap().next;
+        if let Some(mut b) = second {
+            second = b.next.take();
+            *tail = Some(b);
+            tail = &mut tail.as_mut().unwrap().next;
+        }
+    }
+}
+```
+
 
 Hàm đảo dùng ở bước 2:
 
@@ -375,6 +437,30 @@ function reverse(head) {
   let prev = null, cur = head;
   while (cur !== null) { const nxt = cur.next; cur.next = prev; prev = cur; cur = nxt; }
   return prev;
+}
+```
+
+```php
+// Đảo một danh sách tại chỗ, trả đầu mới.
+function reverse(?ListNode $head): ?ListNode
+{
+    $prev = null;
+    $cur = $head;
+    while ($cur !== null) { $nxt = $cur->next; $cur->next = $prev; $prev = $cur; $cur = $nxt; }
+    return $prev;
+}
+```
+
+```rust
+// Đảo một danh sách: take() lấy phần còn lại ra trước khi lật mũi tên.
+fn reverse(mut cur: List) -> List {
+    let mut prev = None;
+    while let Some(mut node) = cur {
+        cur = node.next.take();
+        node.next = prev;
+        prev = Some(node);
+    }
+    prev
 }
 ```
 
@@ -475,6 +561,55 @@ function reorderArray(head) {
 }
 ```
 
+```php
+// Cách 2: chép các nút vào mảng rồi nối lại bằng hai chỉ số.
+function reorderArray(?ListNode $head): void
+{
+    $nodes = [];
+    for ($cur = $head; $cur !== null; $cur = $cur->next) $nodes[] = $cur;
+    $i = 0;
+    $j = count($nodes) - 1;
+    while ($i < $j) {
+        $nodes[$i]->next = $nodes[$j];
+        $i++;
+        if ($i === $j) break;
+        $nodes[$j]->next = $nodes[$i];
+        $j--;
+    }
+    if ($nodes) $nodes[$i]->next = null;
+}
+```
+
+```rust
+// Cách 2: tháo mọi nút vào một Vec, rồi nối lại từ cuối thứ tự L0, Ln, L1, …
+pub fn reorder_vec(head: &mut List) {
+    let mut nodes: Vec<Box<ListNode>> = vec![];
+    let mut cur = head.take();
+    while let Some(mut node) = cur {
+        cur = node.next.take();
+        nodes.push(node);
+    }
+    let mut order = Vec::with_capacity(nodes.len());
+    let (mut i, mut j) = (0usize, nodes.len());
+    while i < j {
+        order.push(i);
+        i += 1;
+        if i < j {
+            j -= 1;
+            order.push(j);
+        }
+    }
+    let mut slots: Vec<Option<Box<ListNode>>> = nodes.into_iter().map(Some).collect();
+    let mut result = None;
+    for &k in order.iter().rev() {
+        let mut node = slots[k].take().unwrap();
+        node.next = result;
+        result = Some(node);
+    }
+    *head = result;
+}
+```
+
 
 Kết quả `node reorder-list.ts`:
 
@@ -541,6 +676,33 @@ n nút      ba bước      mảng        shift()
 100000         0.58 ms     1.50 ms   297.41 ms
 ```
 
+PHP (`php -d xdebug.mode=off reorder-list.php`; cảnh báo đọc thuộc tính của `null` được đổi thành ngoại lệ). `reorderShift` lấy đầu mảng bằng `array_shift`:
+
+```text
+reorderThreeSteps   8/8 ca đúng
+reorderArray        8/8 ca đúng
+reorderShift        8/8 ca đúng
+wrongNoCut          2/8 ca đúng; sai ở [1,2,3,4] → vòng, [1,2,3,4,5] → vòng, [1,2] → vòng, [1,2,3] → vòng, [10,20,30,40,50,60] → vòng, [7,7,7,8,8] → vòng
+wrongSecondLonger   5/8 ca đúng; sai ở [1,2,3,4,5] → ném ErrorException, [1,2,3] → ném ErrorException, [7,7,7,8,8] → ném ErrorException
+
+n = 10000: reorderThreeSteps 0.34 ms, reorderArray 0.31 ms, reorderShift 20.10 ms
+n = 100000: reorderThreeSteps 7.28 ms, reorderArray 6.20 ms, reorderShift 2105.83 ms
+```
+
+Rust (`rustc --edition 2021 -O reorder_list.rs`):
+
+```text
+reorder_three_steps 8/8 ca đúng
+reorder_vec         8/8 ca đúng
+wrong_second_longer 5/8 ca đúng; sai ở [1,2,3,4,5] → panic (unwrap trên None), [1,2,3] → panic (unwrap trên None), [7,7,7,8,8] → panic (unwrap trên None)
+wrongNoCut: trình biên dịch từ chối (một nút không thể có hai chủ), không chạy được
+
+n = 100000: ba bước 0.97 ms, Vec các nút 1.09 ms
+n = 1000000: ba bước 6.07 ms, Vec các nút 10.55 ms
+```
+
+`array_shift` của PHP giống `shift()` của JavaScript: lấy phần tử đầu xong, PHP đánh số lại mọi phần tử còn lại, nên cả vòng thành O(n²): 2,3 giây ở 10⁵ nút so với 7,6 ms của hai chỉ số. Ở Rust, bản ba bước không dùng được hai con trỏ chạy nhanh chạy chậm như các ngôn ngữ kia, vì một `&mut` vào giữa danh sách và một con trỏ khác đi trên cùng danh sách không thể sống cùng lúc; đếm độ dài trước tốn thêm một lượt đi nhưng vẫn O(n) và O(1) bộ nhớ.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Phải tìm đúng điểm giữa, lệch một nút là sai."** Nửa đầu dài hơn nửa sau 1 hay 2 nút đều đúng. Chỉ sai khi nửa sau dài hơn nửa đầu.
@@ -550,6 +712,8 @@ n nút      ba bước      mảng        shift()
 - **Gán nhiều biến trong Python khi đảo danh sách.** Vế phải tính trước, vế trái gán từ trái sang phải: `cur.next` phải đứng trước `cur`.
 - **Dùng `shift()` làm hàng đợi trong JavaScript.** Đúng nhưng O(n) mỗi lần; dùng hai chỉ số.
 - **Chép giá trị thay vì nối lại nút.** Đọc giá trị ra mảng rồi ghi đè `val` theo thứ tự mới cho kết quả đúng khi in, nhưng không phải "sắp lại các nút": đề cấm sửa giá trị.
+- **PHP: `array_shift` để lấy đầu mảng.** Đúng 8/8, nhưng mỗi lần gọi PHP đánh số lại cả mảng: 2,3 giây ở 10⁵ nút. Dùng hai chỉ số, hoặc `SplDoublyLinkedList`/`SplQueue` nếu thật cần hàng đợi hai đầu.
+- **Rust: dịch nguyên văn rùa và thỏ.** Giữ `slow` là `&mut` để cắt ở giữa trong khi `fast` còn đọc cùng danh sách là hai lần mượn chồng nhau, trình biên dịch từ chối. Đếm độ dài rồi đi tới giữa; và bản "quên cắt" của các ngôn ngữ kia không thể viết ra, vì một nút không có hai chủ.
 
 ## Câu hỏi tự kiểm tra
 

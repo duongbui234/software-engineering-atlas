@@ -21,7 +21,7 @@ sources:
 > - Measured: the O(n²) brute force takes 234 ms at n = 16 000; two passes take 7 ms at n = 10⁶.
 
 > [!info] Context
-> LeetCode problem 238, the anchor problem of [[en/posts/2026-11-23-neetcode-prefix-suffix-encoding|station 3: Prefix, Suffix and Encoding]] on **the NeetCode line: Arrays and Strings**. The solutions come in TypeScript, Python, Go, Java and JavaScript. All you need to know is loops, arrays and multiplication.
+> LeetCode problem 238, the anchor problem of [[en/posts/2026-11-23-neetcode-prefix-suffix-encoding|station 3: Prefix, Suffix and Encoding]] on **the NeetCode line: Arrays and Strings**. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. All you need to know is loops, arrays and multiplication.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Prefix**: the start of the array, `nums[0..i-1]`. **Suffix**: the end, `nums[i+1..n-1]`.
@@ -132,7 +132,7 @@ The brute force follows the n² shape exactly (double n, about 4 times the time)
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-product-of-array-except-self/product-except-self.ts) · [Python](../code/neetcode-product-of-array-except-self/product_except_self.py) · [Go](../code/neetcode-product-of-array-except-self/product_except_self.go) · [Java](../code/neetcode-product-of-array-except-self/product-except-self.java) · [JavaScript](../code/neetcode-product-of-array-except-self/product-except-self.js)
+[TypeScript](../code/neetcode-product-of-array-except-self/product-except-self.ts) · [Python](../code/neetcode-product-of-array-except-self/product_except_self.py) · [Go](../code/neetcode-product-of-array-except-self/product_except_self.go) · [Java](../code/neetcode-product-of-array-except-self/product-except-self.java) · [PHP](../code/neetcode-product-of-array-except-self/product-except-self.php) · [Rust](../code/neetcode-product-of-array-except-self/product_except_self.rs) · [JavaScript](../code/neetcode-product-of-array-except-self/product-except-self.js)
 
 Each file has the brute force, zero-aware division, two helper arrays and the folded version, and runs 6 cases. Below are the two prefix-suffix versions.
 
@@ -259,6 +259,36 @@ function prefixSuffixInPlace(nums) {
 }
 ```
 
+```php
+function productExceptSelf(array $nums): array {
+    $n = count($nums);
+    $out = array_fill(0, $n, 1);
+    $left = 1;
+    for ($i = 0; $i < $n; $i++) { $out[$i] = $left; $left *= $nums[$i]; } // write first, multiply after
+    $right = 1;
+    for ($i = $n - 1; $i >= 0; $i--) { $out[$i] *= $right; $right *= $nums[$i]; }
+    return $out;
+}
+```
+
+```rust
+fn product_except_self(nums: Vec<i32>) -> Vec<i32> {
+    let n = nums.len();
+    let mut out = vec![1; n];
+    let mut left = 1;
+    for i in 0..n {
+        out[i] = left; // write first, multiply after
+        left *= nums[i];
+    }
+    let mut right = 1;
+    for i in (0..n).rev() {
+        out[i] *= right;
+        right *= nums[i];
+    }
+    out
+}
+```
+
 
 ```text
 $ node product-except-self.ts
@@ -291,7 +321,7 @@ prefix_suffix_arrays    6/6 cases passed
 prefix_suffix_in_place  6/6 cases passed
 ```
 
-The `[-0, -0, 0]` line is a floating-point quirk: `0 · (−1)` gives `-0`. It is still equal to `0` under `===` and prints as `0` through `JSON.stringify`, so LeetCode accepts it. Go, Java and JavaScript run the four approaches correctly and print `6/6 ca đúng` ("6/6 cases passed").
+The `[-0, -0, 0]` line is a floating-point quirk: `0 · (−1)` gives `-0`. It is still equal to `0` under `===` and prints as `0` through `JSON.stringify`, so LeetCode accepts it. Go, Java and JavaScript run the four approaches correctly and print `6/6 ca đúng` ("6/6 cases passed"). PHP and Rust also give `6/6` for the four correct approaches; PHP's naive division throws `DivisionByZeroError`, and Rust's returns `None` thanks to `checked_div` (without `checked_div` it panics).
 
 ## Misconceptions and common traps
 
@@ -300,6 +330,8 @@ The `[-0, -0, 0]` line is a floating-point quirk: `0 · (−1)` gives `-0`. It i
 - **Updating the running variable before writing.** `left *= nums[i]; out[i] = left` puts `nums[i]` itself into the product. Write first, multiply after.
 - **"O(1) space" counting the result array.** The problem's convention excludes `out`; the folded version uses only two variables.
 - **Overflow.** The problem guarantees prefix and suffix products fit in 32 bits. On data outside the problem, a Java `int` overflows silently; use `long` or `Math.multiplyExact` to get an error.
+- **PHP: `/` returns a float, and `int` overflows into `float`.** `24 / 5` gives `4.8`, so the division version must use `intdiv`; dividing by 0 throws `DivisionByZeroError` (the PHP file catches it in the naive division version). A product above `PHP_INT_MAX` raises no error but silently becomes a `float` and loses precision.
+- **Rust: division by zero and overflow both panic (in a debug build).** `total / x` with `x = 0` crashes the program; `checked_div` returns `None` instead. An `i32` product overflow panics in debug but wraps around in an `-O` build. The loop `for i in (0..n - 1).rev()` also panics when `n = 0`, because `n - 1` underflows `usize`; use `saturating_sub`.
 
 ## Self-check questions
 

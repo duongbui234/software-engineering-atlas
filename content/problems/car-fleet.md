@@ -136,9 +136,9 @@ Thời gian là phân số. Có ba cách so:
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-car-fleet/car-fleet.ts) · [Python](../code/neetcode-car-fleet/car_fleet.py) · [Go](../code/neetcode-car-fleet/car_fleet.go) · [Java](../code/neetcode-car-fleet/car-fleet.java) · [JavaScript](../code/neetcode-car-fleet/car-fleet.js)
+[TypeScript](../code/neetcode-car-fleet/car-fleet.ts) · [Python](../code/neetcode-car-fleet/car_fleet.py) · [Go](../code/neetcode-car-fleet/car_fleet.go) · [Java](../code/neetcode-car-fleet/car-fleet.java) · [JavaScript](../code/neetcode-car-fleet/car-fleet.js) · [PHP](../code/neetcode-car-fleet/car-fleet.php) · [Rust](../code/neetcode-car-fleet/car_fleet.rs)
 
-Mỗi file chạy 7 ca (file Java thêm ca tràn số). Dưới đây là cách sắp xếp với ngăn xếp và cách nhân chéo.
+Mỗi file trong năm bản đầu chạy 7 ca (file Java thêm ca tràn số). Dưới đây là cách sắp xếp với ngăn xếp và cách nhân chéo.
 
 ```ts
 // Sắp xếp theo vị trí giảm dần, rồi ngăn xếp thời gian tới đích của các đầu đoàn.
@@ -261,6 +261,47 @@ function sortCrossMultiply(target, position, speed) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function carFleet(int $target, array $position, array $speed): int {
+    $cars = array_combine($position, $speed);
+    krsort($cars, SORT_NUMERIC);
+    $fleets = 0;
+    [$lastDistance, $lastSpeed] = [0, 1];
+    foreach ($cars as $start => $velocity) {
+        $distance = $target - $start;
+        if ($distance * $lastSpeed > $lastDistance * $velocity) {
+            $fleets++;
+            [$lastDistance, $lastSpeed] = [$distance, $velocity];
+        }
+    }
+    return $fleets;
+}
+```
+
+```rust
+fn car_fleet(target: i32, position: &[i32], speed: &[i32]) -> usize {
+    let mut cars: Vec<_> = position
+        .iter()
+        .copied()
+        .zip(speed.iter().copied())
+        .collect();
+    cars.sort_unstable_by_key(|&(start, _)| std::cmp::Reverse(start));
+    let mut fleets = 0;
+    let (mut last_distance, mut last_speed) = (0_i64, 1_i64);
+    for (start, velocity) in cars {
+        let (distance, velocity) = (i64::from(target - start), i64::from(velocity));
+        if distance * last_speed > last_distance * velocity {
+            fleets += 1;
+            (last_distance, last_speed) = (distance, velocity);
+        }
+    }
+    fleets
+}
+```
+
 
 ```text
 $ node car-fleet.ts
@@ -305,6 +346,8 @@ sort_ascending       3/7 ca đúng; sai ở t=12 [10, 8, 0, 5, 3] t=100 [0, 2, 4
 ```
 
 File Go chạy thêm bản quên đổi sang `float64` (`intDivision`, 6/7: với `target = 10`, `(10 − 6) / 3` và `(10 − 8) / 2` đều thành 1 khi chia nguyên). JavaScript in `7/7 ca đúng` cho cả ba cách.
+
+Hai bản bổ sung so thời gian bằng tích chéo. Rust ép sang `i64` trước khi nhân vì tích có thể vượt `i32`; PHP dùng số nguyên 64 bit. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

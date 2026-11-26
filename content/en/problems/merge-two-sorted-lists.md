@@ -186,7 +186,7 @@ Each call takes exactly one node, so merging m + n nodes needs m + n stack frame
 
 Java's number changes between the first measurement and the later ones because while the code still runs in the interpreter each frame is larger; once the JIT compiles it, frames shrink and the same stack holds more levels. Python stops at 999 rather than 1,000 because the program itself already uses a few frames before it calls the merge.
 
-### Under the hood in five languages
+### Under the hood in seven languages
 
 | | Dummy node | Attach the rest | Specific trap |
 |---|---|---|---|
@@ -194,6 +194,8 @@ Java's number changes between the first measurement and the later ones because w
 | Python | `dummy = tail = ListNode()` | `tail.next = l1 or l2` | recursion breaks at 1,000 nodes; the tuple assignment `tail.next, l1 = l1, l1.next` is safe because the right side is evaluated in full before assigning |
 | Go | `dummy := ListNode{}` is a **value**, `tail := &dummy` | `if a != nil { tail.Next = a } else { tail.Next = b }` | declaring `var dummy *ListNode` (a nil pointer) makes writing `tail.Next` panic: *nil pointer dereference* |
 | Java | `new ListNode(0, null)` | `tail.next = (a != null) ? a : b` | recursion throws `StackOverflowError`; the threshold depends on JIT and the thread's stack size (`-Xss`) |
+| PHP | `new ListNode()` (objects travel by handle, assignment shares) | `$tail->next = $a ?? $b` | reading a property of `null` only warns; recursion over 10⁶ nodes still runs |
+| Rust | `Box::new(ListNode { val: 0, next: None })`, `tail = &mut dummy` | `tail.next = if a.is_some() { a } else { b }` | the node must be `take()`n out of the source before attaching; recursion overflows at 10⁶ nodes |
 
 ### Measurements
 
@@ -214,7 +216,7 @@ The other languages, dummy-node approach: Go 9.87 ms, Java 10.35 ms at m = n = 1
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-merge-two-sorted-lists/merge-two-lists.ts) · [Python](../code/neetcode-merge-two-sorted-lists/merge_two_lists.py) · [Go](../code/neetcode-merge-two-sorted-lists/merge_two_lists.go) · [Java](../code/neetcode-merge-two-sorted-lists/merge-two-lists.java) · [JavaScript](../code/neetcode-merge-two-sorted-lists/merge-two-lists.js)
+[TypeScript](../code/neetcode-merge-two-sorted-lists/merge-two-lists.ts) · [Python](../code/neetcode-merge-two-sorted-lists/merge_two_lists.py) · [Go](../code/neetcode-merge-two-sorted-lists/merge_two_lists.go) · [Java](../code/neetcode-merge-two-sorted-lists/merge-two-lists.java) · [JavaScript](../code/neetcode-merge-two-sorted-lists/merge-two-lists.js) · [PHP](../code/neetcode-merge-two-sorted-lists/merge-two-lists.php) · [Rust](../code/neetcode-merge-two-sorted-lists/merge_two_lists.rs)
 
 Each file runs 8 shared cases: the problem's three examples, an empty list on each side, negative numbers, all-equal values, and two interleaving lists of different lengths.
 
@@ -301,6 +303,39 @@ function mergeDummy(a, b) {
 }
 ```
 
+```php
+// A dummy node sits before the result head: no special case for the head.
+function mergeDummy(?ListNode $a, ?ListNode $b): ?ListNode
+{
+    $dummy = new ListNode();
+    $tail = $dummy;
+    while ($a !== null && $b !== null) {
+        if ($a->val <= $b->val) { $tail->next = $a; $a = $a->next; } // <= keeps a's node first on ties
+        else { $tail->next = $b; $b = $b->next; }
+        $tail = $tail->next;
+    }
+    $tail->next = $a ?? $b; // the rest is already sorted: attach the whole tail
+    return $dummy->next;
+}
+```
+
+```rust
+// Dummy node: tail is a &mut pointing at the last next slot of the result.
+fn merge_dummy(mut a: List, mut b: List) -> List {
+    let mut dummy = Box::new(ListNode { val: 0, next: None });
+    let mut tail = &mut dummy;
+    while let (Some(x), Some(y)) = (&a, &b) {
+        let src = if x.val <= y.val { &mut a } else { &mut b }; // <= keeps a's node first on ties
+        let mut node = src.take().unwrap();
+        *src = node.next.take(); // the source list moves forward one node
+        tail.next = Some(node);
+        tail = tail.next.as_mut().unwrap();
+    }
+    tail.next = if a.is_some() { a } else { b }; // attach the whole rest
+    dummy.next
+}
+```
+
 
 The recursive version:
 
@@ -365,6 +400,36 @@ function mergeRecursive(a, b) {
   if (a.val <= b.val) { a.next = mergeRecursive(a.next, b); return a; }
   b.next = mergeRecursive(a, b.next);
   return b;
+}
+```
+
+```php
+// Recursive: the smaller head goes first, followed by the merge of the rest.
+function mergeRecursive(?ListNode $a, ?ListNode $b): ?ListNode
+{
+    if ($a === null) return $b;
+    if ($b === null) return $a;
+    if ($a->val <= $b->val) { $a->next = mergeRecursive($a->next, $b); return $a; }
+    $b->next = mergeRecursive($a, $b->next);
+    return $b;
+}
+```
+
+```rust
+// Recursive: the smaller head goes first, followed by the merge of the rest.
+fn merge_recursive(a: List, b: List) -> List {
+    match (a, b) {
+        (None, r) | (r, None) => r,
+        (Some(mut x), Some(mut y)) => {
+            if x.val <= y.val {
+                x.next = merge_recursive(x.next.take(), Some(y));
+                Some(x)
+            } else {
+                y.next = merge_recursive(Some(x), y.next.take());
+                Some(y)
+            }
+        }
+    }
 }
 ```
 
@@ -447,6 +512,43 @@ wrongConcatDefaultSort 7/8 cases correct; wrong on [1,5,9]+[2,3,4,6,7,8,10] → 
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
+PHP (`php -d xdebug.mode=off merge-two-lists.php`; Xdebug in develop mode stops recursion at 512 levels). Here `wrongNoDummy` is caught thanks to a `set_error_handler` that turns warnings into exceptions:
+
+```text
+mergeDummy      8/8 cases correct
+mergeNoDummy    8/8 cases correct
+mergeRecursive  8/8 cases correct
+mergeCopy       8/8 cases correct
+concatSort      8/8 cases correct
+wrongNoDummy    5/8 cases correct; wrong on []+[] → ErrorException (Attempt to read property "val" on null), []+[0] → ErrorException (Attempt to read property "val" on null), [1,2,3]+[] → ErrorException (Attempt to read property "val" on null)
+wrongForgetTail 1/8 cases correct; wrong on [1,2,4]+[1,3,4] → [1,1,2,3,4], []+[0] → [], [5]+[1,2,3] → [1,2,3], [1,2,3]+[] → [], [-100,0,100]+[-100,-50] → [-100,-100,-50], [2,2,2]+[2,2] → [2,2,2], [1,5,9]+[2,3,4,6,7,8,10] → [1,2,3,4,5,6,7,8,9]
+wrongNoAdvance  3/8 cases correct; wrong on [1,2,4]+[1,3,4] → [4], [5]+[1,2,3] → [5], [-100,0,100]+[-100,-50] → [0,100], [2,2,2]+[2,2] → [2,2], [1,5,9]+[2,3,4,6,7,8,10] → [10]
+
+stability, [1,2,2] (a) with [2,3] (b):
+  <= : 1a 2a 2a 2b 3b
+
+recursion, total of 10000 nodes: finishes
+recursion, total of 100000 nodes: finishes
+recursion, total of 1000000 nodes: finishes
+```
+
+Rust (`rustc --edition 2021 -O merge_two_lists.rs`). The wrong version without a dummy calls `unwrap()` on `None` and panics, on the same three cases as the other languages:
+
+```text
+merge_dummy       8/8 cases correct
+merge_recursive   8/8 cases correct
+concat_sort       8/8 cases correct
+wrong_no_dummy    5/8 cases correct; wrong on []+[] → panic (unwrap on None), []+[0] → panic (unwrap on None), [1,2,3]+[] → panic (unwrap on None)
+wrong_forget_tail 1/8 cases correct; wrong on [1,2,4]+[1,3,4] → [1,1,2,3,4], []+[0] → [], [5]+[1,2,3] → [1,2,3], [1,2,3]+[] → [], [-100,0,100]+[-100,-50] → [-100,-100,-50], [2,2,2]+[2,2] → [2,2,2], [1,5,9]+[2,3,4,6,7,8,10] → [1,2,3,4,5,6,7,8,9]
+wrong_no_advance  3/8 cases correct; wrong on [1,2,4]+[1,3,4] → [4], [5]+[1,2,3] → [5], [-100,0,100]+[-100,-50] → [0,100], [2,2,2]+[2,2] → [2,2], [1,5,9]+[2,3,4,6,7,8,10] → [10]
+
+recursion, total of 10000 nodes: finishes
+recursion, total of 100000 nodes: finishes
+recursion, total of 1000000 nodes: process crashed (stack overflow)
+```
+
+The two new languages give very different recursion limits. PHP 8.2 keeps call frames on the heap, so a recursive merge of 10⁶ nodes still runs (as long as each arrow is cut before the list is dropped, see `freeList`). Rust uses the main thread's 8 MiB stack; `merge_recursive` is not a tail call (it still assigns `x.next` after the call), so 10⁵ nodes pass but 10⁶ overflows.
+
 ## Misconceptions and common traps
 
 - **"Merging means building a new list."** The problem wants the existing nodes relinked. Creating new nodes still gives the right values but costs m + n allocations, about 4 times slower at 10⁶ nodes.
@@ -456,6 +558,8 @@ wrongConcatDefaultSort 7/8 cases correct; wrong on [1,5,9]+[2,3,4,6,7,8,10] → 
 - **"Recursion is also O(m + n), so it's equivalent."** In time, yes; in memory, no: O(m + n) stack frames. Within the problem's limits (100 nodes) it passes; with lists of tens of thousands of nodes, JS, Python and Java all blow the stack.
 - **Returning `dummy` instead of `dummy.next`.** The result gets an extra 0 at the front.
 - **Go: `var dummy *ListNode`.** That is a nil pointer, not a node; you need `dummy := ListNode{}` or `&ListNode{}`.
+- **PHP: reading `->val` of `null` is only a warning.** PHP prints `Warning: Attempt to read property "val" on null`, returns `null` and carries on; only **writing** `$tail->next` throws an `Error`. So the version without a dummy runs a few more lines on garbage values before stopping. Check `=== null` first; don't rely on the error.
+- **Rust: holding a `&mut` to `tail` while reading `a` and `b`.** The habitual `tail.next = a; a = a.next` does not compile, because `a` has moved into `tail.next`. The right order is to `take()` the node out of the source list, put `node.next.take()` back into the source, and only then attach the node to `tail`.
 
 ## Self-check questions
 

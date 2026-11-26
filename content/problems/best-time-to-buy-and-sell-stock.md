@@ -20,7 +20,7 @@ sources:
 > - Bẫy: `max − min` bỏ qua thứ tự ngày (sai 3/6 ca). Trong JS, `Math.min(...prices)` còn ném `RangeError` với mảng 10⁶ phần tử.
 
 > [!info] Bối cảnh
-> Bài LeetCode 121, bài mở đầu của [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Đây là cửa sổ đơn giản nhất: không cần bảng đếm, chỉ cần nhớ một con số. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn chỉ cần biết vòng lặp và mảng.
+> Bài LeetCode 121, bài mở đầu của [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Đây là cửa sổ đơn giản nhất: không cần bảng đếm, chỉ cần nhớ một con số. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn chỉ cần biết vòng lặp và mảng.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Lời (profit)**: giá bán trừ giá mua. Không giao dịch thì lời 0.
@@ -109,7 +109,7 @@ TypeScript, giá ngẫu nhiên 0..10⁴, trung vị:
 
 Vét cạn đúng dáng n²: gấp đôi n thì gấp 4 thời gian. Ở n = 10⁵ của đề, nó cần khoảng 3,6 giây. Ở 10⁶, bản hai con trỏ nhanh hơn bản giá thấp nhất khoảng 4 lần: cả hai O(n), nhưng bản giá thấp nhất gọi `Math.max` và `Math.min` mỗi ngày, còn bản hai con trỏ chỉ so một lần ở những ngày giá giảm. Khác biệt nằm ở hằng số.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Giá trị khởi đầu của `minSoFar` | Bẫy riêng |
 |---|---|---|
@@ -117,10 +117,12 @@ Vét cạn đúng dáng n²: gấp đôi n thì gấp 4 thời gian. Ở n = 10�
 | Python | `math.inf` | `max(...)` trên dãy rỗng ném `ValueError`; vét cạn phải khởi đầu `best = 0` |
 | Go | `math.MaxInt` | dùng hàm có sẵn `min`, `max` (từ Go 1.21) |
 | Java | `Integer.MAX_VALUE` | `p − MAX_VALUE` không tràn vì giá ≥ 0; nếu giá có thể âm thì tràn |
+| PHP | `PHP_INT_MAX` | `max([])` trên mảng rỗng ném `ValueError` (PHP 8) |
+| Rust | `i32::MAX` | `iter().max()` trả `Option`, mảng rỗng thì `unwrap()` panic; bản build debug panic khi tràn số |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.ts) · [Python](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.py) · [Go](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.go) · [Java](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.java) · [JavaScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.js)
+[TypeScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.ts) · [Python](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.py) · [Go](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.go) · [Java](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.java) · [JavaScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.js) · [PHP](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.php) · [Rust](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.rs)
 
 Mỗi file có vét cạn, giá thấp nhất và hai con trỏ, chạy 6 ca. Dưới đây là hai cách O(n).
 
@@ -230,6 +232,53 @@ function twoPointers(prices) {
 }
 ```
 
+```php
+function runningMin(array $prices): int {
+    $minSoFar = PHP_INT_MAX;
+    $best = 0;
+    foreach ($prices as $p) {
+        // ngày đầu: p - PHP_INT_MAX là số âm (không tràn vì p ≥ 0), nên best vẫn là 0
+        $best = max($best, $p - $minSoFar);
+        $minSoFar = min($minSoFar, $p);
+    }
+    return $best;
+}
+
+function twoPointers(array $prices): int {
+    $left = 0;
+    $best = 0;
+    for ($right = 1; $right < count($prices); $right++) {
+        if ($prices[$right] < $prices[$left]) $left = $right;
+        else $best = max($best, $prices[$right] - $prices[$left]);
+    }
+    return $best;
+}
+```
+
+```rust
+fn running_min(prices: &[i32]) -> i32 {
+    let (mut min_so_far, mut best) = (i32::MAX, 0);
+    for &p in prices {
+        // p - i32::MAX không tràn vì p ≥ 0; ngày đầu ra số âm nên best vẫn là 0
+        best = best.max(p - min_so_far);
+        min_so_far = min_so_far.min(p);
+    }
+    best
+}
+
+fn two_pointers(prices: &[i32]) -> i32 {
+    let (mut left, mut best) = (0, 0);
+    for right in 1..prices.len() {
+        if prices[right] < prices[left] {
+            left = right;
+        } else {
+            best = best.max(prices[right] - prices[left]);
+        }
+    }
+    best
+}
+```
+
 
 ```text
 $ node best-time-stock.ts
@@ -258,7 +307,7 @@ Math.min(...mảng 100000) chạy được
 Math.min(...mảng 1000000): RangeError: Maximum call stack size exceeded
 ```
 
-Spread biến mỗi phần tử thành một đối số trên ngăn xếp, và ngăn xếp có giới hạn. Ở 10⁵ phần tử (giới hạn của đề) vẫn chạy trên máy này, nhưng giới hạn khác nhau giữa các engine; vòng lặp thường thì không bao giờ gặp lỗi này. Python, Go và Java in `6/6 ca đúng` cho cả ba cách.
+Spread biến mỗi phần tử thành một đối số trên ngăn xếp, và ngăn xếp có giới hạn. Ở 10⁵ phần tử (giới hạn của đề) vẫn chạy trên máy này, nhưng giới hạn khác nhau giữa các engine; vòng lặp thường thì không bao giờ gặp lỗi này. Python, Go, Java, PHP và Rust in `6/6 ca đúng` cho cả ba cách.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -267,6 +316,8 @@ Spread biến mỗi phần tử thành một đối số trên ngăn xếp, và 
 - **`Math.min(...prices)` trong JS.** Gọi hàm với hàng triệu đối số làm tràn ngăn xếp. Dùng vòng lặp hoặc `reduce`.
 - **Nghĩ phải tìm cả ngày mua lẫn ngày bán.** Đề chỉ hỏi số lời. Biết ngày bán thì ngày mua tốt nhất đã được xác định bởi giá thấp nhất trước đó.
 - **Lẫn với bài mua bán nhiều lần (LeetCode 122).** Ở bài đó cộng mọi đoạn tăng; ở bài này chỉ một giao dịch.
+- **PHP: `max()` / `min()` trên mảng rỗng.** Từ PHP 8 hai hàm này ném `ValueError` thay vì trả `false`. Đề có ít nhất một giá nên an toàn, nhưng bản sai `maxMinusMin` sẽ nổ nếu gọi với mảng rỗng.
+- **Rust: trừ với `i32::MAX` khi giá có thể âm.** Ở bản build debug, phép trừ tràn số làm chương trình panic; ở bản `-O` nó lặng lẽ quay vòng. Giá của đề ≥ 0 nên không tràn, nhưng an toàn hơn là khởi đầu `min_so_far = prices[0]`.
 
 ## Câu hỏi tự kiểm tra
 

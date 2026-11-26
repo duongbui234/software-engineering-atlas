@@ -20,7 +20,7 @@ sources:
 > - Bẫy: giữ chữ ở **đầu trái** thay vì chữ nhiều nhất (`"BAAAB"`, k = 2 ra 4 thay vì 5).
 
 > [!info] Bối cảnh
-> Bài LeetCode 424, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Bài này dùng lại bảng đếm 26 ô của [[posts/2026-11-22-neetcode-counting-keys|ga 2]] bên trong một cửa sổ co giãn như [[problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]]. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn cần biết vòng lặp, chuỗi và mảng đếm.
+> Bài LeetCode 424, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Bài này dùng lại bảng đếm 26 ô của [[posts/2026-11-22-neetcode-counting-keys|ga 2]] bên trong một cửa sổ co giãn như [[problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]]. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn cần biết vòng lặp, chuỗi và mảng đếm.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Đoạn con**: các ký tự liền nhau trong chuỗi.
@@ -121,7 +121,7 @@ TypeScript, chữ ngẫu nhiên, k = 2, trung vị:
 
 Ở 10⁶ ký tự, bỏ việc đếm lại nhanh hơn khoảng 60 lần: `Math.max(...count)` quét 26 ô và trải mảng thành 26 đối số mỗi lần gọi.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Đếm | Bẫy riêng |
 |---|---|---|
@@ -129,10 +129,12 @@ TypeScript, chữ ngẫu nhiên, k = 2, trung vị:
 | Python | `count[ord(ch) − 65]` | `max(count)` quét 26 ô; `Counter` tiện hơn nhưng chậm hơn mảng |
 | Go | `var count [26]int`, `s[i] − 'A'` | `s[i]` là byte: đúng vì đề chỉ có chữ hoa ASCII |
 | Java | `int[26]`, `s.charAt(i) − 'A'` | `char − char` ra `int`; không có hàm max cho mảng, phải tự viết |
+| PHP | `array_fill(0, 26, 0)`, `ord($s[$i]) − 65` | `max($count)` có sẵn cho mảng; `$s[$i]` là byte, đúng vì đề chỉ có chữ hoa ASCII |
+| Rust | `[0usize; 26]`, `b[i] − b'A'` | `count.iter().max()` trả `Option`; trừ trên `usize` mà ra âm thì panic |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.ts) · [Python](../code/neetcode-longest-repeating-character-replacement/character_replacement.py) · [Go](../code/neetcode-longest-repeating-character-replacement/character_replacement.go) · [Java](../code/neetcode-longest-repeating-character-replacement/character-replacement.java) · [JavaScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.js)
+[TypeScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.ts) · [Python](../code/neetcode-longest-repeating-character-replacement/character_replacement.py) · [Go](../code/neetcode-longest-repeating-character-replacement/character_replacement.go) · [Java](../code/neetcode-longest-repeating-character-replacement/character-replacement.java) · [JavaScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.js) · [PHP](../code/neetcode-longest-repeating-character-replacement/character-replacement.php) · [Rust](../code/neetcode-longest-repeating-character-replacement/character_replacement.rs)
 
 Mỗi file có vét cạn, cửa sổ co có đếm lại và cửa sổ không co, chạy 8 ca. Dưới đây là hai cách cửa sổ.
 
@@ -267,6 +269,63 @@ function windowStaleMax(s, k) {
 }
 ```
 
+```php
+function windowRecount(string $s, int $k): int {
+    $count = array_fill(0, 26, 0);
+    $left = 0;
+    $best = 0;
+    for ($right = 0; $right < strlen($s); $right++) {
+        $count[ord($s[$right]) - 65]++;
+        while ($right - $left + 1 - max($count) > $k) $count[ord($s[$left++]) - 65]--;
+        $best = max($best, $right - $left + 1);
+    }
+    return $best;
+}
+
+function windowStaleMax(string $s, int $k): int {
+    $count = array_fill(0, 26, 0);
+    $left = 0;
+    $maxFreq = 0;
+    for ($right = 0; $right < strlen($s); $right++) {
+        $maxFreq = max($maxFreq, ++$count[ord($s[$right]) - 65]);
+        if ($right - $left + 1 - $maxFreq > $k) $count[ord($s[$left++]) - 65]--; // "if", không phải "while"
+    }
+    return strlen($s) - $left;
+}
+```
+
+```rust
+fn window_recount(s: &str, k: usize) -> usize {
+    let b = s.as_bytes();
+    let mut count = [0usize; 26];
+    let (mut left, mut best) = (0, 0);
+    for right in 0..b.len() {
+        count[idx(b[right])] += 1;
+        while right - left + 1 - count.iter().max().unwrap() > k {
+            count[idx(b[left])] -= 1;
+            left += 1;
+        }
+        best = best.max(right - left + 1);
+    }
+    best
+}
+
+fn window_stale_max(s: &str, k: usize) -> usize {
+    let b = s.as_bytes();
+    let mut count = [0usize; 26];
+    let (mut left, mut max_freq) = (0, 0);
+    for right in 0..b.len() {
+        count[idx(b[right])] += 1;
+        max_freq = max_freq.max(count[idx(b[right])]);
+        if right - left + 1 - max_freq > k { // "if", không phải "while": cửa sổ trượt nguyên khối
+            count[idx(b[left])] -= 1;
+            left += 1;
+        }
+    }
+    b.len() - left
+}
+```
+
 
 File TypeScript chạy thêm bản sai giữ chữ ở đầu trái, rồi đếm số bước maxFreq cũ, đối chiếu với vét cạn và đo:
 
@@ -288,7 +347,7 @@ n          chữ   vét cạn   co + đếm lại   không co   (ms, trung vị)
 1000000      2         —         136.31       3.20
 ```
 
-Bản sai giữ chữ đầu trái hỏng ở `"BAAAB"`: cửa sổ bắt đầu bằng B nên nó tính phải đổi ba chữ A, dù giữ A chỉ cần đổi hai chữ B. Python, Go, Java và JavaScript in `8/8 ca đúng` cho cả ba cách.
+Bản sai giữ chữ đầu trái hỏng ở `"BAAAB"`: cửa sổ bắt đầu bằng B nên nó tính phải đổi ba chữ A, dù giữ A chỉ cần đổi hai chữ B. Python, Go, Java, JavaScript, PHP và Rust in `8/8 ca đúng` cho cả ba cách.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -297,6 +356,8 @@ Bản sai giữ chữ đầu trái hỏng ở `"BAAAB"`: cửa sổ bắt đầu
 - **"maxFreq phải giảm khi bỏ ký tự bên trái."** Không cần, vì chỉ một tần suất kỷ lục mới làm đáp án tăng. Giảm đúng thì phải quét lại 26 ô, chậm hơn 60 lần trong phép đo.
 - **Dùng `while` với maxFreq cũ rồi lấy `best = max(best, độ dài)`.** Vẫn đúng, nhưng thừa: với maxFreq không giảm, cửa sổ không bao giờ hỏng quá một ký tự, nên `if` là đủ và đáp án chính là `n − left`.
 - **Đếm bằng Map khi đề chỉ có chữ hoa.** Đúng nhưng chậm hơn mảng 26 ô; Map chỉ cần khi bảng chữ lớn hay không biết trước.
+- **PHP: truyền mảng vào hàm là bản sao.** Mảng PHP là giá trị (copy-on-write): nếu tách phần co cửa sổ ra hàm riêng nhận `$count`, hàm đó sửa bản sao chứ không sửa bảng đếm của mình. Phải truyền `&$count`.
+- **Rust: `right - left + 1 - max_freq` trên `usize`.** Nếu thứ tự phép tính làm kết quả trung gian âm (chẳng hạn viết `right - max_freq + 1 - left`), bản build debug panic vì tràn số dưới 0. Giữ `right - left + 1` trước, vì độ dài cửa sổ luôn ≥ `max_freq`.
 
 ## Câu hỏi tự kiểm tra
 

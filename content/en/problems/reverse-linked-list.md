@@ -123,7 +123,7 @@ The most obvious approach reads every value into an array, then walks again from
 - **Python tuple assignment in the wrong order.** `cur.next, prev, cur = prev, cur, cur.next` is correct, because the right side is evaluated in full first and then the targets are assigned left to right, so `cur.next` on the left is still the old node. Writing `prev, cur, cur.next = cur, cur.next, prev` assigns `cur` first, and `cur.next` on the left belongs to the **new** node; at the last node `cur` is already `None`, so assigning `None.next` raises `AttributeError`: 1/6 cases correct.
 - **Go, Java: checking `head.next` before `head`.** On an empty list this reads `.next` through a null pointer: Go panics with `nil pointer dereference`, Java throws `NullPointerException`. The order `head == null || head.next == null` is the safe one, because `||` stops as soon as the left side is true.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Node | "No node" | Deep recursion | Specific trap |
 |---|---|---|---|---|
@@ -132,10 +132,12 @@ The most obvious approach reads every value into an array, then walks again from
 | Go | a `struct` with `Next *ListNode` | `nil` | no practical limit | reading a field through a `nil` pointer panics; `var prev *ListNode` defaults to `nil` |
 | Java | nested `static class ListNode` | `null` | 29,470 levels | `NullPointerException`; the order inside `\|\|` matters |
 | JavaScript | `class ListNode` | `null` | about 15,650 levels | destructuring `[a, b, c] = [x, y, z]` is correct but builds a temporary array: 6–11 times slower at 10⁶ nodes |
+| PHP | `final class ListNode` with constructor-promoted properties | `null`; `?ListNode` makes the empty case explicit | no limit (frames live on the heap), unless Xdebug stops it at 512 | destroying a 10⁵-node chain segfaults |
+| Rust | `struct ListNode { val: i32, next: Option<Box<ListNode>> }` | `None`; reading it needs `match`/`while let` | 8 MiB stack; the tail-recursive version survives only thanks to `-O` | one owner per node: `take()` instead of plain assignment; the default Drop is recursive |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-reverse-linked-list/reverse-list.ts) · [Python](../code/neetcode-reverse-linked-list/reverse_list.py) · [Go](../code/neetcode-reverse-linked-list/reverse_list.go) · [Java](../code/neetcode-reverse-linked-list/reverse-list.java) · [JavaScript](../code/neetcode-reverse-linked-list/reverse-list.js)
+[TypeScript](../code/neetcode-reverse-linked-list/reverse-list.ts) · [Python](../code/neetcode-reverse-linked-list/reverse_list.py) · [Go](../code/neetcode-reverse-linked-list/reverse_list.go) · [Java](../code/neetcode-reverse-linked-list/reverse-list.java) · [JavaScript](../code/neetcode-reverse-linked-list/reverse-list.js) · [PHP](../code/neetcode-reverse-linked-list/reverse-list.php) · [Rust](../code/neetcode-reverse-linked-list/reverse_list.rs)
 
 Each file runs 6 cases: the problem's two examples, an empty list, one node, duplicate values, and 5,000 nodes (the problem's limit). The TypeScript version also cross-checks 2,000 random lists (generated with mulberry32), measures the recursion depth, and measures time and memory.
 
@@ -254,6 +256,62 @@ function reverseRecursive(head) {
 }
 ```
 
+```php
+// Iterative: keep $next before flipping $cur->next.
+function reverseIterative(?ListNode $head): ?ListNode
+{
+    $prev = null;
+    $cur = $head;
+    while ($cur !== null) {
+        $next = $cur->next; // keep the rest before cutting
+        $cur->next = $prev; // flip one pointer
+        $prev = $cur;
+        $cur = $next;
+    }
+    return $prev;
+}
+
+// Recursive: reverse the part after head, then attach head at the end.
+function reverseRecursive(?ListNode $head): ?ListNode
+{
+    if ($head === null || $head->next === null) return $head;
+    $newHead = reverseRecursive($head->next);
+    $head->next->next = $head;
+    $head->next = null;
+    return $newHead;
+}
+```
+
+```rust
+// Iterative: take() moves the rest out of node.next and leaves None.
+fn reverse_iterative(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    let mut prev = None;
+    let mut cur = head;
+    while let Some(mut node) = cur {
+        cur = node.next.take(); // keep the rest
+        node.next = prev; // flip one pointer
+        prev = Some(node);
+    }
+    prev
+}
+
+// Recursive: a Box cannot have two nodes pointing at it, so
+// "head.next.next = head" is impossible. Pass the reversed part down as a parameter.
+fn reverse_recursive(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    fn go(cur: Option<Box<ListNode>>, prev: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+        match cur {
+            None => prev,
+            Some(mut node) => {
+                let rest = node.next.take();
+                node.next = prev;
+                go(rest, Some(node))
+            }
+        }
+    }
+    go(head, None)
+}
+```
+
 
 Output of `node --expose-gc reverse-list.ts` (the `--expose-gc` flag is only needed for the final memory line):
 
@@ -319,6 +377,37 @@ n = 10⁶: loop 3.42 ms, destructuring 21.18 ms
 
 Go shows that recursion is not free even when it does not overflow: 10⁶ nodes take 46 ms against 1.6 ms for the loop, because each level allocates a frame and the goroutine's stack has to grow (be copied to a larger region) many times.
 
+PHP (`php -d xdebug.mode=off reverse-list.php`; Xdebug in develop mode stops recursion at 512 levels). Recursion 10⁶ levels deep still runs, but letting PHP destroy a 10⁵-node list crashes the whole process:
+
+```text
+reverseIterative  6/6 cases correct
+reverseRecursive  6/6 cases correct
+reverseViaArray   6/6 cases correct
+wrongLoseNext     2/6 cases correct; wrong at example 1 → [1], example 2 → [1], duplicate values → [3], 5000 nodes (problem limit) → [0]
+wrongNoNullHead   2/6 cases correct; wrong at example 1 → CYCLE, example 2 → CYCLE, duplicate values → CYCLE, 5000 nodes (problem limit) → CYCLE
+n = 10000: recursion finishes; letting PHP destroy the list finishes
+n = 100000: recursion finishes; letting PHP destroy the list process crashed, exit code 139
+n = 1000000: recursion finishes; letting PHP destroy the list process crashed, exit code 139
+n = 100000: iterative 2.40 ms, copy to array 3.13 ms (PHP 8.2.34)
+n = 1000000: iterative 45.37 ms, copy to array 99.69 ms (PHP 8.2.34)
+```
+
+Rust (`rustc --edition 2021 -O reverse_list.rs`). The two wrong versions don't get past the compiler; the default Drop of a 10⁶-node list overflows the stack:
+
+```text
+reverse_iterative 6/6 cases correct
+reverse_recursive 6/6 cases correct
+reverse_via_vec   6/6 cases correct
+wrongLoseNext, wrongNoNullHead: rejected by the compiler, cannot run
+n = 10000: recursion finishes; letting Rust drop the list finishes
+n = 100000: recursion finishes; letting Rust drop the list finishes
+n = 1000000: recursion finishes; letting Rust drop the list process crashed (stack overflow)
+n = 100000: iterative 0.23 ms
+n = 1000000: iterative 2.45 ms
+```
+
+Both PHP and Rust destroy a chain of nodes with hidden recursion: freeing the first node frees the second, then the third… My code isn't recursive, but the cleanup is. The problem's limit is 5,000 nodes, so this never triggers there, but measuring at 10⁶ means cutting each arrow by hand (`freeList`, `drop_iterative` in the files). The Rust recursive version survives 10⁶ levels only because `-O` turns the tail call `go(rest, …)` into a loop; a build without `-O` crashes from 10⁵.
+
 ## Misconceptions and common traps
 
 - **"Reversing means swapping values."** You only change arrows. Swapping values also prints the right order, but it costs O(n) memory and breaks every other pointer into the nodes.
@@ -327,6 +416,8 @@ Go shows that recursion is not free even when it does not overflow: 10⁶ nodes 
 - **Forgetting to cut the tail in the recursive version.** Without `head.next = null`, the old first node and the second node point at each other. Any `while (p)` loop that reads the result runs forever.
 - **Order in multiple assignment.** Python and JavaScript evaluate the right side first but assign the left side one target at a time. A target like `cur.next` reads `cur` **at the time of the assignment**, not at the start of the statement.
 - **"After reversing, the GC has something to clean up."** No node is dropped: every node is still in the new list. Only the array-copy approach creates garbage (the array itself).
+- **PHP: "no recursion, no crash".** Setting `$h = null` on a 10⁵-node list is enough to segfault PHP 8.2: the reference counter frees one node, which frees the next, nested. A long list must have each `next` cut by hand before it is dropped.
+- **Rust: translating `head.next.next = head` word for word.** With `Option<Box<ListNode>>` each node has exactly one owner, so that line does not compile. The right move is to `take()` the rest and attach `prev`, as in the iterative version; the recursive version also has to pass `prev` down.
 
 ## Self-check questions
 

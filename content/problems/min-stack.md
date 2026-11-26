@@ -22,7 +22,7 @@ sources:
 > - Java có hai bẫy riêng: so `peek()` của hai `Deque<Integer>` bằng `==` (sai từ 128 trở lên), và lưu hiệu `x − min` bằng `int` (tràn ở biên 32 bit).
 
 > [!info] Bối cảnh
-> Bài LeetCode 155, thuộc [[posts/2026-11-23-neetcode-stack|ga 6: Ngăn xếp]] trên **tuyến NeetCode: Mảng và chuỗi**. Đây là bài **thiết kế**: viết một lớp, không phải một hàm. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn cần biết [[concepts/stack|ngăn xếp]] (push, pop) và cách viết một lớp có phương thức.
+> Bài LeetCode 155, thuộc [[posts/2026-11-23-neetcode-stack|ga 6: Ngăn xếp]] trên **tuyến NeetCode: Mảng và chuỗi**. Đây là bài **thiết kế**: viết một lớp, không phải một hàm. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn cần biết [[concepts/stack|ngăn xếp]] (push, pop) và cách viết một lớp có phương thức.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Ngăn xếp**: thêm và lấy ở cùng một đầu (đỉnh), vào sau ra trước. Xem [[concepts/stack|Stack]].
@@ -124,7 +124,7 @@ Từ 20 000 lên 40 000, n gấp đôi thì cách duyệt chậm gấp 3,9 lần
 
 Bản trước của trang ghi cách duyệt mất 4 giây ở 40 000. Số đó đo trên dữ liệu của bộ sinh ngẫu nhiên cũ (`seed * 1103515245` tính bằng số thực), vốn mất chính xác và lặp lại sau khoảng 10 nghìn giá trị; vì sao dữ liệu lặp lại làm vòng duyệt chậm thêm 5 lần thì mình chưa đo. File giờ dùng bộ sinh mulberry32 (mọi phép nhân qua `Math.imul`).
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Một tầng của cách cặp | Bẫy riêng |
 |---|---|---|
@@ -132,10 +132,12 @@ Bản trước của trang ghi cách duyệt mất 4 giây ở 40 000. Số đó
 | Python | tuple `(x, min)` | `min(self.a)` gọn nhưng là O(n); int không tràn |
 | Go | struct `pair{val, min}`, nằm liền trong slice | `int32` tràn quay vòng lặng lẽ; `int` là 64 bit trên máy 64 bit |
 | Java | `int[2]` trong `ArrayDeque<int[]>` | `a.pop() == mins.peek()` so **tham chiếu** hai `Integer`; hiệu `int` tràn |
+| PHP | mảng `[$x, $min]` | `int` 64 bit nên hiệu không tràn; đọc ngăn rỗng chỉ báo warning và trả `null` |
+| Rust | tuple `(i32, i32)`, nằm liền trong `Vec` | hiệu của hai `i32` phải lưu bằng `i64`; ngăn rỗng thì `unwrap()` panic |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-min-stack/min-stack.ts) · [Python](../code/neetcode-min-stack/min_stack.py) · [Go](../code/neetcode-min-stack/min_stack.go) · [Java](../code/neetcode-min-stack/min-stack.java) · [JavaScript](../code/neetcode-min-stack/min-stack.js)
+[TypeScript](../code/neetcode-min-stack/min-stack.ts) · [Python](../code/neetcode-min-stack/min_stack.py) · [Go](../code/neetcode-min-stack/min_stack.go) · [Java](../code/neetcode-min-stack/min-stack.java) · [JavaScript](../code/neetcode-min-stack/min-stack.js) · [PHP](../code/neetcode-min-stack/min-stack.php) · [Rust](../code/neetcode-min-stack/min_stack.rs)
 
 Mỗi file chạy 6 chuỗi thao tác, gồm min lặp lại, hai biên 32 bit và giá trị lớn hơn 127. Dưới đây là cách cặp và cách hai ngăn xếp.
 
@@ -291,6 +293,66 @@ class TwoStackMinStack {
 }
 ```
 
+```php
+class PairMinStack implements MinStackLike {
+    private array $a = [];
+    function push(int $x): void {
+        $m = $this->a ? min($x, $this->a[count($this->a) - 1][1]) : $x;
+        $this->a[] = [$x, $m];
+    }
+    function pop(): void { array_pop($this->a); }
+    function top(): int { return $this->a[count($this->a) - 1][0]; }
+    function getMin(): int { return $this->a[count($this->a) - 1][1]; }
+}
+
+class TwoStackMinStack implements MinStackLike {
+    protected array $a = [];
+    protected array $mins = [];
+    function push(int $x): void {
+        $this->a[] = $x;
+        if (!$this->mins || $x <= $this->mins[count($this->mins) - 1]) $this->mins[] = $x;
+    }
+    function pop(): void {
+        // so int với int bằng ===: không có bẫy tham chiếu như Integer của Java
+        if (array_pop($this->a) === $this->mins[count($this->mins) - 1]) array_pop($this->mins);
+    }
+    function top(): int { return $this->a[count($this->a) - 1]; }
+    function getMin(): int { return $this->mins[count($this->mins) - 1]; } // ngăn rỗng: đọc khóa -1, PHP chỉ báo warning rồi trả null
+}
+```
+
+```rust
+#[derive(Default)]
+struct PairMinStack { a: Vec<(i32, i32)> }
+impl MinStackLike for PairMinStack {
+    fn push(&mut self, x: i32) {
+        let m = self.a.last().map_or(x, |&(_, m)| m.min(x));
+        self.a.push((x, m));
+    }
+    fn pop(&mut self) { self.a.pop(); }
+    fn top(&self) -> i32 { self.a.last().unwrap().0 }
+    fn get_min(&self) -> i32 { self.a.last().unwrap().1 }
+}
+
+#[derive(Default)]
+struct TwoStackMinStack { a: Vec<i32>, mins: Vec<i32>, strict: bool }
+impl MinStackLike for TwoStackMinStack {
+    fn push(&mut self, x: i32) {
+        self.a.push(x);
+        let take = match self.mins.last() {
+            None => true,
+            Some(&m) => if self.strict { x < m } else { x <= m }, // strict = bản sai thiếu dấu =
+        };
+        if take { self.mins.push(x); }
+    }
+    fn pop(&mut self) {
+        if self.a.pop() == self.mins.last().copied() { self.mins.pop(); } // so hai Option<i32> theo giá trị
+    }
+    fn top(&self) -> i32 { *self.a.last().unwrap() }
+    fn get_min(&self) -> i32 { *self.mins.last().unwrap() } // ngăn phụ rỗng: unwrap panic
+}
+```
+
 
 File TypeScript chạy cả bốn cách, bản thiếu dấu bằng, rồi đo:
 
@@ -340,7 +402,25 @@ DiffMinStack      6/6 ca đúng
 Diff32MinStack    5/6 ca đúng; sai ở: [biên 32 bit → [-2147483648 -2147483647 -2147483648 -2147483648]]
 ```
 
-JavaScript in `6/6 ca đúng` cho cả ba cách.
+JavaScript in `6/6 ca đúng` cho cả ba cách. PHP và Rust chạy cả bốn cách cùng bản thiếu dấu bằng:
+
+```text
+$ php min-stack.php
+ScanMinStack        6/6 ca đúng
+PairMinStack        6/6 ca đúng
+TwoStackMinStack    6/6 ca đúng
+DiffMinStack        6/6 ca đúng
+StrictLessMinStack  5/6 ca đúng; sai ở: min lặp lại (ErrorException: Undefined array key -1)
+
+$ ./min_stack
+ScanMinStack        6/6 ca đúng
+PairMinStack        6/6 ca đúng
+TwoStackMinStack    6/6 ca đúng
+DiffMinStack        6/6 ca đúng
+StrictLessMinStack  5/6 ca đúng; sai ở: min lặp lại (panic)
+```
+
+Ở PHP, mặc định đọc ngăn phụ rỗng chỉ in warning rồi trả `null`; file đổi warning thành ngoại lệ để thấy chỗ hỏng. Bản Rust của cách hiệu lưu `i64`, nên ca biên 32 bit đúng.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -349,6 +429,8 @@ JavaScript in `6/6 ca đúng` cho cả ba cách.
 - **Java: so `Integer` bằng `==`.** Đúng với mọi test dùng số nhỏ, sai từ 128. Dùng `equals`, hoặc so sau khi gán ra `int`.
 - **Lưu hiệu bằng kiểu 32 bit.** Hiệu của hai số 32 bit cần 33 bit. Java dùng `long`; Go dùng `int` (64 bit); C/C++ cũng phải dùng kiểu rộng hơn.
 - **"Cách lưu hiệu luôn tốt hơn vì ít bộ nhớ."** Nó khó đọc hơn, dễ tràn, và đo ở trên không nhanh hơn rõ rệt so với hai ngăn xếp.
+- **PHP: đọc phần tử cuối của mảng rỗng không ném lỗi.** `$mins[count($mins) - 1]` với mảng rỗng là khóa `-1`: PHP in warning "Undefined array key" rồi trả `null` và chạy tiếp. Với kiểu trả `int` và `strict_types`, lỗi chỉ lộ ra ở chỗ khác, xa chỗ gây ra.
+- **Rust: cách hiệu với `i32`.** `2147483647 - (-2147483648)` vượt `i32`: bản build debug panic, bản `-O` quay vòng giống `int32` của Go. Lưu hiệu và min bằng `i64`, chỉ ép về `i32` khi trả kết quả.
 
 ## Câu hỏi tự kiểm tra
 

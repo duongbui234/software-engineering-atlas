@@ -134,9 +134,9 @@ Ba cách O(n) chênh nhau tới 5 lần: hai mảng phải cấp phát và ghi 2
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-trapping-rain-water/trapping-rain-water.ts) · [Python](../code/neetcode-trapping-rain-water/trapping_rain_water.py) · [Go](../code/neetcode-trapping-rain-water/trapping_rain_water.go) · [Java](../code/neetcode-trapping-rain-water/trapping-rain-water.java) · [JavaScript](../code/neetcode-trapping-rain-water/trapping-rain-water.js)
+[TypeScript](../code/neetcode-trapping-rain-water/trapping-rain-water.ts) · [Python](../code/neetcode-trapping-rain-water/trapping_rain_water.py) · [Go](../code/neetcode-trapping-rain-water/trapping_rain_water.go) · [Java](../code/neetcode-trapping-rain-water/trapping-rain-water.java) · [JavaScript](../code/neetcode-trapping-rain-water/trapping-rain-water.js) · [PHP](../code/neetcode-trapping-rain-water/trapping-rain-water.php) · [Rust](../code/neetcode-trapping-rain-water/trapping_rain_water.rs)
 
-Mỗi file có cả bốn cách và chạy 8 ca, gồm mảng rỗng, một cột, dãy tăng và dãy giảm. Dưới đây là max tiền tố và hai con trỏ.
+Mỗi file trong năm bản đầu có cả bốn cách và chạy 8 ca, gồm mảng rỗng, một cột, dãy tăng và dãy giảm. Dưới đây là max tiền tố và hai con trỏ.
 
 ```ts
 // Hai mảng max tiền tố và max hậu tố: O(n) thời gian, O(n) bộ nhớ.
@@ -278,6 +278,46 @@ function twoPointers(h) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function trap(array $height): int {
+    $left = 0;
+    $right = count($height) - 1;
+    $leftMax = $rightMax = $water = 0;
+    while ($left <= $right) {
+        if ($leftMax <= $rightMax) {
+            $leftMax = max($leftMax, $height[$left]);
+            $water += $leftMax - $height[$left++];
+        } else {
+            $rightMax = max($rightMax, $height[$right]);
+            $water += $rightMax - $height[$right--];
+        }
+    }
+    return $water;
+}
+```
+
+```rust
+fn trap(height: &[i32]) -> i32 {
+    let (mut left, mut right) = (0, height.len()); // [left, right)
+    let (mut left_max, mut right_max, mut water) = (0, 0, 0);
+    while left < right {
+        if left_max <= right_max {
+            left_max = left_max.max(height[left]);
+            water += left_max - height[left];
+            left += 1;
+        } else {
+            right -= 1;
+            right_max = right_max.max(height[right]);
+            water += right_max - height[right];
+        }
+    }
+    water
+}
+```
+
 
 File TypeScript chạy thêm một bản sai rồi đo:
 
@@ -297,6 +337,8 @@ n          vét cạn  max tiền tố  hai con trỏ  ngăn xếp   (ms, trung 
 ```
 
 Bản sai tính max hai bên **không** gồm cột i và quên chặn ở 0: một cột cao hơn mọi cột hai bên cho ra nước âm, và các số âm trừ vào tổng. Python, Go, Java và JavaScript in `8/8 ca đúng` cho cả bốn cách.
+
+Hai bản bổ sung dùng hai con trỏ. Biên phải trong Rust là biên loại trừ, nên mảng rỗng kết thúc ngay. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

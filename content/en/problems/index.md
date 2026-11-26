@@ -1,6 +1,6 @@
 ---
 title: NeetCode 150 Problem Set
-description: "All 150 problems of NeetCode 150, grouped into 6 lines and 39 stations by technique. Written problems have an in-depth page in five languages; the rest are greyed out and link to the original problem on LeetCode."
+description: "All 150 problems of NeetCode 150, grouped into 6 lines and 39 stations by technique. Written problems have an in-depth page in seven languages; the rest are greyed out and link to the original problem on LeetCode."
 lang: en
 ---
 

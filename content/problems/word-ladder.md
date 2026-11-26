@@ -205,9 +205,9 @@ Số đo thời gian đổi theo máy và theo lần chạy; cột "số từ l�
 
 ## Ví dụ chạy được
 
-Mỗi file chạy cùng 8 ca: ví dụ `cold → warm`, đích không có trong danh sách, không có đường, từ một chữ, từ đầu nằm trong danh sách, và ca `aa → bb` làm DFS đi vòng. File còn đối chiếu bốn cách đúng trên 2 000 từ điển ngẫu nhiên, đo hai từ điển 5 000 từ, và đếm lượt đưa vào hàng đợi khi gạch muộn. Bên dưới là ba cách nhanh; Cách 1 và các bản sai nằm trong file đầy đủ.
+Mỗi file trong năm bản đầu chạy cùng 8 ca: ví dụ `cold → warm`, đích không có trong danh sách, không có đường, từ một chữ, từ đầu nằm trong danh sách, và ca `aa → bb` làm DFS đi vòng. File còn đối chiếu bốn cách đúng trên 2 000 từ điển ngẫu nhiên, đo hai từ điển 5 000 từ, và đếm lượt đưa vào hàng đợi khi gạch muộn. Bên dưới là ba cách nhanh; Cách 1 và các bản sai nằm trong file đầy đủ.
 
-[TypeScript](../code/neetcode-word-ladder/word-ladder.ts) · [Python](../code/neetcode-word-ladder/word_ladder.py) · [Go](../code/neetcode-word-ladder/word_ladder.go) · [Java](../code/neetcode-word-ladder/word-ladder.java) · [JavaScript](../code/neetcode-word-ladder/word-ladder.js)
+[TypeScript](../code/neetcode-word-ladder/word-ladder.ts) · [Python](../code/neetcode-word-ladder/word_ladder.py) · [Go](../code/neetcode-word-ladder/word_ladder.go) · [Java](../code/neetcode-word-ladder/word-ladder.java) · [JavaScript](../code/neetcode-word-ladder/word-ladder.js) · [PHP](../code/neetcode-word-ladder/word-ladder.php) · [Rust](../code/neetcode-word-ladder/word_ladder.rs)
 
 ```ts
 // Cách 2: BFS, sinh hàng xóm bằng cách đổi từng chữ thành a..z. O(n·L·26).
@@ -720,6 +720,63 @@ function ladderBidirectional(begin, end, wordList) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function ladderLength(string $begin, string $end, array $words): int {
+    $unseen = array_fill_keys($words, true);
+    if (!isset($unseen[$end])) return 0;
+    unset($unseen[$begin]);
+    $queue = new SplQueue();
+    $queue->enqueue([$begin, 1]);
+    while (!$queue->isEmpty()) {
+        [$word, $distance] = $queue->dequeue();
+        if ($word === $end) return $distance;
+        for ($i = 0; $i < strlen($word); $i++) {
+            $neighbor = $word;
+            for ($ch = ord('a'); $ch <= ord('z'); $ch++) {
+                $neighbor[$i] = chr($ch);
+                if (isset($unseen[$neighbor])) {
+                    unset($unseen[$neighbor]);
+                    $queue->enqueue([$neighbor, $distance + 1]);
+                }
+            }
+        }
+    }
+    return 0;
+}
+```
+
+```rust
+use std::collections::{HashSet, VecDeque};
+
+fn ladder_length(begin: &str, end: &str, words: &[&str]) -> usize {
+    let mut unseen: HashSet<_> = words.iter().map(|word| word.as_bytes()).collect();
+    if !unseen.contains(end.as_bytes()) {
+        return 0;
+    }
+    unseen.remove(begin.as_bytes());
+    let mut queue = VecDeque::from([(begin.as_bytes().to_vec(), 1)]);
+    while let Some((mut word, distance)) = queue.pop_front() {
+        if word == end.as_bytes() {
+            return distance;
+        }
+        for i in 0..word.len() {
+            let original = word[i];
+            for letter in b'a'..=b'z' {
+                word[i] = letter;
+                if unseen.remove(word.as_slice()) {
+                    queue.push_back((word.clone(), distance + 1));
+                }
+            }
+            word[i] = original;
+        }
+    }
+    0
+}
+```
+
 Kết quả chạy `node word-ladder.ts` (bốn bản còn lại in cùng các dòng ca đúng, cùng số từ lấy ra; chỉ thời gian khác):
 
 ```text
@@ -744,6 +801,8 @@ từ điển thưa, 5000 từ: bkarpa → gstmeb
 từ điển dày, đánh dấu lúc lấy ra: đáp án 9, 19234 lượt đưa vào hàng đợi; đánh dấu lúc đưa vào: đáp án 9, tối đa 5000 lượt
 sinh 780000 từ ứng viên (68466 = 68466 lần trúng): split/join 85.5 ms, ghép slice 30.6 ms
 ```
+
+Hai bản bổ sung dùng BFS đổi từng chữ. Cả hai đánh dấu từ ngay lúc đưa vào hàng đợi để tránh xử lý lặp. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

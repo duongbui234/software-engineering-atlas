@@ -22,7 +22,7 @@ sources:
 > - Hai bản sai chạy thật: không có nút giả thì xóa chính đầu (n = L) ném `TypeError` / `NullPointerException` / panic (5/8); `fast` đi trước n thay vì n + 1 thì xóa nhầm nút kế bên (0/8).
 
 > [!info] Bối cảnh
-> Bài LeetCode 19 của [[posts/2026-11-24-neetcode-linked-list|ga 1: Con trỏ trên danh sách liên kết]] trong **tuyến NeetCode: Cấu trúc liên kết**. Nó dùng cùng nút giả với [[problems/merge-two-sorted-lists|Merge Two Sorted Lists]], và cùng ý "hai con trỏ đi khác nhịp" với [[problems/linked-list-cycle|Linked List Cycle]] và bước tìm điểm giữa của [[problems/reorder-list|Reorder List]]; ở đây hai con trỏ đi **cùng tốc độ nhưng lệch nhau một khoảng cố định**. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn chỉ cần biết vòng lặp và con trỏ `next`.
+> Bài LeetCode 19 của [[posts/2026-11-24-neetcode-linked-list|ga 1: Con trỏ trên danh sách liên kết]] trong **tuyến NeetCode: Cấu trúc liên kết**. Nó dùng cùng nút giả với [[problems/merge-two-sorted-lists|Merge Two Sorted Lists]], và cùng ý "hai con trỏ đi khác nhịp" với [[problems/linked-list-cycle|Linked List Cycle]] và bước tìm điểm giữa của [[problems/reorder-list|Reorder List]]; ở đây hai con trỏ đi **cùng tốc độ nhưng lệch nhau một khoảng cố định**. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn chỉ cần biết vòng lặp và con trỏ `next`.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Danh sách liên kết đơn**: mỗi nút chỉ biết nút **sau** nó, không biết nút trước. Xem [[concepts/linked-list|Linked List]].
@@ -144,7 +144,7 @@ function wrongNoDummy(head: ListNode | null, n: number): ListNode | null {
 ```
 
 
-Bắt đầu cả hai con trỏ từ `head` và cho `fast` đi n bước. Khi n = L, `fast` đi hết danh sách thành `null`, và `fast.next` ném lỗi. Bản này qua 5/8 ca, sai đúng ba ca xóa đầu, ở cả năm ngôn ngữ: `TypeError` (TS, JS), `AttributeError` (Python), panic *nil pointer dereference* (Go), `NullPointerException` (Java). Sửa bằng một câu `if (!fast) return head.next` cũng được, nhưng nút giả bỏ hẳn trường hợp riêng đó.
+Bắt đầu cả hai con trỏ từ `head` và cho `fast` đi n bước. Khi n = L, `fast` đi hết danh sách thành `null`, và `fast.next` ném lỗi. Bản này qua 5/8 ca, sai đúng ba ca xóa đầu, ở cả bảy ngôn ngữ: `TypeError` (TS, JS), `AttributeError` (Python), panic *nil pointer dereference* (Go), `NullPointerException` (Java), `ErrorException` (PHP, khi biến Warning thành ngoại lệ), panic khi `unwrap()` một `None` (Rust). Sửa bằng một câu `if (!fast) return head.next` cũng được, nhưng nút giả bỏ hẳn trường hợp riêng đó.
 
 ### "Một lượt" có tiết kiệm bước không?
 
@@ -176,7 +176,7 @@ Cách "mảng các nút" (một lượt, lưu mọi nút vào mảng rồi lấy
 
 Sau `prev.next = prev.next.next`, nút bị bỏ qua không còn con trỏ nào từ danh sách trỏ tới. Ở JavaScript, Python, Go và Java, bộ gom rác sẽ thu hồi nó khi không còn tham chiếu nào khác (ví dụ một biến bạn còn giữ). Không cần `delete` hay `free`. Ở C hay C++ thì phải tự giải phóng nút đó, nếu không sẽ rò bộ nhớ.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Nút giả | Lỗi khi đọc `.next` của null | Ghi chú |
 |---|---|---|---|
@@ -184,10 +184,12 @@ Sau `prev.next = prev.next.next`, nút bị bỏ qua không còn con trỏ nào 
 | Python | `ListNode(0, head)` | `AttributeError: 'NoneType' object has no attribute 'next'` | `dummy = slow = fast = ListNode(0, head)`: ba tên cùng trỏ một nút, đúng ý muốn ở đây |
 | Go | `&ListNode{0, head}` | panic: *nil pointer dereference* | trả `dummy.Next`, không phải `dummy` |
 | Java | `new ListNode(0, head)` | `NullPointerException` | Java 14 trở lên in rõ biểu thức nào là null trong thông báo lỗi |
+| PHP | `new ListNode(0, $head)` | chỉ một Warning *Attempt to read property "next" on null*, rồi chạy tiếp với `null` | file biến Warning thành `ErrorException` bằng `set_error_handler` |
+| Rust | `Box::new(ListNode { val: 0, next: head })` | không có null: `None.unwrap()` là panic | bản một lượt cần một bản sao cho `fast`, vì không được vừa mượn đọc vừa mượn ghi cùng danh sách |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.ts) · [Python](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.py) · [Go](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.go) · [Java](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.java) · [JavaScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.js)
+[TypeScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.ts) · [Python](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.py) · [Go](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.go) · [Java](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.java) · [JavaScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.js) · [PHP](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.php) · [Rust](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.rs)
 
 Mỗi file chạy 8 ca chung: ba ví dụ của đề, ba ca xóa đầu (n = L), một ca xóa đuôi (n = 1), và hai danh sách dài hơn.
 
@@ -254,6 +256,45 @@ function onePass(head, n) {
   while (fast) { fast = fast.next; slow = slow.next; }
   slow.next = slow.next.next;
   return dummy.next;
+}
+```
+
+```php
+// Một lượt: fast đi trước n + 1 bước từ nút giả, rồi hai con trỏ cùng đi.
+function onePass(?ListNode $head, int $n): ?ListNode
+{
+    $dummy = new ListNode(0, $head);
+    $fast = $dummy;
+    $slow = $dummy; // cùng trỏ một đối tượng: object trong PHP đi theo handle, không bị chép
+    for ($i = 0; $i <= $n; $i++) $fast = $fast->next;
+    while ($fast !== null) {
+        $fast = $fast->next;
+        $slow = $slow->next;
+    }
+    $slow->next = $slow->next->next;
+    return $dummy->next;
+}
+```
+
+```rust
+// Một lượt: fast (chỉ đọc) và slow (ghi) cùng nằm trên một danh sách thì Rust từ chối,
+// vì không được vừa mượn đọc vừa mượn ghi cùng một dữ liệu. Cách an toàn: fast chạy
+// trên một bản sao. Vẫn là một lượt trên danh sách thật, nhưng tốn O(L) bộ nhớ cho bản sao.
+fn one_pass(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+    let mut dummy = Box::new(ListNode { val: 0, next: head });
+    let copy = dummy.clone();
+    let mut fast: &Option<Box<ListNode>> = &copy.next;
+    for _ in 0..n {
+        fast = &fast.as_ref().unwrap().next; // fast đi trước n + 1 bước (tính cả nút giả)
+    }
+    let mut slow = &mut dummy;
+    while let Some(f) = fast {
+        fast = &f.next;
+        slow = slow.next.as_mut().unwrap();
+    }
+    let removed = slow.next.take().unwrap();
+    slow.next = removed.next;
+    dummy.next
 }
 ```
 
@@ -325,6 +366,41 @@ function twoPass(head, n) {
   for (let i = 0; i < len - n; i++) prev = prev.next;
   prev.next = prev.next.next;
   return dummy.next;
+}
+```
+
+```php
+// Hai lượt: đếm độ dài L, rồi đi L − n bước từ nút giả để đứng ngay trước nút cần xóa.
+function twoPass(?ListNode $head, int $n): ?ListNode
+{
+    $len = 0;
+    for ($p = $head; $p !== null; $p = $p->next) $len++;
+    $dummy = new ListNode(0, $head);
+    $prev = $dummy;
+    for ($i = 0; $i < $len - $n; $i++) $prev = $prev->next;
+    $prev->next = $prev->next->next; // bỏ qua nút thứ n từ cuối
+    return $dummy->next;
+}
+```
+
+```rust
+// Hai lượt: đếm độ dài L bằng tham chiếu chỉ đọc, rồi đi L − n bước từ nút giả
+// bằng tham chiếu ghi (&mut). Hai lượt không chồng nhau nên borrow checker cho qua.
+fn two_pass(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+    let mut len = 0;
+    let mut p = &head;
+    while let Some(node) = p {
+        len += 1;
+        p = &node.next;
+    }
+    let mut dummy = Box::new(ListNode { val: 0, next: head });
+    let mut prev = &mut dummy;
+    for _ in 0..len - n {
+        prev = prev.next.as_mut().unwrap();
+    }
+    let removed = prev.next.take().unwrap();
+    prev.next = removed.next; // bỏ qua nút thứ n từ cuối
+    dummy.next
 }
 ```
 
@@ -401,14 +477,36 @@ onePass      8/8 ca đúng
 wrongNoDummy 5/8 ca đúng; sai ở [1] n=1 → TypeError, [1,2] n=2 → TypeError, [1,2,3] n=3 → TypeError
 ```
 
+`php -d xdebug.mode=off remove-nth.php`:
+
+```text
+twoPass      8/8 ca đúng
+onePass      8/8 ca đúng
+nodeArray    8/8 ca đúng
+wrongNoDummy 5/8 ca đúng; sai ở [1] n=1 → ErrorException, [1,2] n=2 → ErrorException, [1,2,3] n=3 → ErrorException
+wrongGap     0/8 ca đúng; sai ở [1,2,3,4,5] n=2 → [1,2,3,4], [1] n=1 → [1], [1,2] n=1 → [1,2], [1,2] n=2 → [1], [1,2,3] n=3 → [1,3], [1,2,3] n=1 → [1,2,3], [5,6,7,8] n=3 → [5,6,8], [1,2,3,4,5,6,7,8,9,10] n=5 → [1,2,3,4,5,6,8,9,10]
+```
+
+`rustc --edition 2021 -O remove_nth.rs && ./remove_nth`:
+
+```text
+two_pass       8/8 ca đúng
+one_pass       8/8 ca đúng
+value_vec      8/8 ca đúng
+wrong_no_dummy 5/8 ca đúng; sai ở [1] n=1 → panic, [1,2] n=2 → panic, [1,2,3] n=3 → panic
+wrong_gap      0/8 ca đúng; sai ở [1,2,3,4,5] n=2 → [1,2,3,4], [1] n=1 → [1], [1,2] n=1 → [1,2], [1,2] n=2 → [1], [1,2,3] n=3 → [1,3], [1,2,3] n=1 → [1,2,3], [5,6,7,8] n=3 → [5,6,8], [1,2,3,4,5,6,7,8,9,10] n=5 → [1,2,3,4,5,6,8,9,10]
+```
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Một lượt thì đi ít bước hơn hai lượt."** Số lần theo `.next` gần như bằng nhau (lệch 1 ở L = 10⁶). Một lượt chỉ đan xen hai lần đi; nó nhanh hơn trong thực tế vì cache (và vì số vòng lặp ở Python), không phải vì ít việc hơn.
 - **Khoảng cách n thay vì n + 1.** `slow` dừng ở chính nút cần xóa thay vì nút trước nó; mọi ca đều lệch một ô.
-- **Không có nút giả.** Xóa đầu (n = L) làm `fast` thành null; ba trong tám ca vỡ ở cả năm ngôn ngữ.
+- **Không có nút giả.** Xóa đầu (n = L) làm `fast` thành null; ba trong tám ca vỡ ở cả bảy ngôn ngữ.
 - **Trả `head` thay vì `dummy.next`.** Khi vừa xóa đầu, `head` vẫn trỏ nút cũ đã bị bỏ, nên kết quả sai. Luôn trả `dummy.next`.
-- **"Phải giải phóng nút bị xóa."** Ở năm ngôn ngữ này thì không: bộ gom rác lo. Chỉ C, C++ mới cần.
+- **"Phải giải phóng nút bị xóa."** Ở bảy ngôn ngữ này thì không: bộ gom rác lo (Rust thì tự hủy nút khi biến sở hữu nó ra khỏi phạm vi). Chỉ C, C++ mới cần.
 - **Đếm vị trí từ 0 hay từ 1.** Đề đếm từ 1 ("nút thứ n từ cuối", n = 1 là nút cuối). Lệch một chỗ là ra bản `wrongGap`.
+- **PHP: đọc `->next` của `null` không dừng chương trình.** PHP 8 chỉ phát Warning rồi trả `null`. Không bắt Warning thì bản thiếu nút giả trả `[1]` cho ca `[1] n=1` (sai) thay vì báo lỗi; file dùng `set_error_handler` để lỗi lộ ra.
+- **Rust: `fast` và `slow` trên cùng danh sách.** Viết thẳng như TS thì `fast` giữ một tham chiếu đọc trong lúc `slow` cần tham chiếu ghi, borrow checker từ chối. Bản hai lượt tách hai lần mượn ra; bản một lượt cho `fast` chạy trên `clone()` của danh sách.
 
 ## Câu hỏi tự kiểm tra
 

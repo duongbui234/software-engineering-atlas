@@ -715,7 +715,244 @@ check(buildRanges(preorder, (value) => {
 console.log(`so sánh quét: ${comparisons}, lượt tra chỉ mục: ${lookups}`)
 ```
 
-Download the files [TypeScript](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.ts) · [Python](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.py) · [Go](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.go) · [Java](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.java) · [JavaScript](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.js).
+```php
+<?php
+// LC 105: dựng cây từ tiền thứ tự và trung thứ tự. Ba cách: quét, tra chỉ mục, ngăn xếp.
+// Chạy: php rebuild.php (máy có Xdebug thì thêm -d xdebug.mode=off)
+declare(strict_types=1);
+
+final class TreeNode {
+    public ?TreeNode $left = null;
+    public ?TreeNode $right = null;
+    public function __construct(public int $value) {}
+}
+
+// $findRoot($value, $lo) trả vị trí của gốc trong trung thứ tự.
+function buildRanges(array $preorder, callable $findRoot): ?TreeNode {
+    $next = 0;
+    // $next phải đi vào closure bằng tham chiếu (&): bản sao thì mọi nút đều lấy $preorder[0].
+    $build = function (int $lo, int $hi) use (&$build, &$next, $preorder, $findRoot): ?TreeNode {
+        if ($lo === $hi) return null;
+        $root = new TreeNode($preorder[$next++]);
+        $mid = $findRoot($root->value, $lo);
+        $root->left = $build($lo, $mid);
+        $root->right = $build($mid + 1, $hi);
+        return $root;
+    };
+    return $build(0, count($preorder));
+}
+
+function scanFrom(array $inorder, int $value, int $lo): int {
+    while ($inorder[$lo] !== $value) $lo++;
+    return $lo;
+}
+
+function byScan(array $preorder, array $inorder): ?TreeNode {
+    return buildRanges($preorder, fn(int $value, int $lo): int => scanFrom($inorder, $value, $lo));
+}
+
+function byIndex(array $preorder, array $inorder): ?TreeNode {
+    $index = array_flip($inorder); // giá trị → vị trí; giá trị trùng thì vị trí sau đè vị trí trước
+    return buildRanges($preorder, fn(int $value, int $lo): int => $index[$value]);
+}
+
+function byStack(array $preorder, array $inorder): ?TreeNode {
+    if (count($preorder) === 0) return null;
+    $root = new TreeNode($preorder[0]);
+    $pending = [$root];
+    $nextIn = 0;
+
+    for ($i = 1; $i < count($preorder); $i++) {
+        $child = new TreeNode($preorder[$i]);
+        $parent = end($pending);
+
+        if ($parent->value !== $inorder[$nextIn]) {
+            $parent->left = $child;
+        } else {
+            while ($pending && end($pending)->value === $inorder[$nextIn]) {
+                $parent = array_pop($pending);
+                $nextIn++;
+            }
+            $parent->right = $child;
+        }
+
+        $pending[] = $child;
+    }
+
+    return $root;
+}
+
+function check(?TreeNode $root, array $preorder, array $inorder): void {
+    $before = [];
+    $between = [];
+    $pending = [];
+    while ($root !== null || $pending) {
+        while ($root !== null) {
+            $before[] = $root->value;
+            $pending[] = $root;
+            $root = $root->left;
+        }
+        $root = array_pop($pending);
+        $between[] = $root->value;
+        $root = $root->right;
+    }
+    if ($before !== $preorder || $between !== $inorder) throw new RuntimeException("cây sai");
+}
+
+$cases = [
+    [[-3000], [-3000]],
+    [[8, 14, 5, -2, 4, 0], [14, 5, 8, 4, -2, 0]],
+    [[1, 2, 3, 4], [4, 3, 2, 1]],
+    [[1, 2, 3, 4], [1, 2, 3, 4]],
+    [[1, -2, 3, -4], [-2, -4, 3, 1]],
+];
+
+$ok = 0;
+foreach (['byScan', 'byIndex', 'byStack'] as $rebuild) {
+    foreach ($cases as [$preorder, $inorder]) {
+        check($rebuild($preorder, $inorder), $preorder, $inorder);
+        $ok++;
+    }
+}
+
+$straight = range(1, 3000);
+foreach ([$straight, array_reverse($straight)] as $inorder) {
+    check(byStack($straight, $inorder), $straight, $inorder);
+    $ok++;
+}
+echo "$ok/" . (count($cases) * 3 + 2) . " ca đúng\n";
+```
+
+```rust
+// LC 105: dựng cây từ tiền thứ tự và trung thứ tự. Ba cách: quét, tra chỉ mục, ngăn xếp.
+// Chạy: rustc --edition 2021 -O rebuild.rs && ./rebuild
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
+
+// Hình dạng nút giống LeetCode.
+pub struct TreeNode {
+    pub val: i32,
+    pub left: Option<Rc<RefCell<TreeNode>>>,
+    pub right: Option<Rc<RefCell<TreeNode>>>,
+}
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+fn new_node(val: i32) -> Rc<RefCell<TreeNode>> {
+    Rc::new(RefCell::new(TreeNode { val, left: None, right: None }))
+}
+
+// find_root(value, lo) trả vị trí của gốc trong trung thứ tự.
+fn build_ranges(preorder: &[i32], find_root: &dyn Fn(i32, usize) -> usize) -> Node {
+    fn build(lo: usize, hi: usize, next: &mut usize, preorder: &[i32], find_root: &dyn Fn(i32, usize) -> usize) -> Node {
+        if lo == hi {
+            return None;
+        }
+        let value = preorder[*next];
+        *next += 1;
+        let root = new_node(value);
+        let mid = find_root(value, lo);
+        let left = build(lo, mid, next, preorder, find_root);
+        let right = build(mid + 1, hi, next, preorder, find_root);
+        root.borrow_mut().left = left;
+        root.borrow_mut().right = right;
+        Some(root)
+    }
+    let mut next = 0;
+    build(0, preorder.len(), &mut next, preorder, find_root)
+}
+
+fn scan_from(inorder: &[i32], value: i32, mut lo: usize) -> usize {
+    while inorder[lo] != value {
+        lo += 1;
+    }
+    lo
+}
+
+fn by_scan(preorder: &[i32], inorder: &[i32]) -> Node {
+    build_ranges(preorder, &|value, lo| scan_from(inorder, value, lo))
+}
+
+fn by_index(preorder: &[i32], inorder: &[i32]) -> Node {
+    let index: HashMap<i32, usize> = inorder.iter().enumerate().map(|(i, &v)| (v, i)).collect();
+    build_ranges(preorder, &|value, _lo| index[&value])
+}
+
+fn by_stack(preorder: &[i32], inorder: &[i32]) -> Node {
+    if preorder.is_empty() {
+        return None;
+    }
+    let root = new_node(preorder[0]);
+    let mut pending = vec![root.clone()];
+    let mut next_in = 0;
+
+    for &value in &preorder[1..] {
+        let child = new_node(value);
+        // clone Rc của đỉnh: giữ tham chiếu vào `pending` thì không pop được bên dưới
+        let mut parent = pending.last().unwrap().clone();
+
+        if parent.borrow().val != inorder[next_in] {
+            parent.borrow_mut().left = Some(child.clone());
+        } else {
+            while pending.last().map_or(false, |top| top.borrow().val == inorder[next_in]) {
+                parent = pending.pop().unwrap();
+                next_in += 1;
+            }
+            parent.borrow_mut().right = Some(child.clone());
+        }
+
+        pending.push(child);
+    }
+
+    Some(root)
+}
+
+fn check(root: Node, preorder: &[i32], inorder: &[i32]) {
+    let (mut before, mut between, mut pending) = (Vec::new(), Vec::new(), Vec::new());
+    let mut cur = root;
+    while cur.is_some() || !pending.is_empty() {
+        while let Some(node) = cur {
+            before.push(node.borrow().val);
+            cur = node.borrow().left.clone();
+            pending.push(node);
+        }
+        let node = pending.pop().unwrap();
+        between.push(node.borrow().val);
+        cur = node.borrow().right.clone();
+    }
+    assert_eq!(before, preorder);
+    assert_eq!(between, inorder);
+}
+
+fn main() {
+    let cases: Vec<(Vec<i32>, Vec<i32>)> = vec![
+        (vec![-3000], vec![-3000]),
+        (vec![8, 14, 5, -2, 4, 0], vec![14, 5, 8, 4, -2, 0]),
+        (vec![1, 2, 3, 4], vec![4, 3, 2, 1]),
+        (vec![1, 2, 3, 4], vec![1, 2, 3, 4]),
+        (vec![1, -2, 3, -4], vec![-2, -4, 3, 1]),
+    ];
+    type Rebuild = fn(&[i32], &[i32]) -> Node;
+    let mut ok = 0;
+    for rebuild in [by_scan as Rebuild, by_index, by_stack] {
+        for (preorder, inorder) in &cases {
+            check(rebuild(preorder, inorder), preorder, inorder);
+            ok += 1;
+        }
+    }
+
+    // chuỗi 3000 nút: thả chuỗi Rc dài là đệ quy trong drop, 3000 tầng vẫn an toàn
+    let straight: Vec<i32> = (1..=3000).collect();
+    let reversed: Vec<i32> = straight.iter().rev().copied().collect();
+    for inorder in [&straight, &reversed] {
+        check(by_stack(&straight, inorder), &straight, inorder);
+        ok += 1;
+    }
+    println!("{}/{} ca đúng", ok, cases.len() * 3 + 2);
+}
+```
+
+Download the files [TypeScript](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.ts) · [Python](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.py) · [Go](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.go) · [Java](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.java) · [JavaScript](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.js) · [PHP](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.php) · [Rust](../code/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/rebuild.rs).
 
 I ran `node rebuild.ts`, `python3 rebuild.py`, `go run rebuild.go`, `java rebuild.java`, and `node rebuild.js` inside the example directory. All five print the first line. Both Node versions print the operation counts too.
 
@@ -725,6 +962,8 @@ scan comparisons: 125250, index lookups: 500
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+Both added files check all three approaches on small trees and the stack approach on 3,000-node trees. PHP `17/17 ca đúng` · Rust `17/17 ca đúng`.
 
 ## Misconceptions and common traps
 

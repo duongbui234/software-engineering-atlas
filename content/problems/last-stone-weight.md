@@ -328,9 +328,9 @@ Python, 10⁵ viên: `heapq` 30,2 ms, đếm theo cân nặng 2,0 ms.
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-last-stone-weight/last-stone.ts) · [Python](../code/neetcode-last-stone-weight/last_stone.py) · [Go](../code/neetcode-last-stone-weight/last_stone.go) · [Java](../code/neetcode-last-stone-weight/last-stone.java) · [JavaScript](../code/neetcode-last-stone-weight/last-stone.js)
+[TypeScript](../code/neetcode-last-stone-weight/last-stone.ts) · [Python](../code/neetcode-last-stone-weight/last_stone.py) · [Go](../code/neetcode-last-stone-weight/last_stone.go) · [Java](../code/neetcode-last-stone-weight/last-stone.java) · [JavaScript](../code/neetcode-last-stone-weight/last-stone.js) · [PHP](../code/neetcode-last-stone-weight/last-stone.php) · [Rust](../code/neetcode-last-stone-weight/last_stone.rs)
 
-Mỗi file chạy 9 ca: ví dụ của đề, một viên, hai viên bằng nhau (đáp án 0), ba viên bằng nhau, hai cặp triệt tiêu, `[10, 2, 9]` để bắt lỗi so sánh chuỗi, chênh lệch lớn `[1000, 1]`, và hai ca nhiều lượt.
+Mỗi file trong năm bản đầu chạy 9 ca: ví dụ của đề, một viên, hai viên bằng nhau (đáp án 0), ba viên bằng nhau, hai cặp triệt tiêu, `[10, 2, 9]` để bắt lỗi so sánh chuỗi, chênh lệch lớn `[1000, 1]`, và hai ca nhiều lượt.
 
 ```ts
 // Max-heap: lấy hai viên nặng nhất, đẩy phần dư (nếu có) trở lại. O(n log n).
@@ -401,6 +401,45 @@ function heapSim(stones) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function lastStoneWeight(array $stones): int
+{
+    $heap = new SplMaxHeap();
+    foreach ($stones as $stone) {
+        $heap->insert($stone);
+    }
+
+    while ($heap->count() > 1) {
+        $heavier = $heap->extract();
+        $lighter = $heap->extract();
+        if ($heavier > $lighter) {
+            $heap->insert($heavier - $lighter);
+        }
+    }
+
+    return $heap->isEmpty() ? 0 : $heap->extract();
+}
+```
+
+```rust
+use std::collections::BinaryHeap;
+
+fn last_stone_weight(stones: Vec<i32>) -> i32 {
+    let mut heap = BinaryHeap::from(stones);
+    while heap.len() > 1 {
+        let heavier = heap.pop().unwrap();
+        let lighter = heap.pop().unwrap();
+        if heavier > lighter {
+            heap.push(heavier - lighter);
+        }
+    }
+    heap.pop().unwrap_or(0)
+}
+```
+
 
 Kết quả `node last-stone.ts`:
 
@@ -431,6 +470,8 @@ wrongDirectPop   5/9 ca đúng; sai ở [2 7 4 1 8 1] → 5, [10 2 9] → 3, [7 
 ```
 
 `java last-stone.java` cho `lastStoneWeight`, `subtractComparator`, `counting` đều 9/9; `node last-stone.js` cho `heapSim` và `sortedInsert` đều 9/9.
+
+Hai bản dùng max-heap có sẵn (`SplMaxHeap` và `BinaryHeap`). PHP in `7/7 ca đúng` và Rust in `7/7 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

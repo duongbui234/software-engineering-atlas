@@ -21,7 +21,7 @@ sources:
 > - Two traps: writing the box index as `⌊r/3⌋ + ⌊c/3⌋` (the times 3 is missing), and creating 9 Sets with `[set()] * 9` or `Array(9).fill(new Set())`; both make a **valid board** look invalid.
 
 > [!info] Context
-> LeetCode problem 36, part of [[en/posts/2026-11-22-neetcode-counting-keys|station 2: Canonical Keys and Counting]] on **the NeetCode line: Arrays and Strings**. The station post uses this problem as its "one element, several keys" example; this page compares three implementations and measures them. The solutions come in TypeScript, Python, Go, Java and JavaScript. All you need to know is loops, two-dimensional arrays and the rules of Sudoku.
+> LeetCode problem 36, part of [[en/posts/2026-11-22-neetcode-counting-keys|station 2: Canonical Keys and Counting]] on **the NeetCode line: Arrays and Strings**. The station post uses this problem as its "one element, several keys" example; this page compares three implementations and measures them. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. All you need to know is loops, two-dimensional arrays and the rules of Sudoku.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **3×3 box**: the nine 3×3 blocks that split the 9×9 board, numbered 0..8 left to right, top to bottom.
@@ -125,7 +125,7 @@ One pass is even slower than three passes: both create 27 Sets, but one pass kee
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-valid-sudoku/valid-sudoku.ts) · [Python](../code/neetcode-valid-sudoku/valid_sudoku.py) · [Go](../code/neetcode-valid-sudoku/valid_sudoku.go) · [Java](../code/neetcode-valid-sudoku/valid-sudoku.java) · [JavaScript](../code/neetcode-valid-sudoku/valid-sudoku.js)
+[TypeScript](../code/neetcode-valid-sudoku/valid-sudoku.ts) · [Python](../code/neetcode-valid-sudoku/valid_sudoku.py) · [Go](../code/neetcode-valid-sudoku/valid_sudoku.go) · [Java](../code/neetcode-valid-sudoku/valid-sudoku.java) · [PHP](../code/neetcode-valid-sudoku/valid-sudoku.php) · [Rust](../code/neetcode-valid-sudoku/valid_sudoku.rs) · [JavaScript](../code/neetcode-valid-sudoku/valid-sudoku.js)
 
 Each file has all three approaches and runs 6 test cases. Below are the one-pass and bitmask approaches.
 
@@ -299,6 +299,46 @@ function bitmask(board) {
 }
 ```
 
+```php
+function isValidSudoku(array $board): bool {
+    // array_fill with [] is safe: PHP arrays are values, so the nine slots are nine separate copies
+    $rows = array_fill(0, 9, []); $cols = array_fill(0, 9, []); $boxes = array_fill(0, 9, []);
+    for ($r = 0; $r < 9; $r++) {
+        for ($c = 0; $c < 9; $c++) {
+            $d = $board[$r][$c];
+            if ($d === '.') continue;
+            $b = intdiv($r, 3) * 3 + intdiv($c, 3);
+            if (isset($rows[$r][$d]) || isset($cols[$c][$d]) || isset($boxes[$b][$d])) return false;
+            $rows[$r][$d] = $cols[$c][$d] = $boxes[$b][$d] = true;
+        }
+    }
+    return true;
+}
+```
+
+```rust
+fn is_valid_sudoku(board: Vec<Vec<char>>) -> bool {
+    let (mut rows, mut cols, mut boxes) = ([0u16; 9], [0u16; 9], [0u16; 9]);
+    for r in 0..9 {
+        for c in 0..9 {
+            let d = board[r][c];
+            if d == '.' {
+                continue;
+            }
+            let bit = 1u16 << (d as u8 - b'1'); // char → u8: '1' is 49
+            let b = r / 3 * 3 + c / 3;
+            if (rows[r] | cols[c] | boxes[b]) & bit != 0 { // Rust: & binds tighter than !=, so no extra parentheses
+                return false;
+            }
+            rows[r] |= bit;
+            cols[c] |= bit;
+            boxes[b] |= bit;
+        }
+    }
+    true
+}
+```
+
 
 The TypeScript file also runs the wrong box formula, then measures:
 
@@ -327,7 +367,7 @@ bitmask               6/6 cases passed
 one_pass_shared_sets  4/6 cases passed; wrong on: valid example, two 1s in two different boxes
 ```
 
-The nine "row sets" are really one set, so a 5 in row 0 and a 5 in row 4 count as being in the same row. Go, Java and JavaScript print `6/6 ca đúng` ("6/6 cases passed") for all three approaches.
+The nine "row sets" are really one set, so a 5 in row 0 and a 5 in row 4 count as being in the same row. Go, Java, JavaScript, PHP and Rust print `6/6 ca đúng` ("6/6 cases passed") for all three approaches, and also catch the wrong-formula version (`4/6`). In PHP, `array_fill(0, 9, [])` does not fall into this trap: arrays are values, so each slot is its own copy.
 
 ## Misconceptions and common traps
 
@@ -336,6 +376,8 @@ The nine "row sets" are really one set, so a 5 in row 0 and a 5 in row 4 count a
 - **Creating several Sets by multiplication or `fill`.** `[set()] * 9` and `Array(9).fill(new Set())` repeat the **same** object nine times. Use a list comprehension or `Array.from({ length: 9 }, () => new Set())`.
 - **Java: `x & bit != 0` doesn't compile.** `!=` is evaluated first, giving `x & true`. The parentheses are required.
 - **"It's O(1), so every approach is the same."** All O(1), but the bitmask is 10 times faster in the measurement above. The constant only matters when the function is called very often, as in a Sudoku solver trying millions of boards.
+- **PHP: `$x & $bit != 0` compiles but is wrong.** As in Java and C, `!=` is evaluated first, giving `$x & true`, and `true` is coerced to `1`. Unlike Java, PHP raises no error: the PHP file gets `1` for `0b101 & 0b010 != 0` (looks like "present"). Always put parentheses around `&`.
+- **Rust: `char` is not a number.** `d - '1'` does not compile; you must write `d as u8 - b'1'`. On the other hand, Rust's precedence puts `&` before `!=`, so `x & bit != 0` means what it says. And `vec![HashSet::new(); 9]` clones each element, so it avoids the nine-shared-slots trap of JS and Python.
 
 ## Self-check questions
 

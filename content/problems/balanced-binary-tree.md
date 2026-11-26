@@ -223,9 +223,9 @@ Python, cây hoàn hảo 2¹⁷ − 1 nút: từ trên xuống 270 ms, từ dư�
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-balanced-binary-tree/balanced.ts) · [Python](../code/neetcode-balanced-binary-tree/balanced.py) · [Go](../code/neetcode-balanced-binary-tree/balanced.go) · [Java](../code/neetcode-balanced-binary-tree/balanced.java) · [JavaScript](../code/neetcode-balanced-binary-tree/balanced.js)
+[TypeScript](../code/neetcode-balanced-binary-tree/balanced.ts) · [Python](../code/neetcode-balanced-binary-tree/balanced.py) · [Go](../code/neetcode-balanced-binary-tree/balanced.go) · [Java](../code/neetcode-balanced-binary-tree/balanced.java) · [JavaScript](../code/neetcode-balanced-binary-tree/balanced.js) · [PHP](../code/neetcode-balanced-binary-tree/balanced.php) · [Rust](../code/neetcode-balanced-binary-tree/balanced.rs)
 
-Mỗi file dựng cây từ mảng theo tầng kiểu LeetCode và chạy 9 ca chung: cây rỗng, một nút, cây đầy 7 nút, lệch ngay ở gốc, gốc cân nhưng con lệch (cây ở hình trên), chuỗi 4 nút (nơi -1 nằm cạnh 0), cây Fibonacci bậc 5 (con trái bậc h − 1, con phải bậc h − 2: cân ở mọi nút nhưng lá chênh hai tầng), cây đủ 5 000 nút, và chuỗi lệch 5 000 nút (giới hạn đề). File TypeScript đối chiếu thêm ba cách trên 3 000 cây ngẫu nhiên (sinh bằng mulberry32).
+Mỗi file trong năm bản đầu dựng cây từ mảng theo tầng kiểu LeetCode và chạy 9 ca chung: cây rỗng, một nút, cây đầy 7 nút, lệch ngay ở gốc, gốc cân nhưng con lệch (cây ở hình trên), chuỗi 4 nút (nơi -1 nằm cạnh 0), cây Fibonacci bậc 5 (con trái bậc h − 1, con phải bậc h − 2: cân ở mọi nút nhưng lá chênh hai tầng), cây đủ 5 000 nút, và chuỗi lệch 5 000 nút (giới hạn đề). File TypeScript đối chiếu thêm ba cách trên 3 000 cây ngẫu nhiên (sinh bằng mulberry32).
 
 Từ dưới lên, trả -1 khi đã lệch:
 
@@ -306,6 +306,62 @@ function balancedBottomUp(root) {
     return 1 + Math.max(l, r);
   };
   return check(root) !== -1;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function isBalanced(?TreeNode $root): bool {
+    return balancedHeight($root) !== -1;
+}
+
+function balancedHeight(?TreeNode $node): int {
+    if ($node === null) return 0;
+    $left = balancedHeight($node->left);
+    if ($left === -1) return -1;
+    $right = balancedHeight($node->right);
+    return $right === -1 || abs($left - $right) > 1 ? -1 : 1 + max($left, $right);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    _val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode {
+        _val: val,
+        left,
+        right,
+    })))
+}
+
+fn is_balanced(root: &Node) -> bool {
+    fn height(root: &Node) -> Option<i32> {
+        let Some(root) = root else { return Some(0) };
+        let root = root.borrow();
+        let left = height(&root.left)?;
+        let right = height(&root.right)?;
+        (left.abs_diff(right) <= 1).then_some(1 + left.max(right))
+    }
+    height(root).is_some()
 }
 ```
 
@@ -515,6 +571,8 @@ balancedIterative   9/9 ca đúng
 wrongMinMaxDepth    4/9 ca đúng; sai ở lệch ngay ở gốc → true, gốc cân, con lệch → true, chuỗi 4 nút (-1 cạnh 0) → true, cây Fibonacci bậc 5 → false, chuỗi lệch 5000 nút (giới hạn đề) → true
 wrongIgnoreSentinel 6/9 ca đúng; sai ở gốc cân, con lệch → true, chuỗi 4 nút (-1 cạnh 0) → true, chuỗi lệch 5000 nút (giới hạn đề) → true
 ```
+
+PHP dùng `-1` báo nhánh lệch; Rust dùng `None` và toán tử `?` để trả kết quả đó lên ngay. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

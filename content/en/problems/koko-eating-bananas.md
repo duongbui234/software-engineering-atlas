@@ -142,7 +142,7 @@ The problem allows up to 10⁴ piles of up to 10⁹ each. At k = 1, the hour sum
 
 **`hi = Integer.MAX_VALUE` "to be safe"** is another trap: `(1 + Integer.MAX_VALUE) / 2` overflows to −1,073,741,824 (the [[en/concepts/midpoint-overflow|midpoint overflow]] from station 1). With a negative speed the hour count comes out small, `mid` looks "in time", `hi` becomes negative and the loop exits with `lo = 1`. 8/10 cases are wrong.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | ⌈p / k⌉ | Hour sum | Library | Specific trap |
 |---|---|---|---|---|
@@ -150,6 +150,8 @@ The problem allows up to 10⁴ piles of up to 10⁹ each. At k = 1, the hour sum
 | Python | `-(-p // k)` | unbounded `int` | `bisect_left(range(1, m + 1), True, key=…)` (3.10+) | `math.ceil(p / k)` is wrong once p > 2⁵³; a `range` given to `bisect` reads elements on demand, no list is built |
 | Go | `(p + k - 1) / k` | 64-bit `int` | `sort.Search(n, f)` | `sort.Search` searches `[0, n)`, so index `i` stands for speed `i + 1` |
 | Java | `(p + k - 1) / k` | should be `long` | none for functions; `Arrays.binarySearch` only for arrays | `int` overflows when trying each speed; `p + k - 1` fits `int` only because p, k ≤ 10⁹; `/ 0` throws `ArithmeticException` |
+| PHP | `intdiv($p + $k - 1, $k)` | 64-bit `int` | no binary search over a function | `$p / $k` returns a float; `intdiv($p, 0)` throws `DivisionByZeroError` (the `lo = 0` version fails 2/10 cases). On `int` overflow PHP silently switches to float instead of wrapping |
+| Rust | `(p + k - 1) / k` or `div_ceil` | sum in `i64` | `partition_point` works on slices, not on a numeric range | summing in `i32` overflows on the three 805 306 368 piles: debug panics, `-O` wraps; division by zero always panics. `piles.iter().max()` returns an `Option` |
 
 ### Measurements
 
@@ -168,7 +170,7 @@ Python, same size with piles up to 10⁹: the hand-written loop and `bisect_left
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-koko-eating-bananas/koko-eating.ts) · [Python](../code/neetcode-koko-eating-bananas/koko_eating.py) · [Go](../code/neetcode-koko-eating-bananas/koko_eating.go) · [Java](../code/neetcode-koko-eating-bananas/koko-eating.java) · [JavaScript](../code/neetcode-koko-eating-bananas/koko-eating.js)
+[TypeScript](../code/neetcode-koko-eating-bananas/koko-eating.ts) · [Python](../code/neetcode-koko-eating-bananas/koko_eating.py) · [Go](../code/neetcode-koko-eating-bananas/koko_eating.go) · [Java](../code/neetcode-koko-eating-bananas/koko-eating.java) · [JavaScript](../code/neetcode-koko-eating-bananas/koko-eating.js) · [PHP](../code/neetcode-koko-eating-bananas/koko-eating.php) · [Rust](../code/neetcode-koko-eating-bananas/koko_eating.rs)
 
 Each file runs 10 cases: the problem's three examples, a single pile, an answer of 1, a 10⁹ pile split in two, h one short of the total number of bananas (answer 2), and the three piles of 805,306,368 that overflow `int`. Python and Go also have a version built on the standard library.
 
@@ -286,6 +288,50 @@ function minEatingSpeed(piles, h) {
 }
 ```
 
+```php
+// Hours to finish at speed k: each pile takes ⌈p / k⌉ hours. intdiv keeps everything an int.
+function hoursNeeded(array $piles, int $k): int
+{
+    $hours = 0;
+    foreach ($piles as $p) $hours += intdiv($p + $k - 1, $k); // PHP int is 64-bit: a sum up to 10¹³ doesn't overflow
+    return $hours;
+}
+
+// Binary search on the answer. Invariant: hi always makes it; every speed below lo doesn't.
+function minEatingSpeed(array $piles, int $h): int
+{
+    $lo = 1;
+    $hi = max($piles); // speed max(piles) eats each pile in 1 hour, always in time since h >= n
+    while ($lo < $hi) {
+        $mid = $lo + intdiv($hi - $lo, 2);
+        if (hoursNeeded($piles, $mid) <= $h) $hi = $mid; // mid makes it: it may be the answer, keep it
+        else $lo = $mid + 1;
+    }
+    return $lo;
+}
+```
+
+```rust
+// Hours to finish at speed k: each pile takes ⌈p / k⌉ hours. Sum in i64: the total can reach 10¹³.
+fn hours_needed(piles: &[i32], k: i64) -> i64 {
+    piles.iter().map(|&p| (p as i64 + k - 1) / k).sum() // i64::div_ceil works too (Rust 1.73+)
+}
+
+// Binary search on the answer. Invariant: hi always makes it; every speed below lo doesn't.
+fn min_eating_speed(piles: &[i32], h: i32) -> i32 {
+    let (mut lo, mut hi) = (1i64, *piles.iter().max().unwrap() as i64); // max() returns an Option: None for an empty array
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if hours_needed(piles, mid) <= h as i64 {
+            hi = mid; // mid makes it: it may be the answer, keep it
+        } else {
+            lo = mid + 1;
+        }
+    }
+    lo as i32
+}
+```
+
 
 Output of `node koko-eating.ts`, the three wrong versions included:
 
@@ -320,6 +366,8 @@ random: int sum differs from long sum on 0/100000 inputs
 
 Python prints `ZeroDivisionError` for `lo_from_zero` and the wrong `math.ceil` pair at 2⁵³ + 1; Go prints the `int32` sum `-1879048192`; JavaScript reports that `Math.ceil(p / k)` differs from the integer version on 0 of 1,000,000 pairs.
 
+PHP (`php koko-eating.php`) and Rust (`rustc --edition 2021 -O koko_eating.rs`) print the same counts as the TypeScript file for the first four versions, and `2000/2000` in the random check. The `lo = 0` version behaves like Java: PHP fails 2/10 cases with `DivisionByZeroError`, Rust fails 2/10 because `checked_div` reports division by zero. Rust also prints `tổng ba đống 805306368 trong i32: None` ("sum of the three 805306368 piles in i32").
+
 ## Misconceptions and common traps
 
 - **"Binary search needs a sorted array."** It needs a yes/no question that flips once. The range `[1, max]` with the "in time" check is enough; there is no need to build an array of speeds.
@@ -329,6 +377,8 @@ Python prints `ZeroDivisionError` for `lo_from_zero` and the wrong `math.ceil` p
 - **An oversized `hi` "to be safe".** `hi = 10⁹` is still correct (just a few extra tries), but `Integer.MAX_VALUE` with `(lo + hi) / 2` makes `mid` negative.
 - **The hour sum in an `int`.** Trying each speed really overflows. Binary search does not, thanks to an argument about `mid >= k* / 2`, but a `long` is safer and costs nothing.
 - **Forgetting that h can be very large.** With h ≥ the total number of bananas, the answer is 1. The range `[1, max]` handles it naturally, no special case needed.
+- **PHP: `ceil($p / $k)`.** It returns a float that has to be cast back; `intdiv($p + $k - 1, $k)` keeps everything an int. The `lo = 0` version is not silent as in JS: `intdiv($p, 0)` throws `DivisionByZeroError`.
+- **Rust: summing hours in `i32`.** The three 805 306 368 piles exceed `i32::MAX`: a debug build panics, a `-O` build wraps to a negative number and returns the wrong speed. Sum in `i64` as `hours_needed` does; `checked_add` shows the `i32` sum is `None`.
 
 ## Self-check questions
 

@@ -144,7 +144,7 @@ Số trùng (bản LeetCode 81, target 2 không có):
 | 10 000 | 1 012 bước | 14 bước |
 | 100 000 | 10 016 bước | 17 bước |
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Chia đôi có sẵn | Bẫy riêng |
 |---|---|---|
@@ -152,10 +152,12 @@ Số trùng (bản LeetCode 81, target 2 không có):
 | Python | `bisect_left(a, x, lo, hi)` | `hi` là đầu **mở**; viết `nums[lo] <= target < nums[mid]` được vì Python cho nối so sánh |
 | Go | `sort.Search(n, f)`, `sort.SearchInts`, `slices.BinarySearch` | `sort.Search` trả `n` khi không ô nào thỏa `f`: phải kiểm `i < n` trước khi đọc `nums[i]`. Cắt `nums[a:b]` không sao chép, nhưng chỉ số trả về tính từ a |
 | Java | `Arrays.binarySearch(a, from, to, key)` | không thấy thì trả `−(điểm chèn) − 1`, không phải −1: `binarySearch([1, 3, 5], 4)` ra `-3`. Kiểm `>= 0`. Đầu `to` là đầu mở |
+| PHP | không có; `array_search` là quét tuyến tính | `array_search` không thấy thì trả `false`, không phải `-1`; viết `if (!array_search(...))` thì nhầm luôn ca tìm thấy ở chỉ số 0. Truyền `true` làm tham số thứ ba để so bằng `===` |
+| Rust | `slice::binary_search` trên một slice con | cắt `&nums[pivot..]` rồi tìm thì chỉ số trả về tính từ đầu slice con: phải cộng lại `pivot`. Khoảng đóng có `hi = mid - 1` xuống −1, nên bản một lượt giữ chỉ số ở `i64` |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.ts) · [Python](../code/neetcode-search-in-rotated-sorted-array/search_rotated.py) · [Go](../code/neetcode-search-in-rotated-sorted-array/search_rotated.go) · [Java](../code/neetcode-search-in-rotated-sorted-array/search-rotated.java) · [JavaScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.js)
+[TypeScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.ts) · [Python](../code/neetcode-search-in-rotated-sorted-array/search_rotated.py) · [Go](../code/neetcode-search-in-rotated-sorted-array/search_rotated.go) · [Java](../code/neetcode-search-in-rotated-sorted-array/search-rotated.java) · [JavaScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.js) · [PHP](../code/neetcode-search-in-rotated-sorted-array/search-rotated.php) · [Rust](../code/neetcode-search-in-rotated-sorted-array/search_rotated.rs)
 
 Mỗi file có quét, một lượt và hai lượt, chạy 9 ca. File TypeScript có thêm bản sai, bản có số trùng, phép kiểm toàn bộ ca nhỏ và phép đo. Dưới đây là cách một lượt và cách hai lượt.
 
@@ -345,6 +347,97 @@ function pivotThenSearch(nums, target) {
 }
 ```
 
+```php
+// Cách một lượt: ở mỗi bước, ít nhất một nửa [lo, mid] hoặc [mid, hi] đã sắp xếp. Hỏi target có nằm trong nửa đó không.
+function onePass(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums) - 1;
+    while ($lo <= $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$lo] <= $nums[$mid]) { // nửa trái tăng dần (dấu = cần cho ca lo == mid)
+            if ($nums[$lo] <= $target && $target < $nums[$mid]) $hi = $mid - 1;
+            else $lo = $mid + 1;
+        } else { // nửa phải tăng dần
+            if ($nums[$mid] < $target && $target <= $nums[$hi]) $lo = $mid + 1;
+            else $hi = $mid - 1;
+        }
+    }
+    return -1;
+}
+
+// Cách hai lượt: tìm điểm gãy (chỉ số của min, như bài 153), rồi chia đôi thường trên nửa chứa target.
+function pivotThenSearch(array $nums, int $target): int
+{
+    $n = count($nums);
+    $lo = 0;
+    $hi = $n - 1;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] > $nums[$hi]) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    $pivot = $lo; // nums[pivot..] và nums[..pivot-1] đều tăng dần
+    [$a, $b] = $target >= $nums[$pivot] && $target <= $nums[$n - 1] ? [$pivot, $n - 1] : [0, $pivot - 1];
+    return binarySearch($nums, $target, $a, $b);
+}
+
+function binarySearch(array $nums, int $target, int $lo, int $hi): int
+{
+    while ($lo <= $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid - 1;
+    }
+    return -1;
+}
+```
+
+```rust
+// Cách một lượt: ở mỗi bước, ít nhất một nửa [lo, mid] hoặc [mid, hi] đã sắp xếp.
+// Khoảng đóng cần hi = mid - 1 có thể xuống -1, nên chỉ số giữ ở i64.
+fn one_pass(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0i64, nums.len() as i64 - 1);
+    while lo <= hi {
+        let mid = lo + (hi - lo) / 2;
+        let (l, m, h) = (nums[lo as usize], nums[mid as usize], nums[hi as usize]);
+        if m == target {
+            return mid as i32;
+        }
+        if l <= m {
+            // nửa trái [lo, mid] tăng dần (dấu = cần cho ca lo == mid)
+            if l <= target && target < m { hi = mid - 1 } else { lo = mid + 1 }
+        } else {
+            // nửa phải [mid, hi] tăng dần
+            if m < target && target <= h { lo = mid + 1 } else { hi = mid - 1 }
+        }
+    }
+    -1
+}
+
+// Cách hai lượt: tìm điểm gãy (chỉ số của min, như bài 153), rồi binary_search trên nửa chứa target.
+fn pivot_then_search(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0, nums.len() - 1);
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if nums[mid] > nums[hi] { lo = mid + 1 } else { hi = mid }
+    }
+    let pivot = lo; // nums[pivot..] và nums[..pivot] đều tăng dần
+    // Cắt slice thay vì truyền hai đầu: nửa trái là nums[..pivot], rỗng khi pivot = 0.
+    let (offset, half) = if target >= nums[pivot] && target <= nums[nums.len() - 1] {
+        (pivot, &nums[pivot..])
+    } else {
+        (0, &nums[..pivot])
+    };
+    match half.binary_search(&target) {
+        Ok(i) => (offset + i) as i32, // chỉ số trong slice con phải cộng lại offset
+        Err(_) => -1,
+    }
+}
+```
+
 Kết quả của file TypeScript:
 
 ```text
@@ -379,6 +472,8 @@ Arrays.binarySearch([1, 3, 5], 4) = -3
 
 Python, Go và JavaScript in `9/9 ca đúng` cho cả ba cách.
 
+PHP (`php search-rotated.php`) và Rust (`rustc --edition 2021 -O search_rotated.rs`) chạy cả bản sai, phép kiểm toàn bộ ca nhỏ và bản có số trùng: `9/9` cho ba cách đúng, `8/9` cho `wrongStrict` (sai ở `[3,1] t=1`), 806 bộ lệch 0 (bản sai lệch 18), và 109 / 1 012 / 10 016 bước ở LeetCode 81, khớp TypeScript.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Phải tìm chỗ gãy trước."** Không bắt buộc: cách một lượt chỉ cần biết nửa nào lành ở mỗi bước. Tìm chỗ gãy trước (cách hai lượt) là lựa chọn dễ đúng hơn, không phải bắt buộc.
@@ -387,6 +482,8 @@ Python, Go và JavaScript in `9/9 ca đúng` cho cả ba cách.
 - **Hỏi nửa không lành.** "target > nums[mid]" không nói gì nếu nửa phải chứa chỗ gãy. Luôn hỏi trên nửa đã sắp xếp, và suy ra nửa kia bằng loại trừ.
 - **Java: so kết quả `Arrays.binarySearch` với −1.** Nó trả `−(điểm chèn) − 1`, nên −1 chỉ có nghĩa "điểm chèn là 0". Kiểm `>= 0`.
 - **Áp nguyên lời giải cho mảng có số trùng.** Phải thêm nhánh `lo++, hi--` khi ba ô bằng nhau, và chấp nhận O(n) ca tệ nhất.
+- **PHP: `array_search` làm bản đối chiếu.** Nó trả `false` khi không thấy và `0` khi thấy ở đầu mảng; so lỏng `== -1` hay `!` thì nhầm cả hai. File mẫu đổi `false` thành `-1` bằng `=== false`.
+- **Rust: quên cộng `offset` sau khi tìm trên slice con.** `nums[pivot..].binary_search(&t)` trả chỉ số trong slice con; trả thẳng giá trị đó là sai mọi ca target nằm ở nửa phải. Ca `pivot = 0` cho nửa trái `&nums[..0]` rỗng, không panic.
 
 ## Câu hỏi tự kiểm tra
 

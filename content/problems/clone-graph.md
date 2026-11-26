@@ -174,9 +174,9 @@ Go chạy được bản đệ quy vì ngăn xếp goroutine tự lớn lên (t�
 
 ## Ví dụ chạy được
 
-Mỗi file dựng 10 đồ thị (rỗng, một nút, hai nút, tam giác, hình vuông có đường chéo, ngôi sao, đường thẳng 5 và 100 nút, đồ thị đầy đủ 6 nút, đồ thị ngẫu nhiên 100 nút), chạy ba cách đúng và bốn cách sai, rồi kiểm ba điều kiện của bản sao sâu ở trên. Thêm 500 đồ thị ngẫu nhiên tới 100 nút cho ba cách đúng. Cả năm ngôn ngữ dùng cùng bộ sinh số mulberry32 nên dựng cùng các đồ thị. Bên dưới là phần lời giải; file đầy đủ có cả bản sai và phần kiểm tra.
+Mỗi file trong năm bản đầu dựng 10 đồ thị (rỗng, một nút, hai nút, tam giác, hình vuông có đường chéo, ngôi sao, đường thẳng 5 và 100 nút, đồ thị đầy đủ 6 nút, đồ thị ngẫu nhiên 100 nút), chạy ba cách đúng và bốn cách sai, rồi kiểm ba điều kiện của bản sao sâu ở trên. Thêm 500 đồ thị ngẫu nhiên tới 100 nút cho ba cách đúng. Cả năm ngôn ngữ dùng cùng bộ sinh số mulberry32 nên dựng cùng các đồ thị. Bên dưới là phần lời giải; file đầy đủ có cả bản sai và phần kiểm tra.
 
-[TypeScript](../code/neetcode-clone-graph/clone-graph.ts) · [Python](../code/neetcode-clone-graph/clone_graph.py) · [Go](../code/neetcode-clone-graph/clone_graph.go) · [Java](../code/neetcode-clone-graph/clone-graph.java) · [JavaScript](../code/neetcode-clone-graph/clone-graph.js)
+[TypeScript](../code/neetcode-clone-graph/clone-graph.ts) · [Python](../code/neetcode-clone-graph/clone_graph.py) · [Go](../code/neetcode-clone-graph/clone_graph.go) · [Java](../code/neetcode-clone-graph/clone-graph.java) · [JavaScript](../code/neetcode-clone-graph/clone-graph.js) · [PHP](../code/neetcode-clone-graph/clone-graph.php)
 
 ```ts
 // ---------- Cách 1: DFS đệ quy với sổ "cũ → mới" ----------
@@ -476,6 +476,36 @@ function cloneDfsIterative(node) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class GraphNode {
+    public array $neighbors = [];
+    public function __construct(public int $val) {}
+}
+
+function cloneGraph(?GraphNode $root): ?GraphNode {
+    if ($root === null) return null;
+    $copies = new SplObjectStorage();
+    $queue = new SplQueue();
+    $copies[$root] = new GraphNode($root->val);
+    $queue->enqueue($root);
+    while (!$queue->isEmpty()) {
+        $node = $queue->dequeue();
+        $copy = $copies[$node];
+        foreach ($node->neighbors as $neighbor) {
+            if (!$copies->contains($neighbor)) {
+                $copies[$neighbor] = new GraphNode($neighbor->val);
+                $queue->enqueue($neighbor);
+            }
+            $copy->neighbors[] = $copies[$neighbor];
+        }
+    }
+    return $copies[$root];
+}
+```
+
 Chạy `node clone-graph.ts`:
 
 ```text
@@ -495,6 +525,8 @@ clone-graph: các cách đúng đều qua
 ```
 
 Bốn file còn lại in cùng số ca đúng. Khác biệt duy nhất nằm ở cách bản sai đệ quy vô tận chết: Python ném `RecursionError`, Java ném `StackOverflowError`. Go không bắt được tràn ngăn xếp (chương trình chết hẳn với `fatal error: stack overflow`), nên file Go cho hai bản sai đó dừng ở độ sâu 10 000 bằng `panic` rồi `recover`, và in "đệ quy quá 10000 tầng (đi vòng mãi)".
+
+Bản PHP dùng BFS và `SplObjectStorage` để ánh xạ theo danh tính object. Bài này có sáu ngôn ngữ vì LeetCode chưa cung cấp mẫu Rust cho kiểu nút đồ thị. PHP `3/3 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

@@ -148,7 +148,7 @@ TypeScript, một key có k mốc (timestamp 2, 4, 6, …), 10⁵ lần `get`, t
 
 Java, một key, 10⁶ lần set rồi 10⁶ lần get ngẫu nhiên, trung vị 5 lần: `TreeMap` mất khoảng 98 ms để set và 400 ms để get; hai mảng `int[]`/`String[]` tự nới mất 26 ms và 129 ms. Mảng nhanh hơn khoảng 3 lần ở cả hai: `TreeMap` bọc mỗi timestamp thành `Integer` và đi qua các nút cây rải trong bộ nhớ, còn mảng `int[]` nằm liền nhau. Python, 10⁵ get trên 10⁵ mốc: `bisect_right` trên list timestamp mất 38 ms, `bisect_right(..., key=)` trên list cặp mất 88 ms, vì hàm `key` là một lời gọi Python ở mỗi bước so.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Chia đôi có sẵn | Bẫy riêng |
 |---|---|---|
@@ -156,10 +156,12 @@ Java, một key, 10⁶ lần set rồi 10⁶ lần get ngẫu nhiên, trung vị
 | Python | `bisect_right(times, t)`; `key=` từ 3.10 | `bisect_right(pairs, (t,))` bỏ qua mốc trùng t (4/8 ca); **đọc** `defaultdict[key]` cũng tạo key rỗng |
 | Go | `sort.Search(n, pred)`: chỉ số nhỏ nhất làm `pred` đúng; `pred` phải false rồi true | `m[key].times = …` với `map[string]history` là lỗi biên dịch "cannot assign to struct field … in map": dùng `map[string]*history`; key thiếu trả `nil` |
 | Java | `TreeMap.floorEntry(t)`, `Collections.binarySearch` | `floorEntry` trả `null` khi mọi mốc sau t; `Collections.binarySearch([10, 20], 15)` trả `-2`, tức `-(vị trí chèn) − 1`; `TreeMap` chậm hơn mảng `int[]` khoảng 3 lần |
+| PHP | không có: tự viết, `($lo + $hi) >> 1` | mảng PHP là bảng băm có thứ tự: `$this->times[$key][] = $t` tự tạo mảng con, nhưng **đọc** key chưa có thì ra `null` kèm warning, nên phải `?? []`. Key dạng số như `"123"` bị đổi thành int `123` khi làm khóa mảng |
+| Rust | `partition_point(\|(t, _)\| *t <= ts)` trên `Vec<(i32, String)>` | `entry(key).or_default()` tạo lịch sử rỗng trong một lần tra băm; `get` trả `&String` mượn từ map, nên muốn trả `String` thì phải `clone()`. `BTreeMap::range(..=t).next_back()` là bản tương đương `floorEntry` của Java |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-time-based-key-value-store/time-map.ts) · [Python](../code/neetcode-time-based-key-value-store/time_map.py) · [Go](../code/neetcode-time-based-key-value-store/time_map.go) · [Java](../code/neetcode-time-based-key-value-store/time-map.java) · [JavaScript](../code/neetcode-time-based-key-value-store/time-map.js)
+[TypeScript](../code/neetcode-time-based-key-value-store/time-map.ts) · [Python](../code/neetcode-time-based-key-value-store/time_map.py) · [Go](../code/neetcode-time-based-key-value-store/time_map.go) · [Java](../code/neetcode-time-based-key-value-store/time-map.java) · [JavaScript](../code/neetcode-time-based-key-value-store/time-map.js) · [PHP](../code/neetcode-time-based-key-value-store/time-map.php) · [Rust](../code/neetcode-time-based-key-value-store/time_map.rs)
 
 Mỗi file chạy 8 ca (9 ca ở JavaScript): ví dụ của đề, key chưa từng set, t trước mốc đầu, t giữa hai mốc, t sau mốc cuối, hai key xen kẽ, t trùng mốc giữa, timestamp 10⁷. File JavaScript thêm ca key `"constructor"`. Dưới đây là lời giải chính của mỗi ngôn ngữ.
 
@@ -284,6 +286,55 @@ class TimeMap {
 }
 ```
 
+```php
+// Cách 2, chia đôi: đếm số mốc ≤ t (cận trên) rồi lùi một ô. O(log k) mỗi lần get.
+class TimeMap
+{
+    protected array $times = [];  // key → [timestamp, …], tăng dần vì đề hứa set theo thứ tự tăng
+    protected array $values = []; // key → [value, …]
+
+    public function set(string $key, string $value, int $timestamp): void
+    {
+        $this->times[$key][] = $timestamp; // tự tạo mảng con nếu key chưa có
+        $this->values[$key][] = $value;
+    }
+
+    public function get(string $key, int $timestamp): ?string
+    {
+        $ts = $this->times[$key] ?? []; // key chưa có: ?? tránh warning "undefined array key"
+        $lo = 0;
+        $hi = count($ts); // nửa mở [lo, hi): đếm số mốc ≤ timestamp
+        while ($lo < $hi) {
+            $mid = ($lo + $hi) >> 1;
+            if ($ts[$mid] <= $timestamp) $lo = $mid + 1;
+            else $hi = $mid;
+        }
+        return $lo === 0 ? "" : $this->values[$key][$lo - 1]; // lo − 1 là mốc cuối cùng ≤ timestamp
+    }
+}
+```
+
+```rust
+// Cách 2, chia đôi: partition_point đếm số mốc ≤ t, mốc cần tìm là ô ngay trước. O(log k) mỗi lần get.
+#[derive(Default)]
+struct TimeMap {
+    store: HashMap<String, Vec<(i32, String)>>,
+}
+
+impl TimeMap {
+    fn set(&mut self, key: String, value: String, timestamp: i32) {
+        // entry: một lần tra băm cho cả "tạo nếu chưa có" lẫn "thêm vào"
+        self.store.entry(key).or_default().push((timestamp, value));
+    }
+
+    fn get(&self, key: &str, timestamp: i32) -> String {
+        let Some(h) = self.store.get(key) else { return String::new() }; // key chưa từng set
+        let n = h.partition_point(|(t, _)| *t <= timestamp); // số mốc ≤ timestamp
+        if n == 0 { String::new() } else { h[n - 1].1.clone() } // n − 1 là mốc cuối cùng ≤ timestamp
+    }
+}
+```
+
 
 Bản sai dùng cận dưới (TypeScript) và bản sai so tuple (Python):
 
@@ -370,6 +421,8 @@ new Map().get("constructor") = undefined
 
 Go in `TimeMap  8/8 ca đúng` và `map[string]*history{}["x"] == nil: true`. Lỗi biên dịch của bản `map[string]history` được thử riêng với Go 1.25: `cannot assign to struct field m["k"].times in map`.
 
+PHP (`php time-map.php`) và Rust (`rustc --edition 2021 -O time_map.rs`) chạy cùng bốn cách như bản TypeScript và in y hệt: `8/8` cho quét lùi và chia đôi, `2/8` cho bản cận dưới, `5/8` cho bản trả `null`, cùng các ca sai.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Tìm timestamp bằng t."** Phần lớn câu hỏi rơi giữa hai mốc. Câu hỏi đúng là mốc cuối cùng ≤ t.
@@ -380,6 +433,8 @@ Go in `TimeMap  8/8 ca đúng` và `map[string]*history{}["x"] == nil: true`. L�
 - **Python: đọc `defaultdict` để kiểm tra key.** `self.times[key]` tạo key rỗng ngay cả khi chỉ đọc; dùng `key in self.times` hoặc `dict.get`.
 - **JS: object thường làm kho.** Key `"constructor"`, `"toString"`, `"__proto__"` đã có sẵn hoặc có nghĩa đặc biệt. Dùng `Map`.
 - **Go: map của struct.** Không gán được vào field của giá trị trong map; giữ con trỏ.
+- **PHP: đọc `$this->times[$key]` khi key chưa từng set.** Không ném lỗi: ra `null` kèm warning, và `count(null)` ném `TypeError` từ PHP 8. Viết `$this->times[$key] ?? []`.
+- **Rust: trả `Option<&String>` rồi quên rằng nó mượn từ map.** Giữ tham chiếu đó trong khi gọi `set` (mượn `&mut`) thì không biên dịch được. Lời giải trả `String` đã `clone()`, đúng với chữ ký LeetCode `fn get(&self, key: String, timestamp: i32) -> String`.
 
 ## Câu hỏi tự kiểm tra
 

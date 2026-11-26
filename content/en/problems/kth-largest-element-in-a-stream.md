@@ -130,7 +130,7 @@ The solution above loads `nums` by inserting one number at a time. There is a fa
 
 With random numbers, inserting one by one costs on average only about 1.3 swaps per number (a new number usually stops early), so heapify is only about twice as fast. The descending case is what shows the O(n log n) versus O(n) gap: almost 18 times. In Python, `heapq.heapify` on 10⁶ numbers takes 25.6 ms and 10⁶ calls to `heappush` take 50.6 ms. Here `nums` has at most 10⁴ numbers, so the difference is small; the Python and Go versions still heapify and then trim down to k, because it is as short to write as inserting one by one.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Built-in heap | Default | Specific trap |
 |---|---|---|---|
@@ -138,6 +138,8 @@ With random numbers, inserting one by one costs on average only about 1.3 swaps 
 | Python | `heapq` (functions on a `list`) | min-heap only | negate for a max-heap; `heapq.heapreplace` replaces the top in a single sift |
 | Go | `container/heap` (you implement `heap.Interface`) | decided by `Less` | `Push`, `Pop` need pointer receivers; call `heap.Push(h, x)`, not `h.Push(x)` |
 | Java | `PriorityQueue` | min-heap | max-heap via `Collections.reverseOrder()`; the comparator `(a, b) -> b - a` overflows `int` |
+| PHP | `SplMinHeap`, `SplMaxHeap`, `SplPriorityQueue` | `SplPriorityQueue` takes the **highest** priority out first | `SplMinHeap` has no "replace top": `extract()`, then `insert()`. Items with equal priority in `SplPriorityQueue` come out in no guaranteed order |
+| Rust | `std::collections::BinaryHeap` | max-heap | wrap in `Reverse(x)` for a min-heap; `peek_mut()` edits the top and sifts it down when it goes out of scope; `peek()` returns an `Option` |
 
 Three of these traps are actually run:
 
@@ -158,7 +160,7 @@ The heap column barely moves with the number of `add` calls, because with random
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.ts) · [Python](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.py) · [Go](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.go) · [Java](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.java) · [JavaScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.js)
+[TypeScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.ts) · [Python](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.py) · [Go](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.go) · [Java](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.java) · [JavaScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.js) · [PHP](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.php) · [Rust](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.rs)
 
 Each file runs 7 or 8 cases: the problem's example, a stream with many repeated 7s, empty `nums` with k = 1, `nums` shorter than k (the problem allows k = `nums.length + 1`), duplicates, negatives, and (except JS) a random stream of 200 + 500 numbers with k = 50, whose answers come from re-sorting on every insert.
 
@@ -342,6 +344,60 @@ class KthLargest {
 }
 ```
 
+```php
+// k-slot min-heap: SplMinHeap keeps the k largest numbers seen; the top is the k-th largest.
+final class KthLargest implements Stream
+{
+    private SplMinHeap $heap;
+    public function __construct(private int $k, array $nums)
+    {
+        $this->heap = new SplMinHeap();
+        foreach ($nums as $x) $this->add($x);
+    }
+    public function add(int $val): int
+    {
+        if ($this->heap->count() < $this->k) $this->heap->insert($val);
+        elseif ($val > $this->heap->top()) { // beats the weakest candidate: replace it
+            $this->heap->extract(); // SplMinHeap has no "replace top": extract, then insert
+            $this->heap->insert($val);
+        }
+        return $this->heap->top();
+    }
+}
+```
+
+```rust
+// k-slot min-heap. Rust's BinaryHeap is a max-heap; wrap in Reverse so the smallest number sits on top.
+struct KthLargest {
+    k: usize,
+    heap: BinaryHeap<Reverse<i32>>,
+}
+
+impl KthLargest {
+    fn new(k: i32, nums: Vec<i32>) -> Self {
+        let mut s = KthLargest { k: k as usize, heap: BinaryHeap::with_capacity(k as usize + 1) };
+        for x in nums {
+            s.add(x);
+        }
+        s
+    }
+}
+
+impl Stream for KthLargest {
+    fn add(&mut self, val: i32) -> i32 {
+        if self.heap.len() < self.k {
+            self.heap.push(Reverse(val));
+        } else if let Some(mut top) = self.heap.peek_mut() {
+            // peek_mut lets us edit the top in place; when `top` goes out of scope, the heap sifts it down once.
+            if val > top.0 {
+                *top = Reverse(val);
+            }
+        }
+        self.heap.peek().unwrap().0 // the problem promises k numbers whenever add is called, so the top exists
+    }
+}
+```
+
 
 Output of `node kth-largest-stream.ts`, including re-sorting on every add, two wrong versions and two measurements:
 
@@ -402,6 +458,8 @@ DefaultSortKthLargest  3/7 cases correct; wrong on: problem example → [4, 5, 5
 [4, 5, 8, 2, 10].sort() = [10,2,4,5,8]
 ```
 
+PHP (`php kth-largest-stream.php`) and Rust (`rustc --edition 2021 -O kth_largest_stream.rs`): the correct version passes 8/8 cases, and the version that uses a max-heap instead of a min-heap (`SplPriorityQueue` in PHP, a `BinaryHeap<i32>` without `Reverse` in Rust) passes 1/8, failing exactly the cases TS's `MaxHeapKthLargest` fails. PHP also prints that three items with equal priority 1, inserted as a, b, c, come out as `a, c, b`; Rust prints `heap rỗng: peek() = None` ("empty heap").
+
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 ## Misconceptions and common traps
@@ -410,8 +468,10 @@ DefaultSortKthLargest  3/7 cases correct; wrong on: problem example → [4, 5, 5
 - **Not trimming when the heap goes past k.** The top becomes the smallest number of the whole stream, and the heap keeps growing.
 - **Popping the top, then inserting.** Correct, but it sifts down once and up once. Replacing the top and sifting down once (`heapreplace`, `heap.Fix(h, 0)`) walks only one path.
 - **Comparing with the top using `>=` or `>`.** Both are correct: whether or not a number equal to the top goes in, the heap holds the same values. `>` saves a sift.
-- **`nums` has fewer than k numbers.** The problem allows it (k up to `nums.length + 1`) and promises there are k numbers whenever an answer is needed. Loading without checking "do we have k yet" and reading the top of a short heap is wrong; all five versions take everything while the heap is short.
+- **`nums` has fewer than k numbers.** The problem allows it (k up to `nums.length + 1`) and promises there are k numbers whenever an answer is needed. Loading without checking "do we have k yet" and reading the top of a short heap is wrong; all seven versions take everything while the heap is short.
 - **JS: the default `sort()`.** It compares as strings, so `10` comes before `2`. Always pass `(a, b) => a - b`.
+- **PHP: assuming `SplPriorityQueue` is a min-heap.** It takes the highest priority out first, so trimming with `extract()` drops the largest number: 1/8 cases. Use `SplMinHeap`, or negate the priority.
+- **Rust: forgetting `Reverse`.** `BinaryHeap<i32>` is a max-heap, also 1/8 cases. `BinaryHeap<Reverse<i32>>` gives a min-heap, and `peek_mut()` replaces the top in one sift-down, like Python's `heapreplace`.
 
 ## Self-check questions
 

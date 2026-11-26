@@ -118,7 +118,7 @@ Two mechanisms make "O(1)" true in practice:
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-two-sum/two-sum.ts) · [JavaScript](../code/neetcode-two-sum/two-sum.js) · [Python](../code/neetcode-two-sum/two_sum.py) · [Go](../code/neetcode-two-sum/two_sum.go) · [Java](../code/neetcode-two-sum/two-sum.java)
+[TypeScript](../code/neetcode-two-sum/two-sum.ts) · [JavaScript](../code/neetcode-two-sum/two-sum.js) · [Python](../code/neetcode-two-sum/two_sum.py) · [Go](../code/neetcode-two-sum/two_sum.go) · [Java](../code/neetcode-two-sum/two-sum.java) · [PHP](../code/neetcode-two-sum/two-sum.php) · [Rust](../code/neetcode-two-sum/two_sum.rs)
 
 ```ts
 // TypeScript: one-pass hash map
@@ -192,6 +192,31 @@ function twoSum(nums, target) {
 }
 ```
 
+```php
+function twoSum(array $nums, int $target): array {
+    $seen = []; // value → index; a PHP array is a hash table
+    foreach ($nums as $i => $x) {
+        $need = $target - $x;
+        if (isset($seen[$need])) return [$seen[$need], $i]; // ask before writing
+        $seen[$x] = $i;
+    }
+    return [];
+}
+```
+
+```rust
+fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
+    let mut seen: HashMap<i32, i32> = HashMap::with_capacity(nums.len()); // value → index
+    for (i, &x) in nums.iter().enumerate() {
+        if let Some(&j) = seen.get(&(target - x)) {
+            return vec![j, i as i32]; // get returns Option: no "fake zero value" as in Go
+        }
+        seen.insert(x, i as i32);
+    }
+    vec![]
+}
+```
+
 ```text
 $ node two-sum.ts
 bruteForce         5/5 cases passed
@@ -255,6 +280,20 @@ using comma ok: is 99 in the map? false
 
 String hashes in Python change with the seed, while integer hashes do not. In Go, reading a missing key returns the zero value, which collides with the valid index 0, so you must use the form `j, ok := seen[k]`.
 
+PHP and Rust print the same four case-count lines as TypeScript (`onePassWrongOrder  3/5 ca đúng`), plus one trap for each language:
+
+```text
+$ php two-sum.php
+...
+khóa '1', 1 và 1.7 dồn vào: [1] → số thực 1.7
+
+$ rustc --edition 2021 -O two_sum.rs && ./two_sum
+...
+2e9 + 1e9 với i32: checked_add = None, wrapping_add = -1294967296
+```
+
+In PHP, the numeric string `'1'` and the float `1.7` are both coerced to the integer key `1`, so all three writes land in the same slot (the program prints "khóa … dồn vào", keys … collapse into). An optimized Rust build (`-O`) wraps around silently on overflow; a debug build panics.
+
 ## Misconceptions and common traps
 
 - **Storing first, then asking.** It pairs a number with itself. Always ask first, store second.
@@ -265,6 +304,8 @@ String hashes in Python change with the seed, while integer hashes do not. In Go
 - **Sorting the values and returning the indices after sorting.** The problem asks for the original positions. Sort an array of indices, or an array of (value, index) pairs.
 - **Overflow when computing `target - x`.** With the ±10⁹ limit, a 32-bit `int` is still enough (the maximum difference 2·10⁹ < 2³¹ ≈ 2.1·10⁹), but only just. With larger limits, Java and Go need `long`/`int64`.
 - **"A hash map is always O(1)."** O(1) is the average when the hash spreads keys evenly, amortized over table growth. Keys sent by users can be chosen to collide.
+- **PHP: array keys are coerced.** A numeric string like `"1"` becomes the integer key `1`, and a float loses its fractional part. With integers in Two Sum this is fine, but don't use a PHP array as a map for floats or numeric strings with leading zeros. Also, `isset` returns `false` when the value is `null`, so don't store `null` in the notebook.
+- **Rust: overflow behaves differently in debug and release.** `target - x` on `i32` panics in a debug build but wraps around silently in an `-O` build. With limits of ±10⁹ it just fits, but to be safe switch to `i64` or use `checked_sub`.
 
 ## Self-check questions
 

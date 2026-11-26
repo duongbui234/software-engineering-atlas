@@ -1,6 +1,6 @@
 ---
 title: "Contains Duplicate: Big-O, vét cạn, hash set và cái giá của bộ nhớ"
-description: "Bài đầu tiên của NeetCode 150 hỏi một câu tưởng tầm thường (mảng có số nào lặp lại không), nhưng đủ để học cách đo thuật toán bằng Big-O, đo lại bằng đồng hồ thật, và thấy Set của năm ngôn ngữ khác nhau ở đâu."
+description: "Bài đầu tiên của NeetCode 150 hỏi một câu tưởng tầm thường (mảng có số nào lặp lại không), nhưng đủ để học cách đo thuật toán bằng Big-O, đo lại bằng đồng hồ thật, và thấy Set của bảy ngôn ngữ khác nhau ở đâu."
 date: 2026-11-22T21:01:00+07:00
 tags: [algorithms, neetcode, hashing]
 type: problem
@@ -105,7 +105,7 @@ Một [[concepts/hash-set|hash set]] trả lời "có x chưa?" mà không phả
 
 Đó là một [[concepts/space-time-tradeoff|đánh đổi bộ nhớ lấy thời gian]]: cuốn sổ tốn O(n) bộ nhớ. Với 100 000 số thì không đáng kể. Với một tỷ số trên một máy ít RAM, sắp xếp tại chỗ có thể là lựa chọn duy nhất.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | "Set" là gì | Sắp xếp mặc định |
 |---|---|---|
@@ -113,10 +113,12 @@ Một [[concepts/hash-set|hash set]] trả lời "có x chưa?" mà không phả
 | Python | `set`, hash table địa chỉ mở; `hash(n)` của số nguyên chính là n (trừ −1) | `sorted` / `list.sort`: TimSort, gộp theo chiến lược powersort từ 3.11 |
 | Go | không có kiểu set; dùng `map[int]struct{}` (giá trị rỗng, 0 byte). Từ Go 1.24 map là Swiss Table | `slices.Sort`: pdqsort từ Go 1.19 |
 | Java | `HashSet<Integer>`, thực chất là một `HashMap`; mỗi `int` bị **đóng hộp** thành `Integer` | `Arrays.sort(int[])`: Dual-Pivot Quicksort, không đóng hộp |
+| PHP | không có kiểu set riêng; mảng PHP là bảng băm có thứ tự, dùng giá trị làm **khóa** (`$seen[$x] = true`) | `sort`: lai quicksort và sắp xếp chèn, ổn định từ PHP 8.0; sửa bản sao vì mảng truyền theo giá trị |
+| Rust | `HashSet<i32>`, bảng băm SwissTable (hashbrown), băm mặc định bằng SipHash-1-3 | `sort_unstable`: ipnsort; `sort` ổn định: driftsort (từ Rust 1.81) |
 
 ## Ví dụ chạy được
 
-Mỗi ngôn ngữ một file, tự chạy test của nó: [TypeScript](../code/neetcode-contains-duplicate/contains-duplicate.ts) · [JavaScript](../code/neetcode-contains-duplicate/contains-duplicate.js) · [Python](../code/neetcode-contains-duplicate/contains_duplicate.py) · [Go](../code/neetcode-contains-duplicate/contains_duplicate.go) · [Java](../code/neetcode-contains-duplicate/contains-duplicate.java).
+Mỗi ngôn ngữ một file, tự chạy test của nó: [TypeScript](../code/neetcode-contains-duplicate/contains-duplicate.ts) · [JavaScript](../code/neetcode-contains-duplicate/contains-duplicate.js) · [Python](../code/neetcode-contains-duplicate/contains_duplicate.py) · [Go](../code/neetcode-contains-duplicate/contains_duplicate.go) · [Java](../code/neetcode-contains-duplicate/contains-duplicate.java) · [PHP](../code/neetcode-contains-duplicate/contains-duplicate.php) · [Rust](../code/neetcode-contains-duplicate/contains_duplicate.rs).
 
 ```ts
 // TypeScript: node contains-duplicate.ts
@@ -186,6 +188,31 @@ function containsDuplicate(nums) {
 }
 ```
 
+```php
+// PHP: mảng chính là bảng băm có thứ tự; dùng số làm KHÓA để tra O(1)
+function containsDuplicate(array $nums): bool {
+    $seen = [];
+    foreach ($nums as $x) {
+        if (isset($seen[$x])) return true; // in_array($x, $seen) sẽ quét cả mảng: O(n)
+        $seen[$x] = true;
+    }
+    return false;
+}
+```
+
+```rust
+// Rust: insert trả về false nếu phần tử đã có, một lần tra là đủ
+fn contains_duplicate(nums: &[i32]) -> bool {
+    let mut seen = HashSet::with_capacity(nums.len());
+    for &x in nums {
+        if !seen.insert(x) {
+            return true;
+        }
+    }
+    false
+}
+```
+
 File TypeScript chạy test cho cả bốn cách, rồi đo trên mảng **không có số trùng** (ca tệ nhất, không cách nào dừng sớm được):
 
 ```text
@@ -210,7 +237,7 @@ trùng ở vị trí 0 và 1, n = 1 000 000: sắp xếp 206.11 ms, hash set 0.0
 - **Vét cạn**: n tăng 10 lần (1 000 → 10 000), thời gian tăng 77 lần, đúng dáng O(n²). Theo cùng tỉ lệ, 100 000 số sẽ mất khoảng 4 giây, nên mình không chạy.
 - **Sắp xếp** và **hash set**: n tăng 10 lần thì thời gian tăng khoảng 10–13 lần. Hash set nhanh hơn sắp xếp khoảng 3 lần ở mọi cỡ.
 - **Một dòng** (`new Set(nums).size !== nums.length`) nhanh ngang hash set khi không có số trùng, vì `Set` dựng từ cả mảng một lần được tối ưu tốt. Nhưng khi trùng nằm ngay đầu mảng, nó vẫn mất 64 ms, còn vòng lặp có dừng sớm thì không mất gì.
-- Python, Go, Java in ra `✓` cho cùng các ca test.
+- Python, Go, Java in ra `✓` cho cùng các ca test; PHP và Rust in `test: 4 cách × 6 ca, 0 ca sai` như TypeScript.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -220,6 +247,8 @@ trùng ở vị trí 0 và 1, n = 1 000 000: sắp xếp 206.11 ms, hash set 0.0
 - **"Hash set luôn O(1)."** Đó là trung bình. Bài Two Sum cho thấy khi mọi khóa rơi vào cùng một ô, một `HashMap` của Java chậm tới mức O(n) cho mỗi lần tra.
 - **Quên rằng "một dòng" không dừng sớm.** `len(set(nums)) != len(nums)` gọn và hay, nhưng luôn tốn O(n) thời gian và O(n) bộ nhớ, kể cả khi hai số đầu đã trùng.
 - **Java: tưởng `HashSet<Integer>` rẻ như mảng `int`.** Mỗi phần tử là một object `Integer` riêng, cộng thêm một nút trong bảng. Với vài triệu phần tử, sắp xếp `int[]` có thể tốn ít bộ nhớ hơn hẳn.
+- **PHP: tra bằng `in_array` thay vì bằng khóa.** `in_array($x, $seen)` quét toàn bộ mảng, biến lời giải thành O(n²). Lưu số làm khóa rồi hỏi `isset($seen[$x])`. Thêm nữa, `in_array` không có tham số thứ ba so sánh lỏng: `in_array('1e1', ['10'])` trả `true`.
+- **Rust: quên rằng `nums` chỉ được mượn.** Hàm nhận `&[i32]` thì không sắp xếp tại chỗ được; muốn sắp phải `to_vec()` trước, và cái giá O(n) bộ nhớ hiện rõ ngay trong code. `HashSet` mặc định băm bằng SipHash (chống tấn công va chạm), chậm hơn hàm băm của Go hay Java một chút.
 
 ## Câu hỏi tự kiểm tra
 

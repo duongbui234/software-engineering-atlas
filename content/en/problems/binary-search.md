@@ -146,7 +146,7 @@ lo + (hi - lo) / 2    = 1750000000
 
 `>>>` is an **unsigned** right shift: the overflowing sum only flips the sign bit, and reading those 32 bits as unsigned still gives the true sum (at most 2³² − 2), so halving it gives the right result. `lo + (hi − lo) / 2` avoids the overflow another way: `hi − lo` never exceeds `hi`. See [[en/concepts/midpoint-overflow|Midpoint Overflow]].
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Computing `mid` | Standard library | Language-specific trap |
 |---|---|---|---|
@@ -154,6 +154,8 @@ lo + (hi - lo) / 2    = 1750000000
 | Python | `(lo + hi) // 2` | `bisect_left`, `bisect_right`, `insort` | `int` is unbounded, no overflow. `bisect` returns an **insertion point**, never `-1`: check `i < n and nums[i] == target` yourself |
 | Go | `lo + (hi-lo)/2`, or `int(uint(lo+hi) >> 1)` as in `sort.Search` | `sort.Search(n, f)`: smallest `i` with `f(i)` true; `slices.BinarySearch(s, x)` returns `(i, found)` | `int` is 64-bit on 64-bit machines, so overflow is unlikely, but the library still writes the safe form. `sort.Search`'s `f` must flip from `false` to `true` exactly once |
 | Java | `lo + (hi - lo) / 2` or `(lo + hi) >>> 1` | `Arrays.binarySearch`, `Collections.binarySearch` | when absent it returns `-(insertion point) − 1`, **always negative** but not `-1`: `binarySearch([1, 3, 5], 4)` gives `-3`. `if (i == -1)` is wrong; write `if (i < 0)`. With duplicates there is no guarantee which one is found |
+| PHP | `intdiv($lo + $hi, 2)` or `($lo + $hi) >> 1` | no binary search for arrays; `array_search` is a linear scan | `int` is 64-bit so the sum doesn't overflow, but `/` returns a **float** when the division isn't exact: using `($lo + $hi) / 2` as an index triggers a deprecation in PHP 8.1+ because the float gets truncated |
+| Rust | `lo + (hi - lo) / 2` | `slice::binary_search` returns `Ok(i)` or `Err(insertion point)`; `partition_point(\|&x\| x < t)` is the lower bound | indices are `usize`: `nums.len() - 1` on an empty array, or `hi = mid - 1` when `mid = 0`, makes the program **panic** in a debug build; the half-open convention avoids this. `i32` overflow panics in debug and silently wraps with `-O` |
 
 ### Measurements
 
@@ -173,7 +175,7 @@ Python, n = 10⁶, 10⁵ lookups: hand-written loop 224 ms, `bisect_left` 80 ms.
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-binary-search-problem/binary-search.ts) · [Python](../code/neetcode-binary-search-problem/binary_search.py) · [Go](../code/neetcode-binary-search-problem/binary_search.go) · [Java](../code/neetcode-binary-search-problem/binary-search.java) · [JavaScript](../code/neetcode-binary-search-problem/binary-search.js)
+[TypeScript](../code/neetcode-binary-search-problem/binary-search.ts) · [Python](../code/neetcode-binary-search-problem/binary_search.py) · [Go](../code/neetcode-binary-search-problem/binary_search.go) · [Java](../code/neetcode-binary-search-problem/binary-search.java) · [JavaScript](../code/neetcode-binary-search-problem/binary-search.js) · [PHP](../code/neetcode-binary-search-problem/binary-search.php) · [Rust](../code/neetcode-binary-search-problem/binary_search.rs)
 
 Each file has a closed-range version, a half-open version and one built on the lower bound or the standard library, and runs 8 cases: the problem's examples, a one-element array, a two-element array, and both ends of an odd-length array. Below are the two range conventions.
 
@@ -311,6 +313,71 @@ function halfOpen(nums, target) {
 }
 ```
 
+```php
+// Closed interval [lo, hi]: invariant "if target is present, it is in nums[lo..hi]".
+function closedInterval(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums) - 1;
+    while ($lo <= $hi) {
+        $mid = $lo + (($hi - $lo) >> 1); // PHP int is 64-bit; intdiv($lo + $hi, 2) is safe too
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid - 1;
+    }
+    return -1;
+}
+
+// Half-open interval [lo, hi): hi is the FIRST position no longer considered.
+function halfOpen(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums);
+    while ($lo < $hi) {
+        $mid = intdiv($lo + $hi, 2); // DON'T write ($lo + $hi) / 2: PHP's / returns a float when the division isn't exact
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return -1;
+}
+```
+
+```rust
+// Closed interval [lo, hi]. A usize index can't go negative, so either keep hi = "one past the last cell" (lo..hi)
+// or use i64. Here i64 keeps the closed-interval shape.
+fn closed_interval(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0i64, nums.len() as i64 - 1); // usize: 0 - 1 makes the program panic
+    while lo <= hi {
+        let mid = lo + (hi - lo) / 2;
+        let v = nums[mid as usize];
+        if v == target {
+            return mid as i32;
+        }
+        if v < target {
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    -1
+}
+
+// Half-open interval [lo, hi): fits usize, since hi never has to go below 0.
+fn half_open(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0usize, nums.len());
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        match nums[mid].cmp(&target) {
+            std::cmp::Ordering::Equal => return mid as i32,
+            std::cmp::Ordering::Less => lo = mid + 1,
+            std::cmp::Ordering::Greater => hi = mid,
+        }
+    }
+    -1
+}
+```
+
 
 The lower bound, and how each standard library answers the same question:
 
@@ -379,6 +446,42 @@ function viaLowerBound(nums, target) {
 }
 ```
 
+```php
+// Lower bound: the first position with nums[i] >= target. PHP has no binary search for arrays.
+function lowerBound(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums);
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return $lo;
+}
+
+function viaLowerBound(array $nums, int $target): int
+{
+    $i = lowerBound($nums, $target);
+    return $i < count($nums) && $nums[$i] === $target ? $i : -1;
+}
+```
+
+```rust
+// Standard library: binary_search returns Ok(position) or Err(insertion point); partition_point is the lower bound.
+fn via_std(nums: &[i32], target: i32) -> i32 {
+    match nums.binary_search(&target) {
+        Ok(i) => i as i32,
+        Err(_) => -1,
+    }
+}
+
+fn via_partition_point(nums: &[i32], target: i32) -> i32 {
+    let i = nums.partition_point(|&x| x < target); // first position with nums[i] >= target
+    if i < nums.len() && nums[i] == target { i as i32 } else { -1 }
+}
+```
+
 
 Output of `node binary-search.ts`, both wrong versions included:
 
@@ -400,6 +503,8 @@ lo + ((hi - lo) >> 1) = 1750000000
 
 Python, Go and JavaScript print `8/8` correct for every correct version; Go also prints `slices.BinarySearch([1 3 5], 4) = 2, false`, and Java prints `Arrays.binarySearch([1, 3, 5], 4) = -3`.
 
+PHP (`php binary-search.php`) and Rust (`rustc --edition 2021 -O binary_search.rs`) print `8/8 ca đúng` for every correct version and the same failing counts for the two broken ones. PHP also prints `(lo + hi + 1) / 2 = 1750000000.5` (`/` returns a float); Rust prints `lo.wrapping_add(hi) / 2 = -397483648` (i32 wraps around), `lo.checked_add(hi) = None` and `[1, 3, 5].binary_search(&4) = Err(2)`.
+
 ## Misconceptions and common traps
 
 - **"Tweak `<` into `<=` until the tests pass."** Pick the range convention first; the loop condition and the `hi` update follow from it (table above).
@@ -408,6 +513,8 @@ Python, Go and JavaScript print `8/8` correct for every correct version; Go also
 - **"Python and JS cannot overflow, so `(lo + hi) / 2` is fine."** Python is fine. JS is fine with `Math.floor` or `>>> 1`, but `>> 1` breaks once the sum passes 2³¹. Java, C, C++ and Go with `int32` really overflow.
 - **Java: comparing `Arrays.binarySearch(...) == -1`.** The return value is `-(insertion point) − 1`; it equals `-1` only when the insertion point is 0.
 - **Using it on an unsorted array.** No error, just a wrong result. Sorting costs O(n log n), so it only pays off when searching the same array many times.
+- **PHP: `($lo + $hi) / 2` as an index.** `/` returns a float when the sum is odd (`1750000000.5`); use `intdiv` or `>> 1`. Compare with `===` so `0` doesn't equal `"0"` or `false`.
+- **Rust: a closed interval with `usize`.** `hi = mid - 1` when `mid = 0` panics (debug) or wraps to a huge number (`-O`). Use the half-open convention, or `i64` as the sample file does. `binary_search` returns `Err(insertion point)` when the value is missing, not `-1`.
 
 ## Self-check questions
 

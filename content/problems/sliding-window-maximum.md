@@ -21,7 +21,7 @@ sources:
 > - JS không có deque: bỏ đầu hàng bằng `shift()` dời cả mảng. Với k = 10⁵ trên dãy giảm dần, bản `shift()` mất 1 223 ms, bản dùng chỉ số `head` mất 1,4 ms.
 
 > [!info] Bối cảnh
-> Bài LeetCode 239, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Các bài khác của ga nhớ một con số hoặc một bảng đếm; bài này cần một cấu trúc mới, hàng đợi đơn điệu, sẽ quay lại ở ga ngăn xếp đơn điệu. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Nên đọc trước [[problems/trapping-rain-water|Trapping Rain Water]] (max tiền tố, hậu tố).
+> Bài LeetCode 239, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Các bài khác của ga nhớ một con số hoặc một bảng đếm; bài này cần một cấu trúc mới, hàng đợi đơn điệu, sẽ quay lại ở ga ngăn xếp đơn điệu. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Nên đọc trước [[problems/trapping-rain-water|Trapping Rain Water]] (max tiền tố, hậu tố).
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Cửa sổ cố định**: luôn dài đúng k, mỗi bước trượt sang phải một ô. Xem [[concepts/fixed-size-window|Fixed-size Window]].
@@ -147,7 +147,7 @@ Với dữ liệu ngẫu nhiên, hàng đợi luôn ngắn (phần tử lớn đ
 | `collections.deque` | 19,6 |
 | `list.pop(0)` | 1 141,9 |
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Deque | Bẫy riêng |
 |---|---|---|
@@ -155,10 +155,12 @@ Với dữ liệu ngẫu nhiên, hàng đợi luôn ngắn (phần tử lớn đ
 | Python | `collections.deque`, `popleft()` O(1) | `list.pop(0)` là O(n) |
 | Go | slice + chỉ số `head` | `q = q[1:]` cũng O(1), nhưng mảng nền cũ vẫn bị giữ trong bộ nhớ tới khi slice được cấp lại |
 | Java | `ArrayDeque<Integer>` | `Stack` đồng bộ hóa nên chậm, `LinkedList` tạo một node cho mỗi phần tử; chỉ số bị đóng hộp thành `Integer` |
+| PHP | mảng + `head`/`tail` | `array_shift` đánh lại chỉ số cả mảng nên O(k) mỗi lần, như `shift()` của JS; `SplQueue` là danh sách liên kết đôi |
+| Rust | `VecDeque<usize>` | chỉ số là `usize`: `i - k` tràn khi `i < k`, nên so `front + k <= i` |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-sliding-window-maximum/sliding-window-max.ts) · [Python](../code/neetcode-sliding-window-maximum/sliding_window_max.py) · [Go](../code/neetcode-sliding-window-maximum/sliding_window_max.go) · [Java](../code/neetcode-sliding-window-maximum/sliding-window-max.java) · [JavaScript](../code/neetcode-sliding-window-maximum/sliding-window-max.js)
+[TypeScript](../code/neetcode-sliding-window-maximum/sliding-window-max.ts) · [Python](../code/neetcode-sliding-window-maximum/sliding_window_max.py) · [Go](../code/neetcode-sliding-window-maximum/sliding_window_max.go) · [Java](../code/neetcode-sliding-window-maximum/sliding-window-max.java) · [JavaScript](../code/neetcode-sliding-window-maximum/sliding-window-max.js) · [PHP](../code/neetcode-sliding-window-maximum/sliding-window-max.php) · [Rust](../code/neetcode-sliding-window-maximum/sliding_window_max.rs)
 
 Mỗi file có vét cạn, chia khối và hàng đợi đơn điệu, chạy 7 ca gồm dãy giảm dần, giá trị bằng nhau và k = n. Dưới đây là chia khối và hàng đợi đơn điệu.
 
@@ -306,6 +308,56 @@ function monotonicDeque(nums, k) {
 }
 ```
 
+```php
+function blocks(array $nums, int $k): array {
+    $n = count($nums);
+    $pre = $nums; // gán là chép
+    $suf = $nums;
+    for ($i = 1; $i < $n; $i++) if ($i % $k) $pre[$i] = max($pre[$i - 1], $nums[$i]);
+    for ($i = $n - 2; $i >= 0; $i--) if (($i + 1) % $k) $suf[$i] = max($suf[$i + 1], $nums[$i]);
+    $out = [];
+    for ($i = 0; $i + $k <= $n; $i++) $out[] = max($suf[$i], $pre[$i + $k - 1]);
+    return $out;
+}
+
+function monotonicDeque(array $nums, int $k): array {
+    $q = []; // q[head..tail-1] là hàng đợi; array_shift sẽ đánh lại chỉ số cả mảng
+    $head = 0;
+    $tail = 0;
+    $out = [];
+    foreach ($nums as $i => $x) {
+        if ($head < $tail && $q[$head] <= $i - $k) $head++;
+        while ($head < $tail && $nums[$q[$tail - 1]] <= $x) $tail--;
+        $q[$tail++] = $i;
+        if ($i >= $k - 1) $out[] = $nums[$q[$head]];
+    }
+    return $out;
+}
+```
+
+```rust
+fn blocks(nums: &[i32], k: usize) -> Vec<i32> {
+    let n = nums.len();
+    let (mut pre, mut suf) = (nums.to_vec(), nums.to_vec());
+    for i in 1..n { if i % k != 0 { pre[i] = pre[i - 1].max(nums[i]); } }
+    for i in (0..n.saturating_sub(1)).rev() { if (i + 1) % k != 0 { suf[i] = suf[i + 1].max(nums[i]); } }
+    (0..=n - k).map(|i| suf[i].max(pre[i + k - 1])).collect()
+}
+
+fn monotonic_deque(nums: &[i32], k: usize) -> Vec<i32> {
+    let mut q: VecDeque<usize> = VecDeque::new();
+    let mut out = Vec::with_capacity(nums.len() + 1 - k);
+    for (i, &x) in nums.iter().enumerate() {
+        // viết front + k <= i, KHÔNG viết front <= i - k: với usize, i - k tràn khi i < k
+        if q.front().is_some_and(|&f| f + k <= i) { q.pop_front(); }
+        while q.back().is_some_and(|&b| nums[b] <= x) { q.pop_back(); }
+        q.push_back(i);
+        if i + 1 >= k { out.push(nums[q[0]]); }
+    }
+    out
+}
+```
+
 
 File TypeScript chạy thêm bản max chạy và bản `shift()`, rồi đo:
 
@@ -339,7 +391,7 @@ monotonic_deque      19.6
 monotonic_list     1141.9
 ```
 
-Go, Java và JavaScript in `7/7 ca đúng` cho cả ba cách.
+Go, Java, JavaScript, PHP và Rust in `7/7 ca đúng` cho cả ba cách.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -349,6 +401,8 @@ Go, Java và JavaScript in `7/7 ca đúng` cho cả ba cách.
 - **`shift()` hay `pop(0)` để bỏ đầu hàng.** Kết quả đúng, test nhỏ chạy nhanh, nhưng ca tệ nhất thành O(n·k).
 - **"Vòng `while` lồng trong `for` là O(n·k)."** Phải đếm tổng số lần bỏ: mỗi chỉ số bị bỏ tối đa một lần.
 - **Dùng heap.** Max-heap với "xóa lười" (bỏ đỉnh khi chỉ số đã ra ngoài) cũng đúng, O(n log n). Hàng đợi đơn điệu nhanh hơn và gọn hơn.
+- **PHP: `array_shift` để bỏ đầu hàng.** Nó dời và đánh lại chỉ số mọi phần tử còn lại, nên với dãy giảm dần mỗi bước tốn O(k), giống `shift()` của JS. Giữ một biến `$head`, hoặc dùng `SplQueue`.
+- **Rust: `q[0] <= i - k` với chỉ số `usize`.** Ở những bước đầu `i < k`, `i - k` tràn: bản build debug panic, bản `-O` ra số khổng lồ và bỏ nhầm đầu hàng. Chuyển vế thành `q[0] + k <= i`.
 
 ## Câu hỏi tự kiểm tra
 

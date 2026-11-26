@@ -339,9 +339,9 @@ Các ngôn ngữ khác (10⁶ việc, n = 100): Python heap + deque 326,3 ms, c�
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-task-scheduler/task-scheduler.ts) · [Python](../code/neetcode-task-scheduler/task_scheduler.py) · [Go](../code/neetcode-task-scheduler/task_scheduler.go) · [Java](../code/neetcode-task-scheduler/task-scheduler.java) · [JavaScript](../code/neetcode-task-scheduler/task-scheduler.js)
+[TypeScript](../code/neetcode-task-scheduler/task-scheduler.ts) · [Python](../code/neetcode-task-scheduler/task_scheduler.py) · [Go](../code/neetcode-task-scheduler/task_scheduler.go) · [Java](../code/neetcode-task-scheduler/task-scheduler.java) · [JavaScript](../code/neetcode-task-scheduler/task-scheduler.js) · [PHP](../code/neetcode-task-scheduler/task-scheduler.php) · [Rust](../code/neetcode-task-scheduler/task_scheduler.rs)
 
-Mỗi file chạy 10 ca chung: ba ví dụ của đề, n = 0, một việc với n = 100, `AAAAAABCDEFG` (nhiều nhịp nghỉ), `ABBB` (bắt lỗi chọn sai việc), `AABBCCDD` và `AAABBBCCCDDE` (số việc thắng công thức khung), `AAAB` với n = 3. File JavaScript có thêm ca `AAAAAAAAAABBBCC` để bắt lỗi `sort()`.
+Mỗi file trong năm bản đầu chạy 10 ca chung: ba ví dụ của đề, n = 0, một việc với n = 100, `AAAAAABCDEFG` (nhiều nhịp nghỉ), `ABBB` (bắt lỗi chọn sai việc), `AABBCCDD` và `AAABBBCCCDDE` (số việc thắng công thức khung), `AAAB` với n = 3. File JavaScript có thêm ca `AAAAAAAAAABBBCC` để bắt lỗi `sort()`.
 
 Mô phỏng bằng heap và hàng chờ nguội:
 
@@ -520,6 +520,42 @@ function formula(tasks, n) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function leastInterval(array $tasks, int $cooldown): int
+{
+    if ($tasks === []) {
+        return 0;
+    }
+    $counts = array_count_values($tasks);
+    $most = max($counts);
+    $leaders = 0;
+    foreach ($counts as $count) {
+        if ($count === $most) {
+            $leaders++;
+        }
+    }
+    return max(count($tasks), ($most - 1) * ($cooldown + 1) + $leaders);
+}
+```
+
+```rust
+fn least_interval(tasks: &[u8], cooldown: usize) -> usize {
+    if tasks.is_empty() {
+        return 0;
+    }
+    let mut counts = [0; 26];
+    for &task in tasks {
+        counts[usize::from(task - b'A')] += 1;
+    }
+    let most = *counts.iter().max().unwrap();
+    let leaders = counts.iter().filter(|&&count| count == most).count();
+    tasks.len().max((most - 1) * (cooldown + 1) + leaders)
+}
+```
+
 
 Kết quả `node task-scheduler.ts`:
 
@@ -613,6 +649,8 @@ số việc   n      heap       sắp mỗi vòng  công thức
 100000    100       2.66 ms       1.46 ms    0.21 ms
 1000000   100      61.89 ms      14.63 ms    1.95 ms
 ```
+
+Hai bản thêm dùng công thức khung. Rust dùng mảng 26 ô cho các byte ASCII `A` đến `Z`. PHP in `10/10 ca đúng` và Rust in `10/10 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

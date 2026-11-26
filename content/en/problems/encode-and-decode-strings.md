@@ -111,7 +111,7 @@ It is the same idea as the station's prefixes: write the information **first**, 
 | Tells `[]` from `[""]` | no | yes | yes |
 | Extra length | n − 1 characters | up to double if the content is full of special characters | digits of the length + 1, per string |
 
-### Under the hood of the five languages: what "length" means
+### Under the hood of the seven languages: what "length" means
 
 | | length of `"😀"` | Slicing counts |
 |---|---|---|
@@ -119,12 +119,14 @@ It is the same idea as the station's prefixes: write the information **first**, 
 | Java | `length()` = 2 (UTF-16 units) | UTF-16 units |
 | Python | `len` = 1 (code point) | code points |
 | Go | `len` = 4 (UTF-8 bytes) | bytes |
+| PHP | `strlen` = 4 (bytes); `mb_strlen` = 1 (code point) | bytes with `substr`, code points with `mb_substr` |
+| Rust | `len()` = 4 (UTF-8 bytes); `chars().count()` = 1 | bytes (cutting inside a character panics) |
 
 Within **one** language, counting and slicing use the same unit, so the length prefix is always right. The bug appears when the two sides use two units: encoding in JS and decoding in Python, or, within JS, one side using `length` and the other `[...s]` (which counts code points). The TypeScript file reproduces exactly that case. Real protocols therefore always define the length in **bytes** after UTF-8 encoding.
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-encode-and-decode-strings/encode-decode.ts) · [Python](../code/neetcode-encode-and-decode-strings/encode_decode.py) · [Go](../code/neetcode-encode-and-decode-strings/encode_decode.go) · [Java](../code/neetcode-encode-and-decode-strings/encode-decode.java) · [JavaScript](../code/neetcode-encode-and-decode-strings/encode-decode.js)
+[TypeScript](../code/neetcode-encode-and-decode-strings/encode-decode.ts) · [Python](../code/neetcode-encode-and-decode-strings/encode_decode.py) · [Go](../code/neetcode-encode-and-decode-strings/encode_decode.go) · [Java](../code/neetcode-encode-and-decode-strings/encode-decode.java) · [PHP](../code/neetcode-encode-and-decode-strings/encode-decode.php) · [Rust](../code/neetcode-encode-and-decode-strings/encode_decode.rs) · [JavaScript](../code/neetcode-encode-and-decode-strings/encode-decode.js)
 
 Each file has all three approaches and runs 9 cases, including `[]`, `[""]`, and strings containing `,`, `#`, `/` and an emoji. Below is the length-prefix approach.
 
@@ -222,6 +224,41 @@ function lengthDecode(s) {
 }
 ```
 
+```php
+function lengthEncode(array $strs): string {
+    return implode('', array_map(fn($s) => strlen($s) . '#' . $s, $strs)); // strlen counts BYTES
+}
+
+function lengthDecode(string $s): array {
+    $out = []; $i = 0;
+    while ($i < strlen($s)) {
+        $h = strpos($s, '#', $i);
+        $n = (int) substr($s, $i, $h - $i);
+        $out[] = substr($s, $h + 1, $n); // substr counts bytes too: matches encode time
+        $i = $h + 1 + $n;
+    }
+    return $out;
+}
+```
+
+```rust
+fn length_encode(strs: &[String]) -> String {
+    strs.iter().map(|s| format!("{}#{}", s.len(), s)).collect() // len() counts UTF-8 bytes
+}
+
+fn length_decode(s: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < s.len() {
+        let h = i + s[i..].find('#').unwrap();
+        let n: usize = s[i..h].parse().unwrap();
+        out.push(s[h + 1..h + 1 + n].to_string()); // slices by byte; slicing inside a character panics
+        i = h + 1 + n;
+    }
+    out
+}
+```
+
 
 ```text
 $ node encode-decode.ts
@@ -236,7 +273,7 @@ example: ["12#ab","#"] → "5#12#ab1##"
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
-The fourth line encodes with `s.length` (2 for the emoji) but decodes by counting code points (1 for the emoji), so it takes one character too many and everything after is shifted. The other files print the emoji's length the way their language counts it: Python `len("😀") = 1, len("😀".encode()) = 4`; Go `len("😀") = 4, utf8.RuneCountInString("😀") = 1`; Java `"😀".length() = 2, codePointCount = 1`. All five languages give `9/9 ca đúng` ("9/9 cases passed") for escaping and the length prefix.
+The fourth line encodes with `s.length` (2 for the emoji) but decodes by counting code points (1 for the emoji), so it takes one character too many and everything after is shifted. The other files print the emoji's length the way their language counts it: Python `len("😀") = 1, len("😀".encode()) = 4`; Go `len("😀") = 4, utf8.RuneCountInString("😀") = 1`; Java `"😀".length() = 2, codePointCount = 1`; PHP `strlen("😀") = 4, mb_strlen("😀") = 1`; Rust `"😀".len() = 4, "😀".chars().count() = 1`. All seven languages give `9/9 ca đúng` ("9/9 cases passed") for escaping and the length prefix.
 
 ## Misconceptions and common traps
 
@@ -246,6 +283,8 @@ The fourth line encodes with `s.length` (2 for the emoji) but decodes by countin
 - **Finding the `#` with `lastIndexOf` or `split("#")`.** The content may contain `#`. Only the **first** `#` from the current position is guaranteed to belong to the length.
 - **Java: `split(",")` drops trailing empty strings.** `"a,,".split(",")` gives `[a]`. You must pass `split(",", -1)`.
 - **The two sides count length in different units.** Correct within each language, wrong when two languages talk to each other. Define the length in UTF-8 bytes if the data crosses the network.
+- **PHP: mixing byte functions with `mb_` functions.** `strlen`/`substr` count bytes, `mb_strlen`/`mb_substr` count characters. Encoding with one kind and decoding with the other is exactly the unit-mismatch bug above (the PHP file prints `8/9`). For escaping, use `strtr` with an array: it replaces every pair in one pass, while two chained `str_replace` calls can replace what the first one just produced.
+- **Rust: slicing `&str` by byte.** `s[a..b]` uses byte indices, which match `len()`, so the length prefix works with emoji. But if the lengths use mismatched units and a cut lands inside a multi-byte character, the program **panics** instead of returning garbage. Use `s.get(a..b)` when the data is untrusted.
 
 ## Self-check questions
 

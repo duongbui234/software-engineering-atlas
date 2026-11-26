@@ -135,7 +135,7 @@ The hash set wins every cell, but the gap depends heavily on the language and th
 
 An earlier version of this page gave 14 times for TypeScript on random data. That number was wrong because of the data: the old random generator (`seed * 1103515245` computed in floating point) lost precision and repeated after about 10 thousand values, so "10⁶ random numbers" really held only about 10 thousand distinct values, and a small set is fast. The file now uses the mulberry32 generator (every multiplication goes through `Math.imul`), which gives 10⁶ almost entirely distinct values.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Asking "is x here?" | Language-specific trap |
 |---|---|---|
@@ -143,10 +143,12 @@ An earlier version of this page gave 14 times for TypeScript on random data. Tha
 | Python | `x in s` with `s` a set: O(1) on average | `x in nums` with `nums` a **list** works too, but is O(n) |
 | Go | `_, ok := m[x]` on a `map[int]struct{}` | `slices.Sort` sorts in place; map iteration order is random (does not affect the result) |
 | Java | `HashSet<Integer>.contains` | `Integer == Integer` compares **references**; right for −128..127, wrong from 128 up |
+| PHP | `isset($all[$x])` with the numbers as array **keys** | `in_array` scans the whole array: O(n) per lookup |
+| Rust | `HashSet::contains(&x)` | `x + len` overflowing `i32` panics in a debug build and wraps with `-O` |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.ts) · [Python](../code/neetcode-longest-consecutive-sequence/longest_consecutive.py) · [Go](../code/neetcode-longest-consecutive-sequence/longest_consecutive.go) · [Java](../code/neetcode-longest-consecutive-sequence/longest-consecutive.java) · [JavaScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.js)
+[TypeScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.ts) · [Python](../code/neetcode-longest-consecutive-sequence/longest_consecutive.py) · [Go](../code/neetcode-longest-consecutive-sequence/longest_consecutive.go) · [Java](../code/neetcode-longest-consecutive-sequence/longest-consecutive.java) · [JavaScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.js) · [PHP](../code/neetcode-longest-consecutive-sequence/longest-consecutive.php) · [Rust](../code/neetcode-longest-consecutive-sequence/longest_consecutive.rs)
 
 Each file has all three approaches and runs its own test cases. Below are the sorting and hash set approaches.
 
@@ -302,6 +304,65 @@ function hashSet(nums) {
 }
 ```
 
+```php
+// PHP: arrays are passed by value, so sort() only changes the copy
+function sortScan(array $nums): int {
+    if (count($nums) === 0) return 0;
+    sort($nums, SORT_NUMERIC);
+    $best = 1; $len = 1;
+    for ($i = 1, $n = count($nums); $i < $n; $i++) {
+        if ($nums[$i] === $nums[$i - 1]) continue; // duplicate: skip it, the run does NOT break
+        $len = $nums[$i] === $nums[$i - 1] + 1 ? $len + 1 : 1;
+        $best = max($best, $len);
+    }
+    return $best;
+}
+function hashSet(array $nums): int {
+    $all = array_fill_keys($nums, true);
+    $best = 0;
+    foreach ($all as $x => $_) {            // iterate the KEYS; the values are just true
+        if (isset($all[$x - 1])) continue;
+        $len = 1;
+        while (isset($all[$x + $len])) $len++;
+        $best = max($best, $len);
+    }
+    return $best;
+}
+```
+
+```rust
+// Rust: dedup() drops equal neighbours after sorting
+fn sort_scan(nums: &[i32]) -> i32 {
+    if nums.is_empty() {
+        return 0;
+    }
+    let mut a = nums.to_vec();
+    a.sort_unstable();
+    a.dedup();
+    let (mut best, mut len) = (1, 1);
+    for w in a.windows(2) {
+        len = if w[1] == w[0] + 1 { len + 1 } else { 1 };
+        best = best.max(len);
+    }
+    best
+}
+fn hash_set(nums: &[i32]) -> i32 {
+    let all: HashSet<i32> = nums.iter().copied().collect();
+    let mut best = 0;
+    for &x in &all {
+        if all.contains(&(x - 1)) {
+            continue;
+        }
+        let mut len = 1;
+        while all.contains(&(x + len)) {
+            len += 1;
+        }
+        best = best.max(len);
+    }
+    best
+}
+```
+
 The TypeScript file also runs two wrong versions so the tests point at what breaks, then measures:
 
 ```text
@@ -339,7 +400,7 @@ hashSet        8/8 cases passed
 sortScanBoxed  7/8 cases passed; wrong on [1000, 1001, 1001, 1002] → 2
 ```
 
-The two `1001`s are two different `Integer` objects, so `==` treats them as different, and the run gets cut in the middle. With small numbers such as `[1, 0, 1, 2]` this version is right, because Java shares the object for −128..127. Python, Go and JavaScript print `7/7 ca đúng` ("7/7 cases passed") for all three approaches.
+The two `1001`s are two different `Integer` objects, so `==` treats them as different, and the run gets cut in the middle. With small numbers such as `[1, 0, 1, 2]` this version is right, because Java shares the object for −128..127. Python, Go and JavaScript print `7/7 ca đúng` ("7/7 cases passed") for all three approaches. PHP and Rust also print `7/7 ca đúng` for the three approaches, and the version that treats a duplicate as a break prints `6/7 ca đúng; sai ở [1,0,1,2]` ("6/7 cases passed; wrong on [1,0,1,2]"), like TypeScript.
 
 ## Misconceptions and common traps
 
@@ -349,6 +410,8 @@ The two `1001`s are two different `Integer` objects, so `==` treats them as diff
 - **JS: forgetting the comparator in `sort()`.** Negative and multi-digit numbers land in the wrong order; the wrong version passes only 4/7 cases.
 - **Java: comparing `Integer`s with `==`.** Right for small numbers, wrong from 128 up, so tests with small numbers don't catch it. Use `equals`, or sort an `int[]` instead of a `List<Integer>`.
 - **Python: writing `x + 1 in nums` with `nums` a list.** It runs correctly, but each lookup is O(n), and the solution silently becomes O(n²) or worse.
+- **PHP: building the set with `array_flip` and iterating the values.** `array_flip($nums)` makes the numbers keys, but the values are the old **indices**; `foreach ($all as $x)` then walks indices, not numbers. Write `foreach ($all as $x => $_)`. The file uses `array_fill_keys($nums, true)` so the values can't be mistaken.
+- **Rust: forgetting `dedup()` after sorting.** Without it, two equal neighbours break the run, exactly the `6/7` wrong version. Also, `x + len` on an `i32` near `i32::MAX` panics in a debug build; the problem's ±10⁹ limit keeps the addition safe.
 - **"O(n) is surely much faster than O(n log n)."** On random data at 10⁶ elements, the hash set beats sorting by only 1.5 times in TypeScript and 1.3 times in Python. Both pass LeetCode's limits; only the problem statement forces O(n).
 
 ## Self-check questions

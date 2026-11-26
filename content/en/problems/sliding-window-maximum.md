@@ -22,7 +22,7 @@ sources:
 > - JS has no deque: removing the front with `shift()` moves the whole array. With k = 10⁵ on a decreasing array, the `shift()` version takes 1 223 ms, the version with a `head` index 1.4 ms.
 
 > [!info] Context
-> LeetCode problem 239, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. The station's other problems remember one number or a count table; this one needs a new structure, the monotonic deque, which comes back at the monotonic stack station. The solutions come in TypeScript, Python, Go, Java and JavaScript. Read [[en/problems/trapping-rain-water|Trapping Rain Water]] (prefix and suffix maxima) first.
+> LeetCode problem 239, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. The station's other problems remember one number or a count table; this one needs a new structure, the monotonic deque, which comes back at the monotonic stack station. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. Read [[en/problems/trapping-rain-water|Trapping Rain Water]] (prefix and suffix maxima) first.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Fixed-size window**: always exactly k long, sliding right one slot per step. See [[en/concepts/fixed-size-window|Fixed-size Window]].
@@ -148,7 +148,7 @@ On random data the deque stays short (large elements evict almost everything), s
 | `collections.deque` | 19.6 |
 | `list.pop(0)` | 1 141.9 |
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Deque | Language-specific trap |
 |---|---|---|
@@ -156,10 +156,12 @@ On random data the deque stays short (large elements evict almost everything), s
 | Python | `collections.deque`, `popleft()` O(1) | `list.pop(0)` is O(n) |
 | Go | a slice + a `head` index | `q = q[1:]` is O(1) too, but the old backing array stays in memory until the slice is reallocated |
 | Java | `ArrayDeque<Integer>` | `Stack` is synchronized and slow, `LinkedList` allocates a node per element; indices get boxed into `Integer` |
+| PHP | array + `head`/`tail` | `array_shift` renumbers the whole array, so it is O(k) per call like JS's `shift()`; `SplQueue` is a doubly linked list |
+| Rust | `VecDeque<usize>` | indices are `usize`: `i - k` overflows when `i < k`, so compare `front + k <= i` |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-sliding-window-maximum/sliding-window-max.ts) · [Python](../code/neetcode-sliding-window-maximum/sliding_window_max.py) · [Go](../code/neetcode-sliding-window-maximum/sliding_window_max.go) · [Java](../code/neetcode-sliding-window-maximum/sliding-window-max.java) · [JavaScript](../code/neetcode-sliding-window-maximum/sliding-window-max.js)
+[TypeScript](../code/neetcode-sliding-window-maximum/sliding-window-max.ts) · [Python](../code/neetcode-sliding-window-maximum/sliding_window_max.py) · [Go](../code/neetcode-sliding-window-maximum/sliding_window_max.go) · [Java](../code/neetcode-sliding-window-maximum/sliding-window-max.java) · [JavaScript](../code/neetcode-sliding-window-maximum/sliding-window-max.js) · [PHP](../code/neetcode-sliding-window-maximum/sliding-window-max.php) · [Rust](../code/neetcode-sliding-window-maximum/sliding_window_max.rs)
 
 Each file has the brute force, blocks and the monotonic deque, and runs 7 cases including a decreasing array, equal values and k = n. Below are blocks and the monotonic deque.
 
@@ -307,6 +309,56 @@ function monotonicDeque(nums, k) {
 }
 ```
 
+```php
+function blocks(array $nums, int $k): array {
+    $n = count($nums);
+    $pre = $nums; // assignment copies
+    $suf = $nums;
+    for ($i = 1; $i < $n; $i++) if ($i % $k) $pre[$i] = max($pre[$i - 1], $nums[$i]);
+    for ($i = $n - 2; $i >= 0; $i--) if (($i + 1) % $k) $suf[$i] = max($suf[$i + 1], $nums[$i]);
+    $out = [];
+    for ($i = 0; $i + $k <= $n; $i++) $out[] = max($suf[$i], $pre[$i + $k - 1]);
+    return $out;
+}
+
+function monotonicDeque(array $nums, int $k): array {
+    $q = []; // q[head..tail-1] is the queue; array_shift would renumber the whole array
+    $head = 0;
+    $tail = 0;
+    $out = [];
+    foreach ($nums as $i => $x) {
+        if ($head < $tail && $q[$head] <= $i - $k) $head++;
+        while ($head < $tail && $nums[$q[$tail - 1]] <= $x) $tail--;
+        $q[$tail++] = $i;
+        if ($i >= $k - 1) $out[] = $nums[$q[$head]];
+    }
+    return $out;
+}
+```
+
+```rust
+fn blocks(nums: &[i32], k: usize) -> Vec<i32> {
+    let n = nums.len();
+    let (mut pre, mut suf) = (nums.to_vec(), nums.to_vec());
+    for i in 1..n { if i % k != 0 { pre[i] = pre[i - 1].max(nums[i]); } }
+    for i in (0..n.saturating_sub(1)).rev() { if (i + 1) % k != 0 { suf[i] = suf[i + 1].max(nums[i]); } }
+    (0..=n - k).map(|i| suf[i].max(pre[i + k - 1])).collect()
+}
+
+fn monotonic_deque(nums: &[i32], k: usize) -> Vec<i32> {
+    let mut q: VecDeque<usize> = VecDeque::new();
+    let mut out = Vec::with_capacity(nums.len() + 1 - k);
+    for (i, &x) in nums.iter().enumerate() {
+        // write front + k <= i, NOT front <= i - k: with usize, i - k overflows when i < k
+        if q.front().is_some_and(|&f| f + k <= i) { q.pop_front(); }
+        while q.back().is_some_and(|&b| nums[b] <= x) { q.pop_back(); }
+        q.push_back(i);
+        if i + 1 >= k { out.push(nums[q[0]]); }
+    }
+    out
+}
+```
+
 
 The TypeScript file also runs the running-max version and the `shift()` version, then measures:
 
@@ -342,7 +394,7 @@ monotonic_deque      19.6
 monotonic_list     1141.9
 ```
 
-Go, Java and JavaScript print `7/7 ca đúng` ("7/7 cases passed") for all three approaches.
+Go, Java, JavaScript, PHP and Rust print `7/7 ca đúng` ("7/7 cases passed") for all three approaches.
 
 ## Misconceptions and common traps
 
@@ -352,6 +404,8 @@ Go, Java and JavaScript print `7/7 ca đúng` ("7/7 cases passed") for all three
 - **`shift()` or `pop(0)` to remove the front.** The result is right and small tests run fast, but the worst case becomes O(n·k).
 - **"A `while` nested in a `for` is O(n·k)."** Count the total removals: each index is removed at most once.
 - **Using a heap.** A max-heap with "lazy deletion" (drop the top when its index is outside) also works, in O(n log n). The monotonic deque is faster and simpler.
+- **PHP: `array_shift` to drop the front.** It moves and renumbers every remaining element, so on a decreasing sequence each step costs O(k), like JS's `shift()`. Keep a `$head` variable, or use `SplQueue`.
+- **Rust: `q[0] <= i - k` with `usize` indices.** In the first steps `i < k`, so `i - k` overflows: a debug build panics, an `-O` build gets a huge number and drops the front by mistake. Rewrite it as `q[0] + k <= i`.
 
 ## Self-check questions
 

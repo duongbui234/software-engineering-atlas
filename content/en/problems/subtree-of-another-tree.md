@@ -223,9 +223,9 @@ The bad input for comparing at every node: `root` skewed with m nodes all equal 
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-subtree-of-another-tree/subtree.ts) · [Python](../code/neetcode-subtree-of-another-tree/subtree.py) · [Go](../code/neetcode-subtree-of-another-tree/subtree.go) · [Java](../code/neetcode-subtree-of-another-tree/subtree.java) · [JavaScript](../code/neetcode-subtree-of-another-tree/subtree.js)
+[TypeScript](../code/neetcode-subtree-of-another-tree/subtree.ts) · [Python](../code/neetcode-subtree-of-another-tree/subtree.py) · [Go](../code/neetcode-subtree-of-another-tree/subtree.go) · [Java](../code/neetcode-subtree-of-another-tree/subtree.java) · [JavaScript](../code/neetcode-subtree-of-another-tree/subtree.js) · [PHP](../code/neetcode-subtree-of-another-tree/subtree.php) · [Rust](../code/neetcode-subtree-of-another-tree/subtree.rs)
 
-Every file runs 14 shared cases: a match in the left branch, node 5 with an extra child, `12` and `2`, `-3` and `3`, the whole tree, a leaf as sub, a leaf against a node with children, repeated values, left against right, the same sum of values, negative numbers, the `Objects.hash` colliding pair, skewed trees of 2000 and 1000 nodes, and the same pair differing at the bottom. The TypeScript file also cross-checks 3,000 random pairs (half the time `subRoot` is copied from a subtree of `root`) against an answer taken from the JSON set of every subtree.
+Each of the original five files runs 14 shared cases: a match in the left branch, node 5 with an extra child, `12` and `2`, `-3` and `3`, the whole tree, a leaf as sub, a leaf against a node with children, repeated values, left against right, the same sum of values, negative numbers, the `Objects.hash` colliding pair, skewed trees of 2000 and 1000 nodes, and the same pair differing at the bottom. The TypeScript file also cross-checks 3,000 random pairs (half the time `subRoot` is copied from a subtree of `root`) against an answer taken from the JSON set of every subtree.
 
 Comparing at every node, recursive form:
 
@@ -293,6 +293,72 @@ function isSameRec(p, q) {
 function isSubtreeRecursive(root, sub) {
   if (root === null) return sub === null;
   return isSameRec(root, sub) || isSubtreeRecursive(root.left, sub) || isSubtreeRecursive(root.right, sub);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function sameTree(?TreeNode $a, ?TreeNode $b): bool {
+    if ($a === null || $b === null) return $a === $b;
+    return $a->val === $b->val
+        && sameTree($a->left, $b->left)
+        && sameTree($a->right, $b->right);
+}
+
+function isSubtree(?TreeNode $root, ?TreeNode $sub): bool {
+    if ($sub === null) return true;
+    if ($root === null) return false;
+    return sameTree($root, $sub) || isSubtree($root->left, $sub) || isSubtree($root->right, $sub);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn same_tree(a: &Node, b: &Node) -> bool {
+    match (a, b) {
+        (None, None) => true,
+        (Some(a), Some(b)) => {
+            let a = a.borrow();
+            let b = b.borrow();
+            a.val == b.val && same_tree(&a.left, &b.left) && same_tree(&a.right, &b.right)
+        }
+        _ => false,
+    }
+}
+
+fn is_subtree(root: &Node, sub: &Node) -> bool {
+    if sub.is_none() {
+        return true;
+    }
+    if same_tree(root, sub) {
+        return true;
+    }
+    let Some(root) = root else { return false };
+    let root = root.borrow();
+    is_subtree(&root.left, sub) || is_subtree(&root.right, sub)
 }
 ```
 
@@ -537,6 +603,8 @@ skewed tree of 10000 nodes: isSubtreeJson → throws RangeError, isSubtreeKmp �
 ```
 
 The JavaScript file adds the shortcut `JSON.stringify(root).includes(JSON.stringify(sub))`. It is correct, because JSON has braces and writes `null` for every empty slot, but `JSON.stringify` walks the tree recursively (it stops at about 4,456 levels, measured in [[en/problems/same-tree|Same Tree]]) and `includes` can still be quadratic.
+
+Both added versions check for a match at each node. The cases include an extra child and matching values with different child positions. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

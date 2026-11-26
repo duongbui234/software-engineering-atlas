@@ -127,7 +127,7 @@ Biểu thức `1 1 + 1 + …` với n toán tử, TypeScript, trung vị 5 lần
 
 Độ sâu tối đa đo bằng tìm kiếm nhị phân trên n, với biểu thức `1 1 + 1 + …` (n toán tử, sâu n tầng) ([JS](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.js) · [Java](../code/neetcode-evaluate-reverse-polish-notation/recursion-depth.java) · [Python](../code/neetcode-evaluate-reverse-polish-notation/recursion_depth.py)): Node 24 chịu được **9 765** tầng ở cả ba lần chạy; Java 21 chịu được khoảng **8 600–9 400** tầng ở lần đo đầu (đổi theo lần chạy: 8 593 và 9 375) và **29 473** tầng ở hai lần sau, vì khi code đã được JIT biên dịch, mỗi khung gọi hàm nhỏ hơn; Python 3.12 dừng ở **996** tầng (giới hạn 1 000 trừ vài khung của chính chương trình). Với 10⁴ token, biểu thức sâu tới khoảng 5 000 tầng: JS và Java qua, còn Python **không** qua, nên câu "đệ quy vẫn qua LeetCode" ở trên chỉ đúng với JS và Java. Python phải dùng ngăn xếp tường minh hoặc nâng `sys.setrecursionlimit`.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Chia số nguyên | Đọc `"-11"` thành số |
 |---|---|---|
@@ -135,10 +135,12 @@ Biểu thức `1 1 + 1 + …` với n toán tử, TypeScript, trung vị 5 lần
 | Python | `//` làm tròn **xuống**; dùng `int(a / b)` (đủ chính xác với số 32 bit) | `int(t)` |
 | Go | `/` trên `int` làm tròn về 0 | `strconv.Atoi(t)` |
 | Java | `/` trên `int` làm tròn về 0; `Math.floorDiv` làm tròn xuống | `Integer.parseInt(t)`; so chuỗi bằng `equals`, không bằng `==` |
+| PHP | `/` trả **float** khi không chia hết (`-7 / 2` là `-3.5`); `intdiv` làm tròn về 0 | `(int) $t`; nhận toán tử bằng `isset(OPS[$t])` |
+| Rust | `/` trên `i32` làm tròn về 0; `div_euclid` thì khác khi số bị chia âm | `t.parse::<i32>()`; `match` trên `&str` so cả token |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.ts) · [Python](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.py) · [Go](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.go) · [Java](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.java) · [JavaScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.js)
+[TypeScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.ts) · [Python](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.py) · [Go](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.go) · [Java](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.java) · [JavaScript](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.js) · [PHP](../code/neetcode-evaluate-reverse-polish-notation/eval-rpn.php) · [Rust](../code/neetcode-evaluate-reverse-polish-notation/eval_rpn.rs)
 
 Mỗi file có ngăn xếp và đệ quy, chạy 7 ca gồm `-` và `/` với số âm. Dưới đây là cách ngăn xếp.
 
@@ -257,6 +259,57 @@ function evalStack(tokens) {
 }
 ```
 
+```php
+function apply(string $op, int $a, int $b): int {
+    return match ($op) {
+        '+' => $a + $b,
+        '-' => $a - $b,
+        '*' => $a * $b,
+        default => intdiv($a, $b), // intdiv làm tròn về 0; $a / $b trả float khi không chia hết
+    };
+}
+
+// Cách 1: ngăn xếp. Số lấy ra SAU là vế trái.
+function evalStack(array $tokens): int {
+    $st = [];
+    foreach ($tokens as $t) {
+        if (isset(OPS[$t])) { // so cả token: "-11" không phải khóa của OPS
+            $b = array_pop($st);
+            $a = array_pop($st);
+            $st[] = apply($t, $a, $b);
+        } else {
+            $st[] = (int) $t;
+        }
+    }
+    return $st[0];
+}
+```
+
+```rust
+fn apply(op: &str, a: i32, b: i32) -> i32 {
+    match op {
+        "+" => a + b,
+        "-" => a - b,
+        "*" => a * b,
+        _ => a / b, // chia i32 của Rust làm tròn về 0; div_euclid thì khác với số âm
+    }
+}
+
+// Cách 1: ngăn xếp. Số lấy ra SAU là vế trái.
+fn eval_stack(tokens: &[&str]) -> i32 {
+    let mut st: Vec<i32> = Vec::new();
+    for &t in tokens {
+        if is_op(t) {
+            let b = st.pop().unwrap();
+            let a = st.pop().unwrap();
+            st.push(apply(t, a, b));
+        } else {
+            st.push(t.parse().unwrap()); // parse::<i32>() đọc được cả "-11"
+        }
+    }
+    st[0]
+}
+```
 
 File TypeScript chạy thêm ba bản sai, rồi đo:
 
@@ -300,9 +353,28 @@ evalStack      7/7 ca đúng
 evalRecursive  7/7 ca đúng
 
 đệ quy 10⁶ tầng: 1000001
+
+$ php -d xdebug.mode=off eval-rpn.php
+evalStack      7/7 ca đúng
+evalRecursive  7/7 ca đúng
+evalFloorDiv   4/7 ca đúng; sai ở [10 6 9 3 + -11 * / * 17 + 5 +] → 12, [7 -2 /] → -4, [-7 2 /] → -4
+evalSlash      3/7 ca đúng; sai ở [4 13 5 / +] → TypeError, [10 6 9 3 + -11 * / * 17 + 5 +] → TypeError, [7 -2 /] → TypeError, [-7 2 /] → TypeError
+
+-7 / 2 = -3.5, intdiv(-7, 2) = -3, (int) floor(-7 / 2) = -4
+đệ quy 10⁵ tầng: 100001
+ngăn xếp 10⁵ tầng: 100001
+
+$ rustc --edition 2021 -O eval_rpn.rs -o eval_rpn && ./eval_rpn
+eval_stack     7/7 ca đúng
+eval_recursive 7/7 ca đúng
+eval_euclid    6/7 ca đúng; sai ở [-7 2 /] → -4
+
+-7 / 2 = -3, (-7i32).div_euclid(2) = -4, 7 / -2 = -3, 7i32.div_euclid(-2) = -3
+đệ quy 10⁵ tầng: 100001
+ngăn xếp 10⁵ tầng: 100001
 ```
 
-JavaScript in `7/7 ca đúng` cho cả hai cách.
+JavaScript in `7/7 ca đúng` cho cả hai cách. PHP chạy với `-d xdebug.mode=off` vì Xdebug, nếu bật, chặn đệ quy ở 512 tầng.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -311,6 +383,8 @@ JavaScript in `7/7 ca đúng` cho cả hai cách.
 - **JS: quên làm tròn.** `13 / 5` ra `2.6`, và sai số lan qua các phép sau. `Math.trunc`, không phải `Math.floor`.
 - **Nhận toán tử bằng ký tự đầu, hay bằng "không phải chữ số".** `"-11"` bắt đầu bằng `-`. So cả token với tập bốn toán tử.
 - **Java: so chuỗi bằng `==`.** `t == "+"` so tham chiếu; token đọc từ mảng có thể không phải cùng object với hằng `"+"`. Dùng `equals` hoặc `switch` trên chuỗi.
+- **PHP: dùng `/` cho phép chia.** `13 / 5` ra `2.6` (float), không phải `2`. Với `declare(strict_types=1)`, đưa float đó vào hàm nhận `int` ném `TypeError`. Dùng `intdiv($a, $b)`. Đệ quy 10⁵ tầng vẫn chạy vì PHP 8.2 cấp khung gọi hàm trên heap, nhưng nếu máy bật Xdebug, nó chặn ở 512 tầng (`xdebug.max_nesting_level`).
+- **Rust: tưởng `div_euclid` là "chia nguyên đúng chuẩn".** `/` trên `i32` đã làm tròn về 0, đúng như đề. `div_euclid` giữ phần dư không âm nên `(-7).div_euclid(2)` ra `-4`, còn `7.div_euclid(-2)` vẫn ra `-3`: lỗi chỉ lộ khi số bị chia âm. Ngoài ra `i32::MIN / -1` làm chương trình panic vì tràn số (đề bảo đảm không xảy ra).
 - **Đệ quy không giới hạn độ sâu.** Qua được giới hạn của đề (≤ 10⁴ token), hỏng trên dữ liệu sâu hơn. Ngăn xếp tường minh không có giới hạn đó.
 
 ## Câu hỏi tự kiểm tra
@@ -321,8 +395,8 @@ JavaScript in `7/7 ca đúng` cho cả hai cách.
 > [!question]- Vì sao bản đảo vế vẫn qua ca `["2","1","+","3","*"]`?
 > Biểu thức chỉ có `+` và `*`, hai phép giao hoán: `a + b = b + a`. Đảo vế chỉ lộ ra ở `-` và `/`.
 
-> [!question]- `-7 / 2` trong năm ngôn ngữ, mỗi cách viết, ra bao nhiêu?
-> Java, Go (`int`): −3. Python `-7 // 2`: −4, `int(-7 / 2)`: −3. JS `-7 / 2`: −3,5; `Math.trunc`: −3; `Math.floor`: −4.
+> [!question]- `-7 / 2` trong bảy ngôn ngữ, mỗi cách viết, ra bao nhiêu?
+> Java, Go (`int`), Rust (`i32`): −3. Python `-7 // 2`: −4, `int(-7 / 2)`: −3. JS `-7 / 2`: −3,5; `Math.trunc`: −3; `Math.floor`: −4. PHP `-7 / 2`: −3,5 (float); `intdiv(-7, 2)`: −3. Rust `(-7).div_euclid(2)`: −4.
 
 > [!question]- Viết `(1 + 2) × (3 − 4)` theo RPN.
 > `1 2 + 3 4 - *`. Hai biểu thức con được viết trọn trước, toán tử nối chúng đứng sau cùng.

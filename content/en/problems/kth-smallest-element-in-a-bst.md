@@ -316,9 +316,9 @@ A gap of three orders of magnitude: each stack query visits n/2 nodes on average
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.ts) · [Python](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.py) · [Go](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.go) · [Java](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.java) · [JavaScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.js)
+[TypeScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.ts) · [Python](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.py) · [Go](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.go) · [Java](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.java) · [JavaScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.js) · [PHP](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.php) · [Rust](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.rs)
 
-Each file builds trees from a LeetCode-style level-order array and runs 10 shared cases: a single node; the full 7-node tree with k = 1, 4 (the root) and 7; a tree containing 0 with k = 1 and 2; a tree whose answer sits in the right subtree of the left child; a 10⁴-node left-skewed chain with k = 1 and k = 5,000; a 10⁴-node right-skewed chain with k = 10⁴. After each call, the file rechecks every pointer in the tree (to catch Morris stopping early). TypeScript, Python, Go and Java also cross-check the six approaches on 2,000 random search trees and take measurements. All five files run 5,000 insertions, deletions and queries on the sized tree.
+Each of the original five files builds trees from a LeetCode-style level-order array and runs 10 shared cases: a single node; the full 7-node tree with k = 1, 4 (the root) and 7; a tree containing 0 with k = 1 and 2; a tree whose answer sits in the right subtree of the left child; a 10⁴-node left-skewed chain with k = 1 and k = 5,000; a 10⁴-node right-skewed chain with k = 10⁴. After each call, the file rechecks every pointer in the tree (to catch Morris stopping early). TypeScript, Python, Go and Java also cross-check the six approaches on 2,000 random search trees and take measurements. All five files run 5,000 insertions, deletions and queries on the sized tree.
 
 Recursive in-order, stopping at the kth node:
 
@@ -506,6 +506,68 @@ function kthIterative(root, k) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function kthSmallest(?TreeNode $root, int $k): int {
+    $stack = [];
+    while ($root !== null || $stack) {
+        while ($root !== null) {
+            $stack[] = $root;
+            $root = $root->left;
+        }
+        $root = array_pop($stack);
+        if (--$k === 0) return $root->val;
+        $root = $root->right;
+    }
+    throw new InvalidArgumentException('k nằm ngoài số nút');
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn kth_smallest(root: &Node, mut k: usize) -> Option<i32> {
+    let mut current = root.clone();
+    let mut stack = Vec::new();
+    while k > 0 {
+        while let Some(node) = current {
+            current = node.borrow().left.clone();
+            stack.push(node);
+        }
+        let node = stack.pop()?;
+        let node = node.borrow();
+        k -= 1;
+        if k == 0 {
+            return Some(node.val);
+        }
+        current = node.right.clone();
+    }
+    None
+}
+```
+
 Output of `node kth-smallest.ts`:
 
 ```text
@@ -636,6 +698,8 @@ wrongFalsyZero        7/10 cases passed; failed on contains 0, k = 1 → null, 1
 
 sized tree: 5000 random insert/delete/query operations, 1491/1491 queries match the sorted array
 ```
+
+The added versions use a stack for inorder traversal and stop at the kth node. PHP `5/5 ca đúng` · Rust `6/6 ca đúng`.
 
 ## Misconceptions and common traps
 

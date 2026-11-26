@@ -235,7 +235,7 @@ Ba ngôn ngữ còn lại, mỗi truy vấn: Python (2¹⁷ − 1 nút) tổng q
 
 Trên chuỗi tăng 10⁵ nút (cây hợp lệ theo đề), với p = 99998 và q = 99999: vòng lặp đi hết 99 999 bước trong 0,19 ms; bản đệ quy ném `RangeError` ở Node.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | So sánh nút | Bẫy riêng |
 |---|---|---|
@@ -243,10 +243,12 @@ Trên chuỗi tăng 10⁵ nút (cây hợp lệ theo đề), với p = 99998 và
 | Python | `is` so danh tính | `int` không tràn nên mẹo nhân an toàn; chuỗi 10⁵ nút vượt giới hạn 1 000 tầng, ném `RecursionError` |
 | Go | `==` trên con trỏ | ngăn xếp goroutine tự lớn nên đệ quy 10⁵ tầng chạy được; `int` 32 bit trên `GOARCH=386` làm mẹo nhân sai 2/10 ca |
 | Java | `==` so tham chiếu | `int * int` tràn im lặng: mẹo nhân sai 2/10 ca, sửa bằng `(long)`. `StackOverflowError` là `Error`, không phải `Exception`, nên `catch (Exception e)` không bắt được |
+| PHP | `===` trên object so danh tính (cùng một đối tượng) | `int` 64 bit nên mẹo nhân an toàn; đệ quy 10⁵ tầng chạy được (khung hàm nằm trên heap), nhưng để chuỗi 10⁵ nút tự hủy thì PHP giải phóng đệ quy trong C và chết bằng segfault, nên file tháo cây bằng vòng lặp |
+| Rust | `Rc::ptr_eq` trên `Rc<RefCell<TreeNode>>` | `i32` của LeetCode: `10⁹ − (−10⁹)` đã tràn, phải đổi sang `i64` trước khi trừ. Tràn ngăn xếp làm tiến trình chết, không bắt được, nên file chạy trong luồng có ngăn xếp 256 MB; cả `Drop` của chuỗi dài cũng đệ quy |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.ts) · [Python](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.py) · [Go](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.go) · [Java](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.java) · [JavaScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.js)
+[TypeScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.ts) · [Python](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.py) · [Go](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.go) · [Java](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.java) · [JavaScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.js) · [PHP](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.php) · [Rust](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.rs)
 
 Mỗi file dựng cây từ mảng theo tầng kiểu LeetCode và chạy 10 ca chung trên cây `[20, 10, 30, 5, 15, 25, 35, null, null, 12, 17]` cùng vài cây riêng: p và q ở hai phía gốc, cùng bên trái, cùng bên phải, p là tổ tiên của q, p lớn hơn q, gốc là p, cây 2 nút (cỡ nhỏ nhất của đề), giá trị ±10⁹, hai giá trị cỡ 5·10⁴ cùng phía (bắt lỗi tràn), và chuỗi tăng 10⁵ nút (cỡ lớn nhất của đề). File TypeScript đối chiếu thêm năm cách trên 3 000 BST ngẫu nhiên.
 
@@ -321,6 +323,34 @@ function lcaIterative(root, p, q) {
 }
 ```
 
+```php
+// Cách 4: vòng lặp, O(1) bộ nhớ.
+function lcaIterative(?TreeNode $root, TreeNode $p, TreeNode $q): ?TreeNode {
+    $node = $root;
+    while ($node !== null) {
+        if ($p->val < $node->val && $q->val < $node->val) $node = $node->left;
+        elseif ($p->val > $node->val && $q->val > $node->val) $node = $node->right;
+        else return $node;
+    }
+    return null;
+}
+```
+
+```rust
+// Cách 4: vòng lặp, O(1) bộ nhớ.
+fn lca_iterative(root: &Node, p: &R, q: &R) -> Node {
+    let (pv, qv) = (p.borrow().val, q.borrow().val);
+    let mut node = root.clone();
+    while let Some(n) = node {
+        let v = n.borrow().val;
+        if pv < v && qv < v { node = n.borrow().left.clone(); }
+        else if pv > v && qv > v { node = n.borrow().right.clone(); }
+        else { return Some(n); }
+    }
+    None
+}
+```
+
 Lời giải tổng quát của LC 236, để so sánh:
 
 ```ts
@@ -382,6 +412,31 @@ function lcaGeneral(root, p, q) {
   const r = lcaGeneral(root.right, p, q);
   if (l !== null && r !== null) return root;
   return l !== null ? l : r;
+}
+```
+
+```php
+// Cách 1: LCA của cây nhị phân bất kỳ (LC 236), hậu thứ tự, O(n).
+function lcaGeneral(?TreeNode $root, TreeNode $p, TreeNode $q): ?TreeNode {
+    if ($root === null || $root === $p || $root === $q) return $root; // === trên object: cùng một đối tượng
+    $l = lcaGeneral($root->left, $p, $q);
+    $r = lcaGeneral($root->right, $p, $q);
+    if ($l !== null && $r !== null) return $root;
+    return $l ?? $r;
+}
+```
+
+```rust
+// Cách 1: LCA của cây nhị phân bất kỳ (LC 236), hậu thứ tự, O(n). So danh tính bằng Rc::ptr_eq.
+fn lca_general(root: &Node, p: &R, q: &R) -> Node {
+    let n = root.as_ref()?;
+    if Rc::ptr_eq(n, p) || Rc::ptr_eq(n, q) { return Some(n.clone()); }
+    let l = lca_general(&n.borrow().left, p, q);
+    let r = lca_general(&n.borrow().right, p, q);
+    match (l, r) {
+        (Some(_), Some(_)) => Some(n.clone()),
+        (l, r) => l.or(r),
+    }
 }
 ```
 
@@ -464,6 +519,36 @@ lcaProduct         10/10 ca đúng
 wrongNonStrict     4/10 ca đúng; sai ở p là tổ tiên của q (10, 12) → null, gốc là p (20, 17) → null, cây 2 nút (2, 1) → null, giá trị ±10⁹ (10⁹, 10⁹ − 1) → null, cùng phía, hiệu cỡ 5·10⁴ (50000, 50001) → null, chuỗi tăng 10⁵ nút (99998, 99999) → null
 ```
 
+`php lca.php` (máy có Xdebug thì thêm `-d xdebug.mode=off`):
+
+```text
+lcaGeneral         10/10 ca đúng
+lcaPaths           10/10 ca đúng
+lcaRecursive       10/10 ca đúng
+lcaIterative       10/10 ca đúng
+lcaProduct         10/10 ca đúng
+wrongAssumeOrdered 6/10 ca đúng; sai ở p lớn hơn q (17, 12) → null, gốc là p (20, 17) → null, cây 2 nút (2, 1) → null, giá trị ±10⁹ (10⁹, 10⁹ − 1) → null
+wrongNonStrict     4/10 ca đúng; sai ở p là tổ tiên của q (10, 12) → null, gốc là p (20, 17) → null, cây 2 nút (2, 1) → null, giá trị ±10⁹ (10⁹, 10⁹ − 1) → null, cùng phía, hiệu cỡ 5·10⁴ (50000, 50001) → null, chuỗi tăng 10⁵ nút (99998, 99999) → null
+
+đối chiếu 3000 BST ngẫu nhiên 2..31 nút: năm cách khớp nhau 3000/3000
+```
+
+`rustc --edition 2021 -O lca.rs && ./lca` (chạy trong một luồng có ngăn xếp 256 MB):
+
+```text
+lca_general          10/10 ca đúng
+lca_paths            10/10 ca đúng
+lca_recursive        10/10 ca đúng
+lca_iterative        10/10 ca đúng
+lca_product          10/10 ca đúng
+wrong_assume_ordered 6/10 ca đúng; sai ở p lớn hơn q (17, 12) → None, gốc là p (20, 17) → None, cây 2 nút (2, 1) → None, giá trị ±10⁹ (10⁹, 10⁹ − 1) → None
+wrong_non_strict     4/10 ca đúng; sai ở p là tổ tiên của q (10, 12) → None, gốc là p (20, 17) → None, cây 2 nút (2, 1) → None, giá trị ±10⁹ (10⁹, 10⁹ − 1) → None, cùng phía, hiệu cỡ 5·10⁴ (50000, 50001) → None, chuỗi tăng 10⁵ nút (99998, 99999) → None
+
+đối chiếu 3000 BST ngẫu nhiên 2..31 nút: năm cách khớp nhau 3000/3000
+```
+
+PHP và Rust không đo thời gian; hai file chỉ kiểm đúng sai và đối chiếu ngẫu nhiên.
+
 Ở chuỗi tăng, bản `int` 32 bit dừng sai ở nút 7317: từ đó trở đi, (7317 − 99998)·(7317 − 99999) ≈ 8,6·10⁹ đã tràn thành một số ≤ 0 trong 32 bit.
 
 ## Hiểu lầm và bẫy hay gặp
@@ -475,6 +560,8 @@ wrongNonStrict     4/10 ca đúng; sai ở p là tổ tiên của q (10, 12) →
 - **"O(h) nghĩa là O(log n)."** Chỉ khi cây cân. Đề không hứa thế; chuỗi tăng 10⁵ nút là BST hợp lệ và cách đi xuống tốn 10⁵ bước.
 - **Dùng cách đi xuống khi p hoặc q có thể không có trong cây.** Nó vẫn trả về một điểm tách, dù q không tồn tại. Đề này hứa cả hai có mặt; biến thể không hứa (LeetCode 1644 cho cây thường) phải tìm xác nhận từng nút trước.
 - **So giá trị hay so nút.** Ở đây giá trị khác nhau nên hai cách như nhau, nhưng lời giải tổng quát so **tham chiếu** (`root === p`), vì trên cây thường hai nút có thể cùng giá trị.
+- **PHP: chuỗi dài chết lúc dọn dẹp, không phải lúc tính.** Hàm chạy xong và trả đúng, rồi tiến trình segfault khi biến giữ gốc ra khỏi phạm vi, vì PHP giải phóng 10⁵ object lồng nhau bằng đệ quy trong C. Tháo cây bằng vòng lặp (`teardown`) trước khi bỏ nó. Máy có Xdebug còn chặn đệ quy ở 512 tầng.
+- **Rust: `i32` tràn trước cả phép nhân.** Với giá trị ±10⁹, hiệu `node.val - p.val` đã vượt `i32`. Bản debug panic, bản `-O` quay vòng im lặng và có thể đổi dấu. Đổi cả hai toán hạng sang `i64` rồi mới trừ.
 
 ## Câu hỏi tự kiểm tra
 

@@ -137,9 +137,9 @@ Times are fractions. There are three ways to compare them:
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-car-fleet/car-fleet.ts) · [Python](../code/neetcode-car-fleet/car_fleet.py) · [Go](../code/neetcode-car-fleet/car_fleet.go) · [Java](../code/neetcode-car-fleet/car-fleet.java) · [JavaScript](../code/neetcode-car-fleet/car-fleet.js)
+[TypeScript](../code/neetcode-car-fleet/car-fleet.ts) · [Python](../code/neetcode-car-fleet/car_fleet.py) · [Go](../code/neetcode-car-fleet/car_fleet.go) · [Java](../code/neetcode-car-fleet/car-fleet.java) · [JavaScript](../code/neetcode-car-fleet/car-fleet.js) · [PHP](../code/neetcode-car-fleet/car-fleet.php) · [Rust](../code/neetcode-car-fleet/car_fleet.rs)
 
-Each file runs 7 cases (the Java file adds an overflow case). Below are the sort-with-stack and cross-multiplication approaches.
+Each of the original five files runs 7 cases (the Java file adds an overflow case). Below are the sort-with-stack and cross-multiplication approaches.
 
 ```ts
 // Sort by position descending, then a stack of the fleet leaders' arrival times.
@@ -262,6 +262,47 @@ function sortCrossMultiply(target, position, speed) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function carFleet(int $target, array $position, array $speed): int {
+    $cars = array_combine($position, $speed);
+    krsort($cars, SORT_NUMERIC);
+    $fleets = 0;
+    [$lastDistance, $lastSpeed] = [0, 1];
+    foreach ($cars as $start => $velocity) {
+        $distance = $target - $start;
+        if ($distance * $lastSpeed > $lastDistance * $velocity) {
+            $fleets++;
+            [$lastDistance, $lastSpeed] = [$distance, $velocity];
+        }
+    }
+    return $fleets;
+}
+```
+
+```rust
+fn car_fleet(target: i32, position: &[i32], speed: &[i32]) -> usize {
+    let mut cars: Vec<_> = position
+        .iter()
+        .copied()
+        .zip(speed.iter().copied())
+        .collect();
+    cars.sort_unstable_by_key(|&(start, _)| std::cmp::Reverse(start));
+    let mut fleets = 0;
+    let (mut last_distance, mut last_speed) = (0_i64, 1_i64);
+    for (start, velocity) in cars {
+        let (distance, velocity) = (i64::from(target - start), i64::from(velocity));
+        if distance * last_speed > last_distance * velocity {
+            fleets += 1;
+            (last_distance, last_speed) = (distance, velocity);
+        }
+    }
+    fleets
+}
+```
+
 
 ```text
 $ node car-fleet.ts
@@ -308,6 +349,8 @@ sort_ascending       3/7 cases passed; wrong on t=12 [10, 8, 0, 5, 3] t=100 [0, 
 ```
 
 The Go file also runs a version that forgets the `float64` conversion (`intDivision`, 6/7: with `target = 10`, `(10 − 6) / 3` and `(10 − 8) / 2` both become 1 under integer division). JavaScript prints `7/7 ca đúng` ("7/7 cases passed") for all three approaches.
+
+Both added versions compare arrival times by cross-multiplication. Rust widens before multiplication because the product can exceed `i32`. PHP uses 64-bit integers. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

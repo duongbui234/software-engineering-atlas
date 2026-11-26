@@ -195,9 +195,9 @@ Timings change with the machine and the run; the count of orderings tried is ide
 
 ## Runnable example
 
-Each file runs the same 8 cases: the example on this page, a single word, the prefix case `abc, ab`, a cycle `a, b, a`, two identical words, the valid prefix case `ab, abc`, a duplicate edge `ac, ab, zc, zb`, and `ab, ba` (only the first differing letter counts). Each case runs all four approaches and is checked by the properties above. The file also runs four wrong versions, cross-checks against brute force on 2,000 random lists, and measures as in the table above. Below are Step 1 and Approach 2; brute force, DFS, the min-heap version and the wrong versions are in the full file.
+Each of the original five files runs the same 8 cases: the example on this page, a single word, the prefix case `abc, ab`, a cycle `a, b, a`, two identical words, the valid prefix case `ab, abc`, a duplicate edge `ac, ab, zc, zb`, and `ab, ba` (only the first differing letter counts). Each case runs all four approaches and is checked by the properties above. The file also runs four wrong versions, cross-checks against brute force on 2,000 random lists, and measures as in the table above. Below are Step 1 and Approach 2; brute force, DFS, the min-heap version and the wrong versions are in the full file.
 
-[TypeScript](../code/neetcode-alien-dictionary/alien-dictionary.ts) · [Python](../code/neetcode-alien-dictionary/alien_dictionary.py) · [Go](../code/neetcode-alien-dictionary/alien_dictionary.go) · [Java](../code/neetcode-alien-dictionary/alien-dictionary.java) · [JavaScript](../code/neetcode-alien-dictionary/alien-dictionary.js)
+[TypeScript](../code/neetcode-alien-dictionary/alien-dictionary.ts) · [Python](../code/neetcode-alien-dictionary/alien_dictionary.py) · [Go](../code/neetcode-alien-dictionary/alien_dictionary.go) · [Java](../code/neetcode-alien-dictionary/alien-dictionary.java) · [JavaScript](../code/neetcode-alien-dictionary/alien-dictionary.js) · [PHP](../code/neetcode-alien-dictionary/alien-dictionary.php) · [Rust](../code/neetcode-alien-dictionary/alien_dictionary.rs)
 
 ```ts
 // Shared step: compare each pair of ADJACENT words; the FIRST differing letter gives one edge u → v.
@@ -487,6 +487,88 @@ function alienOrderKahn(words) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function alienOrder(array $words): string {
+    $edges = $indegree = [];
+    foreach ($words as $word) {
+        foreach (str_split($word) as $letter) {
+            $indegree[$letter] = 0;
+        }
+    }
+    for ($i = 1; $i < count($words); $i++) {
+        [$a, $b] = [$words[$i - 1], $words[$i]];
+        $limit = min(strlen($a), strlen($b));
+        $j = 0;
+        while ($j < $limit && $a[$j] === $b[$j]) {
+            $j++;
+        }
+        if ($j === $limit) {
+            if (strlen($a) > strlen($b)) return '';
+        } elseif (!isset($edges[$a[$j]][$b[$j]])) {
+            $edges[$a[$j]][$b[$j]] = true;
+            $indegree[$b[$j]]++;
+        }
+    }
+    $queue = array_keys(array_filter($indegree, fn(int $n): bool => $n === 0));
+    for ($head = 0; $head < count($queue); $head++) {
+        foreach ($edges[$queue[$head]] ?? [] as $next => $_) {
+            if (--$indegree[$next] === 0) $queue[] = $next;
+        }
+    }
+    return count($queue) === count($indegree) ? implode($queue) : '';
+}
+```
+
+```rust
+fn alien_order(words: &[&str]) -> String {
+    let index = |b: u8| usize::from(b - b'a');
+    let (mut present, mut indegree, mut edges) = ([false; 26], [0; 26], [[false; 26]; 26]);
+    for word in words {
+        for b in word.bytes() {
+            present[index(b)] = true;
+        }
+    }
+    for pair in words.windows(2) {
+        let (a, b) = (pair[0], pair[1]);
+        if let Some((u, v)) = a.bytes().zip(b.bytes()).find(|(u, v)| u != v) {
+            let (u, v) = (index(u), index(v));
+            if !edges[u][v] {
+                edges[u][v] = true;
+                indegree[v] += 1;
+            }
+        } else if a.len() > b.len() {
+            return String::new();
+        }
+    }
+    let mut queue: Vec<_> = (0..26)
+        .filter(|&i| present[i] && indegree[i] == 0)
+        .collect();
+    let mut head = 0;
+    while head < queue.len() {
+        let u = queue[head];
+        head += 1;
+        for (v, degree) in indegree.iter_mut().enumerate() {
+            if edges[u][v] {
+                *degree -= 1;
+                if *degree == 0 {
+                    queue.push(v);
+                }
+            }
+        }
+    }
+    if queue.len() != present.iter().filter(|&&found| found).count() {
+        return String::new();
+    }
+    queue
+        .into_iter()
+        .map(|i| char::from(b'a' + i as u8))
+        .collect()
+}
+```
+
 Output of `node alien-dictionary.ts` (the other four languages print the same, apart from timings):
 
 ```text
@@ -509,6 +591,8 @@ measure 8 letters, 100 words: brute force gives hgfedcba after 40320 permutation
 measure 9 letters, 100 words: brute force gives ihgfedcba after 362880 permutations, 42.9 ms; Kahn gives ihgfedcba, 7.6 µs
 ```
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+The added versions use Kahn’s algorithm. They count each edge once and include letters that appear without edges. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

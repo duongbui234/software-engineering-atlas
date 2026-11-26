@@ -116,7 +116,7 @@ The TypeScript and JavaScript examples insert 676 words consisting of `a` follow
 
 ## Runnable example
 
-Each file runs 11 checks on each of the three implementations. The cases cover an empty dictionary, repeated insertion, an internal prefix, missing edges, and a 2,000-character word. TypeScript and JavaScript also verify the operation count for a miss at the root.
+Each of the original five files runs 11 checks on each of the three implementations. The cases cover an empty dictionary, repeated insertion, an internal prefix, missing edges, and a 2,000-character word. TypeScript and JavaScript also verify the operation count for a miss at the root.
 
 ```typescript
 import assert from "node:assert/strict"
@@ -712,6 +712,94 @@ console.log(`${cases}/33 ca đúng`)
 console.log(`Lượt thử tiền tố: ${probes.map((index) => index.lastChecks).join(", ")}`)
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TrieNode
+{
+    public array $children = [];
+    public bool $terminal = false;
+}
+
+final class Trie
+{
+    private TrieNode $root;
+
+    public function __construct()
+    {
+        $this->root = new TrieNode();
+    }
+
+    public function insert(string $word): void
+    {
+        $node = $this->root;
+        for ($i = 0, $length = strlen($word); $i < $length; $i++) {
+            $node = $node->children[$word[$i]] ??= new TrieNode();
+        }
+        $node->terminal = true;
+    }
+
+    private function find(string $text): ?TrieNode
+    {
+        $node = $this->root;
+        for ($i = 0, $length = strlen($text); $i < $length; $i++) {
+            $node = $node->children[$text[$i]] ?? null;
+            if ($node === null) {
+                return null;
+            }
+        }
+        return $node;
+    }
+
+    public function search(string $word): bool
+    {
+        return $this->find($word)?->terminal ?? false;
+    }
+
+    public function startsWith(string $prefix): bool
+    {
+        return $this->find($prefix) !== null;
+    }
+}
+```
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Default)]
+struct Trie {
+    children: HashMap<u8, Trie>,
+    terminal: bool,
+}
+
+impl Trie {
+    fn insert(&mut self, word: &str) {
+        let mut node = self;
+        for letter in word.bytes() {
+            node = node.children.entry(letter).or_default();
+        }
+        node.terminal = true;
+    }
+
+    fn find(&self, text: &str) -> Option<&Trie> {
+        let mut node = self;
+        for letter in text.bytes() {
+            node = node.children.get(&letter)?;
+        }
+        Some(node)
+    }
+
+    fn search(&self, word: &str) -> bool {
+        self.find(word).is_some_and(|node| node.terminal)
+    }
+
+    fn starts_with(&self, prefix: &str) -> bool {
+        self.find(prefix).is_some()
+    }
+}
+```
+
 ```text
 33/33 cases passed
 Prefix probes: 676, 1, 1
@@ -719,7 +807,11 @@ Prefix probes: 676, 1, 1
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
-Only TypeScript and JavaScript print the second line. Download [TypeScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.ts), [Python](../code/neetcode-implement-trie-prefix-tree/prefix_index.py), [Go](../code/neetcode-implement-trie-prefix-tree/prefix_index.go), [Java](../code/neetcode-implement-trie-prefix-tree/prefix-index.java), or [JavaScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.js). Run them in order with `node prefix-index.ts`, `python3 prefix_index.py`, `go run prefix_index.go`, `java prefix-index.java`, and `node prefix-index.js`.
+Only TypeScript and JavaScript print the second line. Download [TypeScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.ts) · [Python](../code/neetcode-implement-trie-prefix-tree/prefix_index.py) · [Go](../code/neetcode-implement-trie-prefix-tree/prefix_index.go) · [Java](../code/neetcode-implement-trie-prefix-tree/prefix-index.java) · [JavaScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.js) · [PHP](../code/neetcode-implement-trie-prefix-tree/prefix-index.php) · [Rust](../code/neetcode-implement-trie-prefix-tree/prefix_index.rs). Run the first five with `node prefix-index.ts`, `python3 prefix_index.py`, `go run prefix_index.go`, `java prefix-index.java`, and `node prefix-index.js`.
+
+Run the added files with `php prefix-index.php` and `rustc --edition 2021 -O prefix_index.rs -o /tmp/prefix-index && /tmp/prefix-index`.
+
+The PHP and Rust versions use a sparse trie and cover empty storage, duplicate inserts, nonterminal prefixes, and a 2,000-character word. PHP uses associative arrays and Rust uses `HashMap<u8, Trie>` for the ASCII input. PHP `15/15 ca đúng` · Rust `15/15 ca đúng`.
 
 ## Misconceptions and common traps
 

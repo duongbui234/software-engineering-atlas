@@ -123,9 +123,9 @@ The measured case uses a `3 × 3` grid of `a` letters and ten words that start w
 
 ## Runnable example
 
-Both approaches run the same six cases, covering words that are prefixes of other words, multiple paths for the same word, rejected diagonal moves, and words that would need to reuse a cell. Five small cases also check that each approach leaves the board intact.
+The original five versions run both approaches on the same six cases, covering words that are prefixes of other words, multiple paths for the same word, rejected diagonal moves, and words that would need to reuse a cell. Five small cases also check that each approach leaves the board intact.
 
-Download [TypeScript](../code/neetcode-word-search-ii/search-grid.ts), [Python](../code/neetcode-word-search-ii/search-grid.py), [Go](../code/neetcode-word-search-ii/search-grid.go), [Java](../code/neetcode-word-search-ii/search-grid.java), or [JavaScript](../code/neetcode-word-search-ii/search-grid.js). Run with `node search-grid.ts`, `python3 search-grid.py`, `go run search-grid.go`, `java search-grid.java`, or `node search-grid.js`.
+Download [TypeScript](../code/neetcode-word-search-ii/search-grid.ts) · [Python](../code/neetcode-word-search-ii/search-grid.py) · [Go](../code/neetcode-word-search-ii/search-grid.go) · [Java](../code/neetcode-word-search-ii/search-grid.java) · [JavaScript](../code/neetcode-word-search-ii/search-grid.js) · [PHP](../code/neetcode-word-search-ii/search-grid.php) · [Rust](../code/neetcode-word-search-ii/search_grid.rs). Run the first five with `node search-grid.ts`, `python3 search-grid.py`, `go run search-grid.go`, `java search-grid.java`, or `node search-grid.js`.
 
 ```ts
 const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
@@ -742,6 +742,131 @@ console.log((cases.length + 1) + "/" + (cases.length + 1) + " ca đúng")
 console.log("Bước khớp: " + left.advances + " / " + right.advances)
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TrieNode
+{
+    public array $children = [];
+    public ?string $word = null;
+}
+
+function findWords(array $board, array $words): array
+{
+    $root = new TrieNode();
+    foreach ($words as $word) {
+        $node = $root;
+        for ($i = 0, $length = strlen($word); $i < $length; $i++) {
+            $node = $node->children[$word[$i]] ??= new TrieNode();
+        }
+        $node->word = $word;
+    }
+
+    $found = [];
+    for ($row = 0; $row < count($board); $row++) {
+        for ($col = 0; $col < count($board[$row]); $col++) {
+            visit($board, $root, $row, $col, $found);
+        }
+    }
+    return $found;
+}
+
+function visit(array &$board, TrieNode $parent, int $row, int $col, array &$found): void
+{
+    $letter = $board[$row][$col] ?? '#';
+    $node = $parent->children[$letter] ?? null;
+    if ($node === null) {
+        return;
+    }
+
+    if ($node->word !== null) {
+        $found[] = $node->word;
+        $node->word = null;
+    }
+
+    if ($node->children !== []) {
+        $board[$row][$col] = '#';
+        visit($board, $node, $row - 1, $col, $found);
+        visit($board, $node, $row + 1, $col, $found);
+        visit($board, $node, $row, $col - 1, $found);
+        visit($board, $node, $row, $col + 1, $found);
+        $board[$row][$col] = $letter;
+    }
+
+    if ($node->children === []) {
+        unset($parent->children[$letter]);
+    }
+}
+```
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Default)]
+struct TrieNode<'a> {
+    children: HashMap<u8, TrieNode<'a>>,
+    word: Option<&'a str>,
+}
+
+fn find_words<'a>(board: &mut [Vec<u8>], words: &[&'a str]) -> Vec<&'a str> {
+    let mut root = TrieNode::default();
+    for &word in words {
+        let mut node = &mut root;
+        for letter in word.bytes() {
+            node = node.children.entry(letter).or_default();
+        }
+        node.word = Some(word);
+    }
+
+    let mut found = Vec::new();
+    for row in 0..board.len() {
+        for col in 0..board[row].len() {
+            visit(board, &mut root, row as isize, col as isize, &mut found);
+        }
+    }
+    found
+}
+
+fn visit<'a>(
+    board: &mut [Vec<u8>],
+    parent: &mut TrieNode<'a>,
+    row: isize,
+    col: isize,
+    found: &mut Vec<&'a str>,
+) {
+    if row < 0 || col < 0 {
+        return;
+    }
+    let Some(&letter) = board
+        .get(row as usize)
+        .and_then(|letters| letters.get(col as usize))
+    else {
+        return;
+    };
+    let Some(node) = parent.children.get_mut(&letter) else {
+        return;
+    };
+
+    if let Some(word) = node.word.take() {
+        found.push(word);
+    }
+
+    if !node.children.is_empty() {
+        board[row as usize][col as usize] = b'#';
+        visit(board, node, row - 1, col, found);
+        visit(board, node, row + 1, col, found);
+        visit(board, node, row, col - 1, found);
+        visit(board, node, row, col + 1, found);
+        board[row as usize][col as usize] = letter;
+    }
+
+    if node.children.is_empty() {
+        parent.children.remove(&letter);
+    }
+}
+```
+
 All five files print the same result.
 
 ```text
@@ -750,6 +875,10 @@ Successful advances: 2610 / 261
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+Run the added files with `php search-grid.php` and `rustc --edition 2021 -O search_grid.rs -o /tmp/search-grid && /tmp/search-grid`.
+
+The PHP and Rust versions search the grid with a trie. After reporting a word, they clear its terminal marker and prune the branch only when it has no children. Both restore marked cells when backtracking. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

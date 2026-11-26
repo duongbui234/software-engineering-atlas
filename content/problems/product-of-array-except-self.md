@@ -20,7 +20,7 @@ sources:
 > - Đo: vét cạn O(n²) mất 234 ms ở n = 16 000; hai lượt mất 7 ms ở n = 10⁶.
 
 > [!info] Bối cảnh
-> Bài LeetCode 238, bài neo của [[posts/2026-11-23-neetcode-prefix-suffix-encoding|ga 3: Tiền tố, hậu tố và mã hóa]] trên **tuyến NeetCode: Mảng và chuỗi**. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn chỉ cần biết vòng lặp, mảng và phép nhân.
+> Bài LeetCode 238, bài neo của [[posts/2026-11-23-neetcode-prefix-suffix-encoding|ga 3: Tiền tố, hậu tố và mã hóa]] trên **tuyến NeetCode: Mảng và chuỗi**. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn chỉ cần biết vòng lặp, mảng và phép nhân.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Tiền tố (prefix)**: đoạn đầu của mảng, `nums[0..i-1]`. **Hậu tố (suffix)**: đoạn cuối, `nums[i+1..n-1]`.
@@ -131,7 +131,7 @@ Vét cạn đi đúng dáng n² (gấp đôi n, gấp khoảng 4 lần thời gi
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-product-of-array-except-self/product-except-self.ts) · [Python](../code/neetcode-product-of-array-except-self/product_except_self.py) · [Go](../code/neetcode-product-of-array-except-self/product_except_self.go) · [Java](../code/neetcode-product-of-array-except-self/product-except-self.java) · [JavaScript](../code/neetcode-product-of-array-except-self/product-except-self.js)
+[TypeScript](../code/neetcode-product-of-array-except-self/product-except-self.ts) · [Python](../code/neetcode-product-of-array-except-self/product_except_self.py) · [Go](../code/neetcode-product-of-array-except-self/product_except_self.go) · [Java](../code/neetcode-product-of-array-except-self/product-except-self.java) · [PHP](../code/neetcode-product-of-array-except-self/product-except-self.php) · [Rust](../code/neetcode-product-of-array-except-self/product_except_self.rs) · [JavaScript](../code/neetcode-product-of-array-except-self/product-except-self.js)
 
 Mỗi file có vét cạn, chia có đếm số 0, hai mảng phụ và bản gộp, chạy 6 ca. Dưới đây là hai bản tiền tố, hậu tố.
 
@@ -258,6 +258,36 @@ function prefixSuffixInPlace(nums) {
 }
 ```
 
+```php
+function productExceptSelf(array $nums): array {
+    $n = count($nums);
+    $out = array_fill(0, $n, 1);
+    $left = 1;
+    for ($i = 0; $i < $n; $i++) { $out[$i] = $left; $left *= $nums[$i]; } // ghi trước, nhân sau
+    $right = 1;
+    for ($i = $n - 1; $i >= 0; $i--) { $out[$i] *= $right; $right *= $nums[$i]; }
+    return $out;
+}
+```
+
+```rust
+fn product_except_self(nums: Vec<i32>) -> Vec<i32> {
+    let n = nums.len();
+    let mut out = vec![1; n];
+    let mut left = 1;
+    for i in 0..n {
+        out[i] = left; // ghi trước, nhân sau
+        left *= nums[i];
+    }
+    let mut right = 1;
+    for i in (0..n).rev() {
+        out[i] *= right;
+        right *= nums[i];
+    }
+    out
+}
+```
+
 
 ```text
 $ node product-except-self.ts
@@ -288,7 +318,7 @@ prefix_suffix_arrays    6/6 ca đúng
 prefix_suffix_in_place  6/6 ca đúng
 ```
 
-Dòng `[-0, -0, 0]` là chuyện riêng của số thực: `0 · (−1)` ra `-0`. Nó vẫn bằng `0` theo `===` và in ra `0` qua `JSON.stringify`, nên LeetCode chấp nhận. Go, Java và JavaScript chạy bốn cách đúng và in `6/6 ca đúng`.
+Dòng `[-0, -0, 0]` là chuyện riêng của số thực: `0 · (−1)` ra `-0`. Nó vẫn bằng `0` theo `===` và in ra `0` qua `JSON.stringify`, nên LeetCode chấp nhận. Go, Java và JavaScript chạy bốn cách đúng và in `6/6 ca đúng`. PHP và Rust cũng `6/6` cho bốn cách đúng; bản chia thẳng của PHP ném `DivisionByZeroError`, của Rust trả `None` nhờ `checked_div` (không có `checked_div` thì panic).
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -297,6 +327,8 @@ Dòng `[-0, -0, 0]` là chuyện riêng của số thực: `0 · (−1)` ra `-0`
 - **Cập nhật biến chạy trước khi ghi.** `left *= nums[i]; out[i] = left` đưa chính `nums[i]` vào tích. Phải ghi trước, nhân sau.
 - **"O(1) bộ nhớ" tính cả mảng kết quả.** Đề quy ước không tính `out`; bản gộp chỉ dùng hai biến.
 - **Tràn số.** Đề bảo đảm tích tiền tố và hậu tố vừa 32 bit. Với dữ liệu ngoài đề, Java `int` tràn lặng lẽ; dùng `long` hoặc `Math.multiplyExact` để có lỗi.
+- **PHP: `/` trả số thực, `int` tràn thành `float`.** `24 / 5` ra `4.8`, nên bản chia phải dùng `intdiv`; chia cho 0 ném `DivisionByZeroError` (file PHP bắt lỗi này ở bản chia thẳng). Tích vượt `PHP_INT_MAX` không báo lỗi mà lặng lẽ thành `float` và mất chính xác.
+- **Rust: chia cho 0 và tràn số đều là panic (ở bản debug).** `total / x` với `x = 0` làm sập chương trình; `checked_div` trả `None` thay vào đó. Tích tràn `i32` panic ở debug nhưng quấn vòng ở bản `-O`. Vòng `for i in (0..n - 1).rev()` cũng panic khi `n = 0` vì `n - 1` tràn `usize`; dùng `saturating_sub`.
 
 ## Câu hỏi tự kiểm tra
 

@@ -135,9 +135,9 @@ The three O(n) approaches differ by up to 5 times: the two arrays must allocate 
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-trapping-rain-water/trapping-rain-water.ts) · [Python](../code/neetcode-trapping-rain-water/trapping_rain_water.py) · [Go](../code/neetcode-trapping-rain-water/trapping_rain_water.go) · [Java](../code/neetcode-trapping-rain-water/trapping-rain-water.java) · [JavaScript](../code/neetcode-trapping-rain-water/trapping-rain-water.js)
+[TypeScript](../code/neetcode-trapping-rain-water/trapping-rain-water.ts) · [Python](../code/neetcode-trapping-rain-water/trapping_rain_water.py) · [Go](../code/neetcode-trapping-rain-water/trapping_rain_water.go) · [Java](../code/neetcode-trapping-rain-water/trapping-rain-water.java) · [JavaScript](../code/neetcode-trapping-rain-water/trapping-rain-water.js) · [PHP](../code/neetcode-trapping-rain-water/trapping-rain-water.php) · [Rust](../code/neetcode-trapping-rain-water/trapping_rain_water.rs)
 
-Each file has all four approaches and runs 8 cases, including an empty array, a single wall, an ascending row and a descending row. Below are prefix maximum and two pointers.
+Each of the original five files has all four approaches and runs 8 cases, including an empty array, a single wall, an ascending row and a descending row. Below are prefix maximum and two pointers.
 
 ```ts
 // Two arrays, prefix max and suffix max: O(n) time, O(n) memory.
@@ -279,6 +279,46 @@ function twoPointers(h) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function trap(array $height): int {
+    $left = 0;
+    $right = count($height) - 1;
+    $leftMax = $rightMax = $water = 0;
+    while ($left <= $right) {
+        if ($leftMax <= $rightMax) {
+            $leftMax = max($leftMax, $height[$left]);
+            $water += $leftMax - $height[$left++];
+        } else {
+            $rightMax = max($rightMax, $height[$right]);
+            $water += $rightMax - $height[$right--];
+        }
+    }
+    return $water;
+}
+```
+
+```rust
+fn trap(height: &[i32]) -> i32 {
+    let (mut left, mut right) = (0, height.len()); // [left, right)
+    let (mut left_max, mut right_max, mut water) = (0, 0, 0);
+    while left < right {
+        if left_max <= right_max {
+            left_max = left_max.max(height[left]);
+            water += left_max - height[left];
+            left += 1;
+        } else {
+            right -= 1;
+            right_max = right_max.max(height[right]);
+            water += right_max - height[right];
+        }
+    }
+    water
+}
+```
+
 
 The TypeScript file also runs a wrong version, then measures:
 
@@ -300,6 +340,8 @@ n          brute   prefix max  two pointers  stack   (ms, median; heights 0..10�
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 The wrong version computes the side maxima **without** wall i and forgets to clamp at 0: a wall taller than everything on both sides yields negative water, and the negatives are subtracted from the total. Python, Go, Java and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all four approaches.
+
+The added versions use two pointers. The exclusive right bound in Rust makes an empty slice exit immediately. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

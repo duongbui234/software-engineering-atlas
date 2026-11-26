@@ -106,7 +106,7 @@ TypeScript, chuỗi 10⁶ ký tự gồm chữ, dấu phẩy và khoảng trắn
 
 Cả hai đều O(n) ở ca tệ nhất. Hai con trỏ nhanh hơn ở ca tệ nhất vì không tạo chuỗi mới, và nhanh hơn hẳn ở ca "sai sớm" vì nó dừng ngay.
 
-### Bên dưới năm ngôn ngữ: "chữ hoặc số" là gì
+### Bên dưới bảy ngôn ngữ: "chữ hoặc số" là gì
 
 | | Hàm có sẵn | Khớp với đề? |
 |---|---|---|
@@ -115,12 +115,14 @@ Cả hai đều O(n) ở ca tệ nhất. Hai con trỏ nhanh hơn ở ca tệ nh
 | Python | `str.isalnum()` | **không hẳn**: nhận cả `"é"`, `"²"`, chữ Hán; đúng với ASCII thì thêm `isascii()` |
 | Go | `unicode.IsLetter`, `IsDigit` | nhận Unicode; đề chỉ có ASCII nên so byte trực tiếp là đủ |
 | Java | `Character.isLetterOrDigit` | nhận Unicode, như Python |
+| PHP | `ctype_alnum` | có: theo locale "C" thì chỉ ASCII; nhưng nhận **chuỗi**, không nhận mã số |
+| Rust | `u8::is_ascii_alphanumeric` | có; còn `char::is_alphanumeric` nhận Unicode như Python |
 
 Đề chỉ có ASCII nên `isalnum()` và `isLetterOrDigit` vẫn qua LeetCode. Nhưng chép hàm này sang nơi nhận chữ tiếng Việt thì "chữ hoặc số" đã đổi nghĩa mà không ai để ý.
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-valid-palindrome/valid-palindrome.ts) · [Python](../code/neetcode-valid-palindrome/valid_palindrome.py) · [Go](../code/neetcode-valid-palindrome/valid_palindrome.go) · [Java](../code/neetcode-valid-palindrome/valid-palindrome.java) · [JavaScript](../code/neetcode-valid-palindrome/valid-palindrome.js)
+[TypeScript](../code/neetcode-valid-palindrome/valid-palindrome.ts) · [Python](../code/neetcode-valid-palindrome/valid_palindrome.py) · [Go](../code/neetcode-valid-palindrome/valid_palindrome.go) · [Java](../code/neetcode-valid-palindrome/valid-palindrome.java) · [JavaScript](../code/neetcode-valid-palindrome/valid-palindrome.js) · [PHP](../code/neetcode-valid-palindrome/valid-palindrome.php) · [Rust](../code/neetcode-valid-palindrome/valid_palindrome.rs)
 
 Mỗi file có cả hai cách và chạy 8 ca (Python 9 ca). Dưới đây là cách hai con trỏ.
 
@@ -199,6 +201,42 @@ function twoPointers(s) {
 }
 ```
 
+```php
+function twoPointers(string $s): bool {
+    $i = 0; $j = strlen($s) - 1;
+    while ($i < $j) {
+        if (!ctype_alnum($s[$i])) { $i++; continue; } // ctype_alnum nhận một CHUỖI, theo locale "C": chỉ ASCII
+        if (!ctype_alnum($s[$j])) { $j--; continue; }
+        if (strtolower($s[$i]) !== strtolower($s[$j])) return false; // khác nhau: dừng ngay
+        $i++; $j--;
+    }
+    return true;
+}
+```
+
+```rust
+fn two_pointers(s: &str) -> bool {
+    let b = s.as_bytes();
+    if b.is_empty() {
+        return true;
+    }
+    let (mut i, mut j) = (0usize, b.len() - 1); // b.len() - 1 trên usize: chuỗi rỗng sẽ tràn, nên kiểm trước
+    while i < j {
+        if !b[i].is_ascii_alphanumeric() {
+            i += 1;
+        } else if !b[j].is_ascii_alphanumeric() {
+            j -= 1;
+        } else if b[i].to_ascii_lowercase() != b[j].to_ascii_lowercase() {
+            return false; // khác nhau: dừng ngay
+        } else {
+            i += 1;
+            j -= 1;
+        }
+    }
+    true
+}
+```
+
 
 ```text
 $ node valid-palindrome.ts
@@ -218,7 +256,7 @@ two_pointers    9/9 ca đúng
 unicode_isalnum 8/9 ca đúng; sai ở ['a²']
 ```
 
-Bản dùng `\w` giữ lại `_` nên `"a_"` thành `a_`, không phải palindrome. Bản Python chỉ dùng `isalnum()` giữ lại `²` (chỉ số trên) vì Unicode coi nó là chữ số. Go, Java và JavaScript in `8/8 ca đúng` cho cả hai cách.
+Bản dùng `\w` giữ lại `_` nên `"a_"` thành `a_`, không phải palindrome. Bản Python chỉ dùng `isalnum()` giữ lại `²` (chỉ số trên) vì Unicode coi nó là chữ số. Go, Java và JavaScript in `8/8 ca đúng` cho cả hai cách. PHP và Rust cũng in `8/8 ca đúng` cho hai cách, và bản lọc kiểu `\w` in `7/8 ca đúng; sai ở "a_"` như TypeScript.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -227,6 +265,8 @@ Bản dùng `\w` giữ lại `_` nên `"a_"` thành `a_`, không phải palindro
 - **Dời cả hai con trỏ khi gặp ký tự rác.** Chỉ ký tự rác ở **một** bên được bỏ; dời cả hai là bỏ qua một ký tự thật ở bên kia.
 - **Quên `i < j` trong vòng bỏ qua.** Chuỗi toàn dấu câu như `".,"` làm `i` chạy quá `j` hoặc ra ngoài mảng nếu vòng bỏ qua viết riêng mà không kiểm biên.
 - **So trước khi đổi chữ thường.** `"Aa"` là palindrome theo đề.
+- **PHP: `strrev` đảo theo byte.** Với ASCII của đề thì đúng, nhưng chuỗi có chữ UTF-8 như `"é"` (hai byte) bị đảo thành byte rác. Ngoài ra `ctype_alnum` nhận chuỗi; truyền một số nguyên từ `ord()` thì PHP hiểu nó là mã ASCII (hành vi đã bị đánh dấu lỗi thời từ PHP 8.1).
+- **Rust: đánh chỉ số chuỗi.** `s[i]` không biên dịch vì chuỗi Rust là UTF-8; phải làm việc trên `s.as_bytes()`. Và `b.len() - 1` trên `usize` với chuỗi rỗng sẽ tràn số (panic ở bản debug), nên file kiểm chuỗi rỗng trước.
 
 ## Câu hỏi tự kiểm tra
 

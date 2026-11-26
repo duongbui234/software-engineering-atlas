@@ -145,7 +145,7 @@ lo + (hi - lo) / 2    = 1750000000
 
 `>>>` là dịch phải **không dấu**: tổng tràn chỉ đổi bit dấu, và đọc 32 bit đó như số không dấu vẫn cho tổng đúng (tối đa 2³² − 2), chia 2 ra kết quả đúng. `lo + (hi − lo) / 2` tránh tràn theo cách khác: `hi − lo` không bao giờ vượt `hi`. Xem [[concepts/midpoint-overflow|Midpoint Overflow]].
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Tính `mid` | Thư viện chuẩn | Bẫy riêng |
 |---|---|---|---|
@@ -153,6 +153,8 @@ lo + (hi - lo) / 2    = 1750000000
 | Python | `(lo + hi) // 2` | `bisect_left`, `bisect_right`, `insort` | `int` không giới hạn, không tràn. `bisect` trả **vị trí chèn**, không trả `-1`: phải tự kiểm `i < n and nums[i] == target` |
 | Go | `lo + (hi-lo)/2`, hoặc `int(uint(lo+hi) >> 1)` như `sort.Search` | `sort.Search(n, f)`: `i` nhỏ nhất làm `f(i)` đúng; `slices.BinarySearch(s, x)` trả `(i, found)` | `int` 64 bit trên máy 64 bit, tràn khó xảy ra nhưng thư viện vẫn viết kiểu an toàn. `f` của `sort.Search` phải đổi từ `false` sang `true` đúng một lần |
 | Java | `lo + (hi - lo) / 2` hoặc `(lo + hi) >>> 1` | `Arrays.binarySearch`, `Collections.binarySearch` | không thấy thì trả `-(vị trí chèn) − 1`, **luôn âm** nhưng không phải `-1`: `binarySearch([1, 3, 5], 4)` ra `-3`. Viết `if (i == -1)` là sai; viết `if (i < 0)`. Có trùng thì không bảo đảm trả ô nào |
+| PHP | `intdiv($lo + $hi, 2)` hoặc `($lo + $hi) >> 1` | không có hàm tìm nhị phân cho mảng; `array_search` là tìm tuyến tính | `int` 64 bit nên tổng không tràn, nhưng `/` ra **float** khi chia không hết: `($lo + $hi) / 2` làm chỉ số thì PHP 8.1+ báo deprecated vì float bị cắt phần lẻ |
+| Rust | `lo + (hi - lo) / 2` | `slice::binary_search` trả `Ok(i)` hoặc `Err(vị trí chèn)`; `partition_point(\|&x\| x < t)` là cận dưới | chỉ số là `usize`: `nums.len() - 1` với mảng rỗng, hay `hi = mid - 1` khi `mid = 0`, làm chương trình **panic** ở bản debug; quy ước nửa mở tránh được chuyện này. Tràn `i32` panic ở debug, cuộn vòng im lặng ở `-O` |
 
 ### Đo
 
@@ -172,7 +174,7 @@ Python, n = 10⁶, 10⁵ lần tìm: vòng lặp viết tay 224 ms, `bisect_left
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-binary-search-problem/binary-search.ts) · [Python](../code/neetcode-binary-search-problem/binary_search.py) · [Go](../code/neetcode-binary-search-problem/binary_search.go) · [Java](../code/neetcode-binary-search-problem/binary-search.java) · [JavaScript](../code/neetcode-binary-search-problem/binary-search.js)
+[TypeScript](../code/neetcode-binary-search-problem/binary-search.ts) · [Python](../code/neetcode-binary-search-problem/binary_search.py) · [Go](../code/neetcode-binary-search-problem/binary_search.go) · [Java](../code/neetcode-binary-search-problem/binary-search.java) · [JavaScript](../code/neetcode-binary-search-problem/binary-search.js) · [PHP](../code/neetcode-binary-search-problem/binary-search.php) · [Rust](../code/neetcode-binary-search-problem/binary_search.rs)
 
 Mỗi file có bản khoảng đóng, bản nửa mở và bản dựa trên cận dưới hay thư viện chuẩn, chạy 8 ca: ví dụ của đề, mảng một phần tử, mảng hai phần tử, và hai đầu của mảng lẻ. Dưới đây là hai quy ước khoảng.
 
@@ -310,6 +312,71 @@ function halfOpen(nums, target) {
 }
 ```
 
+```php
+// Khoảng đóng [lo, hi]: bất biến "nếu target có mặt thì nó nằm trong nums[lo..hi]".
+function closedInterval(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums) - 1;
+    while ($lo <= $hi) {
+        $mid = $lo + (($hi - $lo) >> 1); // int PHP là 64 bit; intdiv($lo + $hi, 2) cũng an toàn
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid - 1;
+    }
+    return -1;
+}
+
+// Khoảng nửa mở [lo, hi): hi là vị trí ĐẦU TIÊN không còn xét.
+function halfOpen(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums);
+    while ($lo < $hi) {
+        $mid = intdiv($lo + $hi, 2); // KHÔNG viết ($lo + $hi) / 2: phép / của PHP ra float khi chia không hết
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return -1;
+}
+```
+
+```rust
+// Khoảng đóng [lo, hi]. Chỉ số kiểu usize không âm được, nên giữ hi = "một sau ô cuối" (lo..hi)
+// hoặc dùng i64. Ở đây dùng i64 để giữ đúng dáng khoảng đóng.
+fn closed_interval(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0i64, nums.len() as i64 - 1); // usize: 0 - 1 làm chương trình panic
+    while lo <= hi {
+        let mid = lo + (hi - lo) / 2;
+        let v = nums[mid as usize];
+        if v == target {
+            return mid as i32;
+        }
+        if v < target {
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    -1
+}
+
+// Khoảng nửa mở [lo, hi): hợp với usize, vì hi không bao giờ phải xuống dưới 0.
+fn half_open(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0usize, nums.len());
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        match nums[mid].cmp(&target) {
+            std::cmp::Ordering::Equal => return mid as i32,
+            std::cmp::Ordering::Less => lo = mid + 1,
+            std::cmp::Ordering::Greater => hi = mid,
+        }
+    }
+    -1
+}
+```
+
 
 Cận dưới, và cách thư viện chuẩn trả lời cùng câu hỏi:
 
@@ -378,6 +445,42 @@ function viaLowerBound(nums, target) {
 }
 ```
 
+```php
+// Cận dưới: vị trí đầu tiên có nums[i] >= target. PHP không có hàm tìm nhị phân cho mảng.
+function lowerBound(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums);
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return $lo;
+}
+
+function viaLowerBound(array $nums, int $target): int
+{
+    $i = lowerBound($nums, $target);
+    return $i < count($nums) && $nums[$i] === $target ? $i : -1;
+}
+```
+
+```rust
+// Thư viện chuẩn: binary_search trả Ok(vị trí) hoặc Err(vị trí chèn); partition_point là cận dưới.
+fn via_std(nums: &[i32], target: i32) -> i32 {
+    match nums.binary_search(&target) {
+        Ok(i) => i as i32,
+        Err(_) => -1,
+    }
+}
+
+fn via_partition_point(nums: &[i32], target: i32) -> i32 {
+    let i = nums.partition_point(|&x| x < target); // vị trí đầu tiên có nums[i] >= target
+    if i < nums.len() && nums[i] == target { i as i32 } else { -1 }
+}
+```
+
 
 Kết quả chạy `node binary-search.ts`, gồm cả hai bản sai:
 
@@ -397,6 +500,8 @@ lo + ((hi - lo) >> 1) = 1750000000
 
 Python, Go và JavaScript in `8/8 ca đúng` cho mọi bản đúng; Go in thêm `slices.BinarySearch([1 3 5], 4) = 2, false`, Java in `Arrays.binarySearch([1, 3, 5], 4) = -3`.
 
+PHP (`php binary-search.php`) và Rust (`rustc --edition 2021 -O binary_search.rs`) in `8/8 ca đúng` cho mọi bản đúng và cùng số ca sai cho hai bản sai. PHP in thêm `(lo + hi + 1) / 2 = 1750000000.5` (phép `/` ra float); Rust in `lo.wrapping_add(hi) / 2 = -397483648` (i32 cuộn vòng), `lo.checked_add(hi) = None` và `[1, 3, 5].binary_search(&4) = Err(2)`.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Chỉnh `<` thành `<=` cho tới khi qua test."** Chọn quy ước khoảng trước; điều kiện lặp và cách gán `hi` suy ra từ đó (bảng ở trên).
@@ -405,6 +510,8 @@ Python, Go và JavaScript in `8/8 ca đúng` cho mọi bản đúng; Go in thêm
 - **"Python và JS không tràn nên `(lo + hi) / 2` là ổn."** Python ổn. JS ổn với `Math.floor` hay `>>> 1`, nhưng `>> 1` sai khi tổng vượt 2³¹. Java, C, C++, Go với `int32` thì tràn thật.
 - **Java: so `Arrays.binarySearch(...) == -1`.** Giá trị trả về là `-(vị trí chèn) − 1`; chỉ bằng `-1` khi vị trí chèn là 0.
 - **Dùng trên mảng chưa sắp.** Không báo lỗi, chỉ trả kết quả sai. Sắp mảng tốn O(n log n), nên chỉ đáng khi tìm nhiều lần trên cùng mảng.
+- **PHP: `($lo + $hi) / 2` làm chỉ số.** Phép `/` ra float khi tổng lẻ (`1750000000.5`); dùng `intdiv` hoặc `>> 1`. So bằng `===` để `0` không bằng `"0"` hay `false`.
+- **Rust: khoảng đóng với `usize`.** `hi = mid - 1` khi `mid = 0` làm chương trình panic (debug) hoặc cuộn thành số khổng lồ (`-O`). Dùng quy ước nửa mở, hoặc `i64` như file mẫu. `binary_search` không thấy thì trả `Err(vị trí chèn)`, không phải `-1`.
 
 ## Câu hỏi tự kiểm tra
 

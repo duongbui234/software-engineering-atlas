@@ -138,7 +138,7 @@ Duplicates (the LeetCode 154 version, counting loop iterations):
 
 With all 1s, almost every step lands in the `hi--` branch: the step count grows with n, not with log n.
 
-### Under the hood in five languages
+### Under the hood in seven languages
 
 | | Computing mid | Language-specific trap |
 |---|---|---|
@@ -146,10 +146,12 @@ With all 1s, almost every step lands in the `hi--` branch: the step count grows 
 | Python | `(lo + hi) // 2` | ints are unbounded, no overflow; `//` rounds down, even for negatives |
 | Go | `lo + (hi-lo)/2` | `int` is 64-bit on 64-bit machines, but this form is a safe habit for any type |
 | Java | `(lo + hi) >>> 1` | 32-bit `int`: `(lo + hi) / 2` with lo = 1.5 billion, hi = 2 billion gives **−397 483 648**; `>>> 1` treats the sum as unsigned and gives the correct 1 750 000 000. This bug once lived in the JDK's `Arrays.binarySearch` |
+| PHP | `($lo + $hi) >> 1` or `intdiv` | 64-bit `int`, no overflow at this size; `/` returns a float. `$nums[-1]` is **not** the last element as in Python: it is a missing key `-1`, giving `null` with a warning. Write `$nums[count($nums) - 1]` |
+| Rust | `lo + (hi - lo) / 2` on `usize` | `nums.len() - 1` on an empty array panics; the problem guarantees n ≥ 1. Approach 3 shrinks to `partition_point(\|&x\| x >= nums[0])` because the predicate is true before the break point and false after it |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.ts) · [Python](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.py) · [Go](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.go) · [Java](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.java) · [JavaScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.js)
+[TypeScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.ts) · [Python](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.py) · [Go](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.go) · [Java](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.java) · [JavaScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.js) · [PHP](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.php) · [Rust](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.rs)
 
 Each file has the scan, binary search against `nums[hi]` and binary search against `nums[0]`, run on 8 cases. The TypeScript file adds two wrong versions, the duplicates version and the measurements. Below are the two binary searches.
 
@@ -279,6 +281,61 @@ function binaryVsFirst(nums) {
 }
 ```
 
+```php
+// Approach 2, binary search against nums[hi]. Invariant: the minimum is always in [lo, hi].
+function binaryVsHi(array $nums): int
+{
+    $lo = 0;
+    $hi = count($nums) - 1;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] > $nums[$hi]) $lo = $mid + 1; // the minimum is strictly right of mid
+        else $hi = $mid; // [mid, hi] is increasing: the minimum is mid or to its left
+    }
+    return $nums[$lo];
+}
+
+// Approach 3, find the break point: the first element smaller than nums[0].
+function binaryVsFirst(array $nums): int
+{
+    $n = count($nums);
+    if ($nums[0] <= $nums[$n - 1]) return $nums[0]; // not rotated: the minimum is first. $nums[-1] is NOT the last element in PHP
+    $lo = 0;
+    $hi = $n - 1;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] >= $nums[0]) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return $nums[$lo];
+}
+```
+
+```rust
+// Approach 2, binary search against nums[hi]. Invariant: the minimum is always in [lo, hi].
+fn binary_vs_hi(nums: &[i32]) -> i32 {
+    let (mut lo, mut hi) = (0, nums.len() - 1);
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if nums[mid] > nums[hi] {
+            lo = mid + 1; // the minimum is strictly right of mid
+        } else {
+            hi = mid; // [mid, hi] is increasing: the minimum is mid or to its left
+        }
+    }
+    nums[lo]
+}
+
+// Approach 3, find the break point: partition_point returns the first position smaller than nums[0]
+// (the predicate "x >= nums[0]" is true in the first part, false in the second).
+fn binary_vs_first(nums: &[i32]) -> i32 {
+    if nums[0] <= nums[nums.len() - 1] {
+        return nums[0]; // not rotated: the minimum is first
+    }
+    nums[nums.partition_point(|&x| x >= nums[0])]
+}
+```
+
 Output of the TypeScript file:
 
 ```text
@@ -314,6 +371,8 @@ binaryVsFirst  8/8 cases passed
 
 Python, Go and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all three approaches.
 
+PHP (`php find-min-rotated.php`) and Rust (`rustc --edition 2021 -O find_min_rotated.rs`) also run both broken versions and the duplicates version: they print exactly what TypeScript prints, `8/8` for the three correct approaches, `4/8` for `wrongVsLo`, `0/8` for the endless loop, and 108 / 1 012 / 10 015 steps for LeetCode 154.
+
 ## Misconceptions and common traps
 
 - **"Binary search needs an increasing array."** Binary search needs a yes/no question whose answer flips exactly once. "`nums[i] <= nums[n − 1]`?" is such a question on a rotated array.
@@ -322,6 +381,8 @@ Python, Go and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all thr
 - **Forgetting the array rotated n times.** It looks unrotated; the answer is `nums[0]`. This is the case where the `nums[lo]` version breaks.
 - **Reusing this solution on an array with duplicates.** When `nums[mid] == nums[hi]` you must `hi--`, and the worst case becomes O(n).
 - **Java: `(lo + hi) / 2`.** Overflows when the sum exceeds 2³¹ − 1. Use `(lo + hi) >>> 1` or `lo + (hi - lo) / 2`.
+- **PHP: `$nums[-1]` for the last element.** A Python habit: PHP treats `-1` as a key, which is missing, so you get `null` with a warning, and the loose comparison `$nums[0] <= null` gives a meaningless result. Use `$nums[count($nums) - 1]` or `end($nums)`.
+- **Rust: `partition_point` with a non-monotonic predicate.** It is only correct when the predicate holds on a prefix and fails on the rest. `x >= nums[0]` does that only when the array is rotated; on an unrotated array it holds everywhere and returns `n`, so the unrotated case must be caught first, as `binary_vs_first` does.
 
 ## Self-check questions
 

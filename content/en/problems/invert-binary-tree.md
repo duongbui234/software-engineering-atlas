@@ -208,7 +208,7 @@ const node = stack.pop()
 
 JavaScript's automatic semicolon insertion (ASI) only inserts one when the next line cannot continue the line above. A line starting with `[` can continue it: the engine reads `const node = stack.pop()[node.left, node.right] = [...]`, using `node` inside its own declaration, and throws `ReferenceError: Cannot access 'node' before initialization`. It passes 1/8 cases, only the empty tree (the loop never runs). The semicolon-free style always puts a `;` at the start of lines that begin with `[` or `(`.
 
-### Under the hood in five languages
+### Under the hood in seven languages
 
 | | Swapping the two children | Language-specific trap |
 |---|---|---|
@@ -216,6 +216,8 @@ JavaScript's automatic semicolon insertion (ASI) only inserts one when the next 
 | Python | `a.left, a.right = a.right, a.left` | `list.pop(0)` is O(n), use `collections.deque`; recursion past 1,000 levels is `RecursionError` |
 | Go | `a.Left, a.Right = a.Right, a.Left` | no `null`; check `root == nil` before reading `root.Left` |
 | Java | a temporary variable | no tuple assignment; `ArrayDeque` rejects `null` (see [[en/problems/maximum-depth-of-binary-tree\|problem 104]]) |
+| PHP | `[$a->left, $a->right] = [$a->right, $a->left]` | objects are passed by handle, so swapping in place changes the original tree; with Xdebug loaded, recursion stops at 512 levels (`-d xdebug.mode=off`) |
+| Rust | `std::mem::swap(&mut b.left, &mut b.right)` | you need `borrow_mut()` on the `RefCell`; borrowing twice at once panics at run time, not at compile time |
 
 ### Measurements
 
@@ -245,7 +247,7 @@ Left-skewed chain of 10⁵ nodes:
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-invert-binary-tree/invert-tree.ts) · [Python](../code/neetcode-invert-binary-tree/invert_tree.py) · [Go](../code/neetcode-invert-binary-tree/invert_tree.go) · [Java](../code/neetcode-invert-binary-tree/invert-tree.java) · [JavaScript](../code/neetcode-invert-binary-tree/invert-tree.js)
+[TypeScript](../code/neetcode-invert-binary-tree/invert-tree.ts) · [Python](../code/neetcode-invert-binary-tree/invert_tree.py) · [Go](../code/neetcode-invert-binary-tree/invert_tree.go) · [Java](../code/neetcode-invert-binary-tree/invert-tree.java) · [JavaScript](../code/neetcode-invert-binary-tree/invert-tree.js) · [PHP](../code/neetcode-invert-binary-tree/invert-tree.php) · [Rust](../code/neetcode-invert-binary-tree/invert_tree.rs)
 
 Each file builds trees from level-order arrays, runs 8 shared cases (empty tree, one node, left child only, three nodes, a complete 3-level tree, a left chain, a tree lopsided on both sides, negative values and 0), then cross-checks 2,000 random trees (mulberry32, up to 40 nodes) against an independent "mirror": the original tree written in right, root, left order must produce exactly the same string as the inverted tree written in left, root, right order.
 
@@ -298,6 +300,29 @@ function invertRecursive(root) {
   if (root === null) return null;
   [root.left, root.right] = [invertRecursive(root.right), invertRecursive(root.left)];
   return root;
+}
+```
+
+```php
+// Approach 1: recursion. Destructuring assignment: PHP builds the whole right-hand array before assigning.
+function invertRecursive(?TreeNode $root): ?TreeNode
+{
+    if ($root === null) return null;
+    [$root->left, $root->right] = [invertRecursive($root->right), invertRecursive($root->left)];
+    return $root;
+}
+```
+
+```rust
+// Approach 1: recursion. take() moves both children out of the node (leaving None), inverts each, then attaches them crosswise.
+fn invert_recursive(root: Node) -> Node {
+    if let Some(n) = &root {
+        let mut b = n.borrow_mut();
+        let (l, r) = (b.left.take(), b.right.take());
+        b.left = invert_recursive(r);
+        b.right = invert_recursive(l);
+    }
+    root
 }
 ```
 
@@ -384,6 +409,36 @@ function invertStack(root) {
     if (node.right !== null) stack.push(node.right);
   }
   return root;
+}
+```
+
+```php
+// Approach 2: a hand-managed stack; the visiting order does not matter.
+function invertStack(?TreeNode $root): ?TreeNode
+{
+    $stack = $root === null ? [] : [$root];
+    while ($stack) {
+        $node = array_pop($stack);
+        [$node->left, $node->right] = [$node->right, $node->left];
+        if ($node->left !== null) $stack[] = $node->left;
+        if ($node->right !== null) $stack[] = $node->right;
+    }
+    return $root;
+}
+```
+
+```rust
+// Approach 2: a hand-managed stack; std::mem::swap swaps the two children in place.
+fn invert_stack(root: Node) -> Node {
+    let mut stack: Vec<Rc<RefCell<TreeNode>>> = root.iter().cloned().collect();
+    while let Some(n) = stack.pop() {
+        let mut b = n.borrow_mut();
+        let b = &mut *b;
+        std::mem::swap(&mut b.left, &mut b.right);
+        stack.extend(b.left.iter().cloned());
+        stack.extend(b.right.iter().cloned());
+    }
+    root
 }
 ```
 
@@ -489,6 +544,30 @@ wrongNoSemicolon 1/8 cases passed; wrong on one node → threw ReferenceError, l
 wrongNoSemicolon([1]): ReferenceError: Cannot access 'node' before initialization
 ```
 
+`php -d xdebug.mode=off invert-tree.php`:
+
+```text
+invertRecursive  8/8 ca đúng
+invertStack      8/8 ca đúng
+invertBfs        8/8 ca đúng
+wrongOverwrite   2/8 ca đúng; sai ở chỉ có con trái → [1], ba nút → [2,3,3], cây đủ 3 tầng → [5,8,8,9,9,9,9], chuỗi trái thành chuỗi phải → [1], lệch hai bên → [1,3,3,5,5,5,5], giá trị âm và 0 → [0]
+
+ngẫu nhiên: invertRecursive 2000/2000, invertStack 2000/2000, invertBfs 2000/2000
+```
+
+`rustc --edition 2021 -O invert_tree.rs && ./invert_tree`:
+
+```text
+invert_recursive 8/8 ca đúng
+invert_stack     8/8 ca đúng
+invert_bfs       8/8 ca đúng
+wrong_overwrite  2/8 ca đúng; sai ở chỉ có con trái → [1], ba nút → [2,3,3], cây đủ 3 tầng → [5,8,8,9,9,9,9], chuỗi trái thành chuỗi phải → [1], lệch hai bên → [1,3,3,5,5,5,5], giá trị âm và 0 → [0]
+
+ngẫu nhiên: invert_recursive 2000/2000, invert_stack 2000/2000, invert_bfs 2000/2000
+```
+
+PHP and Rust are not timed; the two files only check correctness and run the random cross-check (each language uses its own random generator, so the random trees differ from the other four files).
+
 ## Misconceptions and common traps
 
 - **"You have to swap the far-left node with the far-right node."** No need to look that far: swapping the two children at every node is enough, and the far positions come out right because such a node is swapped at every level it passes through.
@@ -497,6 +576,8 @@ wrongNoSemicolon([1]): ReferenceError: Cannot access 'node' before initializatio
 - **"You have to build a new tree."** The problem lets you edit in place and return the same root. A new tree is also correct but costs n nodes.
 - **Leaving out semicolons in JavaScript.** A line starting with `[` gets glued onto the line above.
 - **"Recursion on a tree is always safe because a tree is only log n deep."** Only true for a balanced tree. The problem does not promise balance; a skewed chain is as deep as it has nodes.
+- **PHP: thinking `$node` is a copy.** PHP objects travel by handle: `$node = array_pop($stack)` still points at the real node, so swapping children on `$node` changes the tree. Only arrays are copied on assignment (copy-on-write).
+- **Rust: holding a `borrow()` and then calling `borrow_mut()` on the same node.** The compiler cannot catch it; `RefCell` panics with `already borrowed` at run time. Move both children out with `take()` (or `mem::swap`) inside one single `borrow_mut()`.
 
 ## Self-check questions
 

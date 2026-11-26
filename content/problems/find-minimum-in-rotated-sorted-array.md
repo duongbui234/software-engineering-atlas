@@ -137,7 +137,7 @@ Số trùng (bản LeetCode 154, đếm số vòng lặp):
 
 Toàn số 1 nên hầu hết các bước rơi vào nhánh `hi--`: số bước tăng theo n, không theo log n.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Tính mid | Bẫy riêng |
 |---|---|---|
@@ -145,10 +145,12 @@ Toàn số 1 nên hầu hết các bước rơi vào nhánh `hi--`: số bước
 | Python | `(lo + hi) // 2` | int không giới hạn, không tràn; `//` làm tròn xuống, kể cả số âm |
 | Go | `lo + (hi-lo)/2` | `int` 64 bit trên máy 64 bit, nhưng viết như vậy là thói quen an toàn cho mọi kiểu |
 | Java | `(lo + hi) >>> 1` | `int` 32 bit: `(lo + hi) / 2` với lo = 1,5 tỷ, hi = 2 tỷ ra **−397 483 648**; `>>> 1` coi tổng là số không dấu và ra đúng 1 750 000 000. Đây là lỗi từng nằm trong `Arrays.binarySearch` của JDK |
+| PHP | `($lo + $hi) >> 1` hoặc `intdiv` | `int` 64 bit, không tràn ở cỡ này; `/` ra float. `$nums[-1]` **không** phải phần tử cuối như Python: nó là khóa `-1` không tồn tại, ra `null` kèm warning. Viết `$nums[count($nums) - 1]` |
+| Rust | `lo + (hi - lo) / 2` trên `usize` | `nums.len() - 1` với mảng rỗng làm chương trình panic; đề bảo đảm n ≥ 1. Cách 3 viết gọn bằng `partition_point(\|&x\| x >= nums[0])` vì vị từ đúng ở nửa trước điểm gãy, sai ở nửa sau |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.ts) · [Python](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.py) · [Go](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.go) · [Java](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.java) · [JavaScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.js)
+[TypeScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.ts) · [Python](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.py) · [Go](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.go) · [Java](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.java) · [JavaScript](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.js) · [PHP](../code/neetcode-find-minimum-in-rotated-sorted-array/find-min-rotated.php) · [Rust](../code/neetcode-find-minimum-in-rotated-sorted-array/find_min_rotated.rs)
 
 Mỗi file có quét, chia đôi so với `nums[hi]` và chia đôi so với `nums[0]`, chạy 8 ca. File TypeScript có thêm hai bản sai, bản có số trùng và phép đo. Dưới đây là hai cách chia đôi.
 
@@ -278,6 +280,61 @@ function binaryVsFirst(nums) {
 }
 ```
 
+```php
+// Cách 2, chia đôi so với nums[hi]. Bất biến: phần tử nhỏ nhất luôn nằm trong [lo, hi].
+function binaryVsHi(array $nums): int
+{
+    $lo = 0;
+    $hi = count($nums) - 1;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] > $nums[$hi]) $lo = $mid + 1; // min nằm hẳn bên phải mid
+        else $hi = $mid; // đoạn [mid, hi] tăng dần: min là mid hoặc ở bên trái
+    }
+    return $nums[$lo];
+}
+
+// Cách 3, tìm điểm gãy: phần tử đầu tiên nhỏ hơn nums[0].
+function binaryVsFirst(array $nums): int
+{
+    $n = count($nums);
+    if ($nums[0] <= $nums[$n - 1]) return $nums[0]; // không xoay: min ở đầu. $nums[-1] KHÔNG phải phần tử cuối trong PHP
+    $lo = 0;
+    $hi = $n - 1;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] >= $nums[0]) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return $nums[$lo];
+}
+```
+
+```rust
+// Cách 2, chia đôi so với nums[hi]. Bất biến: phần tử nhỏ nhất luôn nằm trong [lo, hi].
+fn binary_vs_hi(nums: &[i32]) -> i32 {
+    let (mut lo, mut hi) = (0, nums.len() - 1);
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if nums[mid] > nums[hi] {
+            lo = mid + 1; // min nằm hẳn bên phải mid
+        } else {
+            hi = mid; // đoạn [mid, hi] tăng dần: min là mid hoặc ở bên trái
+        }
+    }
+    nums[lo]
+}
+
+// Cách 3, tìm điểm gãy: partition_point trả vị trí đầu tiên nhỏ hơn nums[0]
+// (vị từ "x >= nums[0]" đúng ở nửa đầu, sai ở nửa sau).
+fn binary_vs_first(nums: &[i32]) -> i32 {
+    if nums[0] <= nums[nums.len() - 1] {
+        return nums[0]; // không xoay: min ở đầu
+    }
+    nums[nums.partition_point(|&x| x >= nums[0])]
+}
+```
+
 Kết quả của file TypeScript:
 
 ```text
@@ -311,6 +368,8 @@ binaryVsFirst  8/8 ca đúng
 
 Python, Go và JavaScript in `8/8 ca đúng` cho cả ba cách.
 
+PHP (`php find-min-rotated.php`) và Rust (`rustc --edition 2021 -O find_min_rotated.rs`) chạy cả hai bản sai và bản có số trùng: in đúng như TypeScript, `8/8` cho ba cách đúng, `4/8` cho `wrongVsLo`, `0/8` cho bản lặp vô hạn, và 108 / 1 012 / 10 015 bước ở LeetCode 154.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Chia đôi cần mảng tăng dần."** Chia đôi cần một câu hỏi có/không mà câu trả lời đổi đúng một lần. "`nums[i] <= nums[n − 1]`?" là câu hỏi như vậy trên mảng xoay.
@@ -319,6 +378,8 @@ Python, Go và JavaScript in `8/8 ca đúng` cho cả ba cách.
 - **Quên ca xoay đủ n lần.** Mảng trông như chưa xoay; đáp án là `nums[0]`. Đây là ca bản so với `nums[lo]` gãy.
 - **Áp nguyên lời giải này cho mảng có số trùng.** Khi `nums[mid] == nums[hi]` phải `hi--`, và độ phức tạp ca tệ nhất thành O(n).
 - **Java: `(lo + hi) / 2`.** Tràn khi tổng vượt 2³¹ − 1. Dùng `(lo + hi) >>> 1` hoặc `lo + (hi - lo) / 2`.
+- **PHP: `$nums[-1]` để lấy phần tử cuối.** Thói quen từ Python: PHP coi `-1` là một khóa, không có thì ra `null` kèm warning, và `$nums[0] <= null` so sánh lỏng ra kết quả vô nghĩa. Dùng `$nums[count($nums) - 1]` hoặc `end($nums)`.
+- **Rust: `partition_point` với vị từ không đơn điệu.** Nó chỉ đúng khi vị từ đúng ở một đoạn đầu rồi sai đến hết. `x >= nums[0]` thỏa điều đó chỉ khi mảng đã xoay; với mảng không xoay vị từ đúng ở mọi ô và trả `n`, nên phải chặn ca không xoay trước như `binary_vs_first`.
 
 ## Câu hỏi tự kiểm tra
 

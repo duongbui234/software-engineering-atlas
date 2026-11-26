@@ -143,9 +143,9 @@ Nếu mọi số nằm trong [0, 100], không cần heap: giữ mảng `cnt` 101
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-find-median-from-data-stream/find-median-stream.ts) · [Python](../code/neetcode-find-median-from-data-stream/find_median_stream.py) · [Go](../code/neetcode-find-median-from-data-stream/find_median_stream.go) · [Java](../code/neetcode-find-median-from-data-stream/find-median-stream.java) · [JavaScript](../code/neetcode-find-median-from-data-stream/find-median-stream.js)
+[TypeScript](../code/neetcode-find-median-from-data-stream/find-median-stream.ts) · [Python](../code/neetcode-find-median-from-data-stream/find_median_stream.py) · [Go](../code/neetcode-find-median-from-data-stream/find_median_stream.go) · [Java](../code/neetcode-find-median-from-data-stream/find-median-stream.java) · [JavaScript](../code/neetcode-find-median-from-data-stream/find-median-stream.js) · [PHP](../code/neetcode-find-median-from-data-stream/find-median-stream.php) · [Rust](../code/neetcode-find-median-from-data-stream/find_median_stream.rs)
 
-Mỗi file chạy 8 ca (Java thêm ca thứ 9 ở biên `int`): dãy của ví dụ đề `1, 2, 3`, một số, giảm dần, tăng dần, bốn số 7, số âm, một dãy xen kẽ 11 số và bốn số ở biên đề ±10⁵. Sau **mỗi** lần thêm, `findMedian` được so với trung vị tính bằng cách sắp lại. Bản TypeScript còn đối chiếu với 2 000 dãy ngẫu nhiên (mulberry32) và đo ba cách.
+Mỗi file trong năm bản đầu chạy 8 ca (Java thêm ca thứ 9 ở biên `int`): dãy của ví dụ đề `1, 2, 3`, một số, giảm dần, tăng dần, bốn số 7, số âm, một dãy xen kẽ 11 số và bốn số ở biên đề ±10⁵. Sau **mỗi** lần thêm, `findMedian` được so với trung vị tính bằng cách sắp lại. Bản TypeScript còn đối chiếu với 2 000 dãy ngẫu nhiên (mulberry32) và đo ba cách.
 
 ```ts
 // Min-heap số: cha ở i, hai con ở 2i + 1 và 2i + 2. Max-heap thì đưa vào số âm.
@@ -329,6 +329,70 @@ class MedianFinder {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class MedianFinder
+{
+    private SplMaxHeap $lower;
+    private SplMinHeap $upper;
+
+    public function __construct()
+    {
+        $this->lower = new SplMaxHeap();
+        $this->upper = new SplMinHeap();
+    }
+
+    public function addNum(int $num): void
+    {
+        $this->lower->insert($num);
+        $this->upper->insert($this->lower->extract());
+        if ($this->lower->count() < $this->upper->count()) {
+            $this->lower->insert($this->upper->extract());
+        }
+    }
+
+    public function findMedian(): float
+    {
+        if ($this->lower->count() > $this->upper->count()) {
+            return (float) $this->lower->top();
+        }
+        return ($this->lower->top() + $this->upper->top()) / 2.0;
+    }
+}
+```
+
+```rust
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
+
+#[derive(Default)]
+struct MedianFinder {
+    lower: BinaryHeap<i32>,
+    upper: BinaryHeap<Reverse<i32>>,
+}
+
+impl MedianFinder {
+    fn add_num(&mut self, num: i32) {
+        self.lower.push(num);
+        self.upper.push(Reverse(self.lower.pop().unwrap()));
+        if self.lower.len() < self.upper.len() {
+            self.lower.push(self.upper.pop().unwrap().0);
+        }
+    }
+
+    fn find_median(&self) -> f64 {
+        let lower = f64::from(*self.lower.peek().unwrap());
+        if self.lower.len() > self.upper.len() {
+            return lower;
+        }
+        let upper = f64::from(self.upper.peek().unwrap().0);
+        (lower + upper) / 2.0
+    }
+}
+```
+
 
 Kết quả `node find-median-stream.ts`, gồm bản chèn mảng sắp, hai bản sai, mảng đếm, đối chiếu ngẫu nhiên và phép đo:
 
@@ -390,6 +454,8 @@ DefaultSortFinder 7/8 ca đúng; sai ở: xen kẽ → [6, 8, 2, 4, 5, 3.5, 5, 4
 ```
 
 Python chậm hơn TypeScript ở cả hai cách, nhưng tỉ lệ giống nhau: `bisect.insort` tìm chỗ bằng C và dời bằng `memmove`, vẫn tăng theo n² (378,4 ms ở 10⁵, 5 786,5 ms ở 3·10⁵), còn hai heap tăng tuyến tính (737,7 ms ở 10⁶). Go và Java chạy 10⁶ lần thêm và hỏi trong 331,5 ms và 280,2 ms.
+
+Hai file kiểm trung vị sau từng lần thêm. Rust đổi hai đỉnh sang `f64` trước khi cộng để tránh tràn `i32`. PHP in `8/8 ca đúng` và Rust in `9/9 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

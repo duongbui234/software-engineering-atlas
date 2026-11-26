@@ -118,9 +118,9 @@ Vét cạn gấp 4 lần khi n gấp đôi; ở n = 10⁵ nó cần khoảng 5·
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-container-with-most-water/container-most-water.ts) · [Python](../code/neetcode-container-with-most-water/container_most_water.py) · [Go](../code/neetcode-container-with-most-water/container_most_water.go) · [Java](../code/neetcode-container-with-most-water/container-most-water.java) · [JavaScript](../code/neetcode-container-with-most-water/container-most-water.js)
+[TypeScript](../code/neetcode-container-with-most-water/container-most-water.ts) · [Python](../code/neetcode-container-with-most-water/container_most_water.py) · [Go](../code/neetcode-container-with-most-water/container_most_water.go) · [Java](../code/neetcode-container-with-most-water/container-most-water.java) · [JavaScript](../code/neetcode-container-with-most-water/container-most-water.js) · [PHP](../code/neetcode-container-with-most-water/container-most-water.php) · [Rust](../code/neetcode-container-with-most-water/container_most_water.rs)
 
-Mỗi file có vét cạn và hai con trỏ, chạy 7 ca. Dưới đây là hai con trỏ.
+Mỗi file trong năm bản đầu có vét cạn và hai con trỏ, chạy 7 ca. Dưới đây là hai con trỏ.
 
 ```ts
 // Hai con trỏ: luôn dời cột THẤP hơn vào trong.
@@ -185,6 +185,42 @@ function twoPointers(h) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function maxArea(array $height): int {
+    $left = 0;
+    $right = count($height) - 1;
+    $best = 0;
+    while ($left < $right) {
+        $best = max($best, ($right - $left) * min($height[$left], $height[$right]));
+        if ($height[$left] < $height[$right]) {
+            $left++;
+        } else {
+            $right--;
+        }
+    }
+    return $best;
+}
+```
+
+```rust
+fn max_area(height: &[i32]) -> i32 {
+    let (mut left, mut right) = (0, height.len().saturating_sub(1));
+    let mut best = 0;
+    while left < right {
+        best = best.max((right - left) as i32 * height[left].min(height[right]));
+        if height[left] < height[right] {
+            left += 1;
+        } else {
+            right -= 1;
+        }
+    }
+    best
+}
+```
+
 
 File TypeScript chạy thêm bản dời cột cao, rồi đo:
 
@@ -203,6 +239,8 @@ n          vét cạn   hai con trỏ   (ms, trung vị; chiều cao ngẫu nhi�
 ```
 
 Ở ví dụ đầu, bản dời cột cao giữ cột 0 (cao 1) tới cuối và chỉ thấy các bể cao 1: được 8. Python, Go, Java và JavaScript in `7/7 ca đúng` cho cả hai cách.
+
+PHP và Rust dùng hai con trỏ. Rust dùng `saturating_sub(1)` để chỉ số cuối vẫn hợp lệ cho điều kiện lặp khi mảng rỗng. PHP `4/4 ca đúng` · Rust `4/4 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

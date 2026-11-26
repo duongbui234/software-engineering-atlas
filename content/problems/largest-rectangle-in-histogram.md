@@ -153,9 +153,9 @@ Với dữ liệu ngẫu nhiên, chia để trị chỉ chậm hơn ngăn xếp 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.ts) · [Python](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.py) · [Go](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.go) · [Java](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.java) · [JavaScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.js)
+[TypeScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.ts) · [Python](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.py) · [Go](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.go) · [Java](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.java) · [JavaScript](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.js) · [PHP](../code/neetcode-largest-rectangle-in-histogram/largest-rectangle.php) · [Rust](../code/neetcode-largest-rectangle-in-histogram/largest_rectangle.rs)
 
-Mỗi file có vét cạn, chia để trị và ngăn xếp, chạy 9 ca (gồm cột tăng dần, giảm dần, bằng nhau và cột cao 0). Dưới đây là chia để trị và ngăn xếp.
+Mỗi file trong năm bản đầu có vét cạn, chia để trị và ngăn xếp, chạy 9 ca (gồm cột tăng dần, giảm dần, bằng nhau và cột cao 0). Dưới đây là chia để trị và ngăn xếp.
 
 ```ts
 // Chia để trị: hình lớn nhất hoặc đi qua cột thấp nhất (rộng cả đoạn), hoặc nằm hẳn bên trái/phải nó.
@@ -289,6 +289,42 @@ function monotonicStack(h) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function largestRectangleArea(array $height): int {
+    $stack = [];
+    $best = 0;
+    $height[] = 0;
+    foreach ($height as $right => $current) {
+        while ($stack && $height[end($stack)] > $current) {
+            $h = $height[array_pop($stack)];
+            $left = $stack ? end($stack) : -1;
+            $best = max($best, $h * ($right - $left - 1));
+        }
+        $stack[] = $right;
+    }
+    return $best;
+}
+```
+
+```rust
+fn largest_rectangle_area(height: &[i32]) -> i32 {
+    let mut stack: Vec<usize> = Vec::new();
+    let mut best = 0;
+    for (right, current) in height.iter().copied().chain(std::iter::once(0)).enumerate() {
+        while stack.last().is_some_and(|&i| height[i] > current) {
+            let h = height[stack.pop().unwrap()];
+            let start = stack.last().map_or(0, |&i| i + 1);
+            best = best.max(h * (right - start) as i32);
+        }
+        stack.push(right);
+    }
+    best
+}
+```
+
 
 File TypeScript chạy thêm cách hai mảng (`prevNextSmaller`: một lượt tìm trái, một lượt tìm phải) và hai bản sai, rồi đo:
 
@@ -348,6 +384,8 @@ monotonicStack cùng dữ liệu: 100000
 ```
 
 Go chạy xong 10⁵ tầng đệ quy (cả biên dịch lẫn chạy khoảng 2,9 giây, vì vẫn O(n²)). Dòng Java dùng 10⁵ cột **bằng nhau**: phép so `h[i] < h[m]` là nhỏ hơn hẳn, nên m luôn là cột đầu đoạn và đệ quy sâu n tầng như cột tăng dần. JavaScript in `9/9 ca đúng` cho cả ba cách.
+
+Hai bản bổ sung dùng ngăn xếp đơn điệu. Rust nối cột canh bằng iterator để giữ nguyên lát cắt đầu vào. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

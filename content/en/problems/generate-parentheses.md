@@ -139,7 +139,7 @@ Python, same machine:
 
 Concatenating `s + "("` creates a new string at every step, but the string is at most 2n = 24 characters long, so it is cheaper than `"".join(cur)` at each leaf. The advice "don't concatenate strings in a loop" is right for **long** strings, not here.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | The string being built | Language-specific trap |
 |---|---|---|
@@ -147,10 +147,12 @@ Concatenating `s + "("` creates a new string at every step, but the string is at
 | Python | `str` is immutable: concatenation; or a `list` + `"".join` | default recursion limit of 1 000 levels; only 2n + 1 are needed here |
 | Go | `[]byte` with `append` and reslicing `buf[:len(buf)-1]` | keeping `buf` itself instead of `string(buf)`: every result points to the same backing array |
 | Java | one shared `StringBuilder`, undone with `setLength` | forgetting `setLength`: characters from the previous branch stay behind |
+| PHP | strings are **values** (copy-on-write): `$s . '('` is a new string; or one shared string passed by reference `&$buf` | using `&$buf` and forgetting `substr($buf, 0, -1)`: old characters stay behind, as in Java |
+| Rust | one shared `String`, `push` then `pop` | `out.push(cur)` doesn't compile (cur is borrowed): you must `cur.clone()`, so Go's "keep the buffer" bug can't happen |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-generate-parentheses/generate-parentheses.ts) · [Python](../code/neetcode-generate-parentheses/generate_parentheses.py) · [Go](../code/neetcode-generate-parentheses/generate_parentheses.go) · [Java](../code/neetcode-generate-parentheses/generate-parentheses.java) · [JavaScript](../code/neetcode-generate-parentheses/generate-parentheses.js)
+[TypeScript](../code/neetcode-generate-parentheses/generate-parentheses.ts) · [Python](../code/neetcode-generate-parentheses/generate_parentheses.py) · [Go](../code/neetcode-generate-parentheses/generate_parentheses.go) · [Java](../code/neetcode-generate-parentheses/generate-parentheses.java) · [JavaScript](../code/neetcode-generate-parentheses/generate-parentheses.js) · [PHP](../code/neetcode-generate-parentheses/generate-parentheses.php) · [Rust](../code/neetcode-generate-parentheses/generate_parentheses.rs)
 
 Each file checks n = 1..8: exactly C(n) strings, no duplicates, each of length 2n and valid (together these three mean exactly the answer set). Below is the backtracking approach.
 
@@ -249,6 +251,47 @@ function backtrack(n) {
 }
 ```
 
+```php
+// Approach 2: backtracking, the string passed by value: $s . '(' is a new string, nothing to undo.
+function backtrack(int $n): array {
+    $out = [];
+    $go = function (string $s, int $open, int $close) use (&$go, &$out, $n): void {
+        if (strlen($s) === 2 * $n) {
+            $out[] = $s;
+            return;
+        }
+        if ($open < $n) $go($s . '(', $open + 1, $close);
+        if ($close < $open) $go($s . ')', $open, $close + 1);
+    };
+    $go('', 0, 0);
+    return $out;
+}
+```
+
+```rust
+// Approach 2: backtracking with ONE shared String; push, then pop to undo.
+fn backtrack(n: usize) -> Vec<String> {
+    fn go(cur: &mut String, open: usize, close: usize, n: usize, out: &mut Vec<String>) {
+        if cur.len() == 2 * n {
+            out.push(cur.clone()); // clone copies; the borrow checker won't let you push cur itself into out
+            return;
+        }
+        if open < n {
+            cur.push('(');
+            go(cur, open + 1, close, n, out);
+            cur.pop(); // drop the character just added
+        }
+        if close < open {
+            cur.push(')');
+            go(cur, open, close + 1, n, out);
+            cur.pop();
+        }
+    }
+    let mut out = Vec::new();
+    go(&mut String::with_capacity(2 * n), 0, 0, n, &mut out);
+    out
+}
+```
 
 The TypeScript file also runs the `close < n` version, then prints the Catalan table and measures:
 
@@ -309,12 +352,39 @@ forgetUndo(2) = [(()), (()))]
 
 After the `((…))` branch, the old characters are still in the buffer, so the `()…` branch starts from `(())` instead of `(`. Python prints `8/8 ca đúng` ("8/8 cases passed") for all four approaches (generate then filter, backtracking with list + join, backtracking with concatenation, explicit stack); JavaScript prints `8/8 ca đúng` for its two.
 
+The PHP and Rust files:
+
+```text
+$ php generate-parentheses.php
+generateAllFilter  8/8 cases passed
+backtrack          8/8 cases passed
+explicitStack      8/8 cases passed
+wrongCloseLtN      0/8 cases passed
+forgetUndo         1/8 cases passed
+
+forgetUndo(2) = ["(())","(()))"]
+backtrack(3)  = ["((()))","(()())","(())()","()(())","()()()"]
+
+$ rustc --edition 2021 -O generate_parentheses.rs -o generate_parentheses && ./generate_parentheses
+generate_all_filter  8/8 cases passed
+backtrack            8/8 cases passed
+explicit_stack       8/8 cases passed
+wrong_close_lt_n     0/8 cases passed
+
+wrong_close_lt_n(2) = ["(())", "()()", "())(", ")(()", ")()(", "))(("]
+backtrack(3)        = ["((()))", "(()())", "(())()", "()(())", "()()()"]
+```
+
+The PHP `forgetUndo` breaks exactly like Java's: a shared string passed by reference and never undone. The Rust `wrong_close_lt_n` gives the same six strings as TypeScript.
+
 ## Misconceptions and common traps
 
 - **The closing condition is `close < n`.** It must be `close < open`. Having n `)` in total doesn't mean they are in the right order.
 - **"Backtracking means trying everything and dropping the wrong ones."** That is approach 1. Good backtracking cuts a branch **before** entering it; in this problem every remaining branch leads to an answer.
 - **Recording the buffer instead of a copy.** Go (`buf` instead of `string(buf)`), Java (keeping `sb` instead of `sb.toString()`), Python (keeping `cur` instead of `"".join(cur)`): every result is the same object, modified after it was recorded.
 - **Forgetting to undo the choice with a shared buffer.** Java `StringBuilder`, Go `[]byte`, a character array in TS: what you add must be taken off after trying. With immutable strings (`s + "("`) there is nothing to undo.
+- **PHP: passing the string by reference (`&$buf`) "to save memory".** PHP strings are already copy-on-write, so passing `$s . '('` by value is cheap and needs no undo. Switching to `&$buf` brings back Java's trap: forget `substr($buf, 0, -1)` and the next branch carries the previous branch's characters (`forgetUndo(2)` gives `["(())","(()))"]`).
+- **Rust: pushing `cur` into `out` without `clone`.** The compiler refuses because `cur` is mutably borrowed; you must write `out.push(cur.clone())`. On the other hand, `cur.pop()` returns `Option<char>`, so forgetting the undo still compiles and produces wrong strings, as in Java.
 - **"It must be optimized below O(4ⁿ)."** It can't: the output already has C(n) strings, growing like 4ⁿ / n^1.5. Optimizing only trims the waste beyond the output.
 
 ## Self-check questions

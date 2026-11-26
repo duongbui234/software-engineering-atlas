@@ -206,9 +206,9 @@ In TypeScript, Approach 2 is clearly slower than in Python. The culprit is how t
 
 ## Runnable example
 
-Each file runs the same 8 cases: the `cold → warm` example, a target missing from the list, no path, one-letter words, a start word that is in the list, and the `aa → bb` case that sends DFS the long way round. The file also cross-checks the four correct approaches on 2,000 random dictionaries, measures the two 5,000-word dictionaries, and counts queue additions when words are crossed out late. Below are the three fast approaches; Approach 1 and the wrong versions are in the full files. Comments and printed text in the code stay in Vietnamese.
+Each of the original five files runs the same 8 cases: the `cold → warm` example, a target missing from the list, no path, one-letter words, a start word that is in the list, and the `aa → bb` case that sends DFS the long way round. The file also cross-checks the four correct approaches on 2,000 random dictionaries, measures the two 5,000-word dictionaries, and counts queue additions when words are crossed out late. Below are the three fast approaches; Approach 1 and the wrong versions are in the full files. Comments and printed text in the code stay in Vietnamese.
 
-[TypeScript](../code/neetcode-word-ladder/word-ladder.ts) · [Python](../code/neetcode-word-ladder/word_ladder.py) · [Go](../code/neetcode-word-ladder/word_ladder.go) · [Java](../code/neetcode-word-ladder/word-ladder.java) · [JavaScript](../code/neetcode-word-ladder/word-ladder.js)
+[TypeScript](../code/neetcode-word-ladder/word-ladder.ts) · [Python](../code/neetcode-word-ladder/word_ladder.py) · [Go](../code/neetcode-word-ladder/word_ladder.go) · [Java](../code/neetcode-word-ladder/word-ladder.java) · [JavaScript](../code/neetcode-word-ladder/word-ladder.js) · [PHP](../code/neetcode-word-ladder/word-ladder.php) · [Rust](../code/neetcode-word-ladder/word_ladder.rs)
 
 ```ts
 // Cách 2: BFS, sinh hàng xóm bằng cách đổi từng chữ thành a..z. O(n·L·26).
@@ -721,6 +721,63 @@ function ladderBidirectional(begin, end, wordList) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function ladderLength(string $begin, string $end, array $words): int {
+    $unseen = array_fill_keys($words, true);
+    if (!isset($unseen[$end])) return 0;
+    unset($unseen[$begin]);
+    $queue = new SplQueue();
+    $queue->enqueue([$begin, 1]);
+    while (!$queue->isEmpty()) {
+        [$word, $distance] = $queue->dequeue();
+        if ($word === $end) return $distance;
+        for ($i = 0; $i < strlen($word); $i++) {
+            $neighbor = $word;
+            for ($ch = ord('a'); $ch <= ord('z'); $ch++) {
+                $neighbor[$i] = chr($ch);
+                if (isset($unseen[$neighbor])) {
+                    unset($unseen[$neighbor]);
+                    $queue->enqueue([$neighbor, $distance + 1]);
+                }
+            }
+        }
+    }
+    return 0;
+}
+```
+
+```rust
+use std::collections::{HashSet, VecDeque};
+
+fn ladder_length(begin: &str, end: &str, words: &[&str]) -> usize {
+    let mut unseen: HashSet<_> = words.iter().map(|word| word.as_bytes()).collect();
+    if !unseen.contains(end.as_bytes()) {
+        return 0;
+    }
+    unseen.remove(begin.as_bytes());
+    let mut queue = VecDeque::from([(begin.as_bytes().to_vec(), 1)]);
+    while let Some((mut word, distance)) = queue.pop_front() {
+        if word == end.as_bytes() {
+            return distance;
+        }
+        for i in 0..word.len() {
+            let original = word[i];
+            for letter in b'a'..=b'z' {
+                word[i] = letter;
+                if unseen.remove(word.as_slice()) {
+                    queue.push_back((word.clone(), distance + 1));
+                }
+            }
+            word[i] = original;
+        }
+    }
+    0
+}
+```
+
 Output of `node word-ladder.ts` (the other four print the same case lines and the same "words taken out" counts; only the timings differ). `ca đúng` means "cases correct", `sai ở` lists the failing cases, `lấy ra … từ` is the number of words taken out, and `lượt đưa vào hàng đợi` counts queue additions:
 
 ```text
@@ -745,6 +802,8 @@ từ điển thưa, 5000 từ: bkarpa → gstmeb
 từ điển dày, đánh dấu lúc lấy ra: đáp án 9, 19234 lượt đưa vào hàng đợi; đánh dấu lúc đưa vào: đáp án 9, tối đa 5000 lượt
 sinh 780000 từ ứng viên (68466 = 68466 lần trúng): split/join 85.5 ms, ghép slice 30.6 ms
 ```
+
+The added versions use BFS with one-letter substitutions. Both mark a word on enqueue to avoid revisiting it. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

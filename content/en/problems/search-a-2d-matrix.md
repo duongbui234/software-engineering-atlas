@@ -126,7 +126,7 @@ TypeScript, value `2·k` in the cell with flat index k (so half the queries are 
 - The staircase takes up to m + n steps per query. On the flat 10 × 100 000 matrix that is up to 100 010 steps against about 20 for binary search: about 530 times slower.
 - Two binary searches are about 1.5 times faster than the flat one despite the same number of steps. Each step of the flat version computes `Math.floor(mid / n)` and `mid % n`, while the two-search version only reads the array.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Midpoint and division | Language-specific trap |
 |---|---|---|
@@ -134,12 +134,14 @@ TypeScript, value `2·k` in the cell with flat index k (so half the queries are 
 | Python | `divmod(k, n)` returns quotient and remainder; ints do not overflow | `divmod(-7, 4)` is `(-2, 1)`: rounds down, unlike Go and Java |
 | Go | `mid / n`, `mid % n` on `int` are integer division; `slices.BinarySearch` returns `(position, found)` | `-7 / 4` is `-1` (rounds toward zero); `sort.Search` needs a condition that goes false → true |
 | Java | `(lo + hi) >>> 1`; `Arrays.binarySearch` | `(lo + hi) / 2` overflows when the sum exceeds 2³¹ − 1: gives `-397483648`; `binarySearch` returns `-(insertion point) - 1` when absent |
+| PHP | `intdiv($k, $n)`, `$k % $n`; `($lo + $hi) >> 1` | `$k / $n` returns a **float** when the division isn't exact, and a float array index is truncated with a deprecation warning (8.1+). `$matrix[-1]` doesn't throw: it gives `null` with a warning, so the "target smaller than everything" case must be caught first |
+| Rust | `mid / n`, `mid % n` on `usize` are integer division; `partition_point` + `binary_search` replace the two hand-written loops | `rows - 1` with `rows = 0` panics (debug) or wraps to a huge number (`-O`). The staircase needs the column to go down to −1, so keep it as `i64` or check before subtracting |
 
 Midpoint overflow cannot happen in this problem (m·n ≤ 10⁴), but it is a famous bug: the binary search in Java's standard library had exactly this `(low + high) / 2` bug until 2006 (see References).
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.ts) · [Python](../code/neetcode-search-a-2d-matrix/search_2d_matrix.py) · [Go](../code/neetcode-search-a-2d-matrix/search_2d_matrix.go) · [Java](../code/neetcode-search-a-2d-matrix/search-2d-matrix.java) · [JavaScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.js)
+[TypeScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.ts) · [Python](../code/neetcode-search-a-2d-matrix/search_2d_matrix.py) · [Go](../code/neetcode-search-a-2d-matrix/search_2d_matrix.go) · [Java](../code/neetcode-search-a-2d-matrix/search-2d-matrix.java) · [JavaScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.js) · [PHP](../code/neetcode-search-a-2d-matrix/search-2d-matrix.php) · [Rust](../code/neetcode-search-a-2d-matrix/search_2d_matrix.rs)
 
 Each file has the full scan, two binary searches, the flat binary search and the staircase, and runs 10 cases (including the first element of the last row, the very last element, a target smaller or larger than every element, and a one-cell, one-column and square matrix). Below are the two binary searches and the flat binary search.
 
@@ -295,6 +297,79 @@ function flatBinarySearch(matrix, target) {
 }
 ```
 
+```php
+// Approach 2, two binary searches: find the last row whose first element ≤ target, then search within that row.
+function twoBinarySearch(array $matrix, int $target): bool
+{
+    $lo = 0;
+    $hi = count($matrix); // half-open [lo, hi): count rows whose first element ≤ target
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($matrix[$mid][0] <= $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    $r = $lo - 1; // last row whose first element ≤ target
+    if ($r < 0) return false; // $matrix[-1] is no error in PHP: it gives null with a warning
+    $row = $matrix[$r];
+    $a = 0;
+    $b = count($row);
+    while ($a < $b) {
+        $mid = ($a + $b) >> 1;
+        if ($row[$mid] < $target) $a = $mid + 1;
+        else $b = $mid;
+    }
+    return $a < count($row) && $row[$a] === $target;
+}
+
+// Approach 3, one binary search over the flat index k ∈ [0, m·n): row = ⌊k/n⌋, column = k mod n (n is the number of COLUMNS).
+function flatBinarySearch(array $matrix, int $target): bool
+{
+    $m = count($matrix);
+    $n = count($matrix[0]);
+    $lo = 0;
+    $hi = $m * $n;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        $x = $matrix[intdiv($mid, $n)][$mid % $n]; // intdiv, not /: / returns a float
+        if ($x === $target) return true;
+        if ($x < $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return false;
+}
+```
+
+```rust
+// Approach 2, two binary searches: partition_point counts the rows whose first element ≤ target,
+// the row we want is the one just before; then binary_search within that row.
+fn two_binary_search(matrix: &[Vec<i32>], target: i32) -> bool {
+    let rows = matrix.partition_point(|row| row[0] <= target);
+    if rows == 0 {
+        return false; // target is smaller than every element; rows - 1 on usize would panic
+    }
+    matrix[rows - 1].binary_search(&target).is_ok()
+}
+
+// Approach 3, one binary search over the flat index k ∈ [0, m·n): row = k / n, column = k % n (n is the number of COLUMNS).
+fn flat_binary_search(matrix: &[Vec<i32>], target: i32) -> bool {
+    let (m, n) = (matrix.len(), matrix[0].len());
+    let (mut lo, mut hi) = (0usize, m * n);
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        let x = matrix[mid / n][mid % n]; // usize divided by usize is integer division
+        if x == target {
+            return true;
+        }
+        if x < target {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    false
+}
+```
+
 
 The TypeScript file also runs the two broken versions, then measures:
 
@@ -331,6 +406,8 @@ Arrays.binarySearch([1, 3, 5, 7], 4) = -3
 
 `-3` means "absent, insertion point 2" (`-(2) - 1`). Python, Go and JavaScript print `10/10` correct for all four approaches, plus one line about that language's division: Python `divmod(-7, 4) = (-2, 1)`, Go `-7 / 4 = -1, -7 % 4 = -3`, JavaScript `3000000000 >> 1 = -647483648, 3000000000 >>> 1 = 1500000000, 7 / 2 = 3.5`.
 
+PHP (`php search-2d-matrix.php`) and Rust (`rustc --edition 2021 -O search_2d_matrix.rs`) print `10/10 ca đúng` for the four correct approaches, `4/10` for the wrong-row version and `8/10` for the divide-by-rows version, with the same failing cases as the TypeScript file.
+
 ## Misconceptions and common traps
 
 - **"A matrix needs a two-dimensional binary search."** Under problem 74's conditions, the matrix is an increasing array cut into pieces; a one-dimensional binary search over the flat index is enough.
@@ -340,6 +417,8 @@ Arrays.binarySearch([1, 3, 5, 7], 4) = -3
 - **Using the staircase for problem 74.** Correct but O(m + n); up to several hundred times slower on a flat matrix. Save it for LeetCode 240.
 - **`(lo + hi) / 2` in Java or `>> 1` in JS.** Harmless here, but broken once indices pass 2³⁰ (Java) or 2³¹ (JS). Use `>>> 1` or `lo + (hi − lo) / 2`.
 - **Python: building `[row[0] for row in matrix]` to feed `bisect`.** That step costs O(m) and ruins the O(log m) of finding the row. Since Python 3.10, `bisect_right(matrix, target, key=lambda row: row[0])` compares by the first element without building a list.
+- **PHP: `$matrix[$mid / $n]`.** `/` returns a float; PHP truncates it as an index but emits a deprecation since 8.1, and `$matrix[-1]` only gives `null` with a warning instead of stopping. Use `intdiv` and catch the `r < 0` case.
+- **Rust: `matrix[rows - 1]` when `rows = 0`.** `usize` can't be negative: a debug build panics, a `-O` build wraps to a huge index and then panics on the bounds check. Check `rows == 0` first, as `two_binary_search` does.
 
 ## Self-check questions
 

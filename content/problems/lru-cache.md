@@ -295,9 +295,9 @@ Redis có chính sách `allkeys-lru`, nhưng [tài liệu eviction](https://redi
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-lru-cache/lru-cache.ts) · [Python](../code/neetcode-lru-cache/lru_cache.py) · [Go](../code/neetcode-lru-cache/lru_cache.go) · [Java](../code/neetcode-lru-cache/lru-cache.java) · [JavaScript](../code/neetcode-lru-cache/lru-cache.js)
+[TypeScript](../code/neetcode-lru-cache/lru-cache.ts) · [Python](../code/neetcode-lru-cache/lru_cache.py) · [Go](../code/neetcode-lru-cache/lru_cache.go) · [Java](../code/neetcode-lru-cache/lru-cache.java) · [JavaScript](../code/neetcode-lru-cache/lru-cache.js) · [PHP](../code/neetcode-lru-cache/lru-cache.php) · [Rust](../code/neetcode-lru-cache/lru_cache.rs)
 
-Mỗi file chạy 8 ca và so kết quả với bản chuẩn chậm (mảng key theo thứ tự dùng): ví dụ của đề, cập nhật key đã có, sức chứa 1, `get` key chưa có, đẩy ra rồi thêm lại, và ba chuỗi 2 000 thao tác ngẫu nhiên (mulberry32) với sức chứa 3, 10 và 50.
+Mỗi file trong năm bản đầu chạy 8 ca và so kết quả với bản chuẩn chậm (mảng key theo thứ tự dùng): ví dụ của đề, cập nhật key đã có, sức chứa 1, `get` key chưa có, đẩy ra rồi thêm lại, và ba chuỗi 2 000 thao tác ngẫu nhiên (mulberry32) với sức chứa 3, 10 và 50.
 
 Cách 1, danh sách tự viết:
 
@@ -500,6 +500,163 @@ class LRUList {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class Entry {
+    public ?Entry $previous = null;
+    public ?Entry $next = null;
+
+    public function __construct(public int $key, public int $value) {}
+}
+
+final class LRUCache {
+    private array $entries = [];
+    private Entry $head;
+    private Entry $tail;
+
+    public function __construct(private int $capacity) {
+        $this->head = new Entry(0, 0);
+        $this->tail = new Entry(0, 0);
+        $this->head->next = $this->tail;
+        $this->tail->previous = $this->head;
+    }
+
+    public function get(int $key): int {
+        $entry = $this->entries[$key] ?? null;
+        if ($entry === null) return -1;
+        $this->detach($entry);
+        $this->addFirst($entry);
+        return $entry->value;
+    }
+
+    public function put(int $key, int $value): void {
+        if (isset($this->entries[$key])) {
+            $entry = $this->entries[$key];
+            $entry->value = $value;
+            $this->detach($entry);
+        } else {
+            if (count($this->entries) === $this->capacity) {
+                $oldest = $this->tail->previous;
+                $this->detach($oldest);
+                unset($this->entries[$oldest->key]);
+            }
+            $entry = $this->entries[$key] = new Entry($key, $value);
+        }
+        $this->addFirst($entry);
+    }
+
+    private function detach(Entry $entry): void {
+        $entry->previous->next = $entry->next;
+        $entry->next->previous = $entry->previous;
+        $entry->previous = $entry->next = null;
+    }
+
+    private function addFirst(Entry $entry): void {
+        $first = $this->head->next;
+        $entry->previous = $this->head;
+        $entry->next = $first;
+        $first->previous = $entry;
+        $this->head->next = $entry;
+    }
+}
+```
+
+```rust
+use std::collections::HashMap;
+
+struct Entry {
+    key: i32,
+    value: i32,
+    previous: usize,
+    next: usize,
+}
+
+struct LruCache {
+    slots: Vec<Entry>,
+    entries: HashMap<i32, usize>,
+    capacity: usize,
+}
+
+impl LruCache {
+    const HEAD: usize = 0;
+    const TAIL: usize = 1;
+
+    fn new(capacity: usize) -> Self {
+        let head = Entry {
+            key: 0,
+            value: 0,
+            previous: Self::HEAD,
+            next: Self::TAIL,
+        };
+        let tail = Entry {
+            key: 0,
+            value: 0,
+            previous: Self::HEAD,
+            next: Self::TAIL,
+        };
+        Self {
+            slots: vec![head, tail],
+            entries: HashMap::new(),
+            capacity,
+        }
+    }
+
+    fn get(&mut self, key: i32) -> i32 {
+        let Some(&index) = self.entries.get(&key) else {
+            return -1;
+        };
+        self.detach(index);
+        self.add_first(index);
+        self.slots[index].value
+    }
+
+    fn put(&mut self, key: i32, value: i32) {
+        let index = if let Some(&index) = self.entries.get(&key) {
+            self.detach(index);
+            self.slots[index].value = value;
+            index
+        } else {
+            let entry = Entry {
+                key,
+                value,
+                previous: Self::HEAD,
+                next: Self::TAIL,
+            };
+            let index = if self.entries.len() == self.capacity {
+                let oldest = self.slots[Self::TAIL].previous;
+                self.detach(oldest);
+                self.entries.remove(&self.slots[oldest].key);
+                self.slots[oldest] = entry;
+                oldest
+            } else {
+                let free = self.slots.len();
+                self.slots.push(entry);
+                free
+            };
+            self.entries.insert(key, index);
+            index
+        };
+        self.add_first(index);
+    }
+
+    fn detach(&mut self, index: usize) {
+        let Entry { previous, next, .. } = self.slots[index];
+        self.slots[previous].next = next;
+        self.slots[next].previous = previous;
+    }
+
+    fn add_first(&mut self, index: usize) {
+        let first = self.slots[Self::HEAD].next;
+        self.slots[index].previous = Self::HEAD;
+        self.slots[index].next = first;
+        self.slots[first].previous = index;
+        self.slots[Self::HEAD].next = index;
+    }
+}
+```
+
 
 Cách 2, cấu trúc có sẵn:
 
@@ -692,6 +849,8 @@ sức chứa   10⁶ lần xóa rồi chèn lại key ngẫu nhiên   10⁵ lầ
 100            60.3 ms                               9.6 ms
 10000          82.3 ms                             485.5 ms
 ```
+
+PHP nối object hai chiều, còn Rust nối các ô trong `Vec` bằng chỉ số. Khi loại một key, bản Rust dùng lại ô vừa trống để số ô luôn bị chặn bởi sức chứa. PHP `7/7 ca đúng` · Rust `9/9 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

@@ -325,7 +325,7 @@ Go và Java, trung vị 5 lần (ms):
 
 Ở Go, `q = q[1:]` không chép gì, chỉ dời đầu slice, nên nó cùng cỡ với cách giữ chỉ số. Ở Java, cột 10⁶ nút bị bộ dọn rác chi phối và đổi thứ tự giữa các lần chạy; đọc hàng 131 071 thôi. Máy đo đang chạy song song việc khác, nên chỉ nên đọc thứ tự và tỉ lệ, đừng đọc chữ số lẻ.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Hàng đợi nên dùng | Bẫy riêng |
 |---|---|---|
@@ -333,12 +333,14 @@ Go và Java, trung vị 5 lần (ms):
 | Python | `collections.deque`, hoặc hai danh sách | `list.pop(0)` là O(n); `for node in q` trong lúc `append` vào `q`; `res=[]` làm giá trị mặc định dùng chung giữa các lần gọi; DFS đệ quy vượt 1 000 tầng |
 | Go | slice + chỉ số, hoặc `q = q[1:]` | `i < len(queue)` đọc lại mỗi vòng; truyền `res` theo giá trị vào hàm đệ quy thì `append` bên trong mất; `var res [][]int` qua `json.Marshal` thành `null`, `[][]int{}` thành `[]` |
 | Java | `ArrayDeque` | `ArrayDeque` cấm `null`; `i < queue.size()` đọc lại mỗi vòng |
+| PHP | `SplQueue`, hoặc hai danh sách | `array_shift` đánh lại chỉ số cả mảng nên O(n): 218 ms so với 1,5 ms ở cây 32 767 nút; closure `use ($res)` thiếu `&` nhận một bản sao, nên `wrongUseByValue` trả `[]` cho mọi cây trừ cây rỗng (1/10) |
+| Rust | `VecDeque` | `Vec::remove(0)` dời mọi phần tử: 474 ms so với 1,2 ms ở cây 131 071 nút; `for _ in 0..queue.len()` tự chụp độ dài một lần, muốn mắc lỗi đọc lại phải viết `while i < queue.len()` |
 
 Bẫy `res=[]` của Python: giá trị mặc định được tạo **một lần** khi định nghĩa hàm, nên mọi lần gọi không truyền `res` dùng chung một danh sách. Lần gọi thứ ba (cây `[5, 2, 8, …]`) nhận về `[[7,5],[2,8],[4,7,9]]`, có cả số 7 của ca trước. Bẫy truyền theo giá trị của Go: `res = append(res, []int{})` bên trong hàm con tạo một slice header mới mà hàm gọi không thấy, nên `wrongPassByValue` trả `[]` cho mọi cây.
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-binary-tree-level-order-traversal/level-order.ts) · [Python](../code/neetcode-binary-tree-level-order-traversal/level_order.py) · [Go](../code/neetcode-binary-tree-level-order-traversal/level_order.go) · [Java](../code/neetcode-binary-tree-level-order-traversal/level-order.java) · [JavaScript](../code/neetcode-binary-tree-level-order-traversal/level-order.js)
+[TypeScript](../code/neetcode-binary-tree-level-order-traversal/level-order.ts) · [Python](../code/neetcode-binary-tree-level-order-traversal/level_order.py) · [Go](../code/neetcode-binary-tree-level-order-traversal/level_order.go) · [Java](../code/neetcode-binary-tree-level-order-traversal/level-order.java) · [JavaScript](../code/neetcode-binary-tree-level-order-traversal/level-order.js) · [PHP](../code/neetcode-binary-tree-level-order-traversal/level-order.php) · [Rust](../code/neetcode-binary-tree-level-order-traversal/level_order.rs)
 
 Mỗi file dựng cây từ mảng theo tầng kiểu LeetCode (`null` là chỗ trống) và chạy 10 ca chung: cây rỗng, một nút, cây ba tầng có chỗ trống ở hình đầu trang, chỉ con trái, chỉ con phải, cây đầy 15 nút, nhánh so le `[1, 2, 3, 4, null, null, 5, 6, null, null, 7]`, giá trị âm và trùng, cây đủ 2000 nút, và chuỗi lệch trái 2000 nút. Mỗi file còn đối chiếu các cách đúng với nhau trên 2000 tới 3000 cây ngẫu nhiên 0 tới 59 nút.
 
@@ -461,6 +463,50 @@ function levelSnapshot(root) {
 }
 ```
 
+```php
+// Cách 1: BFS, chụp số nút của tầng trước khi đẩy con vào. SplQueue lấy đầu hàng O(1).
+function levelSnapshot(?TreeNode $root): array {
+    $res = [];
+    if ($root === null) return $res;
+    $queue = new SplQueue();
+    $queue->enqueue($root);
+    while (!$queue->isEmpty()) {
+        $size = count($queue); // chụp một lần cho cả tầng
+        $level = [];
+        for ($i = 0; $i < $size; $i++) {
+            $node = $queue->dequeue();
+            $level[] = $node->val;
+            if ($node->left !== null) $queue->enqueue($node->left);
+            if ($node->right !== null) $queue->enqueue($node->right);
+        }
+        $res[] = $level;
+    }
+    return $res;
+}
+```
+
+```rust
+// Cách 1: BFS, chụp số nút của tầng trước khi đẩy con vào. VecDeque lấy đầu hàng O(1).
+fn level_snapshot(root: &Node) -> Vec<Vec<i32>> {
+    let mut res = Vec::new();
+    let Some(r) = root else { return res };
+    let mut queue = VecDeque::from([r.clone()]);
+    while !queue.is_empty() {
+        let size = queue.len(); // chụp một lần cho cả tầng
+        let mut level = Vec::with_capacity(size);
+        for _ in 0..size {
+            let node = queue.pop_front().unwrap();
+            let n = node.borrow();
+            level.push(n.val);
+            if let Some(l) = &n.left { queue.push_back(l.clone()); }
+            if let Some(r) = &n.right { queue.push_back(r.clone()); }
+        }
+        res.push(level);
+    }
+    res
+}
+```
+
 DFS mang độ sâu, đệ quy (bản Python này hỏng trên chuỗi 2000 tầng; bản lặp ở phần Cơ chế thì không):
 
 ```ts
@@ -549,6 +595,39 @@ function levelDfs(root) {
   };
   go(root, 0);
   return res;
+}
+```
+
+```php
+// Cách 4: DFS tiền thứ tự mang độ sâu. $res truyền bằng tham chiếu (&), nếu không mỗi lần gọi sửa một bản sao.
+function levelDfs(?TreeNode $root): array {
+    $res = [];
+    $go = function (?TreeNode $node, int $depth) use (&$res, &$go): void {
+        if ($node === null) return;
+        if (count($res) === $depth) $res[] = []; // lần đầu xuống tới tầng này
+        $res[$depth][] = $node->val;
+        $go($node->left, $depth + 1);
+        $go($node->right, $depth + 1);
+    };
+    $go($root, 0);
+    return $res;
+}
+```
+
+```rust
+// Cách 4: DFS tiền thứ tự mang độ sâu; res đi qua &mut.
+fn level_dfs(root: &Node) -> Vec<Vec<i32>> {
+    fn go(node: &Node, depth: usize, res: &mut Vec<Vec<i32>>) {
+        let Some(n) = node else { return };
+        if res.len() == depth { res.push(Vec::new()); } // lần đầu xuống tới tầng này
+        let n = n.borrow();
+        res[depth].push(n.val);
+        go(&n.left, depth + 1, res);
+        go(&n.right, depth + 1, res);
+    }
+    let mut res = Vec::new();
+    go(root, 0, &mut res);
+    res
 }
 ```
 
@@ -644,6 +723,49 @@ thời gian trung vị 5 lần (ms), cây đầy, sau khi làm nóng
  1048575     524288       22.26       16.46          21.74      21.82   14.64
 ```
 
+`php level-order.php` (máy có Xdebug thì thêm `-d xdebug.mode=off`):
+
+```text
+levelSnapshot      10/10 ca đúng
+levelSnapshotShift 10/10 ca đúng
+levelTwoLists      10/10 ca đúng
+levelMarker        10/10 ca đúng
+levelDfs           10/10 ca đúng
+wrongLiveLength    5/10 ca đúng; sai ở ba tầng có chỗ trống → [[5,2],[8,4],[7],[9]], cây đầy 15 nút → [[1,2,3,4,5,6,7,8],[9,10,11,12],[13,1..., nhánh so le → [[1,2],[3,4],[5,6],[7]], giá trị âm và trùng → [[0,-1000],[1000,-1000],[1000]], cây đủ 2000 nút → [[-1000,-963,-926,-889,-852,-815,-778...
+wrongRightFirst    5/10 ca đúng; sai ở ba tầng có chỗ trống → [[5],[8,2],[9,7,4]], cây đầy 15 nút → [[1],[3,2],[7,6,5,4],[15,14,13,12,11,..., nhánh so le → [[1],[3,2],[5,4],[7,6]], giá trị âm và trùng → [[0],[1000,-1000],[1000,-1000]], cây đủ 2000 nút → [[-1000],[-926,-963],[-778,-815,-852,...
+wrongEmptyNull     9/10 ca đúng; sai ở cây rỗng → null
+wrongUseByValue    1/10 ca đúng; sai ở một nút → [], ba tầng có chỗ trống → [], chỉ con trái → [], chỉ con phải → [], cây đầy 15 nút → [], nhánh so le → [], giá trị âm và trùng → [], cây đủ 2000 nút → [], chuỗi trái 2000 nút → []
+
+đối chiếu 3000 cây ngẫu nhiên 0..59 nút: năm cách khớp nhau 3000/3000
+
+thời gian trung vị 5 lần (ms), cây đầy
+        n  SplQueue  array_shift
+     2000      0.10         0.99
+    16383      0.75        58.09
+    32767      1.56       243.32
+```
+
+`rustc --edition 2021 -O level_order.rs && ./level_order`:
+
+```text
+level_snapshot         10/10 ca đúng
+level_snapshot_remove0 10/10 ca đúng
+level_two_lists        10/10 ca đúng
+level_marker           10/10 ca đúng
+level_dfs              10/10 ca đúng
+wrong_live_length      5/10 ca đúng; sai ở ba tầng có chỗ trống → [[5,2],[8,4],[7],[9]], cây đầy 15 nút → [[1,2,3,4,5,6,7,8],[9,10,11,12],[13,1..., nhánh so le → [[1,2],[3,4],[5,6],[7]], giá trị âm và trùng → [[0,-1000],[1000,-1000],[1000]], cây đủ 2000 nút → [[-1000,-963,-926,-889,-852,-815,-778...
+wrong_right_first      5/10 ca đúng; sai ở ba tầng có chỗ trống → [[5],[8,2],[9,7,4]], cây đầy 15 nút → [[1],[3,2],[7,6,5,4],[15,14,13,12,11,..., nhánh so le → [[1],[3,2],[5,4],[7,6]], giá trị âm và trùng → [[0],[1000,-1000],[1000,-1000]], cây đủ 2000 nút → [[-1000],[-926,-963],[-778,-815,-852,...
+
+đối chiếu 3000 cây ngẫu nhiên 0..59 nút: năm cách khớp nhau 3000/3000
+
+thời gian trung vị 5 lần (ms), cây đầy
+        n  VecDeque  Vec::remove(0)
+     2000      0.01            0.09
+    16383      0.10            6.05
+    32767      0.16           28.59
+   131071      0.65          497.88
+```
+
 `node level-order.js` cho đúng các dòng chạy thử như bản TypeScript; số đo cùng cỡ (cột `shift()` ở cây 131 071 nút: 481 ms).
 
 ## Hiểu lầm và bẫy hay gặp
@@ -655,6 +777,8 @@ thời gian trung vị 5 lần (ms), cây đầy, sau khi làm nóng
 - **`null` làm vạch ngăn trong Java.** `ArrayDeque` cấm `null`. Dùng một nút canh, hoặc chụp kích thước.
 - **Cây rỗng.** Trả danh sách rỗng, không phải `null`. Ở Go, nil slice và slice rỗng giống nhau với `len`, nhưng `json.Marshal` biến nil thành `null`.
 - **Giá trị mặc định có thể đổi của Python.** `def f(root, depth=0, res=[])` dùng chung một `res` cho mọi lần gọi: ca thứ ba đã dính số của ca trước.
+- **PHP: `array_shift` làm hàng đợi.** Nó đánh lại chỉ số mọi phần tử còn lại, nên mỗi lần lấy là O(n). Dùng `SplQueue` (hoặc mảng + chỉ số đầu hàng). Closure đệ quy phải `use (&$res, &$go)`: thiếu `&` thì `$res` là bản sao và kết quả rỗng.
+- **Rust: `Vec::remove(0)` làm hàng đợi.** Cùng bẫy O(n) như `shift()`, chỉ khác là không có tối ưu nào che đi: ở 131 071 nút mất 474 ms. Dùng `VecDeque::pop_front`.
 
 ## Câu hỏi tự kiểm tra
 

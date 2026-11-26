@@ -181,7 +181,7 @@ Martin Kleppmann opens *Designing Data-Intensive Applications* with exactly this
 
 ## Runnable example
 
-The heap-merge solution in five languages ([TypeScript](../code/neetcode-design-twitter/design-twitter.ts) · [Python](../code/neetcode-design-twitter/design_twitter.py) · [Go](../code/neetcode-design-twitter/design_twitter.go) · [Java](../code/neetcode-design-twitter/design-twitter.java) · [JavaScript](../code/neetcode-design-twitter/design-twitter.js)). The TypeScript version inherits its storage from the collect-then-sort approach, so both are shown:
+The heap-merge solution ([TypeScript](../code/neetcode-design-twitter/design-twitter.ts) · [Python](../code/neetcode-design-twitter/design_twitter.py) · [Go](../code/neetcode-design-twitter/design_twitter.go) · [Java](../code/neetcode-design-twitter/design-twitter.java) · [JavaScript](../code/neetcode-design-twitter/design-twitter.js) · [PHP](../code/neetcode-design-twitter/design-twitter.php) · [Rust](../code/neetcode-design-twitter/design_twitter.rs)). The TypeScript version inherits its storage from the collect-then-sort approach, so both are shown:
 
 ```ts
 // A small max-heap on a numeric key: JS/TS has no built-in heap.
@@ -496,6 +496,121 @@ class Twitter {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class Twitter
+{
+    private int $clock = 0;
+    private array $tweets = [];
+    private array $following = [];
+
+    public function postTweet(int $userId, int $tweetId): void
+    {
+        $this->tweets[$userId][] = [$this->clock++, $tweetId];
+    }
+
+    public function getNewsFeed(int $userId): array
+    {
+        $sources = [$userId => true] + ($this->following[$userId] ?? []);
+        $ready = new SplPriorityQueue();
+        foreach ($sources as $author => $_) {
+            $index = count($this->tweets[$author] ?? []) - 1;
+            if ($index >= 0) {
+                $ready->insert([$author, $index], $this->tweets[$author][$index][0]);
+            }
+        }
+
+        $feed = [];
+        while (!$ready->isEmpty() && count($feed) < 10) {
+            [$author, $index] = $ready->extract();
+            $feed[] = $this->tweets[$author][$index][1];
+            if ($index > 0) {
+                $previous = $index - 1;
+                $ready->insert([$author, $previous], $this->tweets[$author][$previous][0]);
+            }
+        }
+        return $feed;
+    }
+
+    public function follow(int $followerId, int $followeeId): void
+    {
+        if ($followerId !== $followeeId) {
+            $this->following[$followerId][$followeeId] = true;
+        }
+    }
+
+    public function unfollow(int $followerId, int $followeeId): void
+    {
+        unset($this->following[$followerId][$followeeId]);
+    }
+}
+```
+
+```rust
+use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::iter;
+
+#[derive(Default)]
+struct Twitter {
+    clock: usize,
+    tweets: HashMap<i32, Vec<(usize, i32)>>,
+    following: HashMap<i32, HashSet<i32>>,
+}
+
+impl Twitter {
+    fn post_tweet(&mut self, user_id: i32, tweet_id: i32) {
+        self.tweets
+            .entry(user_id)
+            .or_default()
+            .push((self.clock, tweet_id));
+        self.clock += 1;
+    }
+
+    fn get_news_feed(&self, user_id: i32) -> Vec<i32> {
+        let followed = self.following.get(&user_id).into_iter().flatten().copied();
+        let sources = iter::once(user_id).chain(followed);
+        let newest: Vec<_> = sources
+            .filter_map(|author| {
+                let history = self.tweets.get(&author)?;
+                let &(time, _) = history.last()?;
+                Some((time, author, history.len() - 1))
+            })
+            .collect();
+        let mut ready = BinaryHeap::from(newest);
+
+        let mut feed = Vec::new();
+        while feed.len() < 10 {
+            let Some((_, author, index)) = ready.pop() else {
+                break;
+            };
+            let history = &self.tweets[&author];
+            feed.push(history[index].1);
+            if index > 0 {
+                ready.push((history[index - 1].0, author, index - 1));
+            }
+        }
+        feed
+    }
+
+    fn follow(&mut self, follower_id: i32, followee_id: i32) {
+        if follower_id != followee_id {
+            self.following
+                .entry(follower_id)
+                .or_default()
+                .insert(followee_id);
+        }
+    }
+
+    fn unfollow(&mut self, follower_id: i32, followee_id: i32) {
+        if let Some(followed) = self.following.get_mut(&follower_id) {
+            followed.remove(&followee_id);
+        }
+    }
+}
+```
+
 
 Python has `heapq.merge` built in: it takes several sorted sequences and returns a lazily merged one. Each list runs from newest to oldest (`reversed`), so it needs `reverse=True`; `islice` stops after 10 elements, and the rest is never merged:
 
@@ -586,6 +701,8 @@ ObjectFollowsTwitter 4/9 cases correct; wrong on: problem example → [5] [5] [5
 Object.keys({ 2: true }) = ["2"]
 new Map([[2, "x"]]).get("2") = undefined
 ```
+
+PHP inserts each author into `SplPriorityQueue`. Rust uses `BinaryHeap::from` to build the initial heap in linear time. Both versions check self-follow followed by self-unfollow and the 10-tweet limit. PHP prints `6/6 ca đúng` and Rust prints `6/6 ca đúng`.
 
 ## Misconceptions and common traps
 

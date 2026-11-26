@@ -240,9 +240,9 @@ Các ngôn ngữ khác ở 10⁶ nút: Go bảng 186,82 ms và 99,6 MB cấp ph�
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.ts) · [Python](../code/neetcode-copy-list-with-random-pointer/copy_random_list.py) · [Go](../code/neetcode-copy-list-with-random-pointer/copy_random_list.go) · [Java](../code/neetcode-copy-list-with-random-pointer/copy-random-list.java) · [JavaScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.js)
+[TypeScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.ts) · [Python](../code/neetcode-copy-list-with-random-pointer/copy_random_list.py) · [Go](../code/neetcode-copy-list-with-random-pointer/copy_random_list.go) · [Java](../code/neetcode-copy-list-with-random-pointer/copy-random-list.java) · [JavaScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.js) · [PHP](../code/neetcode-copy-list-with-random-pointer/copy-random-list.php)
 
-Mỗi file chạy 7 ca chung: ba ví dụ của đề, danh sách rỗng, một nút có random trỏ vào chính nó, mọi random null, mọi random trỏ nút cuối. Mỗi ca kiểm ba điều: bản sao đúng cấu trúc (giá trị và vị trí random), không nút nào của bản sao (kể cả qua random) thuộc danh sách gốc, và danh sách gốc còn nguyên. TypeScript chạy thêm 2000 danh sách ngẫu nhiên dài 0..60.
+Mỗi file trong năm bản đầu chạy 7 ca chung: ba ví dụ của đề, danh sách rỗng, một nút có random trỏ vào chính nó, mọi random null, mọi random trỏ nút cuối. Mỗi ca kiểm ba điều: bản sao đúng cấu trúc (giá trị và vị trí random), không nút nào của bản sao (kể cả qua random) thuộc danh sách gốc, và danh sách gốc còn nguyên. TypeScript chạy thêm 2000 danh sách ngẫu nhiên dài 0..60.
 
 Bảng nút cũ → mới, hai lượt:
 
@@ -316,6 +316,32 @@ function copyTwoPass(head) {
     map.get(cur).random = cur.random === null ? null : map.get(cur.random);
   }
   return head === null ? null : map.get(head);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class Node {
+    public ?Node $next = null;
+    public ?Node $random = null;
+
+    public function __construct(public int $val) {}
+}
+
+function copyRandomList(?Node $head): ?Node {
+    if ($head === null) return null;
+    $copies = new SplObjectStorage();
+    for ($old = $head; $old !== null; $old = $old->next) {
+        $copies[$old] = new Node($old->val);
+    }
+    for ($old = $head; $old !== null; $old = $old->next) {
+        $new = $copies[$old];
+        $new->next = $old->next === null ? null : $copies[$old->next];
+        $new->random = $old->random === null ? null : $copies[$old->random];
+    }
+    return $copies[$head];
 }
 ```
 
@@ -553,6 +579,8 @@ wrongObjectMap  2/7 ca đúng; sai ở ví dụ 1 của đề → sai cấu trú
 
 khóa mà {} thực sự lưu cho một nút: ["[object Object]"]
 ```
+
+Bản PHP dùng hai lượt và `SplObjectStorage`, nên hai nút cùng giá trị vẫn có hai bản sao. Bài này có sáu ngôn ngữ vì LeetCode chưa cung cấp mẫu Rust cho kiểu nút có con trỏ `random`. PHP `3/3 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

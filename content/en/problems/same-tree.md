@@ -198,9 +198,9 @@ Two identical trees of 10⁶ nodes (a binary search tree built from random mulbe
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-same-tree/same-tree.ts) · [Python](../code/neetcode-same-tree/same_tree.py) · [Go](../code/neetcode-same-tree/same_tree.go) · [Java](../code/neetcode-same-tree/same-tree.java) · [JavaScript](../code/neetcode-same-tree/same-tree.js)
+[TypeScript](../code/neetcode-same-tree/same-tree.ts) · [Python](../code/neetcode-same-tree/same_tree.py) · [Go](../code/neetcode-same-tree/same_tree.go) · [Java](../code/neetcode-same-tree/same-tree.java) · [JavaScript](../code/neetcode-same-tree/same-tree.js) · [PHP](../code/neetcode-same-tree/same-tree.php) · [Rust](../code/neetcode-same-tree/same_tree.rs)
 
-Every file runs 12 shared cases: two identical trees, left child against right child, swapped values, two empty trees, one side empty, one node, values above 127, negative numbers, a full tree of 7 nodes, a different last leaf, left-skewed against right-skewed, and a left-skewed tree of 100 nodes. The TypeScript file also cross-checks 3,000 random tree pairs against an answer taken from nested JSON.
+Each of the original five files runs 12 shared cases: two identical trees, left child against right child, swapped values, two empty trees, one side empty, one node, values above 127, negative numbers, a full tree of 7 nodes, a different last leaf, left-skewed against right-skewed, and a left-skewed tree of 100 nodes. The TypeScript file also cross-checks 3,000 random tree pairs against an answer taken from nested JSON.
 
 Parallel recursion:
 
@@ -243,6 +243,54 @@ static boolean isSameRecursive(TreeNode p, TreeNode q) {
 function isSameRecursive(p, q) {
   if (p === null || q === null) return p === q; // true only when both are null
   return p.val === q.val && isSameRecursive(p.left, q.left) && isSameRecursive(p.right, q.right);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function isSameTree(?TreeNode $a, ?TreeNode $b): bool {
+    if ($a === null || $b === null) return $a === $b;
+    return $a->val === $b->val
+        && isSameTree($a->left, $b->left)
+        && isSameTree($a->right, $b->right);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn is_same_tree(a: &Node, b: &Node) -> bool {
+    match (a, b) {
+        (None, None) => true,
+        (Some(a), Some(b)) => {
+            let a = a.borrow();
+            let b = b.borrow();
+            a.val == b.val && is_same_tree(&a.left, &b.left) && is_same_tree(&a.right, &b.right)
+        }
+        _ => false,
+    }
 }
 ```
 
@@ -439,6 +487,8 @@ isSameRecursive  deepest depth it handles: 13907
 isSameJson       deepest depth it handles: 4456
 isSameStack      skewed tree of 10⁶ nodes: true
 ```
+
+Both added versions walk the trees in parallel. They compare values and shape, including when a node exists on only one side. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

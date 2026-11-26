@@ -197,21 +197,21 @@ Mình chọn Kahn làm mặc định: không đệ quy, dễ giải thích, và 
 
 ### Đo trên 2 000 môn
 
-File chạy thử dùng hai đầu vào 2 000 môn. **Chuỗi ngược**: môn `i` cần môn `i + 1`, ca xấu nhất của Cách 1. **Ngẫu nhiên**: 5 000 cặp không có vòng, số môn xáo trộn. Cột "lần nhìn cạnh" đếm số lần một cách xử lý nhìn một cặp tiên quyết; năm ngôn ngữ ra đúng cùng con số.
+File chạy thử dùng hai đầu vào 2 000 môn. **Chuỗi ngược**: môn `i` cần môn `i + 1`, ca xấu nhất của Cách 1. **Ngẫu nhiên**: 5 000 cặp không có vòng, số môn xáo trộn. Cột "lần nhìn cạnh" đếm số lần một cách xử lý nhìn một cặp tiên quyết; bảy ngôn ngữ ra đúng cùng con số.
 
-| Chuỗi ngược, 1 999 cạnh | Lần nhìn cạnh | TS | Python | Go | Java |
-|---|---:|---:|---:|---:|---:|
-| Cách 1: quét lại, 2 001 lượt | 2 000 999 | 29 ms | 136 ms | 3,6 ms | 5,5 ms |
-| Cách 2: Kahn | 1 999 | 0,3 ms | 0,3 ms | 0,1 ms | 0,2 ms |
-| Cách 3: DFS đệ quy | 1 999 | 0,1 ms | 0,3 ms | 0,1 ms | 0,1 ms |
-| Cách 3b: DFS tự giữ ngăn xếp | 1 999 | 0,1 ms | 0,5 ms | 0,1 ms | 0,4 ms |
+| Chuỗi ngược, 1 999 cạnh | Lần nhìn cạnh | TS | Python | Go | Java | PHP | Rust |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Cách 1: quét lại, 2 001 lượt | 2 000 999 | 29 ms | 136 ms | 3,6 ms | 5,5 ms | 59 ms | 3,1 ms |
+| Cách 2: Kahn | 1 999 | 0,3 ms | 0,3 ms | 0,1 ms | 0,2 ms | 0,1 ms | 0,1 ms |
+| Cách 3: DFS đệ quy | 1 999 | 0,1 ms | 0,3 ms | 0,1 ms | 0,1 ms | 0,2 ms | < 0,1 ms |
+| Cách 3b: DFS tự giữ ngăn xếp | 1 999 | 0,1 ms | 0,5 ms | 0,1 ms | 0,4 ms | 0,3 ms | 0,1 ms |
 
-| Ngẫu nhiên, 5 000 cạnh | Lần nhìn cạnh | TS | Python | Go | Java |
-|---|---:|---:|---:|---:|---:|
-| Cách 1: quét lại, 10 lượt | 12 033 | 0,4 ms | 1,1 ms | 0,3 ms | 0,2 ms |
-| Cách 2: Kahn | 5 000 | 0,3 ms | 0,7 ms | 0,2 ms | 0,3 ms |
-| Cách 3: DFS đệ quy | 5 000 | 0,3 ms | 0,6 ms | 0,2 ms | 0,2 ms |
-| Cách 3b: DFS tự giữ ngăn xếp | 5 000 | 0,2 ms | 1,0 ms | 0,3 ms | 0,3 ms |
+| Ngẫu nhiên, 5 000 cạnh | Lần nhìn cạnh | TS | Python | Go | Java | PHP | Rust |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Cách 1: quét lại, 10 lượt | 12 033 | 0,4 ms | 1,1 ms | 0,3 ms | 0,2 ms | 0,6 ms | 0,1 ms |
+| Cách 2: Kahn | 5 000 | 0,3 ms | 0,7 ms | 0,2 ms | 0,3 ms | 0,4 ms | 0,1 ms |
+| Cách 3: DFS đệ quy | 5 000 | 0,3 ms | 0,6 ms | 0,2 ms | 0,2 ms | 0,5 ms | 0,1 ms |
+| Cách 3b: DFS tự giữ ngăn xếp | 5 000 | 0,2 ms | 1,0 ms | 0,3 ms | 0,3 ms | 0,6 ms | 0,1 ms |
 
 Ở chuỗi ngược, DFS đệ quy không vấp vì mũi tên chỉ từ môn lớn về môn nhỏ, nên DFS bắt đầu từ môn 0 không đi đâu cả; mỗi lần đi chỉ sâu một tầng. Chiều ngược lại mới làm DFS đi một mạch, xem bảng đệ quy sâu bên dưới. Hai điều đáng nhớ:
 
@@ -220,19 +220,19 @@ File chạy thử dùng hai đầu vào 2 000 môn. **Chuỗi ngược**: môn `
 
 Đệ quy sâu: chuỗi "môn `i + 1` cần môn `i`", nên DFS từ môn 0 đi một mạch hết chuỗi.
 
-| Độ sâu | TS và JS | Python | Go | Java |
-|---|---|---|---|---|
-| 2 000 tầng, DFS đệ quy | đúng | `RecursionError` | đúng | đúng |
-| 100 000 tầng, DFS đệ quy | `RangeError` | `RecursionError` | đúng | `StackOverflowError` |
-| 100 000 tầng, DFS tự giữ ngăn xếp và Kahn | đúng | đúng | đúng | đúng |
+| Độ sâu | TS và JS | Python | Go | Java | PHP | Rust |
+|---|---|---|---|---|---|---|
+| 2 000 tầng, DFS đệ quy | đúng | `RecursionError` | đúng | đúng | đúng | đúng |
+| 100 000 tầng, DFS đệ quy | `RangeError` | `RecursionError` | đúng | `StackOverflowError` | đúng | đúng (luồng chính) |
+| 100 000 tầng, DFS tự giữ ngăn xếp và Kahn | đúng | đúng | đúng | đúng | đúng | đúng |
 
-Go không vỡ vì ngăn xếp của mỗi goroutine tự nới ra, mặc định tới 1 GB trên máy 64-bit. Ba ngôn ngữ còn lại có trần cố định. Đề chỉ cho tối đa 2 000 môn, nên ở LeetCode chỉ Python vấp; nhưng ở dữ liệu thật (một hệ thống build với hàng trăm nghìn bước), cả JavaScript và Java cũng vấp.
+Go không vỡ vì ngăn xếp của mỗi goroutine tự nới ra, mặc định tới 1 GB trên máy 64-bit. Ba ngôn ngữ còn lại có trần cố định. PHP không vỡ vì lời gọi hàm PHP nằm trên heap của máy ảo, không phải stack của luồng; riêng máy bật Xdebug thì Xdebug tự chặn ở 512 tầng, nên các file PHP chạy bằng `php -d xdebug.mode=off`. Rust chạy được 100 000 tầng trên luồng chính (stack 8 MB), nhưng cùng hàm đó trên một luồng mới (mặc định 2 MB) thì tràn và cả tiến trình dừng. Đề chỉ cho tối đa 2 000 môn, nên ở LeetCode chỉ Python vấp; nhưng ở dữ liệu thật (một hệ thống build với hàng trăm nghìn bước), cả JavaScript và Java cũng vấp.
 
 ## Ví dụ chạy được
 
-Mỗi file chạy cùng 8 ca: hai môn, hai môn chờ nhau, kim cương, ví dụ năm môn, học được một môn rồi kẹt, môn tự cần chính nó, không có tiên quyết, và hai mảnh rời mà mảnh sau có vòng. File còn đối chiếu bốn cách đúng trên 2 000 đồ thị nhỏ ngẫu nhiên (sinh bằng cùng một bộ số giả ngẫu nhiên ở cả năm ngôn ngữ), đo hai đầu vào 2 000 môn và thử đệ quy sâu. Bên dưới là phần dựng đồ thị, Kahn và DFS ba màu đệ quy; Cách 1, Cách 3b và hai bản sai nằm trong file đầy đủ.
+Mỗi file chạy cùng 8 ca: hai môn, hai môn chờ nhau, kim cương, ví dụ năm môn, học được một môn rồi kẹt, môn tự cần chính nó, không có tiên quyết, và hai mảnh rời mà mảnh sau có vòng. File còn đối chiếu bốn cách đúng trên 2 000 đồ thị nhỏ ngẫu nhiên (sinh bằng cùng một bộ số giả ngẫu nhiên ở cả bảy ngôn ngữ), đo hai đầu vào 2 000 môn và thử đệ quy sâu. Bên dưới là phần dựng đồ thị, Kahn và DFS ba màu đệ quy; Cách 1, Cách 3b và hai bản sai nằm trong file đầy đủ.
 
-[TypeScript](../code/neetcode-course-schedule/course-schedule.ts) · [Python](../code/neetcode-course-schedule/course_schedule.py) · [Go](../code/neetcode-course-schedule/course_schedule.go) · [Java](../code/neetcode-course-schedule/course-schedule.java) · [JavaScript](../code/neetcode-course-schedule/course-schedule.js)
+[TypeScript](../code/neetcode-course-schedule/course-schedule.ts) · [Python](../code/neetcode-course-schedule/course_schedule.py) · [Go](../code/neetcode-course-schedule/course_schedule.go) · [Java](../code/neetcode-course-schedule/course-schedule.java) · [JavaScript](../code/neetcode-course-schedule/course-schedule.js) · [PHP](../code/neetcode-course-schedule/course-schedule.php) · [Rust](../code/neetcode-course-schedule/course_schedule.rs)
 
 ```ts
 // Cặp [a, b] nghĩa là "muốn học a phải học b trước": cạnh đi từ b sang a.
@@ -516,8 +516,132 @@ function canFinishDfs(n, prerequisites) {
   return true
 }
 ```
+```php
+// Cặp [a, b] nghĩa là "muốn học a phải học b trước": cạnh đi từ b sang a.
+function buildGraph(int $n, array $prerequisites): array
+{
+    $adj = array_fill(0, $n, []);
+    $indegree = array_fill(0, $n, 0);
+    foreach ($prerequisites as [$a, $b]) {
+        $adj[$b][] = $a;
+        $indegree[$a]++;
+    }
+    return [$adj, $indegree];
+}
 
-Kết quả chạy `node course-schedule.ts` (bốn bản còn lại in cùng các dòng ca đúng và cùng số lần nhìn cạnh; thời gian và dòng đệ quy sâu khác như bảng trên):
+// Cách 2: Kahn. Môn có bậc vào 0 thì học được ngay; học xong thì trừ bậc vào
+// của các môn đứng sau. Đếm số môn học được. O(V + E).
+function canFinishKahn(int $n, array $prerequisites): bool
+{
+    global $work;
+    [$adj, $indegree] = buildGraph($n, $prerequisites);
+    $queue = [];
+    for ($c = 0; $c < $n; $c++) if ($indegree[$c] === 0) $queue[] = $c;
+    $taken = 0;
+    for ($head = 0; $head < count($queue); $head++) { // giữ chỉ số đầu, không array_shift
+        $u = $queue[$head];
+        $taken++;
+        foreach ($adj[$u] as $v) {
+            $work++;
+            if (--$indegree[$v] === 0) $queue[] = $v;
+        }
+    }
+    return $taken === $n; // thiếu môn nào là môn đó kẹt trong một vòng
+}
+
+const WHITE = 0;
+const GRAY = 1;
+const BLACK = 2;
+
+// Cách 3: DFS ba màu, đệ quy. Trắng = chưa đụng, xám = đang trên đường đi,
+// đen = đã xong. Gặp lại một đỉnh xám là có vòng. O(V + E).
+function canFinishDfs(int $n, array $prerequisites): bool
+{
+    [$adj] = buildGraph($n, $prerequisites);
+    $color = array_fill(0, $n, WHITE);
+    // $color truyền theo tham chiếu (&): mảng PHP là giá trị, không có & thì mỗi lời gọi sửa một bản sao
+    $visit = function (int $u) use (&$visit, &$color, $adj): bool {
+        global $work;
+        $color[$u] = GRAY;
+        foreach ($adj[$u] as $v) {
+            $work++;
+            if ($color[$v] === GRAY) return false; // quay về đỉnh đang trên đường: vòng
+            if ($color[$v] === WHITE && !$visit($v)) return false;
+        }
+        $color[$u] = BLACK;
+        return true;
+    };
+    for ($u = 0; $u < $n; $u++) {
+        if ($color[$u] === WHITE && !$visit($u)) return false;
+    }
+    return true;
+}
+```
+```rust
+// Cặp [a, b] nghĩa là "muốn học a phải học b trước": cạnh đi từ b sang a.
+fn build_graph(n: usize, prerequisites: &[[usize; 2]]) -> (Vec<Vec<usize>>, Vec<usize>) {
+    let mut adj = vec![Vec::new(); n];
+    let mut indegree = vec![0usize; n];
+    for &[a, b] in prerequisites {
+        adj[b].push(a);
+        indegree[a] += 1;
+    }
+    (adj, indegree)
+}
+
+// Cách 2: Kahn. Môn có bậc vào 0 thì học được ngay; học xong thì trừ bậc vào
+// của các môn đứng sau. Đếm số môn học được. O(V + E).
+fn can_finish_kahn(n: usize, prerequisites: &[[usize; 2]]) -> bool {
+    let (adj, mut indegree) = build_graph(n, prerequisites);
+    let mut queue: VecDeque<usize> = (0..n).filter(|&c| indegree[c] == 0).collect();
+    let mut taken = 0;
+    while let Some(u) = queue.pop_front() {
+        taken += 1;
+        for &v in &adj[u] {
+            tick();
+            indegree[v] -= 1; // usize: chỉ trừ khi chắc > 0, nếu không bản debug panic
+            if indegree[v] == 0 {
+                queue.push_back(v);
+            }
+        }
+    }
+    taken == n // thiếu môn nào là môn đó kẹt trong một vòng
+}
+
+const WHITE: u8 = 0;
+const GRAY: u8 = 1;
+const BLACK: u8 = 2;
+
+// Cách 3: DFS ba màu, đệ quy. Trắng = chưa đụng, xám = đang trên đường đi,
+// đen = đã xong. Gặp lại một đỉnh xám là có vòng. O(V + E).
+fn can_finish_dfs(n: usize, prerequisites: &[[usize; 2]]) -> bool {
+    let (adj, _) = build_graph(n, prerequisites);
+    let mut color = vec![WHITE; n];
+    // Hàm lồng thay cho closure: closure đệ quy cần mượn &mut color hai lần, borrow checker không cho.
+    fn visit(u: usize, adj: &[Vec<usize>], color: &mut [u8]) -> bool {
+        color[u] = GRAY;
+        for &v in &adj[u] {
+            tick();
+            if color[v] == GRAY {
+                return false; // quay về đỉnh đang trên đường: vòng
+            }
+            if color[v] == WHITE && !visit(v, adj, color) {
+                return false;
+            }
+        }
+        color[u] = BLACK;
+        true
+    }
+    for u in 0..n {
+        if color[u] == WHITE && !visit(u, &adj, &mut color) {
+            return false;
+        }
+    }
+    true
+}
+```
+
+Kết quả chạy `node course-schedule.ts` (sáu bản còn lại in cùng các dòng ca đúng và cùng số lần nhìn cạnh; thời gian và dòng đệ quy sâu khác như bảng trên):
 
 ```text
 canFinishScan        8/8 ca đúng
@@ -554,6 +678,8 @@ ngẫu nhiên 2000 môn, 5000 cặp, không vòng:
 - **TypeScript và JavaScript: `queue.shift()`.** Mỗi lần lấy đầu mảng phải dời cả mảng. Giữ một chỉ số `head` chạy dọc mảng như trong file. DFS đệ quy chịu được 2 000 tầng nhưng vỡ `RangeError` ở 100 000.
 - **Java: `List<List<Integer>>` và đệ quy.** Mỗi số được bọc thành `Integer`, tốn bộ nhớ hơn `int[]`; với 5 000 cạnh thì không đáng lo. DFS đệ quy ném `StackOverflowError` ở 100 000 tầng với ngăn xếp mặc định.
 - **Go: không tràn nhưng vẫn tốn.** Ngăn xếp goroutine tự nới nên đệ quy 100 000 tầng vẫn chạy. Lấy đầu hàng đợi bằng `queue = queue[1:]` thì mảng gốc không được giải phóng cho tới khi hết hàng; dùng chỉ số `head` thì gọn hơn.
+- **PHP: mảng là giá trị, closure phải lấy `&$color`.** Viết `use ($color)` thì closure nhận một bản sao lúc tạo ra, mọi lời gọi đệ quy đều thấy mảng toàn trắng, không bao giờ gặp đỉnh xám; trên đồ thị có vòng nó đệ quy mãi cho tới khi PHP báo hết bộ nhớ (lỗi Fatal, không bắt được). Phải `use (&$visit, &$color)`. Ngoài ra Xdebug, nếu bật, chặn đệ quy ở 512 tầng dù chuỗi 2 000 môn hoàn toàn hợp lệ.
+- **Rust: closure đệ quy và luồng phụ.** Closure không tự gọi được chính nó khi còn mượn `&mut color`, nên bản Rust viết `visit` thành một `fn` lồng nhận `&mut [u8]`. Tràn stack ở Rust không phải ngoại lệ: tiến trình bị abort. Chuỗi 100 000 môn chạy được trên luồng chính (8 MB) nhưng tràn trên một `thread::spawn` mặc định (2 MB); Kahn với `VecDeque` thì không phụ thuộc stack.
 
 ## Câu hỏi tự kiểm tra
 

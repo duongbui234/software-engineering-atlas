@@ -222,7 +222,7 @@ Cạnh bảng tăng gấp ba (30 → 90) thì vét cạn chậm đi khoảng 94 
 
 Mỗi file chạy cả sáu cách đúng và ba bản sai trên 10 ca chung: bảng ví dụ, một ô `O`, một ô `X`, `3 × 3` toàn `O`, vòng `X` bao một ô, một hàng `OXO`, hai ô chỉ chạm góc, một đường vòng vèo ra viền, `200 × 200` toàn `O`, và `200 × 200` viền `X` với phần trong toàn `O`. Sau đó file đối chiếu năm cách đúng với vét cạn trên 2.000 bảng ngẫu nhiên tới `8 × 8`, rồi đo như bảng trên. Đoạn dưới là cách 2 trong từng file.
 
-[TypeScript](../code/neetcode-surrounded-regions/surrounded.ts) · [Python](../code/neetcode-surrounded-regions/surrounded.py) · [Go](../code/neetcode-surrounded-regions/surrounded.go) · [Java](../code/neetcode-surrounded-regions/surrounded.java) · [JavaScript](../code/neetcode-surrounded-regions/surrounded.js)
+[TypeScript](../code/neetcode-surrounded-regions/surrounded.ts) · [Python](../code/neetcode-surrounded-regions/surrounded.py) · [Go](../code/neetcode-surrounded-regions/surrounded.go) · [Java](../code/neetcode-surrounded-regions/surrounded.java) · [JavaScript](../code/neetcode-surrounded-regions/surrounded.js) · [PHP](../code/neetcode-surrounded-regions/surrounded.php) · [Rust](../code/neetcode-surrounded-regions/surrounded.rs)
 
 ```ts
 const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]]
@@ -419,6 +419,97 @@ function finish(board) {
 }
 ```
 
+```php
+<?php
+const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+// Cách 2 (nên dùng): đi ngược từ biên. Ô O trên biên vào hàng đợi, đánh dấu an toàn 'S',
+// BFS lan 'S' vào trong. Cuối cùng: O còn lại thành X, S trả lại thành O.
+function borderBfs(array &$board): void
+{
+    $m = count($board);
+    $n = count($board[0]);
+    $queue = [];
+    $seed = function (int $r, int $c) use (&$board, &$queue, $n): void {
+        if ($board[$r][$c] === 'O') { $board[$r][$c] = 'S'; $queue[] = $r * $n + $c; }
+    };
+    for ($r = 0; $r < $m; $r++) { $seed($r, 0); $seed($r, $n - 1); }
+    for ($c = 0; $c < $n; $c++) { $seed(0, $c); $seed($m - 1, $c); }
+    for ($head = 0; $head < count($queue); $head++) {
+        $cr = intdiv($queue[$head], $n);
+        $cc = $queue[$head] % $n;
+        foreach (DIRS as [$dr, $dc]) {
+            $nr = $cr + $dr;
+            $nc = $cc + $dc;
+            if ($nr < 0 || $nr >= $m || $nc < 0 || $nc >= $n || $board[$nr][$nc] !== 'O') continue;
+            $board[$nr][$nc] = 'S';
+            $queue[] = $nr * $n + $nc;
+        }
+    }
+    finish($board);
+}
+
+function finish(array &$board): void
+{
+    foreach ($board as &$row) {
+        foreach ($row as &$cell) $cell = $cell === 'O' ? 'X' : ($cell === 'S' ? 'O' : $cell);
+        unset($cell);
+    }
+    unset($row);
+}
+```
+
+```rust
+const DIRS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+
+// Hàng xóm trong bảng m×n của ô (r, c), đã lọc ô ra ngoài biên.
+fn neighbors(m: usize, n: usize, r: usize, c: usize) -> impl Iterator<Item = (usize, usize)> {
+    DIRS.iter().filter_map(move |&(dr, dc)| {
+        let (nr, nc) = (r as i32 + dr, c as i32 + dc);
+        if nr < 0 || nr >= m as i32 || nc < 0 || nc >= n as i32 {
+            None
+        } else {
+            Some((nr as usize, nc as usize))
+        }
+    })
+}
+
+// Các ô O trên biên: điểm xuất phát của những cách đi ngược.
+fn border_cells(m: usize, n: usize) -> Vec<(usize, usize)> {
+    let mut cells = Vec::new();
+    for r in 0..m { cells.push((r, 0)); cells.push((r, n - 1)); }
+    for c in 0..n { cells.push((0, c)); cells.push((m - 1, c)); }
+    cells
+}
+
+// Cách 2 (nên dùng): đi ngược từ biên. Ô O trên biên vào hàng đợi, đánh dấu an toàn 'S',
+// BFS lan 'S' vào trong. Cuối cùng: O còn lại thành X, S trả lại thành O.
+fn border_bfs(board: &mut Board) {
+    let (m, n) = (board.len(), board[0].len());
+    let mut queue = Vec::new();
+    for (r, c) in border_cells(m, n) {
+        if board[r][c] == b'O' { board[r][c] = b'S'; queue.push(r * n + c); }
+    }
+    let mut head = 0;
+    while head < queue.len() {
+        let (cr, cc) = (queue[head] / n, queue[head] % n);
+        head += 1;
+        for (nr, nc) in neighbors(m, n, cr, cc) {
+            if board[nr][nc] != b'O' { continue; }
+            board[nr][nc] = b'S';
+            queue.push(nr * n + nc);
+        }
+    }
+    finish(board);
+}
+
+fn finish(board: &mut Board) {
+    for cell in board.iter_mut().flatten() {
+        *cell = match *cell { b'O' => b'X', b'S' => b'O', other => other };
+    }
+}
+```
+
 Kết quả `node surrounded.ts`:
 
 ```text
@@ -437,9 +528,11 @@ wrongNewBoard          6/10 ca đúng; sai ở ví dụ 5×5 ở trên, vòng X 
 90×90: vét cạn 59969536 lượt thăm, 1548.7 ms; tô từng vùng 0.24 ms
 ```
 
-Bốn file còn lại cho cùng kết quả đúng/sai, trừ hai chỗ:
+Sáu file còn lại cho cùng kết quả đúng/sai, trừ bốn chỗ:
 - **Go:** `borderDfsRecursive` đúng cả 10/10, vì stack của goroutine tự lớn. Bản sai `wrongFlipDuringSearch` cũng không tràn stack, nên đúng thêm ca `200 × 200` viền `X` (3/10 thay vì 2/10). Ở ca đó mọi ô bên trong đều bị vây, nên đổi ngay cũng tình cờ ra đúng.
 - **Python:** in thêm một dòng cho bẫy riêng của Python: `bảng là list[str]: ném TypeError ('str' object does not support item assignment)`. Python đo trên bảng nhỏ hơn (20, 30, 40) vì chậm hơn: `40 × 40` tốn 2.085.136 lượt thăm, khoảng 1.068 ms cho vét cạn và 0,54 ms cho tô từng vùng.
+- **PHP** (`php surrounded.php`): `borderDfsRecursive` đúng 10/10, vì lời gọi hàm PHP nằm trên heap chứ không trên stack của luồng (máy bật Xdebug thì Xdebug chặn ở 512 tầng; tắt bằng `php -d xdebug.mode=off`). `wrongFlipDuringSearch` vì thế cũng được 3/10 như Go. Bản sai thứ ba được viết lại cho đúng kiểu PHP: hàm nhận `array $board` thay vì `array &$board`, tức **quên dấu `&`**, nên nó sửa một bản sao và vẫn sai 6/10. PHP chỉ đo `30 × 30` và `60 × 60`: vét cạn `60 × 60` đã mất khoảng 3.500 ms, `90 × 90` mất khoảng 20 giây.
+- **Rust** (`rustc --edition 2021 -O surrounded.rs`): `border_dfs_recursive` đúng 10/10 trên stack 8 MB của luồng chính, `wrong_flip_during_search` được 3/10 như Go. Bản sai thứ ba che tên bằng `let mut board = board.clone()`, nên cũng sửa bản sao. Rust nhanh nhất ở phép đo: vét cạn `90 × 90` mất khoảng 520 ms, tô từng vùng 0,07 ms.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -453,6 +546,8 @@ Bốn file còn lại cho cùng kết quả đúng/sai, trừ hai chỗ:
 - **TypeScript/JavaScript: hàng là chuỗi.** Lệnh gán `board[r][c] = 'X'` lên một chuỗi **không báo lỗi gì** trong file không ở strict mode (mình chạy thử: chuỗi `'XOX'` vẫn là `'XOX'`). Ở strict mode thì ném `TypeError: Cannot assign to read only property`. Bảng phải là mảng các mảng ký tự.
 - **Java: so `char` với `String`.** Viết `board[r][c] == "O"` (nháy kép) là lỗi biên dịch `bad operand types for binary operator '=='`. Dùng `'O'` (nháy đơn).
 - **Go và Java: chép bảng nông.** `copy(dst, board)` trong Go hay `board.clone()` trong Java chỉ chép mảng ngoài; các hàng vẫn dùng chung. Khi cần bản sao để thử, chép từng hàng như hàm `clone`/`copy` trong file.
+- **PHP: `foreach ($board as $row)` rồi sửa `$row`.** `$row` là bản sao của hàng, sửa nó không đổi bảng. Hàm `finish` trong bản PHP lặp bằng tham chiếu (`foreach ($board as &$row)`) và `unset($row)` ngay sau vòng lặp; quên `unset` thì vòng `foreach` kế tiếp sẽ ghi đè lên hàng cuối.
+- **Rust: hàm đệ quy mượn `&mut board` hai lần.** Không thể viết `dfs` thành closure vừa đọc vừa sửa `board` rồi tự gọi lại chính nó; borrow checker từ chối. Bản Rust tách `mark_safe` thành hàm thường nhận `board: &mut Board` và chỉ số kiểu `i32`, để `r - 1` ở hàng 0 thành `-1` rồi bị chặn ở dòng kiểm biên, không panic.
 
 ## Câu hỏi tự kiểm tra
 

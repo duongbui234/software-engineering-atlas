@@ -111,7 +111,7 @@ Even a code point is not yet "the character a reader sees": country flags and fa
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-valid-anagram/valid-anagram.ts) · [JavaScript](../code/neetcode-valid-anagram/valid-anagram.js) · [Python](../code/neetcode-valid-anagram/valid_anagram.py) · [Go](../code/neetcode-valid-anagram/valid_anagram.go) · [Java](../code/neetcode-valid-anagram/valid-anagram.java)
+[TypeScript](../code/neetcode-valid-anagram/valid-anagram.ts) · [JavaScript](../code/neetcode-valid-anagram/valid-anagram.js) · [Python](../code/neetcode-valid-anagram/valid_anagram.py) · [Go](../code/neetcode-valid-anagram/valid_anagram.go) · [Java](../code/neetcode-valid-anagram/valid-anagram.java) · [PHP](../code/neetcode-valid-anagram/valid-anagram.php) · [Rust](../code/neetcode-valid-anagram/valid_anagram.rs)
 
 ```ts
 // TypeScript: 26-slot array for the original problem (a–z only)
@@ -194,6 +194,33 @@ function isAnagram(s, t) {
 }
 ```
 
+```php
+function isAnagram(string $s, string $t): bool {
+    if (strlen($s) !== strlen($t)) return false; // strlen counts BYTES
+    $count = array_fill(0, 26, 0);
+    for ($i = 0, $n = strlen($s); $i < $n; $i++) {
+        $count[ord($s[$i]) - 97]++; // $s[$i] is one byte, ord() gives its code
+        $count[ord($t[$i]) - 97]--;
+    }
+    foreach ($count as $c) if ($c !== 0) return false;
+    return true;
+}
+```
+
+```rust
+fn is_anagram(s: &str, t: &str) -> bool {
+    if s.len() != t.len() {
+        return false; // len() is the number of UTF-8 bytes
+    }
+    let mut count = [0i32; 26];
+    for (a, b) in s.bytes().zip(t.bytes()) {
+        count[(a - b'a') as usize] += 1; // a byte outside a..z panics instead of silently writing wrong data
+        count[(b - b'a') as usize] -= 1;
+    }
+    count == [0; 26] // fixed-size arrays compare with ==
+}
+```
+
 ```text
 $ node valid-anagram.ts
 lowercase test: 3 approaches × 5 cases, 0 cases failed
@@ -229,13 +256,23 @@ $ java valid-anagram.java
 true false
 emoji, sorting char[]: true (wrong) | by code point: false
 café vs éfac: false | NFC: true
+$ php valid-anagram.php
+test chữ thường: 3 cách × 5 ca, 0 ca sai
+"café" vs "éfac": strlen 5 vs 6, mb_strlen 4 vs 5
+  bySorting: false, byMap (NFC): true
+  "éè" vs byte xáo trộn: bySorting true (sai), byMap false
+$ rustc --edition 2021 -O valid_anagram.rs && ./valid_anagram
+test chữ thường: 3 cách × 5 ca, 0 ca sai
+"café" vs "éfac": len 5 vs 6 byte, chars 4 vs 5
+  by_sorting: false, by_map: false (không có NFC thì cả hai sai)
+  emoji: by_sorting false, by_map false (char là code point, không vỡ)
 ```
 
 Reading the results:
 
 - **Speed**: the 26-slot array is about 60 times faster than sorting and about 12 times faster than the hash map. All three give the correct answer for lowercase letters.
 - **"café"** written in two ways has different lengths (4 and 5), so every approach without normalization returns `false`. After NFC it is correct.
-- **Emoji**: the code-unit sorting in JS and Java returns `true`, which is wrong. Python sorts by code point, so it is correct; Go iterating by `rune` is correct too.
+- **Emoji**: the code-unit sorting in JS and Java returns `true`, which is wrong. Python sorts by code point, so it is correct; Go iterating by `rune` is correct too. PHP sorts bytes, so it is wrong too for multi-byte letters; Rust sorts by `char` (code point), so it is correct, but without NFC it still returns `false` for "café".
 
 ## Misconceptions and common traps
 
@@ -246,6 +283,8 @@ Reading the results:
 - **Sorting `split('')` on a Unicode string.** It breaks surrogate pairs and yields false anagrams, as in the emoji example.
 - **Not normalizing.** Two strings that look identical can differ byte by byte. Text that users type on different keyboards, or copy from macOS, often comes in the decomposed form (NFD).
 - **Go: `len(s)` is the number of bytes.** The byte-based 26-slot array is only correct because the problem limits input to a–z (one byte per letter). With accented letters, you have to iterate `range s` by rune.
+- **PHP: strings are byte sequences.** `strlen`, `$s[$i]`, `str_split` and `sort` all work on bytes. An accented letter takes 2–3 bytes, so a byte sort can call two strings with different letters anagrams. Use `mb_str_split` and `Normalizer::normalize` (the intl extension) for real text.
+- **Rust: the standard library does not normalize Unicode.** `chars()` walks code points, so emoji do not break, but precomposed `"café"` and the decomposed form still differ; you need the `unicode-normalization` crate. On the other hand, an index outside the 26-slot array makes the program panic instead of overwriting memory.
 
 ## Self-check questions
 

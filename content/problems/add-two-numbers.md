@@ -200,7 +200,7 @@ Cộng hai số n chữ số, trung vị 5 lần chạy, không tính thời gia
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-add-two-numbers/add-two-numbers.ts) · [Python](../code/neetcode-add-two-numbers/add_two_numbers.py) · [Go](../code/neetcode-add-two-numbers/add_two_numbers.go) · [Java](../code/neetcode-add-two-numbers/add-two-numbers.java) · [JavaScript](../code/neetcode-add-two-numbers/add-two-numbers.js)
+[TypeScript](../code/neetcode-add-two-numbers/add-two-numbers.ts) · [Python](../code/neetcode-add-two-numbers/add_two_numbers.py) · [Go](../code/neetcode-add-two-numbers/add_two_numbers.go) · [Java](../code/neetcode-add-two-numbers/add-two-numbers.java) · [JavaScript](../code/neetcode-add-two-numbers/add-two-numbers.js) · [PHP](../code/neetcode-add-two-numbers/add-two-numbers.php) · [Rust](../code/neetcode-add-two-numbers/add_two_numbers.rs)
 
 Các file chạy chung các ca: ba ví dụ của đề, `[9,9] + [1]`, hai số dài lệch nhau (`1 + 899999`), và hai số 100 chữ số ngẫu nhiên (giới hạn của đề). TypeScript thêm ca 16 chữ số và 10 000 cặp ngẫu nhiên (mulberry32); Python thêm ca 5000 chữ số. Đáp án được tính bằng một hàm cộng mảng chữ số riêng.
 
@@ -291,6 +291,87 @@ function addDigits(l1, l2) {
     l2 = l2?.next ?? null;
   }
   return dummy.next;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class ListNode {
+    public function __construct(public int $val, public ?ListNode $next = null) {}
+}
+
+function addTwoNumbers(?ListNode $a, ?ListNode $b): ?ListNode {
+    $dummy = $tail = new ListNode(0);
+    $carry = 0;
+    while ($a !== null || $b !== null || $carry !== 0) {
+        $sum = ($a->val ?? 0) + ($b->val ?? 0) + $carry;
+        $carry = intdiv($sum, 10);
+        $tail->next = new ListNode($sum % 10);
+        $tail = $tail->next;
+        $a = $a->next ?? null;
+        $b = $b->next ?? null;
+    }
+    return $dummy->next;
+}
+
+function listFrom(array $values): ?ListNode {
+    $head = null;
+    foreach (array_reverse($values) as $val) $head = new ListNode($val, $head);
+    return $head;
+}
+
+function valuesOf(?ListNode $head): array {
+    $values = [];
+    for (; $head !== null; $head = $head->next) $values[] = $head->val;
+    return $values;
+}
+```
+
+```rust
+type Link = Option<Box<ListNode>>;
+
+struct ListNode {
+    val: i32,
+    next: Link,
+}
+
+fn add_two_numbers(a: &Link, b: &Link) -> Link {
+    let (mut a, mut b) = (a.as_deref(), b.as_deref());
+    let mut result = None;
+    let mut tail = &mut result;
+    let mut carry = 0;
+    while a.is_some() || b.is_some() || carry != 0 {
+        let sum = a.map_or(0, |n| n.val) + b.map_or(0, |n| n.val) + carry;
+        carry = sum / 10;
+        tail = &mut tail
+            .insert(Box::new(ListNode {
+                val: sum % 10,
+                next: None,
+            }))
+            .next;
+        a = a.and_then(|n| n.next.as_deref());
+        b = b.and_then(|n| n.next.as_deref());
+    }
+    result
+}
+
+fn list_from(values: &[i32]) -> Link {
+    values
+        .iter()
+        .rev()
+        .fold(None, |next, &val| Some(Box::new(ListNode { val, next })))
+}
+
+fn values_of(head: &Link) -> Vec<i32> {
+    let mut out = Vec::new();
+    let mut current = head.as_deref();
+    while let Some(node) = current {
+        out.push(node.val);
+        current = node.next.as_deref();
+    }
+    out
 }
 ```
 
@@ -460,6 +541,8 @@ addDigits (chuỗi)  1/5 ca đúng; sai ở ví dụ 1 của đề → [0,5,2,6,
 
 "4" + "6" + 0 = "460"; Math.floor("460" / 10) = 46
 ```
+
+Hai bản bổ sung cộng từng cặp chữ số. PHP lấy phần nhớ bằng `intdiv`; Rust giữ tham chiếu sửa được tới ô `next` cuối. PHP `4/4 ca đúng` · Rust `4/4 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

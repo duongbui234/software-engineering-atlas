@@ -149,7 +149,7 @@ The TypeScript file runs the version without the swap and prints exactly those t
 
 ### Odd total, even total, and integer division
 
-The median of an even total can end in `.5`. Three of the five languages do integer division when both operands are integers:
+The median of an even total can end in `.5`. Four of the seven languages do integer division when both operands are integers:
 
 | | `(2 + 3) / 2` | Negative numbers | The right way |
 |---|---|---|---|
@@ -157,8 +157,10 @@ The median of an even total can end in `.5`. Three of the five languages do inte
 | Go | `2` | `-3 / 2 = -1` | `float64(x + y) / 2` |
 | Python | `/` gives `2.5`; `//` gives `2` (rounds down) | `-3 // 2 = -2` | use `/` |
 | TS, JS | `2.5` (every number is a double) | `-1.5` | nothing needed |
+| Rust | `2` (`i32 / i32`, truncates toward 0) | `-3 / 2 = -1`; `div_euclid` gives `-2` | convert to `f64`, then divide by `2.0` |
+| PHP | `2.5`; `intdiv` gives `2` | `intdiv(-3, 2) = -1`, `-3 / 2 = -1.5` | use `/`, but `(2 + 4) / 2` gives the **int** `3`, not a float |
 
-The integer-division version passes 8/10 test cases and gets about a quarter of the random pairs wrong: 24 681 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java). A quarter makes sense: it is wrong only when the total is even **and** the two middle cells have an odd sum.
+The integer-division version passes 8/10 test cases and gets about a quarter of the random pairs wrong: 24 681 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java), 24 999 (PHP), 24 856 (Rust). A quarter makes sense: it is wrong only when the total is even **and** the two middle cells have an odd sum.
 
 Java has one more trap: `(x + y) / 2.0` adds **first**, in `int`, and only then converts to double. With `x = y = 2 000 000 000`, the Java file prints `-1.47483648E8`; `((long) x + y) / 2.0` prints `2.0E9`. The problem's bound `|x| ≤ 10⁶` keeps this bug hidden on LeetCode, but not in code reused elsewhere.
 
@@ -181,9 +183,9 @@ TypeScript, two random sorted integer arrays, median of 7 runs, µs per call; th
 
 The two linear approaches grow about 10 times when n grows 10 times. The two logarithmic ones barely move, and on the last row the cut is about 11 times faster than the k-th approach because it only binary searches the 11 cut positions of a 10-element array. On the last row two pointers is also about 21 times faster than merging: it only walks to the middle and allocates no 10⁶-element array.
 
-Besides the 10 test cases, each file cross-checks the four approaches against "concatenate then sort" on 100 000 random pairs (each array 0 to 20 elements, values in `[-50, 50]`, so plenty of duplicates and empty arrays). All four approaches get 0 pairs wrong in all five languages.
+Besides the 10 test cases, each file cross-checks the four approaches against "concatenate then sort" on 100 000 random pairs (each array 0 to 20 elements, values in `[-50, 50]`, so plenty of duplicates and empty arrays). All four approaches get 0 pairs wrong in all seven languages.
 
-### Under the hood in five languages
+### Under the hood in seven languages
 
 | | Sentinels | Dividing on an even total | Specific traps |
 |---|---|---|---|
@@ -191,12 +193,14 @@ Besides the 10 test cases, each file cross-checks the four approaches against "c
 | Python | `float("-inf")`, `float("inf")`, comparable with `int` | `/` | `//` rounds down: `-3 // 2 = -2`. `heapq.merge` merges two sorted sequences without re-sorting |
 | Go | `math.MinInt`, `math.MaxInt` | `float64(x+y) / 2` | `float64((x+y)/2)` divides as integers first, then converts. `min` and `max` are built in since Go 1.21 |
 | Java | `Integer.MIN_VALUE`, `Integer.MAX_VALUE` | `((long) x + y) / 2.0` | `(x + y) / 2` loses `.5`; `(x + y) / 2.0` still overflows because the addition happens in `int`. Without the swap, `b[j]` with `j = −1` throws `ArrayIndexOutOfBoundsException` |
+| PHP | `PHP_INT_MIN`, `PHP_INT_MAX` | `/` gives a float when the division is not exact | `/` between two ints that divide exactly returns an **int**: `(2 + 4) / 2` is `3`, so comparing `===` with `3.0` fails unless the function declares a `float` return type. Arrays are copied on assignment, so `[$a, $b] = [$b, $a]` leaves the caller's arrays alone |
+| Rust | `i64::MIN`, `i64::MAX` (widen the `i32` elements to `i64`) | `as f64`, then `/ 2.0` | indices are `usize` and cannot be negative: without the swap, `j = half − i` underflows; a debug build panics with `attempt to subtract with overflow`, a `-O` build wraps around and then panics on an out-of-bounds index |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.ts) · [Python](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.py) · [Go](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.go) · [Java](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.java) · [JavaScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.js)
+[TypeScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.ts) · [Python](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.py) · [Go](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.go) · [Java](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.java) · [JavaScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.js) · [PHP](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.php) · [Rust](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.rs)
 
-Each file has the four approaches, runs 10 test cases and cross-checks 100 000 random pairs. The TypeScript file also has three wrong versions and the measurements; Python, Go and Java have the integer-division version; Java also has the no-swap version. The main approach, binary search on the cut position:
+Each file has the four approaches, runs 10 test cases and cross-checks 100 000 random pairs. The TypeScript file also has three wrong versions and the measurements; Python, Go, Java, PHP and Rust have the integer-division version; Java also has the no-swap version. The main approach, binary search on the cut position:
 
 ```ts
 // Approach 4, binary search on the cut position in the shorter array: O(log min(m, n)).
@@ -329,6 +333,58 @@ function partition(a, b) {
 }
 ```
 
+```php
+// Approach 4, binary search on the cut position in the shorter array: O(log min(m, n)).
+// Cut a at i and b at j = half − i; the cut is right when aL ≤ bR and bL ≤ aR. Sentinels are PHP_INT_MIN / PHP_INT_MAX.
+function partition(array $a, array $b): float
+{
+    if (count($a) > count($b)) [$a, $b] = [$b, $a]; // PHP arrays are copied on assignment: the swap does not touch the caller's arrays
+    $m = count($a);
+    $n = count($b);
+    $half = ($m + $n + 1) >> 1;
+    $lo = 0;
+    $hi = $m;
+    while ($lo <= $hi) {
+        $i = ($lo + $hi) >> 1;
+        $j = $half - $i;
+        $aL = $i > 0 ? $a[$i - 1] : PHP_INT_MIN;
+        $aR = $i < $m ? $a[$i] : PHP_INT_MAX;
+        $bL = $j > 0 ? $b[$j - 1] : PHP_INT_MIN;
+        $bR = $j < $n ? $b[$j] : PHP_INT_MAX;
+        if ($aL <= $bR && $bL <= $aR) {
+            return ($m + $n) % 2 ? (float) max($aL, $bL) : (max($aL, $bL) + min($aR, $bR)) / 2; // / gives a float when the sum is odd
+        }
+        if ($aL > $bR) $hi = $i - 1;
+        else $lo = $i + 1;
+    }
+    throw new RuntimeException("mảng chưa sắp xếp");
+}
+```
+
+```rust
+// Approach 4, binary search on the cut position in the shorter array: O(log min(m, n)).
+// Cut a at i and b at j = half − i; the cut is right when aL ≤ bR and bL ≤ aR. Sentinels are i64::MIN / i64::MAX.
+fn partition(a: &[i32], b: &[i32]) -> f64 {
+    let (a, b) = if a.len() > b.len() { (b, a) } else { (a, b) }; // swap the two references, no array copy
+    let (m, n) = (a.len(), b.len());
+    let half = (m + n + 1) / 2;
+    let (mut lo, mut hi) = (0, m);
+    loop {
+        let i = (lo + hi) / 2;
+        let j = half - i; // usize: cannot go negative because m ≤ n guarantees half ≥ i
+        let a_l = if i > 0 { a[i - 1] as i64 } else { i64::MIN };
+        let a_r = if i < m { a[i] as i64 } else { i64::MAX };
+        let b_l = if j > 0 { b[j - 1] as i64 } else { i64::MIN };
+        let b_r = if j < n { b[j] as i64 } else { i64::MAX };
+        if a_l <= b_r && b_l <= a_r {
+            let left = a_l.max(b_l) as f64;
+            return if (m + n) % 2 == 1 { left } else { (left + a_r.min(b_r) as f64) / 2.0 };
+        }
+        if a_l > b_r { hi = i - 1 } else { lo = i + 1 }
+    }
+}
+```
+
 
 Elimination to find the k-th element:
 
@@ -454,6 +510,61 @@ function kthElimination(a, b) {
 }
 ```
 
+```php
+// Approach 3, elimination to find the k-th element (k counts from 1): each step drops k/2 elements that surely come before. O(log(m + n)).
+function kth(array $a, array $b, int $k): int
+{
+    $i = $j = 0;
+    while (true) {
+        if ($i === count($a)) return $b[$j + $k - 1];
+        if ($j === count($b)) return $a[$i + $k - 1];
+        if ($k === 1) return min($a[$i], $b[$j]);
+        $h = $k >> 1;
+        $ni = min($i + $h, count($a)) - 1;
+        $nj = min($j + $h, count($b)) - 1;
+        if ($a[$ni] <= $b[$nj]) { $k -= $ni - $i + 1; $i = $ni + 1; } // a[i..ni] all come before the k-th element: drop them
+        else { $k -= $nj - $j + 1; $j = $nj + 1; }
+    }
+}
+
+function kthElimination(array $a, array $b): float
+{
+    $t = count($a) + count($b);
+    return $t % 2 ? (float) kth($a, $b, ($t >> 1) + 1) : (kth($a, $b, intdiv($t, 2)) + kth($a, $b, intdiv($t, 2) + 1)) / 2;
+}
+```
+
+```rust
+// Approach 3, elimination to find the k-th element (k counts from 1). O(log(m + n)).
+// Slices make this tidy: drop the front by reslicing a = &a[h..], no i, j indices to keep.
+fn kth(mut a: &[i32], mut b: &[i32], mut k: usize) -> i32 {
+    loop {
+        if a.is_empty() {
+            return b[k - 1];
+        }
+        if b.is_empty() {
+            return a[k - 1];
+        }
+        if k == 1 {
+            return a[0].min(b[0]);
+        }
+        let (ha, hb) = ((k / 2).min(a.len()), (k / 2).min(b.len()));
+        if a[ha - 1] <= b[hb - 1] {
+            k -= ha; // a[..ha] all come before the k-th element: drop them
+            a = &a[ha..];
+        } else {
+            k -= hb;
+            b = &b[hb..];
+        }
+    }
+}
+
+fn kth_elimination(a: &[i32], b: &[i32]) -> f64 {
+    let t = a.len() + b.len();
+    if t % 2 == 1 { kth(a, b, t / 2 + 1) as f64 } else { (kth(a, b, t / 2) as f64 + kth(a, b, t / 2 + 1) as f64) / 2.0 }
+}
+```
+
 
 Output of the TypeScript file:
 
@@ -507,6 +618,8 @@ wrongIntDivision 25047 pairs wrong
 
 Python prints `wrong_floor_div 8/10 ca đúng` ("8/10 cases passed") and `sai 24994 cặp` ("24994 pairs wrong"), then `-3 // 2 = -2   -3 / 2 = -1.5`. Go prints `wrongIntDivision sai 24791 cặp` and `chia nguyên trong Go: -3 / 2 = -1` ("integer division in Go"). JavaScript prints `10/10 ca đúng` and `sai 0 cặp` for all four approaches, then `[10, 9, 1].sort() = [1,10,9]`.
 
+PHP (`php median-two-arrays.php`) and Rust (`rustc --edition 2021 -O median_two_arrays.rs`) print `10/10 ca đúng` and `sai 0 cặp` for all four approaches. The integer-division version passes 8/10 cases in both, with `sai 24999 cặp` (PHP) and `sai 24856 cặp` (Rust); the last line is `intdiv(-3, 2) = -1   -3 / 2 = -1.5` (PHP) and `(-3) / 2 = -1   (-3).div_euclid(2) = -2` (Rust).
+
 ## Misconceptions and common traps
 
 - **"Binary search needs a value to find."** Here no value is given. What gets halved is the cut position, and "`aL > bR`?" is the monotone question.
@@ -515,6 +628,8 @@ Python prints `wrong_floor_div 8/10 ca đúng` ("8/10 cases passed") and `sai 24
 - **Integer division on an even total.** `(x + y) / 2` with two `int`s in Java or Go, `//` in Python: the `.5` is lost. With negative numbers Python also rounds **down** (`-3 // 2 = -2`) while Java and Go truncate **toward 0** (`-1`).
 - **`half = (m + n) / 2` instead of `(m + n + 1) / 2`.** It can work, but then for an odd total the median sits on the **right** (`min(aR, bR)`), so the formula must change too. Mixing the two conventions is an off-by-one bug.
 - **Thinking two pointers is already O(log).** It saves memory, not time: it still walks `(m + n) / 2` steps.
+- **PHP: assuming `/` always gives a float.** `(2 + 4) / 2` returns the int `3`; only an inexact division gives a float. A function declared `: float` converts it for you, but comparing directly with `=== 3.0` fails. For integer division call `intdiv`, which truncates toward 0 like Java.
+- **Rust: forgetting the swap when indices are `usize`.** Starting with `a = [1..6]`, `b = [7]` makes `j = half − i` negative: a debug build panics with `attempt to subtract with overflow`, a `-O` build wraps to 18 446 744 073 709 551 614 and then panics on an out-of-bounds index. Swapping first is enough to keep `half ≥ i`.
 
 ## Self-check questions
 

@@ -134,7 +134,7 @@ Hash set thắng ở mọi ô, nhưng khoảng cách phụ thuộc nhiều vào 
 
 Bản trước của trang ghi TypeScript ngẫu nhiên là 14 lần. Con số đó sai vì dữ liệu: bộ sinh số ngẫu nhiên cũ (`seed * 1103515245` tính bằng số thực) mất chính xác và lặp lại sau khoảng 10 nghìn giá trị, nên "10⁶ số ngẫu nhiên" thật ra chỉ có khoảng 10 nghìn giá trị khác nhau, và set nhỏ thì nhanh. File giờ dùng bộ sinh mulberry32 (mọi phép nhân qua `Math.imul`), cho 10⁶ giá trị gần như khác nhau hết.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Tra "có x không" | Bẫy riêng |
 |---|---|---|
@@ -142,10 +142,12 @@ Bản trước của trang ghi TypeScript ngẫu nhiên là 14 lần. Con số �
 | Python | `x in s` với `s` là set: O(1) trung bình | `x in nums` với `nums` là **list** cũng chạy, nhưng O(n) |
 | Go | `_, ok := m[x]` trên `map[int]struct{}` | `slices.Sort` sửa tại chỗ; thứ tự duyệt map ngẫu nhiên (không ảnh hưởng kết quả) |
 | Java | `HashSet<Integer>.contains` | `Integer == Integer` so **tham chiếu**; đúng với −128..127, sai từ 128 trở lên |
+| PHP | `isset($all[$x])` với số làm **khóa** của mảng | `in_array` quét cả mảng: O(n) mỗi lần tra |
+| Rust | `HashSet::contains(&x)` | `x + len` tràn `i32` thì panic ở bản debug, quay vòng ở bản `-O` |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.ts) · [Python](../code/neetcode-longest-consecutive-sequence/longest_consecutive.py) · [Go](../code/neetcode-longest-consecutive-sequence/longest_consecutive.go) · [Java](../code/neetcode-longest-consecutive-sequence/longest-consecutive.java) · [JavaScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.js)
+[TypeScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.ts) · [Python](../code/neetcode-longest-consecutive-sequence/longest_consecutive.py) · [Go](../code/neetcode-longest-consecutive-sequence/longest_consecutive.go) · [Java](../code/neetcode-longest-consecutive-sequence/longest-consecutive.java) · [JavaScript](../code/neetcode-longest-consecutive-sequence/longest-consecutive.js) · [PHP](../code/neetcode-longest-consecutive-sequence/longest-consecutive.php) · [Rust](../code/neetcode-longest-consecutive-sequence/longest_consecutive.rs)
 
 Mỗi file có cả ba cách và tự chạy các ca kiểm tra. Dưới đây là cách sắp xếp và cách hash set.
 
@@ -301,6 +303,65 @@ function hashSet(nums) {
 }
 ```
 
+```php
+// PHP: mảng truyền theo giá trị, sort() chỉ sửa bản sao
+function sortScan(array $nums): int {
+    if (count($nums) === 0) return 0;
+    sort($nums, SORT_NUMERIC);
+    $best = 1; $len = 1;
+    for ($i = 1, $n = count($nums); $i < $n; $i++) {
+        if ($nums[$i] === $nums[$i - 1]) continue; // số trùng: bỏ qua, KHÔNG đứt dãy
+        $len = $nums[$i] === $nums[$i - 1] + 1 ? $len + 1 : 1;
+        $best = max($best, $len);
+    }
+    return $best;
+}
+function hashSet(array $nums): int {
+    $all = array_fill_keys($nums, true);
+    $best = 0;
+    foreach ($all as $x => $_) {            // duyệt KHÓA; giá trị chỉ là true
+        if (isset($all[$x - 1])) continue;
+        $len = 1;
+        while (isset($all[$x + $len])) $len++;
+        $best = max($best, $len);
+    }
+    return $best;
+}
+```
+
+```rust
+// Rust: dedup() bỏ số trùng đứng cạnh nhau sau khi sắp xếp
+fn sort_scan(nums: &[i32]) -> i32 {
+    if nums.is_empty() {
+        return 0;
+    }
+    let mut a = nums.to_vec();
+    a.sort_unstable();
+    a.dedup();
+    let (mut best, mut len) = (1, 1);
+    for w in a.windows(2) {
+        len = if w[1] == w[0] + 1 { len + 1 } else { 1 };
+        best = best.max(len);
+    }
+    best
+}
+fn hash_set(nums: &[i32]) -> i32 {
+    let all: HashSet<i32> = nums.iter().copied().collect();
+    let mut best = 0;
+    for &x in &all {
+        if all.contains(&(x - 1)) {
+            continue;
+        }
+        let mut len = 1;
+        while all.contains(&(x + len)) {
+            len += 1;
+        }
+        best = best.max(len);
+    }
+    best
+}
+```
+
 File TypeScript chạy thêm hai bản sai để test chỉ ra chỗ hỏng, rồi đo:
 
 ```text
@@ -336,7 +397,7 @@ hashSet        8/8 ca đúng
 sortScanBoxed  7/8 ca đúng; sai ở [1000, 1001, 1001, 1002] → 2
 ```
 
-Hai số `1001` là hai object `Integer` khác nhau, nên `==` coi chúng là khác nhau, và dãy bị cắt ở giữa. Với số nhỏ như `[1, 0, 1, 2]` thì bản này lại đúng, vì Java dùng chung object cho −128..127. Python, Go và JavaScript in `7/7 ca đúng` cho cả ba cách.
+Hai số `1001` là hai object `Integer` khác nhau, nên `==` coi chúng là khác nhau, và dãy bị cắt ở giữa. Với số nhỏ như `[1, 0, 1, 2]` thì bản này lại đúng, vì Java dùng chung object cho −128..127. Python, Go và JavaScript in `7/7 ca đúng` cho cả ba cách. PHP và Rust cũng in `7/7 ca đúng` cho ba cách, và bản coi số trùng là đứt dãy in `6/7 ca đúng; sai ở [1,0,1,2]` như TypeScript.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -346,6 +407,8 @@ Hai số `1001` là hai object `Integer` khác nhau, nên `==` coi chúng là kh
 - **JS: quên hàm so sánh trong `sort()`.** Số âm và số nhiều chữ số bị xếp sai thứ tự; bản sai chỉ qua 4/7 ca.
 - **Java: so `Integer` bằng `==`.** Đúng với số nhỏ, sai từ 128 trở lên, nên test với số nhỏ không bắt được. Dùng `equals`, hoặc sắp xếp `int[]` thay vì `List<Integer>`.
 - **Python: viết `x + 1 in nums` với `nums` là list.** Chạy đúng, nhưng mỗi lần tra là O(n), và lời giải thành O(n²) hoặc tệ hơn mà không có gì báo.
+- **PHP: dựng set bằng `array_flip` rồi duyệt giá trị.** `array_flip($nums)` cho số làm khóa nhưng giá trị là **chỉ số** cũ; `foreach ($all as $x)` khi đó duyệt chỉ số chứ không duyệt số. Phải viết `foreach ($all as $x => $_)`. File dùng `array_fill_keys($nums, true)` để giá trị không gây nhầm.
+- **Rust: quên `dedup()` sau khi sắp xếp.** Không có nó, hai số trùng đứng cạnh nhau làm đứt dãy, đúng bản sai `6/7`. Ngoài ra `x + len` trên `i32` gần `i32::MAX` sẽ panic ở bản debug; giới hạn ±10⁹ của đề giữ phép cộng an toàn.
 - **"O(n) chắc chắn nhanh hơn nhiều O(n log n)."** Với dữ liệu ngẫu nhiên ở 10⁶ phần tử, hash set chỉ nhanh hơn sắp xếp 1,5 lần trong TypeScript và 1,3 lần trong Python. Cả hai đều qua giới hạn của LeetCode; chỉ đề bài mới bắt buộc O(n).
 
 ## Câu hỏi tự kiểm tra

@@ -175,9 +175,9 @@ Go runs the recursive version because goroutine stacks grow on their own (up to 
 
 ## Runnable example
 
-Each file builds 10 graphs (empty, one node, two nodes, a triangle, a square with a diagonal, a star, lines of 5 and 100 nodes, the complete graph on 6 nodes, a random 100-node graph), runs the three correct approaches and four broken ones, and checks the three deep-copy conditions above. On top of that come 500 random graphs of up to 100 nodes for the three correct approaches. All five languages use the same mulberry32 generator, so they build the same graphs. Below is the solution part; the full files also hold the broken versions and the checks.
+Each of the original five files builds 10 graphs (empty, one node, two nodes, a triangle, a square with a diagonal, a star, lines of 5 and 100 nodes, the complete graph on 6 nodes, a random 100-node graph), runs the three correct approaches and four broken ones, and checks the three deep-copy conditions above. On top of that come 500 random graphs of up to 100 nodes for the three correct approaches. All five languages use the same mulberry32 generator, so they build the same graphs. Below is the solution part; the full files also hold the broken versions and the checks.
 
-[TypeScript](../code/neetcode-clone-graph/clone-graph.ts) · [Python](../code/neetcode-clone-graph/clone_graph.py) · [Go](../code/neetcode-clone-graph/clone_graph.go) · [Java](../code/neetcode-clone-graph/clone-graph.java) · [JavaScript](../code/neetcode-clone-graph/clone-graph.js)
+[TypeScript](../code/neetcode-clone-graph/clone-graph.ts) · [Python](../code/neetcode-clone-graph/clone_graph.py) · [Go](../code/neetcode-clone-graph/clone_graph.go) · [Java](../code/neetcode-clone-graph/clone-graph.java) · [JavaScript](../code/neetcode-clone-graph/clone-graph.js) · [PHP](../code/neetcode-clone-graph/clone-graph.php)
 
 ```ts
 // ---------- Approach 1: recursive DFS with an "old → new" map ----------
@@ -477,6 +477,36 @@ function cloneDfsIterative(node) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class GraphNode {
+    public array $neighbors = [];
+    public function __construct(public int $val) {}
+}
+
+function cloneGraph(?GraphNode $root): ?GraphNode {
+    if ($root === null) return null;
+    $copies = new SplObjectStorage();
+    $queue = new SplQueue();
+    $copies[$root] = new GraphNode($root->val);
+    $queue->enqueue($root);
+    while (!$queue->isEmpty()) {
+        $node = $queue->dequeue();
+        $copy = $copies[$node];
+        foreach ($node->neighbors as $neighbor) {
+            if (!$copies->contains($neighbor)) {
+                $copies[$neighbor] = new GraphNode($neighbor->val);
+                $queue->enqueue($neighbor);
+            }
+            $copy->neighbors[] = $copies[$neighbor];
+        }
+    }
+    return $copies[$root];
+}
+```
+
 Running `node clone-graph.ts`:
 
 ```text
@@ -498,6 +528,8 @@ clone-graph: all correct approaches pass
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 The other four files print the same pass counts. The only difference is how the endlessly recursive broken versions die: Python throws `RecursionError`, Java throws `StackOverflowError`. Go cannot catch a stack overflow (the program dies outright with `fatal error: stack overflow`), so the Go file stops those two broken versions at depth 10,000 with `panic` and `recover`, and prints "đệ quy quá 10000 tầng (đi vòng mãi)" ("recursed past 10000 levels (looping forever)").
+
+The PHP version uses BFS and `SplObjectStorage` to map objects by identity. This page has six languages because LeetCode does not provide a Rust template for its graph node type. PHP `3/3 ca đúng`.
 
 ## Misconceptions and common traps
 

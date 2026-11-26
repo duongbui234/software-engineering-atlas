@@ -109,7 +109,7 @@ Every sorting algorithm that relies only on comparing two elements needs Ω(n lo
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-top-k-frequent/top-k-frequent.ts) · [JavaScript](../code/neetcode-top-k-frequent/top-k-frequent.js) · [Python](../code/neetcode-top-k-frequent/top_k_frequent.py) · [Go](../code/neetcode-top-k-frequent/top_k_frequent.go) · [Java](../code/neetcode-top-k-frequent/top-k-frequent.java)
+[TypeScript](../code/neetcode-top-k-frequent/top-k-frequent.ts) · [JavaScript](../code/neetcode-top-k-frequent/top-k-frequent.js) · [Python](../code/neetcode-top-k-frequent/top_k_frequent.py) · [Go](../code/neetcode-top-k-frequent/top_k_frequent.go) · [Java](../code/neetcode-top-k-frequent/top-k-frequent.java) · [PHP](../code/neetcode-top-k-frequent/top-k-frequent.php) · [Rust](../code/neetcode-top-k-frequent/top_k_frequent.rs)
 
 ```ts
 // TypeScript: bucket sort by frequency, O(n)
@@ -226,6 +226,41 @@ function topKFrequent(nums, k) {
 }
 ```
 
+```php
+function topKFrequent(array $nums, int $k): array {
+    $count = array_count_values($nums); // value → count
+    // buckets[f] = the values that appear exactly f times
+    $buckets = array_fill(0, count($nums) + 1, []);
+    foreach ($count as $value => $freq) $buckets[$freq][] = $value;
+    $out = [];
+    for ($f = count($nums); $f > 0; $f--) {
+        foreach ($buckets[$f] as $v) {
+            $out[] = $v;
+            if (count($out) === $k) return $out;
+        }
+    }
+    return $out;
+}
+```
+
+```rust
+fn top_k_frequent(nums: Vec<i32>, k: i32) -> Vec<i32> {
+    let mut count: HashMap<i32, usize> = HashMap::new();
+    for &x in &nums {
+        *count.entry(x).or_insert(0) += 1;
+    }
+    // BinaryHeap is a MAX-heap; wrap in Reverse so the top is the least frequent element
+    let mut heap = BinaryHeap::new();
+    for (v, c) in count {
+        heap.push(Reverse((c, v)));
+        if heap.len() > k as usize {
+            heap.pop(); // push the weakest one out
+        }
+    }
+    heap.into_iter().map(|Reverse((_, v))| v).collect()
+}
+```
+
 The TypeScript file runs the tests for all four approaches, then measures on a million numbers with different numbers of distinct values (m) and different k. The "count only" column is the counting step alone, the part every approach has to do:
 
 ```text
@@ -251,7 +286,7 @@ Reading the results:
 - **Quickselect, last row**: 798 ms, 3.5 times slower than sorting. Most of the 632,052 values have the same frequency (1 or 2), so the two-way partition degenerates as explained above.
 - The general lesson: Big-O tells you the curve; measurement tells you the real cost. Under the problem's constraints (n ≤ 100,000), all four approaches take under a few tens of milliseconds. Choose by code clarity, unless measurement says otherwise.
 
-The other languages all give the same answers, and Java illustrates the trap of comparing by subtraction:
+The other languages all give the same answers (PHP and Rust print `4/4 ca đúng` for all four approaches). Java illustrates the trap of comparing by subtraction, PHP and Rust the trap of heap direction:
 
 ```text
 $ python3 top_k_frequent.py
@@ -267,6 +302,14 @@ $ go run top_k_frequent.go
 $ java top-k-frequent.java
 ...
 comparing MIN_VALUE with 1 by subtraction: 2147483647 (positive, meaning 'greater': wrong) | Integer.compare: -1
+
+$ php top-k-frequent.php
+...
+SplMinHeap với compare($a, $b) = $a <=> $b lấy ra trước: 3 (tưởng là 1)
+
+$ rustc --edition 2021 -O top_k_frequent.rs && ./top_k_frequent
+...
+BinaryHeap peek: Some(3) | bọc Reverse: Some(1)
 ```
 
 ## Misconceptions and common traps
@@ -278,6 +321,8 @@ comparing MIN_VALUE with 1 by subtraction: 2147483647 (positive, meaning 'greate
 - **Go: calling `h.Push(x)` instead of `heap.Push(h, x)`.** `h.Push` is just an append and does not sift the element up; the heap loses its property without any error.
 - **Quickselect is "O(n)".** That is the average with a random pivot. Many equal values call for a three-way partition, otherwise it can be slower than sorting.
 - **Forgetting that counting costs too.** At a million elements, the counting step (O(n) map operations) is often more expensive than the top-k selection step.
+- **PHP: `SplMinHeap::compare` runs against intuition.** It returns a **positive** number when `$a` should sit on top, which for a min-heap means when `$a` is **smaller**. Writing the habitual `$a <=> $b` silently turns the min-heap into a max-heap; the PHP file prints `3` instead of `1`. And `SplPriorityQueue` is a max-heap that does not keep order among elements of equal priority.
+- **Rust: `BinaryHeap` is a max-heap.** For a min-heap, wrap the items in `std::cmp::Reverse`. The standard library ships quickselect (`select_nth_unstable_by`), so approach 4 is a single line; comparing with `cmp` means there is no overflow trap like Java's subtraction comparator.
 
 ## Self-check questions
 

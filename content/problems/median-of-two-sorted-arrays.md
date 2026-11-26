@@ -148,7 +148,7 @@ File TypeScript chạy bản không đổi chỗ và in đúng hai ca đó: `j =
 
 ### Tổng lẻ, tổng chẵn, và chia nguyên
 
-Trung vị của tổng chẵn có thể là `.5`. Ba ngôn ngữ trong năm có phép chia nguyên khi hai toán hạng là số nguyên:
+Trung vị của tổng chẵn có thể là `.5`. Bốn ngôn ngữ trong bảy có phép chia nguyên khi hai toán hạng là số nguyên:
 
 | | `(2 + 3) / 2` | Số âm | Cách đúng |
 |---|---|---|---|
@@ -156,8 +156,10 @@ Trung vị của tổng chẵn có thể là `.5`. Ba ngôn ngữ trong năm có
 | Go | `2` | `-3 / 2 = -1` | `float64(x + y) / 2` |
 | Python | `/` cho `2.5`; `//` cho `2` (làm tròn xuống) | `-3 // 2 = -2` | dùng `/` |
 | TS, JS | `2.5` (mọi số là double) | `-1.5` | không cần gì |
+| Rust | `2` (`i32 / i32`, cắt về 0) | `-3 / 2 = -1`; `div_euclid` cho `-2` | đổi sang `f64` rồi chia cho `2.0` |
+| PHP | `2.5`; `intdiv` cho `2` | `intdiv(-3, 2) = -1`, `-3 / 2 = -1.5` | dùng `/`, nhưng `(2 + 4) / 2` ra **int** `3`, không phải float |
 
-Bản chia nguyên sai 8/10 ca test, và khoảng một phần tư số cặp ngẫu nhiên: 24 681 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java). Một phần tư là hợp lý: nó chỉ sai khi tổng chẵn **và** hai ô giữa có tổng lẻ.
+Bản chia nguyên sai 8/10 ca test, và khoảng một phần tư số cặp ngẫu nhiên: 24 681 (TS), 24 994 (Python), 24 791 (Go), 25 047 (Java), 24 999 (PHP), 24 856 (Rust). Một phần tư là hợp lý: nó chỉ sai khi tổng chẵn **và** hai ô giữa có tổng lẻ.
 
 Trong Java còn một bẫy nữa: `(x + y) / 2.0` cộng **trước** trong `int`, rồi mới đổi sang double. Với `x = y = 2 000 000 000`, file Java in `-1.47483648E8`; `((long) x + y) / 2.0` in `2.0E9`. Giới hạn `|x| ≤ 10⁶` của đề làm lỗi này không lộ trên LeetCode, nhưng code dùng lại ở chỗ khác thì có.
 
@@ -180,9 +182,9 @@ TypeScript, hai mảng số nguyên ngẫu nhiên đã sắp xếp, trung vị 7
 
 Hai cách tuyến tính tăng gấp khoảng 10 khi n gấp 10. Hai cách logarit gần như đứng yên, và ở hàng cuối cách cắt nhanh gấp khoảng 11 lần cách thứ k vì nó chỉ chia đôi trên 11 vị trí cắt của mảng 10 phần tử. Hai con trỏ ở hàng cuối cũng nhanh hơn trộn khoảng 21 lần: nó chỉ đi tới giữa và không cấp phát mảng 10⁶ phần tử.
 
-Ngoài 10 ca test, mỗi file đối chiếu bốn cách với "nối rồi sort" trên 100 000 cặp ngẫu nhiên (mỗi mảng 0 tới 20 phần tử, giá trị trong `[-50, 50]`, nên có rất nhiều số trùng và mảng rỗng). Cả bốn cách sai 0 cặp ở cả năm ngôn ngữ.
+Ngoài 10 ca test, mỗi file đối chiếu bốn cách với "nối rồi sort" trên 100 000 cặp ngẫu nhiên (mỗi mảng 0 tới 20 phần tử, giá trị trong `[-50, 50]`, nên có rất nhiều số trùng và mảng rỗng). Cả bốn cách sai 0 cặp ở cả bảy ngôn ngữ.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Phần tử canh | Chia khi tổng chẵn | Bẫy riêng |
 |---|---|---|---|
@@ -190,12 +192,14 @@ Ngoài 10 ca test, mỗi file đối chiếu bốn cách với "nối rồi sort
 | Python | `float("-inf")`, `float("inf")`, so sánh được với `int` | `/` | `//` làm tròn xuống: `-3 // 2 = -2`. `heapq.merge` trộn hai dãy đã sắp xếp mà không sort lại |
 | Go | `math.MinInt`, `math.MaxInt` | `float64(x+y) / 2` | `float64((x+y)/2)` chia nguyên trước rồi mới đổi kiểu. `min`, `max` dựng sẵn từ Go 1.21 |
 | Java | `Integer.MIN_VALUE`, `Integer.MAX_VALUE` | `((long) x + y) / 2.0` | `(x + y) / 2` mất `.5`; `(x + y) / 2.0` vẫn tràn vì phép cộng làm trong `int`. Không đổi chỗ thì `b[j]` với `j = −1` ném `ArrayIndexOutOfBoundsException` |
+| PHP | `PHP_INT_MIN`, `PHP_INT_MAX` | `/` ra float khi không chia hết | `/` giữa hai int chia hết trả **int**: `(2 + 4) / 2` là `3`, nên so `===` với `3.0` sẽ sai nếu hàm không khai báo kiểu trả `float`. Mảng được chép khi gán, nên `[$a, $b] = [$b, $a]` không đụng mảng của người gọi |
+| Rust | `i64::MIN`, `i64::MAX` (đổi phần tử `i32` lên `i64`) | `as f64` rồi `/ 2.0` | chỉ số là `usize`, không âm được: không đổi chỗ thì `j = half − i` trừ tràn, bản debug panic `attempt to subtract with overflow`, bản `-O` cuộn vòng rồi panic vì chỉ số ngoài slice |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.ts) · [Python](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.py) · [Go](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.go) · [Java](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.java) · [JavaScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.js)
+[TypeScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.ts) · [Python](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.py) · [Go](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.go) · [Java](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.java) · [JavaScript](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.js) · [PHP](../code/neetcode-median-of-two-sorted-arrays/median-two-arrays.php) · [Rust](../code/neetcode-median-of-two-sorted-arrays/median_two_arrays.rs)
 
-Mỗi file có bốn cách, chạy 10 ca test và đối chiếu 100 000 cặp ngẫu nhiên. File TypeScript có thêm ba bản sai và phép đo; Python, Go và Java có bản chia nguyên; Java có thêm bản không đổi chỗ. Cách chính, chia đôi vị trí cắt:
+Mỗi file có bốn cách, chạy 10 ca test và đối chiếu 100 000 cặp ngẫu nhiên. File TypeScript có thêm ba bản sai và phép đo; Python, Go, Java, PHP và Rust có bản chia nguyên; Java có thêm bản không đổi chỗ. Cách chính, chia đôi vị trí cắt:
 
 ```ts
 // Cách 4, chia đôi vị trí cắt trên mảng ngắn hơn: O(log min(m, n)).
@@ -328,6 +332,58 @@ function partition(a, b) {
 }
 ```
 
+```php
+// Cách 4, chia đôi vị trí cắt trên mảng ngắn hơn: O(log min(m, n)).
+// Cắt a ở i và b ở j = half − i; cắt đúng khi aL ≤ bR và bL ≤ aR. Phần tử canh là PHP_INT_MIN / PHP_INT_MAX.
+function partition(array $a, array $b): float
+{
+    if (count($a) > count($b)) [$a, $b] = [$b, $a]; // mảng PHP được chép khi gán: đổi chỗ không đụng tới mảng của người gọi
+    $m = count($a);
+    $n = count($b);
+    $half = ($m + $n + 1) >> 1;
+    $lo = 0;
+    $hi = $m;
+    while ($lo <= $hi) {
+        $i = ($lo + $hi) >> 1;
+        $j = $half - $i;
+        $aL = $i > 0 ? $a[$i - 1] : PHP_INT_MIN;
+        $aR = $i < $m ? $a[$i] : PHP_INT_MAX;
+        $bL = $j > 0 ? $b[$j - 1] : PHP_INT_MIN;
+        $bR = $j < $n ? $b[$j] : PHP_INT_MAX;
+        if ($aL <= $bR && $bL <= $aR) {
+            return ($m + $n) % 2 ? (float) max($aL, $bL) : (max($aL, $bL) + min($aR, $bR)) / 2; // / ra float khi tổng lẻ
+        }
+        if ($aL > $bR) $hi = $i - 1;
+        else $lo = $i + 1;
+    }
+    throw new RuntimeException("mảng chưa sắp xếp");
+}
+```
+
+```rust
+// Cách 4, chia đôi vị trí cắt trên mảng ngắn hơn: O(log min(m, n)).
+// Cắt a ở i và b ở j = half − i; cắt đúng khi aL ≤ bR và bL ≤ aR. Phần tử canh là i64::MIN / i64::MAX.
+fn partition(a: &[i32], b: &[i32]) -> f64 {
+    let (a, b) = if a.len() > b.len() { (b, a) } else { (a, b) }; // đổi hai tham chiếu, không chép mảng
+    let (m, n) = (a.len(), b.len());
+    let half = (m + n + 1) / 2;
+    let (mut lo, mut hi) = (0, m);
+    loop {
+        let i = (lo + hi) / 2;
+        let j = half - i; // usize: không âm được vì m ≤ n bảo đảm half ≥ i
+        let a_l = if i > 0 { a[i - 1] as i64 } else { i64::MIN };
+        let a_r = if i < m { a[i] as i64 } else { i64::MAX };
+        let b_l = if j > 0 { b[j - 1] as i64 } else { i64::MIN };
+        let b_r = if j < n { b[j] as i64 } else { i64::MAX };
+        if a_l <= b_r && b_l <= a_r {
+            let left = a_l.max(b_l) as f64;
+            return if (m + n) % 2 == 1 { left } else { (left + a_r.min(b_r) as f64) / 2.0 };
+        }
+        if a_l > b_r { hi = i - 1 } else { lo = i + 1 }
+    }
+}
+```
+
 
 Cách loại bỏ để tìm phần tử thứ k:
 
@@ -453,6 +509,61 @@ function kthElimination(a, b) {
 }
 ```
 
+```php
+// Cách 3, loại bỏ để tìm phần tử thứ k (k đếm từ 1): mỗi bước bỏ k/2 phần tử chắc chắn đứng trước. O(log(m + n)).
+function kth(array $a, array $b, int $k): int
+{
+    $i = $j = 0;
+    while (true) {
+        if ($i === count($a)) return $b[$j + $k - 1];
+        if ($j === count($b)) return $a[$i + $k - 1];
+        if ($k === 1) return min($a[$i], $b[$j]);
+        $h = $k >> 1;
+        $ni = min($i + $h, count($a)) - 1;
+        $nj = min($j + $h, count($b)) - 1;
+        if ($a[$ni] <= $b[$nj]) { $k -= $ni - $i + 1; $i = $ni + 1; } // a[i..ni] đều đứng trước phần tử thứ k: bỏ
+        else { $k -= $nj - $j + 1; $j = $nj + 1; }
+    }
+}
+
+function kthElimination(array $a, array $b): float
+{
+    $t = count($a) + count($b);
+    return $t % 2 ? (float) kth($a, $b, ($t >> 1) + 1) : (kth($a, $b, intdiv($t, 2)) + kth($a, $b, intdiv($t, 2) + 1)) / 2;
+}
+```
+
+```rust
+// Cách 3, loại bỏ để tìm phần tử thứ k (k đếm từ 1). O(log(m + n)).
+// Slice làm việc này gọn: bỏ phần đầu bằng cách cắt a = &a[h..], không cần giữ chỉ số i, j.
+fn kth(mut a: &[i32], mut b: &[i32], mut k: usize) -> i32 {
+    loop {
+        if a.is_empty() {
+            return b[k - 1];
+        }
+        if b.is_empty() {
+            return a[k - 1];
+        }
+        if k == 1 {
+            return a[0].min(b[0]);
+        }
+        let (ha, hb) = ((k / 2).min(a.len()), (k / 2).min(b.len()));
+        if a[ha - 1] <= b[hb - 1] {
+            k -= ha; // a[..ha] đều đứng trước phần tử thứ k: bỏ
+            a = &a[ha..];
+        } else {
+            k -= hb;
+            b = &b[hb..];
+        }
+    }
+}
+
+fn kth_elimination(a: &[i32], b: &[i32]) -> f64 {
+    let t = a.len() + b.len();
+    if t % 2 == 1 { kth(a, b, t / 2 + 1) as f64 } else { (kth(a, b, t / 2) as f64 + kth(a, b, t / 2 + 1) as f64) / 2.0 }
+}
+```
+
 
 Kết quả của file TypeScript:
 
@@ -504,6 +615,8 @@ wrongIntDivision sai 25047 cặp
 
 Python in `wrong_floor_div 8/10 ca đúng` và `sai 24994 cặp`, rồi `-3 // 2 = -2   -3 / 2 = -1.5`. Go in `wrongIntDivision sai 24791 cặp` và `chia nguyên trong Go: -3 / 2 = -1`. JavaScript in `10/10 ca đúng` và `sai 0 cặp` cho cả bốn cách, rồi `[10, 9, 1].sort() = [1,10,9]`.
 
+PHP (`php median-two-arrays.php`) và Rust (`rustc --edition 2021 -O median_two_arrays.rs`) in `10/10 ca đúng` và `sai 0 cặp` cho cả bốn cách. Bản chia nguyên sai 8/10 ca ở cả hai, `sai 24999 cặp` (PHP) và `sai 24856 cặp` (Rust); dòng cuối là `intdiv(-3, 2) = -1   -3 / 2 = -1.5` (PHP) và `(-3) / 2 = -1   (-3).div_euclid(2) = -2` (Rust).
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Chia đôi cần một giá trị để tìm."** Ở đây không có giá trị nào cho trước. Thứ được chia đôi là vị trí cắt, và câu hỏi "`aL > bR`?" là câu hỏi đơn điệu.
@@ -512,6 +625,8 @@ Python in `wrong_floor_div 8/10 ca đúng` và `sai 24994 cặp`, rồi `-3 // 2
 - **Chia nguyên khi tổng chẵn.** `(x + y) / 2` với hai `int` trong Java hay Go, `//` trong Python: mất `.5`. Với số âm, Python còn làm tròn **xuống** (`-3 // 2 = -2`) còn Java, Go cắt **về 0** (`-1`).
 - **`half = (m + n) / 2` thay vì `(m + n + 1) / 2`.** Vẫn làm được, nhưng khi tổng lẻ trung vị nằm bên **phải** (`min(aR, bR)`), nên phải đổi cả công thức. Trộn hai quy ước là lỗi lệch một.
 - **Nghĩ hai con trỏ đã là O(log).** Nó tiết kiệm bộ nhớ, không tiết kiệm thời gian: vẫn đi `(m + n) / 2` bước.
+- **PHP: tưởng `/` luôn ra float.** `(2 + 4) / 2` trả int `3`; chỉ khi không chia hết mới ra float. Hàm khai báo `: float` thì PHP đổi giúp, còn so thẳng `=== 3.0` thì sai. Muốn chia nguyên phải gọi `intdiv`, cắt về 0 như Java.
+- **Rust: quên đổi chỗ khi chỉ số là `usize`.** Bắt đầu với `a = [1..6]`, `b = [7]` thì `j = half − i` âm: bản debug panic `attempt to subtract with overflow`, bản `-O` cuộn vòng thành 18 446 744 073 709 551 614 rồi panic vì chỉ số ngoài slice. Đổi chỗ trước là đủ để `half ≥ i`.
 
 ## Câu hỏi tự kiểm tra
 

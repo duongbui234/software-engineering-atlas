@@ -241,9 +241,9 @@ The other languages at 10⁶ nodes: Go table 186.82 ms and 99.6 MB allocated, we
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.ts) · [Python](../code/neetcode-copy-list-with-random-pointer/copy_random_list.py) · [Go](../code/neetcode-copy-list-with-random-pointer/copy_random_list.go) · [Java](../code/neetcode-copy-list-with-random-pointer/copy-random-list.java) · [JavaScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.js)
+[TypeScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.ts) · [Python](../code/neetcode-copy-list-with-random-pointer/copy_random_list.py) · [Go](../code/neetcode-copy-list-with-random-pointer/copy_random_list.go) · [Java](../code/neetcode-copy-list-with-random-pointer/copy-random-list.java) · [JavaScript](../code/neetcode-copy-list-with-random-pointer/copy-random-list.js) · [PHP](../code/neetcode-copy-list-with-random-pointer/copy-random-list.php)
 
-Each file runs 7 shared cases: the three examples of the problem, an empty list, one node whose random points to itself, all randoms null, all randoms pointing to the last node. Each case checks three things: the copy has the right structure (values and random positions), no node of the copy (including through random) belongs to the original list, and the original list is unchanged. TypeScript also runs 2000 random lists of length 0..60.
+Each of the original five files runs 7 shared cases: the three examples of the problem, an empty list, one node whose random points to itself, all randoms null, all randoms pointing to the last node. Each case checks three things: the copy has the right structure (values and random positions), no node of the copy (including through random) belongs to the original list, and the original list is unchanged. TypeScript also runs 2000 random lists of length 0..60.
 
 Old → new table, two passes:
 
@@ -317,6 +317,32 @@ function copyTwoPass(head) {
     map.get(cur).random = cur.random === null ? null : map.get(cur.random);
   }
   return head === null ? null : map.get(head);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class Node {
+    public ?Node $next = null;
+    public ?Node $random = null;
+
+    public function __construct(public int $val) {}
+}
+
+function copyRandomList(?Node $head): ?Node {
+    if ($head === null) return null;
+    $copies = new SplObjectStorage();
+    for ($old = $head; $old !== null; $old = $old->next) {
+        $copies[$old] = new Node($old->val);
+    }
+    for ($old = $head; $old !== null; $old = $old->next) {
+        $new = $copies[$old];
+        $new->next = $old->next === null ? null : $copies[$old->next];
+        $new->random = $old->random === null ? null : $copies[$old->random];
+    }
+    return $copies[$head];
 }
 ```
 
@@ -556,6 +582,8 @@ the key {} actually stores for a node: ["[object Object]"]
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+The PHP version uses two passes and `SplObjectStorage`, so two equal-valued nodes still get separate copies. This page has six languages because LeetCode does not provide a Rust template for its node with a `random` pointer. PHP `3/3 ca đúng`.
 
 ## Misconceptions and common traps
 

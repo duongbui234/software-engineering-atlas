@@ -53,7 +53,7 @@ For each post, follow `/publish` steps 3–7 (`.claude/skills/publish/SKILL.md`)
 
 With `--repo`, publish only diagrams and trimmed, renamed snippets.
 
-For a NeetCode run, also follow **NeetCode stations** in `/publish`: every problem page, all five languages, every file run.
+For a NeetCode run, also follow **NeetCode stations** in `/publish`: every problem page, all seven languages, every file run.
 
 Done when every concept in the inventory is explained in a post and has a `content/concepts/` note, and each of those files has its `content/en/` counterpart. On a NeetCode run, also when every problem of the station has its VI and EN page.
 

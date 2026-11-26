@@ -1,6 +1,6 @@
 ---
 title: "Contains Duplicate: Big-O, brute force, hash sets and the price of memory"
-description: "The first NeetCode 150 problem asks a seemingly trivial question (does an array contain a repeated number?), but it is enough to learn how to measure an algorithm with Big-O, measure it again with a real clock, and see where the Sets of five languages differ."
+description: "The first NeetCode 150 problem asks a seemingly trivial question (does an array contain a repeated number?), but it is enough to learn how to measure an algorithm with Big-O, measure it again with a real clock, and see where the Sets of seven languages differ."
 date: 2026-11-22T21:01:00+07:00
 tags: [algorithms, neetcode, hashing]
 type: problem
@@ -106,7 +106,7 @@ An advantage that rarely gets mentioned: **early exit**. If the first two number
 
 It is a [[en/concepts/space-time-tradeoff|trade of memory for time]]: the notebook costs O(n) memory. For 100,000 numbers that is negligible. For a billion numbers on a machine with little RAM, sorting in place may be the only option.
 
-### Under the five languages
+### Under the seven languages
 
 | | What "Set" is | Default sort |
 |---|---|---|
@@ -114,10 +114,12 @@ It is a [[en/concepts/space-time-tradeoff|trade of memory for time]]: the notebo
 | Python | `set`, an open-addressing hash table; `hash(n)` of an integer is n itself (except −1) | `sorted` / `list.sort`: TimSort, merging with the powersort strategy since 3.11 |
 | Go | no set type; use `map[int]struct{}` (empty value, 0 bytes). Since Go 1.24 maps are Swiss Tables | `slices.Sort`: pdqsort since Go 1.19 |
 | Java | `HashSet<Integer>`, which is really a `HashMap`; every `int` gets **boxed** into an `Integer` | `Arrays.sort(int[])`: Dual-Pivot Quicksort, no boxing |
+| PHP | no separate set type; a PHP array is an ordered hash table, so use the value as the **key** (`$seen[$x] = true`) | `sort`: a hybrid of quicksort and insertion sort, stable since PHP 8.0; it sorts a copy because arrays are passed by value |
+| Rust | `HashSet<i32>`, a SwissTable hash table (hashbrown), hashed by default with SipHash-1-3 | `sort_unstable`: ipnsort; stable `sort`: driftsort (since Rust 1.81) |
 
 ## Runnable example
 
-One file per language, each running its own tests: [TypeScript](../code/neetcode-contains-duplicate/contains-duplicate.ts) · [JavaScript](../code/neetcode-contains-duplicate/contains-duplicate.js) · [Python](../code/neetcode-contains-duplicate/contains_duplicate.py) · [Go](../code/neetcode-contains-duplicate/contains_duplicate.go) · [Java](../code/neetcode-contains-duplicate/contains-duplicate.java).
+One file per language, each running its own tests: [TypeScript](../code/neetcode-contains-duplicate/contains-duplicate.ts) · [JavaScript](../code/neetcode-contains-duplicate/contains-duplicate.js) · [Python](../code/neetcode-contains-duplicate/contains_duplicate.py) · [Go](../code/neetcode-contains-duplicate/contains_duplicate.go) · [Java](../code/neetcode-contains-duplicate/contains-duplicate.java) · [PHP](../code/neetcode-contains-duplicate/contains-duplicate.php) · [Rust](../code/neetcode-contains-duplicate/contains_duplicate.rs).
 
 ```ts
 // TypeScript: node contains-duplicate.ts
@@ -187,6 +189,31 @@ function containsDuplicate(nums) {
 }
 ```
 
+```php
+// PHP: an array is an ordered hash table; use the number as the KEY for O(1) lookup
+function containsDuplicate(array $nums): bool {
+    $seen = [];
+    foreach ($nums as $x) {
+        if (isset($seen[$x])) return true; // in_array($x, $seen) would scan the whole array: O(n)
+        $seen[$x] = true;
+    }
+    return false;
+}
+```
+
+```rust
+// Rust: insert returns false if the element is already there, so one lookup is enough
+fn contains_duplicate(nums: &[i32]) -> bool {
+    let mut seen = HashSet::with_capacity(nums.len());
+    for &x in nums {
+        if !seen.insert(x) {
+            return true;
+        }
+    }
+    false
+}
+```
+
 The TypeScript file runs the tests for all four approaches, then measures on an array **with no duplicates** (the worst case, where no approach can exit early):
 
 ```text
@@ -213,7 +240,7 @@ Reading the results:
 - **Brute force**: n grows 10 times (1,000 → 10,000), time grows 77 times, exactly the shape of O(n²). At the same ratio, 100,000 numbers would take about 4 seconds, so I did not run it.
 - **Sort** and **hash set**: n grows 10 times, time grows about 10–13 times. The hash set is about 3 times faster than sorting at every size.
 - **The one-liner** (`new Set(nums).size !== nums.length`) is as fast as the hash set when there are no duplicates, because building a `Set` from a whole array in one go is well optimized. But when the duplicate sits right at the start of the array, it still takes 64 ms, while the loop with early exit takes nothing.
-- Python, Go and Java print `✓` for the same test cases.
+- Python, Go and Java print `✓` for the same test cases; PHP and Rust print `test: 4 cách × 6 ca, 0 ca sai` like TypeScript.
 
 ## Misconceptions and common traps
 
@@ -223,6 +250,8 @@ Reading the results:
 - **"A hash set is always O(1)."** That is the average. Two Sum shows that when every key lands in the same bucket, a Java `HashMap` slows down to O(n) per lookup.
 - **Forgetting that the "one-liner" has no early exit.** `len(set(nums)) != len(nums)` is neat and compact, but it always costs O(n) time and O(n) memory, even when the first two numbers are already equal.
 - **Java: assuming `HashSet<Integer>` is as cheap as an `int` array.** Each element is a separate `Integer` object, plus a node in the table. With a few million elements, sorting an `int[]` can use far less memory.
+- **PHP: looking up with `in_array` instead of by key.** `in_array($x, $seen)` scans the whole array, which turns the solution into O(n²). Store the number as a key and ask `isset($seen[$x])`. Also, without its third argument `in_array` compares loosely: `in_array('1e1', ['10'])` returns `true`.
+- **Rust: forgetting that `nums` is only borrowed.** A function taking `&[i32]` cannot sort in place; to sort you must `to_vec()` first, and the O(n) memory cost shows right in the code. The default `HashSet` hashes with SipHash (resistant to collision attacks), a little slower than the hash functions of Go or Java.
 
 ## Self-check questions
 

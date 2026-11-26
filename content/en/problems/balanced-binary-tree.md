@@ -224,9 +224,9 @@ Python, perfect tree of 2¹⁷ − 1 nodes: top-down 270 ms, bottom-up 22.3 ms, 
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-balanced-binary-tree/balanced.ts) · [Python](../code/neetcode-balanced-binary-tree/balanced.py) · [Go](../code/neetcode-balanced-binary-tree/balanced.go) · [Java](../code/neetcode-balanced-binary-tree/balanced.java) · [JavaScript](../code/neetcode-balanced-binary-tree/balanced.js)
+[TypeScript](../code/neetcode-balanced-binary-tree/balanced.ts) · [Python](../code/neetcode-balanced-binary-tree/balanced.py) · [Go](../code/neetcode-balanced-binary-tree/balanced.go) · [Java](../code/neetcode-balanced-binary-tree/balanced.java) · [JavaScript](../code/neetcode-balanced-binary-tree/balanced.js) · [PHP](../code/neetcode-balanced-binary-tree/balanced.php) · [Rust](../code/neetcode-balanced-binary-tree/balanced.rs)
 
-Every file builds trees from a LeetCode-style level-order array and runs 9 shared cases: empty tree, one node, a full 7-node tree, unbalanced right at the root, balanced root with an unbalanced child (the tree in the figure above), a 4-node chain (where -1 sits next to 0), a Fibonacci tree of order 5 (left child of order h − 1, right child of order h − 2: balanced at every node, but its leaves differ by two levels), a complete 5,000-node tree, and a 5,000-node skewed chain (the problem's limit). The TypeScript file also cross-checks the three approaches on 3,000 random trees (generated with mulberry32).
+Each of the original five files builds trees from a LeetCode-style level-order array and runs 9 shared cases: empty tree, one node, a full 7-node tree, unbalanced right at the root, balanced root with an unbalanced child (the tree in the figure above), a 4-node chain (where -1 sits next to 0), a Fibonacci tree of order 5 (left child of order h − 1, right child of order h − 2: balanced at every node, but its leaves differ by two levels), a complete 5,000-node tree, and a 5,000-node skewed chain (the problem's limit). The TypeScript file also cross-checks the three approaches on 3,000 random trees (generated with mulberry32).
 
 Bottom-up, returning -1 once unbalanced:
 
@@ -307,6 +307,62 @@ function balancedBottomUp(root) {
     return 1 + Math.max(l, r);
   };
   return check(root) !== -1;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function isBalanced(?TreeNode $root): bool {
+    return balancedHeight($root) !== -1;
+}
+
+function balancedHeight(?TreeNode $node): int {
+    if ($node === null) return 0;
+    $left = balancedHeight($node->left);
+    if ($left === -1) return -1;
+    $right = balancedHeight($node->right);
+    return $right === -1 || abs($left - $right) > 1 ? -1 : 1 + max($left, $right);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    _val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode {
+        _val: val,
+        left,
+        right,
+    })))
+}
+
+fn is_balanced(root: &Node) -> bool {
+    fn height(root: &Node) -> Option<i32> {
+        let Some(root) = root else { return Some(0) };
+        let root = root.borrow();
+        let left = height(&root.left)?;
+        let right = height(&root.right)?;
+        (left.abs_diff(right) <= 1).then_some(1 + left.max(right))
+    }
+    height(root).is_some()
 }
 ```
 
@@ -518,6 +574,8 @@ balancedIterative   9/9 cases passed
 wrongMinMaxDepth    4/9 cases passed; wrong on unbalanced at the root → true, balanced root, unbalanced child → true, 4-node chain (-1 next to 0) → true, Fibonacci tree of order 5 → false, 5000-node skewed chain (problem limit) → true
 wrongIgnoreSentinel 6/9 cases passed; wrong on balanced root, unbalanced child → true, 4-node chain (-1 next to 0) → true, 5000-node skewed chain (problem limit) → true
 ```
+
+PHP uses `-1` for an unbalanced branch. Rust uses `None` and `?` to propagate it immediately. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

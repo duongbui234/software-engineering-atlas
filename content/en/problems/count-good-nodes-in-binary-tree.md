@@ -1,6 +1,6 @@
 ---
 title: "Count Good Nodes in Binary Tree: carry the path's record down to every node, a tie with the record still counts, and why 10⁵ nodes break the recursive version"
-description: "Counting the nodes that no node above them beats on the path from the root: brute force climbing back to the root costs O(n·h), carrying the path maximum down with DFS or BFS is O(n); the page runs 10 shared cases in five languages, including negative values, equal values and two 10⁵-node chains, measures brute force on a chain, shows three wrong versions (strict comparison, max initialized to 0, a shared max) and the shift()/pop(0)/remove(0) queue trap."
+description: "Counting the nodes that no node above them beats on the path from the root: brute force climbing back to the root costs O(n·h), carrying the path maximum down with DFS or BFS is O(n); the page runs 10 shared cases in seven languages, including negative values, equal values and two 10⁵-node chains, measures brute force on a chain, shows three wrong versions (strict comparison, max initialized to 0, a shared max) and the shift()/pop(0)/remove(0) queue trap."
 date: 2026-11-25T21:00:00+07:00
 tags: [algorithms, neetcode, tree, recursion]
 type: problem
@@ -19,7 +19,7 @@ sources:
 > - Brute force: for each node, climb back to the root and compare with every ancestor. Correct, but O(n·h): a 10⁴-node chain costs 49,995,000 comparisons.
 > - The O(n) approach: walk down from the root and **carry the largest value on the path** (the [[en/concepts/path-state|path state]]). Each node needs one comparison `val >= max`, then hands `max(max, val)` down to its two children. Recursion, a stack or [[en/concepts/breadth-first-search|BFS]] all work, as long as each node keeps the max **of its own path**.
 > - Three wrong versions, run for real: the strict comparison `>` (fails 4/10 cases), initializing max to 0 although values can be negative (fails 3/10), and one max variable shared by the whole tree, so the left branch's record leaks into the right branch (fails 1/10, disagrees on 802 of 3,000 random trees).
-> - The problem allows up to **10⁵ nodes**. A 10⁵-node skewed chain makes the recursive version throw in TypeScript, JavaScript, Python and Java; only Go survives. A queue built on `shift()`, `pop(0)` or `remove(0)` is correct but 100 to 200 times slower on a 10⁵-node tree.
+> - The problem allows up to **10⁵ nodes**. A 10⁵-node skewed chain makes the recursive version throw in TypeScript, JavaScript, Python and Java; Go, PHP (with Xdebug off) and Rust (the `-O` build) survive. A queue built on `shift()`, `pop(0)` or `remove(0)` is correct but 100 to 200 times slower on a 10⁵-node tree.
 
 > [!info] Context
 > LeetCode problem 1448 (Medium), on [[en/posts/2026-11-25-neetcode-level-order|station 5: Level Order and Carried State]] of **the NeetCode Line: Linked Structures**. At [[en/posts/2026-11-25-neetcode-tree-recursion|station 3]], results flow **bottom-up** (the height returned to the parent). At [[en/posts/2026-11-25-neetcode-binary-search-tree|station 4]], [[en/problems/validate-binary-search-tree|Validate BST]] carries an interval **top-down**. This problem also flows top-down, but what it carries is one number that sums up the whole path: the largest value from the root to here. The other two problems on the station, [[en/problems/binary-tree-level-order-traversal|Binary Tree Level Order Traversal]] and [[en/problems/binary-tree-right-side-view|Binary Tree Right Side View]], traverse level by level; this one can be solved depth-first or level by level. Solutions come in TypeScript, Python, Go, Java and JavaScript. You only need to know what recursion is.
@@ -173,7 +173,7 @@ function goodIterative(root: TreeNode | null): number {
 }
 ```
 
-Same O(n) time; memory is O(h) for the stack (each level has at most one sibling waiting). There is no recursion depth limit, so the 10⁵-node chain runs in all five languages.
+Same O(n) time; memory is O(h) for the stack (each level has at most one sibling waiting). There is no recursion depth limit, so the 10⁵-node chain runs in all seven languages.
 
 ### Approach 4: BFS level by level
 
@@ -187,6 +187,8 @@ The trap is in **how you take the front of the queue**:
 | Python | `list.pop(0)`: moves the whole list (the Python docs state O(n)) | `collections.deque` with `popleft()` |
 | Java | `ArrayList.remove(0)`: shifts every element after it | `ArrayDeque` with `poll()` |
 | Go | no common slow way | `queue = queue[1:]` only moves the slice's start, O(1) |
+| PHP | `array_shift($queue)`: renumbers the whole array | `SplQueue` with `dequeue()` |
+| Rust | `Vec::remove(0)`: shifts every element after it | `VecDeque` with `pop_front()` |
 
 All three slow ways give the right answer, so only a measurement exposes them. In the measurements below, on a 10⁵-node tree, they are 100 to 200 times slower than the fast version.
 
@@ -251,7 +253,7 @@ The bug is that 9 is not an ancestor of the nodes on the right, yet it is still 
 
 When n doubles, the comparison count quadruples, exactly the n² shape. The iterative DFS visits exactly n nodes. TypeScript and Go brute force are about equally slow here because each step up is a lookup in the `parent` hash table, not a pointer read.
 
-**A full 10⁵-node tree** (height 17), with values from the same linear generator in all five languages, so all five count 8,191 good nodes. Brute force costs only 330,132 comparisons (about 3.3 times n) because random values make it meet a larger ancestor very early. Median of 5 runs (ms):
+**A full 10⁵-node tree** (height 17), with values from the same linear generator in the five languages that run this measurement (the PHP and Rust files skip it), so all five count 8,191 good nodes. Brute force costs only 330,132 comparisons (about 3.3 times n) because random values make it meet a larger ancestor very early. Median of 5 runs (ms):
 
 | | TypeScript | Python | Go | Java |
 |---|---|---|---|---|
@@ -265,7 +267,7 @@ The three bold cells are the same O(n) algorithm as the cell right above them, d
 
 The numbers change with the machine and the run; the ratios between approaches are stable. I measured while the machine was running other work in parallel.
 
-### Under the five languages
+### Under the seven languages
 
 | | Recursion on a 10⁵-node chain | Language-specific trap |
 |---|---|---|
@@ -273,10 +275,12 @@ The numbers change with the machine and the run; the ratios between approaches a
 | Python | `RecursionError` (default limit 1,000 levels); with `sys.setrecursionlimit(200000)` it runs | forgetting `nonlocal` when counting in an outer variable: `count += 1` turns `count` into an unassigned local variable and throws `UnboundLocalError` in all 10/10 cases; `list.pop(0)` |
 | Go | runs: goroutine stacks grow on their own | passing an `int` counter into a recursive function passes a copy; to count through a parameter use `*int`, or return the value |
 | Java | `StackOverflowError` on the main thread; a self-created thread with a 256 MB stack runs it | `int` is always passed by value, so `countInto(node, max, count)` can never change the caller's `count`: 0/10 cases; `ArrayList.remove(0)` |
+| PHP | runs with Xdebug off: PHP sets no depth limit; with Xdebug on it throws `Error` at level 512 (8/10 cases) | a recursive closure has to capture itself through `use (&$go)`; objects can't be array keys, so the brute force's `parent` table is an `SplObjectStorage` |
+| Rust | the `-O` build runs on the 8 MB main thread; the debug build (no `-O`) overflows the stack and the process dies, with nothing to catch | dropping a 10⁵-node `Rc<RefCell<TreeNode>>` chain also recurses inside `drop`, so the file tears the tree down with a loop before releasing it |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.ts) · [Python](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.py) · [Go](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.go) · [Java](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.java) · [JavaScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.js)
+[TypeScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.ts) · [Python](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.py) · [Go](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.go) · [Java](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.java) · [JavaScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.js) · [PHP](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.php) · [Rust](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.rs)
 
 Each file builds trees from a LeetCode-style level-order array (`null` is a gap) and runs 10 shared cases: one node, one negative node (−10⁴), three nodes, three nodes with the same value, an all-negative tree, the tree at the top of the page, a full 7-node tree, a branch that dips and then beats the record again (`[6, 2, null, 1, 7]`), a non-decreasing right chain of 10⁵ nodes (every node good) and a non-increasing left chain of 10⁵ nodes (only the first 5, equal to the root, are good). Brute force skips the non-decreasing 10⁵-node chain (5·10⁹ comparisons) and is measured separately at smaller sizes. The TypeScript and JavaScript files also check the four correct approaches against brute force on 3,000 random trees of 1 to 12 nodes with values −3 to 3 (generated with mulberry32), so that ties and negative values come up often.
 
@@ -344,6 +348,31 @@ function goodDfs(root) {
     return good + go(node.left, m) + go(node.right, m);
   };
   return go(root, -Infinity);
+}
+```
+
+```php
+function goodDfs(?TreeNode $root): int {
+    $go = function (?TreeNode $node, int $maxSoFar) use (&$go): int {
+        if ($node === null) return 0;
+        $good = $node->val >= $maxSoFar ? 1 : 0; // equal to max still counts as good
+        $m = max($maxSoFar, $node->val);
+        return $good + $go($node->left, $m) + $go($node->right, $m);
+    };
+    return $go($root, PHP_INT_MIN);
+}
+```
+
+```rust
+fn good_dfs(root: &Node) -> i32 {
+    fn go(node: &Node, max_so_far: i32) -> i32 {
+        let Some(n) = node else { return 0 };
+        let n = n.borrow();
+        let good = if n.val >= max_so_far { 1 } else { 0 }; // equal to max still counts as good
+        let m = max_so_far.max(n.val);
+        good + go(&n.left, m) + go(&n.right, m)
+    }
+    go(root, i32::MIN)
 }
 ```
 
@@ -445,6 +474,38 @@ function goodIterative(root) {
     if (node.left !== null) stack.push([node.left, m]);
   }
   return good;
+}
+```
+
+```php
+function goodIterative(?TreeNode $root): int {
+    if ($root === null) return 0;
+    $good = 0;
+    $stack = [[$root, $root->val]];
+    while ($stack) {
+        [$node, $maxSoFar] = array_pop($stack);
+        if ($node->val >= $maxSoFar) $good++;
+        $m = max($maxSoFar, $node->val);
+        if ($node->right !== null) $stack[] = [$node->right, $m];
+        if ($node->left !== null) $stack[] = [$node->left, $m];
+    }
+    return $good;
+}
+```
+
+```rust
+fn good_iterative(root: &Node) -> i32 {
+    let Some(r) = root else { return 0 };
+    let mut good = 0;
+    let mut stack = vec![(r.clone(), r.borrow().val)];
+    while let Some((node, max_so_far)) = stack.pop() {
+        let n = node.borrow();
+        if n.val >= max_so_far { good += 1; }
+        let m = max_so_far.max(n.val);
+        if let Some(c) = &n.right { stack.push((c.clone(), m)); }
+        if let Some(c) = &n.left { stack.push((c.clone(), m)); }
+    }
+    good
 }
 ```
 
@@ -575,15 +636,51 @@ thread with a 256 MB stack: goodDfs on the chain of 10^5 nodes → 100000
 
 `node good-nodes.js` prints the same test-case and cross-check lines as the TypeScript version; the timings shift by a few percent (`BFS shift()` 308.79 ms), and the longest chain the recursive version survives is 7,421 nodes.
 
+`php -d xdebug.mode=off good-nodes.php`:
+
+```text
+goodBrute       10/10 cases passed
+goodDfs         10/10 cases passed
+goodIterative   10/10 cases passed
+goodBfs         10/10 cases passed
+wrongStrict     6/10 cases passed; failed on equal to max is still good → 1, big max in the left branch → 4, non-decreasing chain of 10^5 nodes → 20000, non-increasing chain of 10^5 nodes → 1
+wrongInitZero   7/10 cases passed; failed on one negative node → 0, all negative → 0, non-decreasing chain of 10^5 nodes → 50000
+wrongSharedMax  9/10 cases passed; failed on big max in the left branch → 2
+
+checked 3000 random trees of 1..12 nodes, values -3..3: the three correct approaches match brute force 3000/3000
+wrong versions disagreeing with brute force: wrongStrict 1516, wrongInitZero 1257, wrongSharedMax 734 trees
+```
+
+Running `php good-nodes.php` on a machine with Xdebug leaves `goodDfs` at 8/10: Xdebug throws `Error` once recursion passes 512 levels.
+
+`rustc --edition 2021 -O good_nodes.rs && ./good_nodes`:
+
+```text
+good_brute       10/10 cases passed
+good_dfs         10/10 cases passed
+good_iterative   10/10 cases passed
+good_bfs         10/10 cases passed
+wrong_strict     6/10 cases passed; failed on equal to max is still good → 1, big max in the left branch → 4, non-decreasing chain of 10^5 nodes → 20000, non-increasing chain of 10^5 nodes → 1
+wrong_init_zero  7/10 cases passed; failed on one negative node → 0, all negative → 0, non-decreasing chain of 10^5 nodes → 50000
+wrong_shared_max 9/10 cases passed; failed on big max in the left branch → 2
+
+checked 3000 random trees of 1..12 nodes, values -3..3: the three correct approaches match brute force 3000/3000
+wrong versions disagreeing with brute force: wrong_strict 1522, wrong_init_zero 1281, wrong_shared_max 772 trees
+```
+
+The PHP and Rust disagreement counts differ slightly from the TypeScript ones because each file generates its random trees with its own generator.
+
 ## Misconceptions and common traps
 
 - **"A good node must be greater than every node above it."** The problem says no node above it is **greater** than it; equal is still good. `>` instead of `>=` fails 4/10 cases and disagrees on 1,546 of 3,000 random trees.
 - **"Above" means every node visited earlier.** Only ancestors count. One max for the whole traversal lets the left branch's record leak into the right branch: the tree `[1, 9, 2, null, null, 2, 3]` gives 2 instead of 5.
 - **Initializing max to 0.** Values go down to −10⁴. Start with `root.val` or negative infinity.
-- **"Recursion is enough, LeetCode trees aren't deep."** The problem allows 10⁵ nodes, which means a chain 10⁵ levels deep. The recursive version throws in TypeScript, JavaScript (about 7,400 to 7,800 levels), Python (1,000 levels) and Java (main thread); only Go survives. The iterative version with (node, max) pairs has no such limit.
+- **"Recursion is enough, LeetCode trees aren't deep."** The problem allows 10⁵ nodes, which means a chain 10⁵ levels deep. The recursive version throws in TypeScript, JavaScript (about 7,400 to 7,800 levels), Python (1,000 levels) and Java (main thread); Go survives, PHP survives with Xdebug off, Rust survives in the `-O` build. The iterative version with (node, max) pairs has no such limit.
 - **Counting in an outer variable in Python without `nonlocal`.** The assignment `count += 1` inside a nested function makes `count` local, and its first read throws `UnboundLocalError`. Return the count as the function's value and you need no outer variable.
 - **Passing the counter as an `int` parameter in Go or Java.** Each call increments its own copy; the caller sees nothing. Java gives 0 for every case, Go gives 1.
 - **A queue built on `shift()`, `pop(0)`, `remove(0)`.** Correct, but it moves the whole array on every take: 287 ms, 328 ms, 170 ms on a 10⁵-node tree, against 1 to 30 ms for a proper queue.
+- **PHP: forgetting the `&` in a recursive closure's `use`.** `use ($go)` captures the value of `$go` when the closure is created, and at that point the variable is still unassigned, so the first recursive call throws `Error`. Write `use (&$go)`. Xdebug also stops recursion at level 512, so on a dev machine the recursive version fails on the two 10⁵-node chains even though it runs on the judge.
+- **Rust: trusting a debug build like the `-O` build.** The same `good_dfs` walks the whole 10⁵-node chain on the main thread in the `-O` build, while the debug build (bigger stack frames) overflows the stack and the process dies on the spot, with no `catch` to stop it. Releasing the tree is the same: `drop` on a long `Rc` chain is recursive, so the file tears the tree down with a loop.
 
 ## Self-check questions
 

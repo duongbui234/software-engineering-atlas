@@ -128,6 +128,8 @@ Thước đo đếm việc xét ô trong lượt quét và việc lấy ô từ 
 - [Go](../code/neetcode-rotting-oranges/rot_by_minute.go) — chạy `go run rot_by_minute.go`
 - [Java](../code/neetcode-rotting-oranges/rot-by-minute.java) — chạy `java rot-by-minute.java`
 - [JavaScript](../code/neetcode-rotting-oranges/rot-by-minute.js) — chạy `node rot-by-minute.js`
+- [PHP](../code/neetcode-rotting-oranges/rot-by-minute.php) — chạy `php rot-by-minute.php`
+- [Rust](../code/neetcode-rotting-oranges/rot_by_minute.rs) — chạy `rustc --edition 2021 -O rot_by_minute.rs && ./rot_by_minute`
 
 ```typescript
 type Grid = number[][]
@@ -618,7 +620,214 @@ console.log(`${cases.length}/${cases.length} ca đúng`)
 console.log(`Quét: ${scans}; lấy khỏi hàng đợi: ${pops}`)
 ```
 
-Cả năm file chạy ra cùng kết quả:
+```php
+<?php
+declare(strict_types=1);
+
+const DIRECTIONS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+function simulate(array $grid): array
+{
+    $fresh = 0;
+    foreach ($grid as $row) {
+        $fresh += count(array_keys($row, 1, true));
+    }
+    $minutes = 0;
+    $scans = 0;
+
+    while ($fresh > 0) {
+        $next = [];
+        foreach ($grid as $r => $row) {
+            foreach ($row as $c => $value) {
+                $scans++;
+                if ($value !== 1) {
+                    continue;
+                }
+                foreach (DIRECTIONS as [$dr, $dc]) {
+                    if (($grid[$r + $dr][$c + $dc] ?? null) === 2) {
+                        $next[] = [$r, $c];
+                        break;
+                    }
+                }
+            }
+        }
+        if (!$next) {
+            return ['minutes' => -1, 'scans' => $scans];
+        }
+        foreach ($next as [$r, $c]) {
+            $grid[$r][$c] = 2;
+        }
+        $fresh -= count($next);
+        $minutes++;
+    }
+    return ['minutes' => $minutes, 'scans' => $scans];
+}
+
+function spread(array $grid): array
+{
+    $queue = [];
+    $fresh = 0;
+    foreach ($grid as $r => $row) {
+        foreach ($row as $c => $value) {
+            if ($value === 2) $queue[] = [$r, $c];
+            if ($value === 1) $fresh++;
+        }
+    }
+
+    $head = 0;
+    $minutes = 0;
+    while ($head < count($queue)) {
+        $end = count($queue);
+        while ($head < $end) {
+            [$r, $c] = $queue[$head++];
+            foreach (DIRECTIONS as [$dr, $dc]) {
+                $nr = $r + $dr;
+                $nc = $c + $dc;
+                if (($grid[$nr][$nc] ?? null) !== 1) {
+                    continue;
+                }
+                $grid[$nr][$nc] = 2;
+                $fresh--;
+                $queue[] = [$nr, $nc];
+            }
+        }
+        if (count($queue) > $end) $minutes++;
+    }
+    return ['minutes' => $fresh === 0 ? $minutes : -1, 'pops' => $head];
+}
+
+$cases = [
+    [[[2, 1, 1, 0, 2], [0, 1, 1, 1, 1]], 3],
+    [[[2, 1, 0, 1], [0, 1, 0, 1]], -1],
+    [[[0, 2, 0]], 0],
+    [[[1]], -1],
+    [[[0]], 0],
+    [[[2, 1, 2]], 1],
+    [[[2, 1, 1, 1, 1, 1, 1, 1, 1, 1]], 9],
+];
+
+foreach ($cases as [$grid, $expected]) {
+    if (simulate($grid)['minutes'] !== $expected || spread($grid)['minutes'] !== $expected) {
+        throw new RuntimeException('unexpected result for ' . json_encode($grid));
+    }
+}
+
+[$corridor] = $cases[count($cases) - 1];
+$scans = simulate($corridor)['scans'];
+$pops = spread($corridor)['pops'];
+if ($scans !== 90 || $pops !== 10) {
+    throw new RuntimeException('unexpected operation counts');
+}
+$n = count($cases);
+echo "{$n}/{$n} ca đúng\n";
+echo "Quét: {$scans}; lấy khỏi hàng đợi: {$pops}\n";
+```
+
+```rust
+use std::collections::VecDeque;
+
+type Grid = Vec<Vec<u8>>;
+
+const DIRECTIONS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+
+fn at(grid: &Grid, r: i32, c: i32) -> Option<u8> {
+    if r < 0 || c < 0 {
+        return None;
+    }
+    grid.get(r as usize)?.get(c as usize).copied()
+}
+
+fn simulate(mut grid: Grid) -> (i32, usize) {
+    let mut fresh = grid.iter().flatten().filter(|&&v| v == 1).count();
+    let mut minutes = 0;
+    let mut scans = 0;
+
+    while fresh > 0 {
+        let mut next = Vec::new();
+        for r in 0..grid.len() {
+            for c in 0..grid[0].len() {
+                scans += 1;
+                if grid[r][c] == 1
+                    && DIRECTIONS.iter().any(|&(dr, dc)| at(&grid, r as i32 + dr, c as i32 + dc) == Some(2))
+                {
+                    next.push((r, c));
+                }
+            }
+        }
+        if next.is_empty() {
+            return (-1, scans);
+        }
+        for &(r, c) in &next {
+            grid[r][c] = 2;
+        }
+        fresh -= next.len();
+        minutes += 1;
+    }
+    (minutes, scans)
+}
+
+fn spread(mut grid: Grid) -> (i32, usize) {
+    let mut queue = VecDeque::new();
+    let mut fresh = 0;
+    for r in 0..grid.len() {
+        for c in 0..grid[0].len() {
+            if grid[r][c] == 2 { queue.push_back((r as i32, c as i32)); }
+            if grid[r][c] == 1 { fresh += 1; }
+        }
+    }
+
+    let mut pops = 0;
+    let mut minutes = 0;
+    while !queue.is_empty() {
+        let mut rotted_this_minute = false;
+        for _ in 0..queue.len() {
+            let (r, c) = queue.pop_front().unwrap();
+            pops += 1;
+            for (dr, dc) in DIRECTIONS {
+                let (nr, nc) = (r + dr, c + dc);
+                if at(&grid, nr, nc) != Some(1) {
+                    continue;
+                }
+                grid[nr as usize][nc as usize] = 2;
+                fresh -= 1;
+                rotted_this_minute = true;
+                queue.push_back((nr, nc));
+            }
+        }
+        if rotted_this_minute { minutes += 1; }
+    }
+    (if fresh == 0 { minutes } else { -1 }, pops)
+}
+
+fn main() {
+    let cases: Vec<(Grid, i32)> = vec![
+        (vec![vec![2, 1, 1, 0, 2], vec![0, 1, 1, 1, 1]], 3),
+        (vec![vec![2, 1, 0, 1], vec![0, 1, 0, 1]], -1),
+        (vec![vec![0, 2, 0]], 0),
+        (vec![vec![1]], -1),
+        (vec![vec![0]], 0),
+        (vec![vec![2, 1, 2]], 1),
+        (vec![vec![2, 1, 1, 1, 1, 1, 1, 1, 1, 1]], 9),
+    ];
+
+    for (grid, expected) in &cases {
+        if simulate(grid.clone()).0 != *expected || spread(grid.clone()).0 != *expected {
+            panic!("unexpected result for {:?}", grid);
+        }
+    }
+
+    let corridor = &cases[cases.len() - 1].0;
+    let (_, scans) = simulate(corridor.clone());
+    let (_, pops) = spread(corridor.clone());
+    if scans != 90 || pops != 10 {
+        panic!("unexpected operation counts");
+    }
+    println!("{}/{} ca đúng", cases.len(), cases.len());
+    println!("Quét: {}; lấy khỏi hàng đợi: {}", scans, pops);
+}
+```
+
+Cả bảy file chạy ra cùng kết quả:
 
 ```text
 7/7 ca đúng
@@ -633,6 +842,8 @@ Quét: 90; lấy khỏi hàng đợi: 10
 - **Kiểm tra mỗi điểm hỏng ban đầu bằng một BFS riêng.** Việc này lặp lại công việc khi nhiều nguồn cùng tới một vùng. Gộp chúng vào lớp 0 để lượt phát hiện đầu tiên tự chọn thời điểm sớm nhất.
 - **Dùng hàng đợi bằng cách xóa đầu mảng liên tục.** TypeScript và JavaScript dùng chỉ số `head` để đọc mảng tiến dần. Go cũng dùng chỉ số trên slice. Python dùng `deque.popleft()`, Java dùng `ArrayDeque.removeFirst()`.
 - **Sao chép mỗi mảng ngoài.** Hai cách đều ghi vào ô. Sao chép mỗi hàng nếu cần giữ đầu vào. Python cho phép chỉ số âm, nên kiểm tra đủ cận dưới và cận trên trước khi đọc ô.
+- **PHP: đọc ô ngoài lưới bằng `??`.** `$grid[-1][0] ?? null` không báo lỗi: mảng PHP là bảng băm, khóa `-1` chỉ đơn giản là không có, và `??` trả `null`. Tiện, nhưng nó cũng nuốt luôn lỗi gõ sai tên biến. Mảng PHP truyền theo giá trị nên `simulate($grid)` tự làm việc trên bản sao, không cần chép từng hàng như TypeScript.
+- **Rust: `VecDeque` hay `Vec` kèm chỉ số.** Bản Rust dùng `VecDeque::pop_front` và đếm lớp bằng `for _ in 0..queue.len()`: `queue.len()` được đọc **một lần** khi bắt đầu vòng `for`, nên ô thêm vào trong lớp này không lọt vào lớp hiện tại. Đọc ô hàng xóm bằng `grid.get(r)?.get(c)` sau khi đã chặn chỉ số âm, vì ép `-1` sang `usize` sẽ thành một số khổng lồ.
 
 ## Câu hỏi tự kiểm tra
 

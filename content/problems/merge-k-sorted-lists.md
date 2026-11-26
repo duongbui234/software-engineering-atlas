@@ -229,9 +229,9 @@ Các ngôn ngữ khác ở N = 10⁶: Go heap 28,4 / 136,6 / 297,6 ms và chia �
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.ts) · [Python](../code/neetcode-merge-k-sorted-lists/merge_k_lists.py) · [Go](../code/neetcode-merge-k-sorted-lists/merge_k_lists.go) · [Java](../code/neetcode-merge-k-sorted-lists/merge-k-lists.java) · [JavaScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.js)
+[TypeScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.ts) · [Python](../code/neetcode-merge-k-sorted-lists/merge_k_lists.py) · [Go](../code/neetcode-merge-k-sorted-lists/merge_k_lists.go) · [Java](../code/neetcode-merge-k-sorted-lists/merge-k-lists.java) · [JavaScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.js) · [PHP](../code/neetcode-merge-k-sorted-lists/merge-k-lists.php) · [Rust](../code/neetcode-merge-k-sorted-lists/merge_k_lists.rs)
 
-Mỗi file chạy 9 ca chung: ví dụ của đề, mảng rỗng, một danh sách rỗng, danh sách rỗng xen kẽ, một danh sách, số âm, `9` với `10` (bẫy sắp theo chuỗi), 20 danh sách một phần tử, và toàn giá trị trùng. File TypeScript đối chiếu thêm 2 000 bộ ngẫu nhiên.
+Mỗi file trong năm bản đầu chạy 9 ca chung: ví dụ của đề, mảng rỗng, một danh sách rỗng, danh sách rỗng xen kẽ, một danh sách, số âm, `9` với `10` (bẫy sắp theo chuỗi), 20 danh sách một phần tử, và toàn giá trị trùng. File TypeScript đối chiếu thêm 2 000 bộ ngẫu nhiên.
 
 Heap k đầu danh sách:
 
@@ -355,6 +355,106 @@ function mergeHeap(lists) {
     if (h.length > 0) down(0);
   }
   return dummy.next;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class ListNode {
+    public function __construct(public int $val, public ?ListNode $next = null) {}
+}
+
+function mergeKLists(array $lists): ?ListNode {
+    $heap = new SplPriorityQueue();
+    foreach ($lists as $node) {
+        if ($node !== null) $heap->insert($node, -$node->val);
+    }
+    $dummy = $tail = new ListNode(0);
+    while (!$heap->isEmpty()) {
+        $node = $heap->extract();
+        if ($node->next !== null) $heap->insert($node->next, -$node->next->val);
+        $tail->next = $node;
+        $tail = $node;
+    }
+    return $dummy->next;
+}
+
+function listFrom(array $values): ?ListNode {
+    $head = null;
+    foreach (array_reverse($values) as $val) $head = new ListNode($val, $head);
+    return $head;
+}
+
+function valuesOf(?ListNode $head): array {
+    $values = [];
+    for (; $head !== null; $head = $head->next) $values[] = $head->val;
+    return $values;
+}
+```
+
+```rust
+type Link = Option<Box<ListNode>>;
+
+struct ListNode {
+    val: i32,
+    next: Link,
+}
+
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
+
+struct Entry(Box<ListNode>);
+
+impl Ord for Entry {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.0.val.cmp(&self.0.val)
+    }
+}
+
+impl PartialOrd for Entry {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for Entry {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.val == other.0.val
+    }
+}
+
+impl Eq for Entry {}
+
+fn merge_k_lists(lists: Vec<Link>) -> Link {
+    let mut heap: BinaryHeap<_> = lists.into_iter().flatten().map(Entry).collect();
+    let mut result = None;
+    let mut tail = &mut result;
+    while let Some(Entry(mut node)) = heap.pop() {
+        if let Some(next) = node.next.take() {
+            heap.push(Entry(next));
+        }
+        tail = &mut tail.insert(node).next;
+    }
+    result
+}
+
+fn list_from(values: &[i32]) -> Link {
+    values
+        .iter()
+        .rev()
+        .fold(None, |next, &val| Some(Box::new(ListNode { val, next })))
+}
+
+fn values_of(head: &Link) -> Vec<i32> {
+    let mut out = Vec::new();
+    let mut current = head.as_deref();
+    while let Some(node) = current {
+        out.push(node.val);
+        current = node.next.as_deref();
+    }
+    out
 }
 ```
 
@@ -587,6 +687,8 @@ mergeHeap         9/9 ca đúng
 mergeDivide       9/9 ca đúng
 wrongDefaultSort  6/9 ca đúng; sai ở số âm → [-10,-3,-5,0,10], 9 và 10 → [10,2,9], 20 danh sách 1 phần tử → [0,1,10,11,12,13,14,15,16,17,18,19,2,3,4,5,6,7,8,9]
 ```
+
+Hai bản bổ sung dùng heap và chuyển các nút gốc vào kết quả. PHP đổi dấu độ ưu tiên, Rust đảo thứ tự trong `Ord` để giá trị nhỏ nhất lên đỉnh. PHP `4/4 ca đúng` · Rust `4/4 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

@@ -115,7 +115,7 @@ TypeScript, n số ngẫu nhiên trong ±10⁵, trung vị:
 
 Hash theo neo và hai con trỏ cùng O(n²), nhưng hash chậm hơn khoảng 15 lần: mỗi vòng trong tạo Set mới, băm và ghi. Hai con trỏ chỉ đọc mảng liền mạch.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Sắp xếp số | Khóa cho bộ ba (nếu dùng Set) |
 |---|---|---|
@@ -123,10 +123,12 @@ Hash theo neo và hai con trỏ cùng O(n²), nhưng hash chậm hơn khoảng 1
 | Python | `sorted(nums)` | `tuple` (list không hash được) |
 | Go | `slices.Sort` | mảng cố định `[3]int` (slice không làm khóa map được) |
 | Java | `Arrays.sort(int[])` | `List.of(a, b, c)`: `List.equals` so nội dung |
+| PHP | `sort($a)` sửa tại chỗ, trả `bool` | chuỗi `"a,b,c"` làm khóa mảng |
+| Rust | `a.sort_unstable()` | mảng cố định `[i32; 3]` (băm được, so theo nội dung) |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-3sum/three-sum.ts) · [Python](../code/neetcode-3sum/three_sum.py) · [Go](../code/neetcode-3sum/three_sum.go) · [Java](../code/neetcode-3sum/three-sum.java) · [JavaScript](../code/neetcode-3sum/three-sum.js)
+[TypeScript](../code/neetcode-3sum/three-sum.ts) · [Python](../code/neetcode-3sum/three_sum.py) · [Go](../code/neetcode-3sum/three_sum.go) · [Java](../code/neetcode-3sum/three-sum.java) · [JavaScript](../code/neetcode-3sum/three-sum.js) · [PHP](../code/neetcode-3sum/three-sum.php) · [Rust](../code/neetcode-3sum/three_sum.rs)
 
 Mỗi file có cả ba cách và chạy 7 ca, gồm `[0, 0, 0, 0]` và một mảng nhiều số trùng. Dưới đây là cách sắp xếp + hai con trỏ.
 
@@ -253,6 +255,65 @@ function sortTwoPointers(nums) {
 }
 ```
 
+```php
+// Sắp xếp + hai con trỏ: cố định a = nums[i], tìm b + c = −a trên đoạn bên phải.
+// sort() sửa mảng tại chỗ và trả về bool, nên KHÔNG viết $a = sort($nums).
+function sortTwoPointers(array $nums): array {
+    $a = $nums; sort($a); $out = []; $n = count($a);
+    for ($i = 0; $i < $n - 2; $i++) {
+        if ($a[$i] > 0) break; // số nhỏ nhất đã dương thì tổng ba số không thể bằng 0
+        if ($i > 0 && $a[$i] === $a[$i - 1]) continue; // cùng giá trị neo: mọi bộ ba đã được tìm
+        $lo = $i + 1; $hi = $n - 1;
+        while ($lo < $hi) {
+            $s = $a[$i] + $a[$lo] + $a[$hi];
+            if ($s < 0) $lo++;
+            elseif ($s > 0) $hi--;
+            else {
+                $out[] = [$a[$i], $a[$lo], $a[$hi]];
+                $lo++; $hi--;
+                while ($lo < $hi && $a[$lo] === $a[$lo - 1]) $lo++; // nhảy qua b trùng
+            }
+        }
+    }
+    return $out;
+}
+```
+
+```rust
+// Sắp xếp + hai con trỏ: cố định a = nums[i], tìm b + c = −a trên đoạn bên phải.
+fn sort_two_pointers(nums: &[i32]) -> Vec<Vec<i32>> {
+    let mut a = nums.to_vec();
+    a.sort_unstable();
+    let mut out = vec![];
+    // a.len() - 2 trên usize sẽ tràn nếu mảng có dưới 2 phần tử; saturating_sub giữ nó ở 0.
+    for i in 0..a.len().saturating_sub(2) {
+        if a[i] > 0 {
+            break; // số nhỏ nhất đã dương thì tổng ba số không thể bằng 0
+        }
+        if i > 0 && a[i] == a[i - 1] {
+            continue; // cùng giá trị neo: mọi bộ ba đã được tìm
+        }
+        let (mut lo, mut hi) = (i + 1, a.len() - 1);
+        while lo < hi {
+            let s = a[i] + a[lo] + a[hi];
+            if s < 0 {
+                lo += 1;
+            } else if s > 0 {
+                hi -= 1;
+            } else {
+                out.push(vec![a[i], a[lo], a[hi]]);
+                lo += 1;
+                hi -= 1;
+                while lo < hi && a[lo] == a[lo - 1] {
+                    lo += 1; // nhảy qua b trùng
+                }
+            }
+        }
+    }
+    out
+}
+```
+
 
 File TypeScript chạy thêm hai bản sai rồi đo:
 
@@ -274,7 +335,7 @@ n        vét cạn  hash theo neo  sắp xếp + hai con trỏ   (ms, trung v�
 3000           —          222.5                  13.06
 ```
 
-Bản không bỏ trùng sai ngay ở ví dụ đầu tiên của đề (hai số `-1` cùng làm neo). Bản thiếu hàm so sánh qua được 5/7 ca: nó chỉ hỏng khi thứ tự chuỗi và thứ tự số khác nhau đủ để hai con trỏ đi sai hướng. Python, Go, Java và JavaScript in `7/7 ca đúng` cho cả ba cách.
+Bản không bỏ trùng sai ngay ở ví dụ đầu tiên của đề (hai số `-1` cùng làm neo). Bản thiếu hàm so sánh qua được 5/7 ca: nó chỉ hỏng khi thứ tự chuỗi và thứ tự số khác nhau đủ để hai con trỏ đi sai hướng. Python, Go, Java và JavaScript in `7/7 ca đúng` cho cả ba cách. PHP và Rust cũng in `7/7 ca đúng` cho ba cách và `4/7` cho bản không bỏ trùng; bản PHP sắp xếp theo chuỗi (`SORT_STRING`) in `5/7` với đúng hai ca sai như bản JS thiếu hàm so sánh.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -283,6 +344,8 @@ Bản không bỏ trùng sai ngay ở ví dụ đầu tiên của đề (hai s�
 - **Thêm Set "cho chắc" ở cách hai con trỏ.** Đúng nhưng thừa, và che mất lỗi bỏ trùng.
 - **JS: `sort()` không có hàm so sánh.** `[-1, -4, 2, 10]` thành `[-1, -4, 10, 2]`. Hai con trỏ trên mảng không thật sự tăng dần thì lập luận cắt bỏ sụp.
 - **Trả chỉ số thay vì giá trị.** Đề 3Sum trả giá trị; Two Sum mới trả chỉ số.
+- **PHP: viết `$a = sort($nums)`.** `sort` sửa mảng tại chỗ và trả `true`, nên `$a` thành `true` chứ không phải mảng đã sắp. Sao chép trước (`$a = $nums; sort($a);`). Và `sort($a, SORT_STRING)` cho đúng lỗi của JS: `5/7` ca.
+- **Rust: `a.len() - 2` trên `usize`.** Với mảng dưới 2 phần tử, phép trừ tràn: panic ở bản debug, ra số khổng lồ ở bản `-O`. File dùng `saturating_sub(2)`. Đề hứa n ≥ 3, nhưng hàm dùng lại ở nơi khác thì không.
 
 ## Câu hỏi tự kiểm tra
 

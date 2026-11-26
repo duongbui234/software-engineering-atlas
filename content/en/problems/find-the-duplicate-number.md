@@ -303,9 +303,9 @@ Go and Java compile the counting loop into machine code that runs very fast over
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-find-the-duplicate-number/find-duplicate.ts) · [Python](../code/neetcode-find-the-duplicate-number/find_duplicate.py) · [Go](../code/neetcode-find-the-duplicate-number/find_duplicate.go) · [Java](../code/neetcode-find-the-duplicate-number/find-duplicate.java) · [JavaScript](../code/neetcode-find-the-duplicate-number/find-duplicate.js)
+[TypeScript](../code/neetcode-find-the-duplicate-number/find-duplicate.ts) · [Python](../code/neetcode-find-the-duplicate-number/find_duplicate.py) · [Go](../code/neetcode-find-the-duplicate-number/find_duplicate.go) · [Java](../code/neetcode-find-the-duplicate-number/find-duplicate.java) · [JavaScript](../code/neetcode-find-the-duplicate-number/find-duplicate.js) · [PHP](../code/neetcode-find-the-duplicate-number/find-duplicate.php) · [Rust](../code/neetcode-find-the-duplicate-number/find_duplicate.rs)
 
-Each file runs 10 shared cases: the problem's three examples, `[1, 1]`, the duplicate at the start, at the end, repeated many times (`[2, 2, 2, 2, 2]`, `[1, 4, 4, 2, 4]`), a self-loop, and a ten-element array. The JavaScript file adds `[10, 2, 9, …, 10]` to try string-order `sort()`. The TypeScript file also checks every valid array with n from 1 to 6 exhaustively plus 2,000 random arrays (mulberry32); Go, Java and Python cross-check another 2,000 or 500 random arrays.
+Each of the original five files runs 10 shared cases: the problem's three examples, `[1, 1]`, the duplicate at the start, at the end, repeated many times (`[2, 2, 2, 2, 2]`, `[1, 4, 4, 2, 4]`), a self-loop, and a ten-element array. The JavaScript file adds `[10, 2, 9, …, 10]` to try string-order `sort()`. The TypeScript file also checks every valid array with n from 1 to 6 exhaustively plus 2,000 random arrays (mulberry32); Go, Java and Python cross-check another 2,000 or 500 random arrays.
 
 Tortoise and hare:
 
@@ -394,6 +394,44 @@ function floyd(nums) {
     slow = nums[slow];
   }
   return a;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+function findDuplicate(array $nums): int {
+    $slow = $fast = 0;
+    do {
+        $slow = $nums[$slow];
+        $fast = $nums[$nums[$fast]];
+    } while ($slow !== $fast);
+    $entry = 0;
+    while ($entry !== $slow) {
+        $entry = $nums[$entry];
+        $slow = $nums[$slow];
+    }
+    return $entry;
+}
+```
+
+```rust
+fn find_duplicate(nums: &[usize]) -> usize {
+    let (mut slow, mut fast) = (0, 0);
+    loop {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+        if slow == fast {
+            break;
+        }
+    }
+    let mut entry = 0;
+    while entry != slow {
+        entry = nums[entry];
+        slow = nums[slow];
+    }
+    entry
 }
 ```
 
@@ -573,6 +611,8 @@ sortInPlace([3, 1, 3, 4, 2]) = 3; the caller's array is now [1,2,3,3,4]
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+Both added versions run Floyd’s algorithm on array indices. Every valid input value can serve as the index for the next step. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

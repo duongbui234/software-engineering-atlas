@@ -149,7 +149,7 @@ TypeScript, one key with k entries (timestamps 2, 4, 6, …), 10⁵ `get` calls,
 
 Java, one key, 10⁶ sets then 10⁶ random gets, median of 5: `TreeMap` takes about 98 ms to set and 400 ms to get; two self-growing `int[]`/`String[]` arrays take 26 ms and 129 ms. The arrays are about 3 times faster at both: `TreeMap` boxes every timestamp as an `Integer` and walks tree nodes scattered in memory, while an `int[]` is contiguous. Python, 10⁵ gets over 10⁵ entries: `bisect_right` over a timestamp list takes 38 ms, `bisect_right(..., key=)` over a list of pairs takes 88 ms, because the `key` function is a Python call at every comparison.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Built-in binary search | Language-specific trap |
 |---|---|---|
@@ -157,10 +157,12 @@ Java, one key, 10⁶ sets then 10⁶ random gets, median of 5: `TreeMap` takes a
 | Python | `bisect_right(times, t)`; `key=` since 3.10 | `bisect_right(pairs, (t,))` skips the entry equal to t (4/8 cases); merely **reading** `defaultdict[key]` creates an empty key |
 | Go | `sort.Search(n, pred)`: the smallest index where `pred` holds; `pred` must go false then true | `m[key].times = …` on a `map[string]history` is the compile error "cannot assign to struct field … in map": use `map[string]*history`; a missing key gives `nil` |
 | Java | `TreeMap.floorEntry(t)`, `Collections.binarySearch` | `floorEntry` returns `null` when every entry is after t; `Collections.binarySearch([10, 20], 15)` returns `-2`, i.e. `-(insertion point) − 1`; `TreeMap` is about 3 times slower than an `int[]` |
+| PHP | none: write it, `($lo + $hi) >> 1` | a PHP array is an ordered hash table: `$this->times[$key][] = $t` creates the inner array, but **reading** a missing key gives `null` with a warning, hence `?? []`. A numeric key like `"123"` is turned into the int `123` as an array key |
+| Rust | `partition_point(\|(t, _)\| *t <= ts)` on `Vec<(i32, String)>` | `entry(key).or_default()` creates an empty history in one hash lookup; `get` returns a `&String` borrowed from the map, so returning a `String` needs `clone()`. `BTreeMap::range(..=t).next_back()` is the counterpart of Java's `floorEntry` |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-time-based-key-value-store/time-map.ts) · [Python](../code/neetcode-time-based-key-value-store/time_map.py) · [Go](../code/neetcode-time-based-key-value-store/time_map.go) · [Java](../code/neetcode-time-based-key-value-store/time-map.java) · [JavaScript](../code/neetcode-time-based-key-value-store/time-map.js)
+[TypeScript](../code/neetcode-time-based-key-value-store/time-map.ts) · [Python](../code/neetcode-time-based-key-value-store/time_map.py) · [Go](../code/neetcode-time-based-key-value-store/time_map.go) · [Java](../code/neetcode-time-based-key-value-store/time-map.java) · [JavaScript](../code/neetcode-time-based-key-value-store/time-map.js) · [PHP](../code/neetcode-time-based-key-value-store/time-map.php) · [Rust](../code/neetcode-time-based-key-value-store/time_map.rs)
 
 Each file runs 8 cases (9 in JavaScript): the problem's example, a key never set, t before the first entry, t between two entries, t after the last entry, two interleaved keys, t equal to a middle entry, and timestamp 10⁷. The JavaScript file adds the key `"constructor"`. Below is the main solution in each language.
 
@@ -285,6 +287,55 @@ class TimeMap {
 }
 ```
 
+```php
+// Approach 2, binary search: count the timestamps ≤ t (upper bound), then step back one. O(log k) per get.
+class TimeMap
+{
+    protected array $times = [];  // key → [timestamp, …], increasing because the problem promises increasing set calls
+    protected array $values = []; // key → [value, …]
+
+    public function set(string $key, string $value, int $timestamp): void
+    {
+        $this->times[$key][] = $timestamp; // creates the inner array if the key is new
+        $this->values[$key][] = $value;
+    }
+
+    public function get(string $key, int $timestamp): ?string
+    {
+        $ts = $this->times[$key] ?? []; // missing key: ?? avoids the "undefined array key" warning
+        $lo = 0;
+        $hi = count($ts); // half-open [lo, hi): count timestamps ≤ timestamp
+        while ($lo < $hi) {
+            $mid = ($lo + $hi) >> 1;
+            if ($ts[$mid] <= $timestamp) $lo = $mid + 1;
+            else $hi = $mid;
+        }
+        return $lo === 0 ? "" : $this->values[$key][$lo - 1]; // lo − 1 is the last timestamp ≤ timestamp
+    }
+}
+```
+
+```rust
+// Approach 2, binary search: partition_point counts the timestamps ≤ t, the one we want is just before. O(log k) per get.
+#[derive(Default)]
+struct TimeMap {
+    store: HashMap<String, Vec<(i32, String)>>,
+}
+
+impl TimeMap {
+    fn set(&mut self, key: String, value: String, timestamp: i32) {
+        // entry: one hash lookup for both "create if missing" and "append"
+        self.store.entry(key).or_default().push((timestamp, value));
+    }
+
+    fn get(&self, key: &str, timestamp: i32) -> String {
+        let Some(h) = self.store.get(key) else { return String::new() }; // key never set
+        let n = h.partition_point(|(t, _)| *t <= timestamp); // number of timestamps ≤ timestamp
+        if n == 0 { String::new() } else { h[n - 1].1.clone() } // n − 1 is the last timestamp ≤ timestamp
+    }
+}
+```
+
 
 The lower-bound version (TypeScript) and the tuple version (Python), both wrong:
 
@@ -373,6 +424,8 @@ new Map().get("constructor") = undefined
 
 Go prints `TimeMap  8/8 cases correct` and `map[string]*history{}["x"] == nil: true`. The compile error of the `map[string]history` version was tried separately with Go 1.25: `cannot assign to struct field m["k"].times in map`.
 
+PHP (`php time-map.php`) and Rust (`rustc --edition 2021 -O time_map.rs`) run the same four versions as the TypeScript file and print the same thing: `8/8` for the backward scan and the binary search, `2/8` for the lower-bound version, `5/8` for the `null` version, with the same failing cases.
+
 ## Misconceptions and common traps
 
 - **"Find the timestamp equal to t."** Most queries fall between two entries. The right question is the last entry ≤ t.
@@ -383,6 +436,8 @@ Go prints `TimeMap  8/8 cases correct` and `map[string]*history{}["x"] == nil: t
 - **Python: reading a `defaultdict` to check for a key.** `self.times[key]` creates an empty key even on a read; use `key in self.times` or `dict.get`.
 - **JS: a plain object as the store.** Keys like `"constructor"`, `"toString"` and `"__proto__"` already exist or mean something special. Use `Map`.
 - **Go: a map of structs.** You cannot assign to a field of a map value; keep a pointer.
+- **PHP: reading `$this->times[$key]` for a key never set.** It doesn't throw: it gives `null` with a warning, and `count(null)` throws a `TypeError` since PHP 8. Write `$this->times[$key] ?? []`.
+- **Rust: returning an `Option<&String>` and forgetting it borrows from the map.** Holding that reference while calling `set` (an `&mut` borrow) doesn't compile. The solution returns a cloned `String`, matching LeetCode's signature `fn get(&self, key: String, timestamp: i32) -> String`.
 
 ## Self-check questions
 

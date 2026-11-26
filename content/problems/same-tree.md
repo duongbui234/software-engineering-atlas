@@ -197,9 +197,9 @@ Hai cây giống hệt nhau 10⁶ nút (cây tìm kiếm nhị phân dựng từ
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-same-tree/same-tree.ts) · [Python](../code/neetcode-same-tree/same_tree.py) · [Go](../code/neetcode-same-tree/same_tree.go) · [Java](../code/neetcode-same-tree/same-tree.java) · [JavaScript](../code/neetcode-same-tree/same-tree.js)
+[TypeScript](../code/neetcode-same-tree/same-tree.ts) · [Python](../code/neetcode-same-tree/same_tree.py) · [Go](../code/neetcode-same-tree/same_tree.go) · [Java](../code/neetcode-same-tree/same-tree.java) · [JavaScript](../code/neetcode-same-tree/same-tree.js) · [PHP](../code/neetcode-same-tree/same-tree.php) · [Rust](../code/neetcode-same-tree/same_tree.rs)
 
-Mỗi file chạy 12 ca chung: hai cây giống hệt, con trái và con phải, đổi chỗ giá trị, hai cây rỗng, một bên rỗng, một nút, giá trị lớn hơn 127, số âm, cây đầy 7 nút, khác ở lá cuối, lệch trái với lệch phải, và lệch trái 100 nút. File TypeScript đối chiếu thêm 3 000 cặp cây ngẫu nhiên với đáp án lấy từ JSON lồng nhau.
+Mỗi file trong năm bản đầu chạy 12 ca chung: hai cây giống hệt, con trái và con phải, đổi chỗ giá trị, hai cây rỗng, một bên rỗng, một nút, giá trị lớn hơn 127, số âm, cây đầy 7 nút, khác ở lá cuối, lệch trái với lệch phải, và lệch trái 100 nút. File TypeScript đối chiếu thêm 3 000 cặp cây ngẫu nhiên với đáp án lấy từ JSON lồng nhau.
 
 Đệ quy song song:
 
@@ -242,6 +242,54 @@ static boolean isSameRecursive(TreeNode p, TreeNode q) {
 function isSameRecursive(p, q) {
   if (p === null || q === null) return p === q; // chỉ đúng khi cả hai cùng null
   return p.val === q.val && isSameRecursive(p.left, q.left) && isSameRecursive(p.right, q.right);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function isSameTree(?TreeNode $a, ?TreeNode $b): bool {
+    if ($a === null || $b === null) return $a === $b;
+    return $a->val === $b->val
+        && isSameTree($a->left, $b->left)
+        && isSameTree($a->right, $b->right);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn is_same_tree(a: &Node, b: &Node) -> bool {
+    match (a, b) {
+        (None, None) => true,
+        (Some(a), Some(b)) => {
+            let a = a.borrow();
+            let b = b.borrow();
+            a.val == b.val && is_same_tree(&a.left, &b.left) && is_same_tree(&a.right, &b.right)
+        }
+        _ => false,
+    }
 }
 ```
 
@@ -436,6 +484,8 @@ isSameRecursive  độ sâu lớn nhất chạy được: 13907
 isSameJson       độ sâu lớn nhất chạy được: 4456
 isSameStack      cây lệch 10⁶ nút: true
 ```
+
+Hai bản bổ sung duyệt song song. Chúng so giá trị và cấu trúc từng cặp nút, kể cả khi chỉ một bên có nút. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

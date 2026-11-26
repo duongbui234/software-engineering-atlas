@@ -113,11 +113,11 @@ Both return `false`. The scan rejects each word at the first letter. The trie lo
 
 ## Runnable example
 
-Each version maintains two independent structures, runs the same 12 cases in sequence, and checks the measurement counts. The cases cover an empty dictionary, a prefix that is not a word, two dots, a branch that fails before a successful one in insertion order, marking a prefix after adding a longer word, and adding a duplicate.
+The original five versions maintain two independent structures, runs the same 12 cases in sequence, and checks the measurement counts. The cases cover an empty dictionary, a prefix that is not a word, two dots, a branch that fails before a successful one in insertion order, marking a prefix after adding a longer word, and adding a duplicate.
 
-Download [TypeScript](../code/neetcode-design-add-and-search-words-data-structure/word-dictionary.ts), [Python](../code/neetcode-design-add-and-search-words-data-structure/word_dictionary.py), [Go](../code/neetcode-design-add-and-search-words-data-structure/word_dictionary.go), [Java](../code/neetcode-design-add-and-search-words-data-structure/word-dictionary.java), or [JavaScript](../code/neetcode-design-add-and-search-words-data-structure/word-dictionary.js).
+Download [TypeScript](../code/neetcode-design-add-and-search-words-data-structure/word-dictionary.ts) · [Python](../code/neetcode-design-add-and-search-words-data-structure/word_dictionary.py) · [Go](../code/neetcode-design-add-and-search-words-data-structure/word_dictionary.go) · [Java](../code/neetcode-design-add-and-search-words-data-structure/word-dictionary.java) · [JavaScript](../code/neetcode-design-add-and-search-words-data-structure/word-dictionary.js) · [PHP](../code/neetcode-design-add-and-search-words-data-structure/word-dictionary.php) · [Rust](../code/neetcode-design-add-and-search-words-data-structure/word_dictionary.rs).
 
-Run directly with `node word-dictionary.ts`, `python3 word_dictionary.py`, `go run word_dictionary.go`, `java word-dictionary.java`, or `node word-dictionary.js`.
+Run the first five with `node word-dictionary.ts`, `python3 word_dictionary.py`, `go run word_dictionary.go`, `java word-dictionary.java`, or `node word-dictionary.js`.
 
 ```ts
 class LengthDictionary {
@@ -688,12 +688,115 @@ console.log(`${queries.length}/${queries.length} ca đúng`)
 console.log(`So sánh khi quét: ${scanProbe.comparisons}, trạng thái Trie: ${trieProbe.visits}`)
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TrieNode
+{
+    public array $children = [];
+    public bool $terminal = false;
+}
+
+final class WordDictionary
+{
+    private TrieNode $root;
+
+    public function __construct()
+    {
+        $this->root = new TrieNode();
+    }
+
+    public function addWord(string $word): void
+    {
+        $node = $this->root;
+        for ($i = 0, $length = strlen($word); $i < $length; $i++) {
+            $node = $node->children[$word[$i]] ??= new TrieNode();
+        }
+        $node->terminal = true;
+    }
+
+    public function search(string $pattern): bool
+    {
+        return $this->matches($this->root, $pattern, 0);
+    }
+
+    private function matches(TrieNode $node, string $pattern, int $offset): bool
+    {
+        if ($offset === strlen($pattern)) {
+            return $node->terminal;
+        }
+
+        $letter = $pattern[$offset];
+        if ($letter !== '.') {
+            $child = $node->children[$letter] ?? null;
+            return $child !== null && $this->matches($child, $pattern, $offset + 1);
+        }
+
+        foreach ($node->children as $child) {
+            if ($this->matches($child, $pattern, $offset + 1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Default)]
+struct TrieNode {
+    children: HashMap<u8, TrieNode>,
+    terminal: bool,
+}
+
+#[derive(Default)]
+struct WordDictionary {
+    root: TrieNode,
+}
+
+impl WordDictionary {
+    fn add_word(&mut self, word: &str) {
+        let mut node = &mut self.root;
+        for letter in word.bytes() {
+            node = node.children.entry(letter).or_default();
+        }
+        node.terminal = true;
+    }
+
+    fn search(&self, pattern: &str) -> bool {
+        Self::matches(&self.root, pattern.as_bytes())
+    }
+
+    fn matches(node: &TrieNode, pattern: &[u8]) -> bool {
+        let Some((&letter, rest)) = pattern.split_first() else {
+            return node.terminal;
+        };
+        if letter == b'.' {
+            return node
+                .children
+                .values()
+                .any(|child| Self::matches(child, rest));
+        }
+        node.children
+            .get(&letter)
+            .is_some_and(|child| Self::matches(child, rest))
+    }
+}
+```
+
 All five programs print the same result:
 
 ```text
 12/12 cases passed
 Scan comparisons: 1000, trie states: 1
 ```
+
+Run the added files with `php word-dictionary.php` and `rustc --edition 2021 -O word_dictionary.rs -o /tmp/word-dictionary && /tmp/word-dictionary`.
+
+The PHP and Rust versions use a sparse trie. Each dot tries the existing edges and consumes one step. PHP passes an offset into the pattern and Rust borrows a byte slice of the remaining pattern. PHP `12/12 ca đúng` · Rust `12/12 ca đúng`.
 
 ## Misconceptions and common traps
 

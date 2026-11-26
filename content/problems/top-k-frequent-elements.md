@@ -108,7 +108,7 @@ Mọi thuật toán sắp xếp chỉ dựa vào phép so sánh hai phần tử 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-top-k-frequent/top-k-frequent.ts) · [JavaScript](../code/neetcode-top-k-frequent/top-k-frequent.js) · [Python](../code/neetcode-top-k-frequent/top_k_frequent.py) · [Go](../code/neetcode-top-k-frequent/top_k_frequent.go) · [Java](../code/neetcode-top-k-frequent/top-k-frequent.java)
+[TypeScript](../code/neetcode-top-k-frequent/top-k-frequent.ts) · [JavaScript](../code/neetcode-top-k-frequent/top-k-frequent.js) · [Python](../code/neetcode-top-k-frequent/top_k_frequent.py) · [Go](../code/neetcode-top-k-frequent/top_k_frequent.go) · [Java](../code/neetcode-top-k-frequent/top-k-frequent.java) · [PHP](../code/neetcode-top-k-frequent/top-k-frequent.php) · [Rust](../code/neetcode-top-k-frequent/top_k_frequent.rs)
 
 ```ts
 // TypeScript: bucket sort theo tần suất, O(n)
@@ -225,6 +225,41 @@ function topKFrequent(nums, k) {
 }
 ```
 
+```php
+function topKFrequent(array $nums, int $k): array {
+    $count = array_count_values($nums); // giá trị → số lần
+    // buckets[f] = các giá trị xuất hiện đúng f lần
+    $buckets = array_fill(0, count($nums) + 1, []);
+    foreach ($count as $value => $freq) $buckets[$freq][] = $value;
+    $out = [];
+    for ($f = count($nums); $f > 0; $f--) {
+        foreach ($buckets[$f] as $v) {
+            $out[] = $v;
+            if (count($out) === $k) return $out;
+        }
+    }
+    return $out;
+}
+```
+
+```rust
+fn top_k_frequent(nums: Vec<i32>, k: i32) -> Vec<i32> {
+    let mut count: HashMap<i32, usize> = HashMap::new();
+    for &x in &nums {
+        *count.entry(x).or_insert(0) += 1;
+    }
+    // BinaryHeap là heap LỚN nhất; bọc Reverse để đỉnh là phần tử ít gặp nhất
+    let mut heap = BinaryHeap::new();
+    for (v, c) in count {
+        heap.push(Reverse((c, v)));
+        if heap.len() > k as usize {
+            heap.pop(); // đẩy kẻ yếu nhất ra
+        }
+    }
+    heap.into_iter().map(|Reverse((_, v))| v).collect()
+}
+```
+
 File TypeScript chạy test cho bốn cách, rồi đo trên một triệu số với số giá trị khác nhau (m) và k khác nhau. Cột "chỉ đếm" là riêng bước đếm, phần mà mọi cách đều phải làm:
 
 ```text
@@ -248,7 +283,7 @@ m = 632052  k = 10000  đều         108      228      160      167      798
 - **Quickselect, hàng cuối**: 798 ms, gấp 3,5 lần sắp xếp. Phần lớn trong 632 052 giá trị có cùng tần suất (1 hoặc 2), nên phân hoạch hai phần suy biến như đã giải thích ở trên.
 - Bài học chung: Big-O nói đường cong; phép đo nói chi phí thật. Với giới hạn của đề (n ≤ 100 000), cả bốn cách đều dưới vài chục mili giây. Chọn theo độ rõ ràng của code, trừ khi phép đo nói khác.
 
-Các ngôn ngữ còn lại đều cho cùng đáp án, và Java minh họa bẫy so sánh bằng phép trừ:
+Các ngôn ngữ còn lại đều cho cùng đáp án (PHP và Rust in `4/4 ca đúng` cho cả bốn cách). Java minh họa bẫy so sánh bằng phép trừ, PHP và Rust minh họa bẫy chiều của heap:
 
 ```text
 $ python3 top_k_frequent.py
@@ -264,6 +299,14 @@ $ go run top_k_frequent.go
 $ java top-k-frequent.java
 ...
 so sánh MIN_VALUE với 1 bằng phép trừ: 2147483647 (dương, tức 'lớn hơn': sai) | Integer.compare: -1
+
+$ php top-k-frequent.php
+...
+SplMinHeap với compare($a, $b) = $a <=> $b lấy ra trước: 3 (tưởng là 1)
+
+$ rustc --edition 2021 -O top_k_frequent.rs && ./top_k_frequent
+...
+BinaryHeap peek: Some(3) | bọc Reverse: Some(1)
 ```
 
 ## Hiểu lầm và bẫy hay gặp
@@ -275,6 +318,8 @@ so sánh MIN_VALUE với 1 bằng phép trừ: 2147483647 (dương, tức 'lớn
 - **Go: gọi `h.Push(x)` thay vì `heap.Push(h, x)`.** `h.Push` chỉ là append, không nổi phần tử lên; heap mất tính chất mà không báo lỗi.
 - **Quickselect "O(n)".** Đó là trung bình với chốt ngẫu nhiên. Nhiều giá trị bằng nhau thì cần phân hoạch ba phần, nếu không có thể chậm hơn cả sắp xếp.
 - **Quên rằng đếm cũng tốn.** Ở cỡ một triệu, bước đếm (O(n) thao tác trên map) thường đắt hơn bước chọn top k.
+- **PHP: `SplMinHeap::compare` ngược chiều trực giác.** Hàm trả số **dương** khi `$a` phải nằm trên đỉnh, tức với min-heap là khi `$a` **nhỏ** hơn. Viết theo thói quen `$a <=> $b` biến min-heap thành max-heap mà không báo lỗi; file PHP in ra `3` thay vì `1`. Còn `SplPriorityQueue` là max-heap và không giữ thứ tự giữa các phần tử cùng độ ưu tiên.
+- **Rust: `BinaryHeap` là heap lớn nhất.** Muốn min-heap phải bọc `std::cmp::Reverse`. Thư viện chuẩn có sẵn quickselect (`select_nth_unstable_by`), nên Cách 4 chỉ còn một dòng; so sánh bằng `cmp` nên không có bẫy tràn số như comparator trừ của Java.
 
 ## Câu hỏi tự kiểm tra
 

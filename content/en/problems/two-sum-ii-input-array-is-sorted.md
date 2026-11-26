@@ -113,7 +113,7 @@ TypeScript, the array `0, 1, …, n − 1` with target equal to the sum of the t
 
 The hash map is the slowest of the three fast approaches even though it is O(n) like two pointers: every step hashes and writes into the table, and the table also has to grow several times. Two pointers only read the array in order, which the CPU cache handles very well.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Built-in binary search | Language-specific trap |
 |---|---|---|
@@ -121,10 +121,12 @@ The hash map is the slowest of the three fast approaches even though it is O(n) 
 | Python | `bisect_left(a, x, lo)` | you must pass `lo = i + 1`, or it searches left of i too |
 | Go | `sort.SearchInts(rest, x)` on a sub-slice | the returned index counts from the start of the sub-slice; add back `i + 1` |
 | Java | `Arrays.binarySearch(a, from, to, x)` | not found returns a **negative** number, not −1; with duplicates, which position it returns is unspecified |
+| PHP | none; write it yourself | `($lo + $hi) / 2` is a **float** when the sum is odd; use `intdiv` |
+| Rust | `slice.binary_search(&x)` on `nums[i + 1..]` | returns a `Result`: `Ok(k)` with `k` counted from the subslice start; with duplicates, which position it returns is unspecified |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.ts) · [Python](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.py) · [Go](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.go) · [Java](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.java) · [JavaScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.js)
+[TypeScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.ts) · [Python](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.py) · [Go](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.go) · [Java](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.java) · [JavaScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.js) · [PHP](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.php) · [Rust](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.rs)
 
 Each file has all four approaches and runs 6 cases, including negatives and duplicates. Below are binary search and two pointers.
 
@@ -250,6 +252,63 @@ function twoPointers(nums, target) {
 }
 ```
 
+```php
+// For each nums[i], binary-search its complement in the part RIGHT of i. O(n log n), O(1) memory.
+function binarySearch(array $nums, int $target): array {
+    $n = count($nums);
+    for ($i = 0; $i < $n; $i++) {
+        $lo = $i + 1; $hi = $n - 1;
+        $want = $target - $nums[$i];
+        while ($lo <= $hi) {
+            $mid = intdiv($lo + $hi, 2); // ($lo + $hi) / 2 gives a float when the sum is odd
+            if ($nums[$mid] === $want) return [$i + 1, $mid + 1];
+            if ($nums[$mid] < $want) $lo = $mid + 1; else $hi = $mid - 1;
+        }
+    }
+    return [];
+}
+// Two pointers: sum too small, move left up; too big, move right down. O(n), O(1) memory.
+function twoPointers(array $nums, int $target): array {
+    $i = 0; $j = count($nums) - 1;
+    while ($i < $j) {
+        $sum = $nums[$i] + $nums[$j];
+        if ($sum === $target) return [$i + 1, $j + 1];
+        if ($sum < $target) $i++; // nums[i] plus the LARGEST number left is still short
+        else $j--;                // nums[j] plus the SMALLEST number left is still too big
+    }
+    return [];
+}
+```
+
+```rust
+// For each nums[i], binary-search its complement in the part RIGHT of i. O(n log n), O(1) memory.
+// the built-in binary_search on the subslice nums[i + 1..]; the index it returns counts from the subslice start.
+fn binary_search(nums: &[i32], target: i32) -> Vec<i32> {
+    for i in 0..nums.len() {
+        if let Ok(k) = nums[i + 1..].binary_search(&(target - nums[i])) {
+            return vec![i as i32 + 1, (i + 1 + k) as i32 + 1];
+        }
+    }
+    vec![]
+}
+// Two pointers: sum too small, move left up; too big, move right down. O(n), O(1) memory.
+fn two_pointers(nums: &[i32], target: i32) -> Vec<i32> {
+    let (mut i, mut j) = (0, nums.len() - 1);
+    while i < j {
+        let sum = nums[i] + nums[j];
+        if sum == target {
+            return vec![i as i32 + 1, j as i32 + 1];
+        }
+        if sum < target {
+            i += 1; // nums[i] plus the LARGEST number left is still short
+        } else {
+            j -= 1; // nums[j] plus the SMALLEST number left is still too big
+        }
+    }
+    vec![]
+}
+```
+
 
 ```text
 $ node two-sum-ii.ts
@@ -268,7 +327,7 @@ n          brute   binary search  hash map  two pointers   (ms, median)
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
-The whole-array binary search finds the complement 3 of the number 3 **at its own position** and returns `[1, 1]`. Only a case with two equal numbers each equal to `target / 2` exposes this bug. Python, Go, Java and JavaScript print `6/6 ca đúng` ("6/6 cases passed") for all four approaches.
+The whole-array binary search finds the complement 3 of the number 3 **at its own position** and returns `[1, 1]`. Only a case with two equal numbers each equal to `target / 2` exposes this bug. Python, Go, Java and JavaScript print `6/6 ca đúng` ("6/6 cases passed") for all four approaches. PHP and Rust also print `6/6 ca đúng` for the four approaches, and the whole-array search prints `4/6 ca đúng` ("4/6 cases passed") with the same two failing cases as TypeScript.
 
 ## Misconceptions and common traps
 
@@ -277,6 +336,8 @@ The whole-array binary search finds the complement 3 of the number 3 **at its ow
 - **Moving both pointers when the sum is wrong.** Move only the side you have evidence against: too small means `i`, too big means `j`. Moving both can skip the pair `(i, j − 1)`.
 - **"O(n) is O(n)."** The hash map and two pointers are both O(n) but differ by 80 times at 10⁶ elements.
 - **Worrying about overflow when adding.** Not with limits of ±1000. In other problems with values up to 2³¹, `nums[i] + nums[j]` overflows a 32-bit `int` in Java and Go; then compare `nums[i] < target − nums[j]` or use `long`.
+- **PHP: halving with `/`.** `($lo + $hi) / 2` returns a `float` when the sum is odd (`7 / 2 = 3.5`), and `$nums[3.5]` is truncated to index 3 with a "Deprecated: implicit conversion" warning since PHP 8.1. Use `intdiv($lo + $hi, 2)`.
+- **Rust: forgetting that `binary_search` returns an index into the subslice.** `nums[i + 1..].binary_search(&want)` returns `Ok(k)` counted from `i + 1`, so the real index is `i + 1 + k`. Also, `nums.len() - 1` on a `usize` underflows for an empty array; the problem promises at least two elements.
 
 ## Self-check questions
 

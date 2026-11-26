@@ -117,7 +117,7 @@ Hai cơ chế làm "O(1)" đúng trong thực tế:
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-two-sum/two-sum.ts) · [JavaScript](../code/neetcode-two-sum/two-sum.js) · [Python](../code/neetcode-two-sum/two_sum.py) · [Go](../code/neetcode-two-sum/two_sum.go) · [Java](../code/neetcode-two-sum/two-sum.java)
+[TypeScript](../code/neetcode-two-sum/two-sum.ts) · [JavaScript](../code/neetcode-two-sum/two-sum.js) · [Python](../code/neetcode-two-sum/two_sum.py) · [Go](../code/neetcode-two-sum/two_sum.go) · [Java](../code/neetcode-two-sum/two-sum.java) · [PHP](../code/neetcode-two-sum/two-sum.php) · [Rust](../code/neetcode-two-sum/two_sum.rs)
 
 ```ts
 // TypeScript: hash map một lượt
@@ -191,6 +191,31 @@ function twoSum(nums, target) {
 }
 ```
 
+```php
+function twoSum(array $nums, int $target): array {
+    $seen = []; // giá trị → chỉ số; mảng PHP là bảng băm
+    foreach ($nums as $i => $x) {
+        $need = $target - $x;
+        if (isset($seen[$need])) return [$seen[$need], $i]; // hỏi trước khi ghi
+        $seen[$x] = $i;
+    }
+    return [];
+}
+```
+
+```rust
+fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
+    let mut seen: HashMap<i32, i32> = HashMap::with_capacity(nums.len()); // giá trị → chỉ số
+    for (i, &x) in nums.iter().enumerate() {
+        if let Some(&j) = seen.get(&(target - x)) {
+            return vec![j, i as i32]; // get trả Option: không có "giá trị 0 giả" như Go
+        }
+        seen.insert(x, i as i32);
+    }
+    vec![]
+}
+```
+
 ```text
 $ node two-sum.ts
 bruteForce         5/5 ca đúng
@@ -252,6 +277,20 @@ dùng comma ok: 99 có trong map? false
 
 Hash của chuỗi trong Python đổi theo seed, còn hash của số nguyên thì không. Trong Go, đọc một khóa không có trả về giá trị 0, trùng với chỉ số 0 hợp lệ, nên phải dùng dạng `j, ok := seen[k]`.
 
+PHP và Rust in cùng bốn dòng đếm ca như TypeScript (`onePassWrongOrder  3/5 ca đúng`), kèm một bẫy riêng mỗi ngôn ngữ:
+
+```text
+$ php two-sum.php
+...
+khóa '1', 1 và 1.7 dồn vào: [1] → số thực 1.7
+
+$ rustc --edition 2021 -O two_sum.rs && ./two_sum
+...
+2e9 + 1e9 với i32: checked_add = None, wrapping_add = -1294967296
+```
+
+Trong PHP, chuỗi số `'1'` và số thực `1.7` đều bị ép thành khóa nguyên `1`, nên ba lần ghi đè lên cùng một ô. Rust bản build tối ưu (`-O`) tràn số thì quấn vòng âm thầm; bản debug thì panic.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **Ghi trước rồi mới hỏi.** Ghép một số với chính nó. Luôn hỏi trước, ghi sau.
@@ -262,6 +301,8 @@ Hash của chuỗi trong Python đổi theo seed, còn hash của số nguyên t
 - **Sắp xếp giá trị rồi trả về chỉ số sau khi sắp xếp.** Đề đòi vị trí gốc. Sắp xếp mảng chỉ số, hoặc mảng cặp (giá trị, chỉ số).
 - **Tràn số khi tính `target - x`.** Với giới hạn ±10⁹ thì `int` 32 bit vẫn đủ (hiệu tối đa 2·10⁹ < 2³¹ ≈ 2,1·10⁹), nhưng sát nút. Với giới hạn lớn hơn, Java và Go cần `long`/`int64`.
 - **"Hash map luôn O(1)."** O(1) là trung bình khi hash rải đều, và khấu hao qua các lần nới bảng. Khóa do người dùng gửi lên có thể bị chọn để va chạm.
+- **PHP: khóa mảng bị ép kiểu.** Chuỗi số như `"1"` thành khóa nguyên `1`, số thực bị cắt phần lẻ. Với Two Sum dùng số nguyên thì không sao, nhưng đừng dùng mảng PHP làm map cho số thực hay chuỗi số có số 0 đứng đầu. Và `isset` trả `false` khi giá trị là `null`, nên đừng lưu `null` vào sổ.
+- **Rust: tràn số khác nhau giữa debug và release.** `target - x` với `i32` panic ở bản debug nhưng quấn vòng âm thầm ở bản `-O`. Với giới hạn ±10⁹ thì vừa đủ, nhưng muốn chắc thì đổi sang `i64` hoặc dùng `checked_sub`.
 
 ## Câu hỏi tự kiểm tra
 

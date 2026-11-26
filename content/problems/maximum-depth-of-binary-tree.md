@@ -202,6 +202,8 @@ Giá trị mặc định được tính **một lần**, lúc chạy câu `def`,
 | Node (sau khi JIT tối ưu) | 13 909 | như trên | qua |
 | Java (luồng main) | 39 299 | `StackOverflowError` (là `Error`, không phải `Exception`) | qua |
 | Go | không chạm ngưỡng ở 10⁷ | vượt 1 GB thì chết cả chương trình, không bắt được | qua |
+| PHP 8.2 (tắt Xdebug) | không đếm tầng; khung hàm nằm trên heap | hết `memory_limit` thì lỗi fatal; Xdebug bật thì dừng ở 512 tầng | qua |
+| Rust (luồng main, 8 MB) | không đo ngưỡng | tiến trình chết với `has overflowed its stack`, không bắt được | qua |
 
 - **Python** đếm số khung, không đo bộ nhớ: giới hạn mặc định là 1 000, trừ vài khung của phần gọi bên ngoài còn 998. `sys.setrecursionlimit(200_000)` cho chuỗi 10⁵ nút chạy trong khoảng 20 ms. Từ Python 3.11, hàm Python gọi hàm Python gần như không tốn ngăn xếp C nên nâng giới hạn khá an toàn; ở bản cũ hơn, nâng quá tay có thể làm sập cả tiến trình.
 - **Node** có ngăn xếp cố định (khoảng 1 MB mặc định), và số tầng phụ thuộc kích thước khung. Lần chạy đầu, hàm còn chạy bằng trình thông dịch, khung lớn, chỉ được 7 827 tầng; file JavaScript gọi thẳng trên chuỗi 10⁴ nút và nhận `RangeError`. File TypeScript chạy hàm nhiều lần trước rồi mới đo, khung nhỏ lại, được 13 909 tầng. Cùng một hàm, cùng một máy, hai con số.
@@ -225,7 +227,7 @@ Cùng O(n), chênh nhau trong vòng 3 lần. Đáng chú ý nhất là Python: B
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.ts) · [Python](../code/neetcode-maximum-depth-of-binary-tree/max_depth.py) · [Go](../code/neetcode-maximum-depth-of-binary-tree/max_depth.go) · [Java](../code/neetcode-maximum-depth-of-binary-tree/max-depth.java) · [JavaScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.js)
+[TypeScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.ts) · [Python](../code/neetcode-maximum-depth-of-binary-tree/max_depth.py) · [Go](../code/neetcode-maximum-depth-of-binary-tree/max_depth.go) · [Java](../code/neetcode-maximum-depth-of-binary-tree/max-depth.java) · [JavaScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.js) · [PHP](../code/neetcode-maximum-depth-of-binary-tree/max-depth.php) · [Rust](../code/neetcode-maximum-depth-of-binary-tree/max_depth.rs)
 
 Mỗi file dựng cây từ mảng theo tầng và chạy 8 ca chung: cây rỗng, một nút, chỉ có con phải, cây đủ 3 tầng, nhánh sâu bên phải, chuỗi trái 6 nút, zigzag 5 tầng, giá trị âm và 0. Các file TypeScript, Python, Go và Java đối chiếu thêm 2 000 cây ngẫu nhiên (mulberry32, tới 40 nút), với độ sâu đúng được ghi lại ngay lúc dựng cây.
 
@@ -270,6 +272,28 @@ static int maxDepthRecursive(TreeNode root) {
 function maxDepthRecursive(root) {
   if (root === null) return 0;
   return 1 + Math.max(maxDepthRecursive(root.left), maxDepthRecursive(root.right));
+}
+```
+
+```php
+// Cách 1: đệ quy. Độ sâu = 1 + độ sâu lớn hơn của hai cây con; cây rỗng sâu 0.
+function maxDepthRecursive(?TreeNode $root): int
+{
+    if ($root === null) return 0;
+    return 1 + max(maxDepthRecursive($root->left), maxDepthRecursive($root->right));
+}
+```
+
+```rust
+// Cách 1: đệ quy. Độ sâu = 1 + độ sâu lớn hơn của hai cây con; cây rỗng (None) sâu 0.
+fn max_depth_recursive(root: &Node) -> i32 {
+    match root {
+        None => 0,
+        Some(n) => {
+            let b = n.borrow();
+            1 + max_depth_recursive(&b.left).max(max_depth_recursive(&b.right))
+        }
+    }
 }
 ```
 
@@ -372,7 +396,45 @@ function maxDepthBfs(root) {
 }
 ```
 
-Bản ngăn xếp tự quản của cả năm ngôn ngữ nằm trong các file ở trên.
+```php
+// Cách 3: BFS theo tầng với SplQueue; mỗi vòng ngoài lấy ra đúng số nút của một tầng.
+function maxDepthBfs(?TreeNode $root): int
+{
+    if ($root === null) return 0;
+    $queue = new SplQueue();
+    $queue->enqueue($root);
+    $depth = 0;
+    while (!$queue->isEmpty()) {
+        $depth++;
+        for ($k = $queue->count(); $k > 0; $k--) {
+            $node = $queue->dequeue();
+            if ($node->left !== null) $queue->enqueue($node->left);
+            if ($node->right !== null) $queue->enqueue($node->right);
+        }
+    }
+    return $depth;
+}
+```
+
+```rust
+// Cách 3: BFS theo tầng với VecDeque; mỗi vòng ngoài lấy ra đúng số nút của một tầng.
+fn max_depth_bfs(root: &Node) -> i32 {
+    let mut queue: std::collections::VecDeque<Rc<RefCell<TreeNode>>> = root.iter().cloned().collect();
+    let mut depth = 0;
+    while !queue.is_empty() {
+        depth += 1;
+        for _ in 0..queue.len() {
+            let n = queue.pop_front().unwrap();
+            let b = n.borrow();
+            queue.extend(b.left.iter().cloned());
+            queue.extend(b.right.iter().cloned());
+        }
+    }
+    depth
+}
+```
+
+Bản ngăn xếp tự quản của cả bảy ngôn ngữ nằm trong các file ở trên.
 
 Kết quả `node max-depth.ts`:
 
@@ -484,6 +546,32 @@ chuỗi 100000 nút, maxDepthRecursive: ném RangeError: Maximum call stack size
 chuỗi 100000 nút, maxDepthStack: 100000
 ```
 
+`php -d xdebug.mode=off max-depth.php`:
+
+```text
+maxDepthRecursive  8/8 ca đúng
+maxDepthStack      8/8 ca đúng
+maxDepthBfs        8/8 ca đúng
+wrongBfsPerNode    5/8 ca đúng; sai ở cây đủ 3 tầng → 7 (đúng là 3), nhánh sâu bên phải → 9 (đúng là 4), giá trị âm và 0 → 4 (đúng là 3)
+
+ngẫu nhiên: maxDepthRecursive 2000/2000, maxDepthStack 2000/2000, maxDepthBfs 2000/2000
+chuỗi trái 10000 nút: đệ quy → 10000, ngăn xếp → 10000
+```
+
+`rustc --edition 2021 -O max_depth.rs && ./max_depth`:
+
+```text
+max_depth_recursive 8/8 ca đúng
+max_depth_stack     8/8 ca đúng
+max_depth_bfs       8/8 ca đúng
+wrong_bfs_per_node  5/8 ca đúng; sai ở cây đủ 3 tầng → 7 (đúng là 3), nhánh sâu bên phải → 9 (đúng là 4), giá trị âm và 0 → 4 (đúng là 3)
+
+ngẫu nhiên: max_depth_recursive 2000/2000, max_depth_stack 2000/2000, max_depth_bfs 2000/2000
+chuỗi trái 10000 nút: đệ quy → 10000, ngăn xếp → 10000
+```
+
+PHP và Rust không đo thời gian; hai file kiểm đúng sai, đối chiếu ngẫu nhiên (bộ sinh số riêng của từng ngôn ngữ) và chạy thử chuỗi 10⁴ nút, cỡ lớn nhất của đề.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Ca dừng là lá, trả 1."** Chọn cây rỗng trả 0 thì gọn hơn: không phải xử lý riêng nút một con, và cây rỗng ở đầu vào tự đúng.
@@ -493,6 +581,8 @@ chuỗi 100000 nút, maxDepthStack: 100000
 - **"Node chịu được N tầng" là một con số cố định.** Cùng một hàm ra 7 827 khi chưa tối ưu và 13 909 sau khi JIT tối ưu.
 - **`catch (Exception e)` trong Java bắt được tràn ngăn xếp.** Không: `StackOverflowError` là `Error`.
 - **Giá trị mặc định là list trong Python.** Được tạo một lần và dùng chung giữa các lời gọi; dùng `None` rồi tạo list mới trong thân hàm, hoặc trả kết quả qua giá trị trả về như bản đệ quy chuẩn.
+- **PHP: tưởng PHP có giới hạn đệ quy như Python.** PHP 8.2 không đếm tầng: chuỗi 10⁴ nút chạy đệ quy bình thường. Thứ chặn bạn là Xdebug (512 tầng, báo "possible infinite loop") hoặc `memory_limit`. Chạy file với `-d xdebug.mode=off` nếu máy có Xdebug.
+- **Rust: dùng `match` mà quên mượn.** Viết `match root { Some(n) => … n.left … }` trên `Option<Rc<RefCell<TreeNode>>>` thì phải qua `n.borrow()` mới đọc được `left`; truyền `&Node` thay vì `Node` để khỏi phải `clone()` mỗi tầng.
 
 ## Câu hỏi tự kiểm tra
 

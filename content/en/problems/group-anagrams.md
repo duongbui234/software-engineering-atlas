@@ -117,7 +117,7 @@ The map holds every word once, plus one key per group: O(n·k) for the words, pl
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-group-anagrams/group-anagrams.ts) · [JavaScript](../code/neetcode-group-anagrams/group-anagrams.js) · [Python](../code/neetcode-group-anagrams/group_anagrams.py) · [Go](../code/neetcode-group-anagrams/group_anagrams.go) · [Java](../code/neetcode-group-anagrams/group-anagrams.java)
+[TypeScript](../code/neetcode-group-anagrams/group-anagrams.ts) · [JavaScript](../code/neetcode-group-anagrams/group-anagrams.js) · [Python](../code/neetcode-group-anagrams/group_anagrams.py) · [Go](../code/neetcode-group-anagrams/group_anagrams.go) · [Java](../code/neetcode-group-anagrams/group-anagrams.java) · [PHP](../code/neetcode-group-anagrams/group-anagrams.php) · [Rust](../code/neetcode-group-anagrams/group_anagrams.rs)
 
 ```ts
 // TypeScript: count key, joined with a separator
@@ -205,6 +205,33 @@ function groupAnagrams(strs) {
 }
 ```
 
+```php
+function groupAnagrams(array $strs): array {
+    $groups = [];
+    foreach ($strs as $s) {
+        $count = array_fill(0, 26, 0);
+        for ($i = 0, $n = strlen($s); $i < $n; $i++) $count[ord($s[$i]) - 97]++;
+        $groups[implode('#', $count)][] = $s; // an array can't be a key: join it into a string
+    }
+    return array_values($groups); // drop the string keys, keep only the groups
+}
+```
+
+```rust
+fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
+    // [u8; 26] has Hash + Eq by contents: use it directly as the key, no string joining
+    let mut groups: HashMap<[u8; 26], Vec<String>> = HashMap::new();
+    for s in strs {
+        let mut count = [0u8; 26]; // k ≤ 100, so u8 is enough
+        for b in s.bytes() {
+            count[(b - b'a') as usize] += 1;
+        }
+        groups.entry(count).or_default().push(s);
+    }
+    groups.into_values().collect()
+}
+```
+
 ```text
 $ node group-anagrams.ts
 bySortedKey            4/4 cases passed
@@ -248,9 +275,21 @@ $ java group-anagrams.java
 [[tan, nat], [eat, tea, ate], [bat]]
 [[eat, tea, ate], [bat], [tan, nat]]
 int[] as a key: get(new int[]{1, 2}) = null
+
+$ php group-anagrams.php
+...
+  mảng PHP giữ thứ tự chèn:       [["eat","tea","ate"],["tan","nat"],["bat"]]
+
+$ rustc --edition 2021 -O group_anagrams.rs && ./group_anagrams
+bySortedKey            4/4 ca đúng
+byCountKey             4/4 ca đúng
+byCountKeyNoSeparator  4/4 ca đúng
+...
+  byCountKeyNoSeparator: 1 nhóm
+  byCountKey:            2 nhóm
 ```
 
-With the same input, Go returns the groups in a different order on each run: the Go spec says map iteration order is unspecified, and the runtime deliberately shuffles it. Java does not keep order either (`HashMap`). Python and JS keep insertion order. Tests for this problem must normalize (sort within each group, then sort the groups) before comparing.
+With the same input, Go returns the groups in a different order on each run: the Go spec says map iteration order is unspecified, and the runtime deliberately shuffles it. Java does not keep order either (`HashMap`). Python, JS and PHP keep insertion order; Rust's `HashMap` does not. Tests for this problem must normalize (sort within each group, then sort the groups) before comparing.
 
 ## Misconceptions and common traps
 
@@ -261,6 +300,8 @@ With the same input, Go returns the groups in a different order on each run: the
 - **Comparing the output against a fixed order.** The problem allows any order, and Go changes the order on every run. Normalize before comparing.
 - **"The count key is always faster because O(k) < O(k log k)."** For short words, the constants (building 26 slots, joining 51 characters) outweigh the cost of sorting a few letters.
 - **Count keys with Unicode.** 26 slots are only for a–z. For arbitrary letters, only a sorted key by code point (or a map-based count table, sorted and joined) is correct.
+- **PHP: using an array as a key.** `$groups[$count]` fails with `Illegal offset type` (PHP 8 throws a `TypeError`). You have to join it into a string, and it still needs a separator like every other language. Remember `array_values` at the end, or the result becomes a JSON object with string keys instead of a list.
+- **Rust: `HashMap` iterates in random order, like Go.** Hashing uses a random seed on each run, so the group order changes between runs. A `[u8; 26]` key is compact, but `u8` overflows at 256: a debug build panics, an `-O` build wraps around and groups wrongly. For words longer than 255 letters use `[u16; 26]`.
 
 ## Self-check questions
 

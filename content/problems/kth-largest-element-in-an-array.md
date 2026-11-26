@@ -239,9 +239,9 @@ Python, n = 10⁵, ngẫu nhiên, trung vị 5 lần, mili giây:
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.ts) · [Python](../code/neetcode-kth-largest-element-in-an-array/kth_largest.py) · [Go](../code/neetcode-kth-largest-element-in-an-array/kth_largest.go) · [Java](../code/neetcode-kth-largest-element-in-an-array/kth-largest.java) · [JavaScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.js)
+[TypeScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.ts) · [Python](../code/neetcode-kth-largest-element-in-an-array/kth_largest.py) · [Go](../code/neetcode-kth-largest-element-in-an-array/kth_largest.go) · [Java](../code/neetcode-kth-largest-element-in-an-array/kth-largest.java) · [JavaScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.js) · [PHP](../code/neetcode-kth-largest-element-in-an-array/kth-largest.php) · [Rust](../code/neetcode-kth-largest-element-in-an-array/kth_largest.rs)
 
-Mỗi file chạy 10 ca: hai ví dụ của đề, một phần tử, toàn số bằng nhau, toàn số âm, hai biên giá trị, mảng đã sắp tăng, mảng sắp giảm với k = n, `[10, 9, 1]` (bẫy so sánh chuỗi) và `[2, -1, 10, -20]`.
+Mỗi file trong năm bản đầu chạy 10 ca: hai ví dụ của đề, một phần tử, toàn số bằng nhau, toàn số âm, hai biên giá trị, mảng đã sắp tăng, mảng sắp giảm với k = n, `[10, 9, 1]` (bẫy so sánh chuỗi) và `[2, -1, 10, -20]`.
 
 Min-heap k phần tử. TypeScript và JavaScript không có heap sẵn nên tự viết; Go phải khai báo kiểu cho `container/heap`:
 
@@ -367,6 +367,41 @@ function sortThenPick(nums, k) {
 function typedSort(nums, k) {
   const a = Int32Array.from(nums).sort();
   return a[a.length - k];
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+function findKthLargest(array $nums, int $k): int
+{
+    $top = new SplMinHeap();
+    foreach ($nums as $num) {
+        if ($top->count() < $k) {
+            $top->insert($num);
+        } elseif ($num > $top->top()) {
+            $top->extract();
+            $top->insert($num);
+        }
+    }
+    return $top->top();
+}
+```
+
+```rust
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
+
+fn find_kth_largest(nums: &[i32], k: usize) -> i32 {
+    let mut top: BinaryHeap<_> = nums[..k].iter().copied().map(Reverse).collect();
+    for &num in &nums[k..] {
+        let mut smallest = top.peek_mut().unwrap();
+        if num > smallest.0 {
+            *smallest = Reverse(num);
+        }
+    }
+    top.peek().unwrap().0
 }
 ```
 
@@ -533,6 +568,8 @@ maxHeapSubtract  10/10 ca đúng
 ```
 
 JavaScript in `[10, 9, 1].sort() = [1,10,9]`, `[-1, -2, -3].sort() = [-1,-2,-3]` và `Int32Array.from([10, 9, 1]).sort() = [1,9,10]`. Python in bảng đo ở trên; cả năm cách đúng 10/10.
+
+PHP dùng `SplMinHeap`. Rust bọc mỗi số bằng `Reverse` và dùng `peek_mut` để thay đỉnh rồi sửa heap. PHP in `6/6 ca đúng` và Rust in `6/6 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

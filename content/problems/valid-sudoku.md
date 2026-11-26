@@ -20,7 +20,7 @@ sources:
 > - Hai bẫy: viết chỉ số ô 3×3 thành `⌊r/3⌋ + ⌊c/3⌋` (thiếu nhân 3), và tạo 9 Set bằng `[set()] * 9` hay `Array(9).fill(new Set())`, cả hai làm **bảng hợp lệ** bị báo là sai.
 
 > [!info] Bối cảnh
-> Bài LeetCode 36, thuộc [[posts/2026-11-22-neetcode-counting-keys|ga 2: Khóa chuẩn và đếm tần suất]] trên **tuyến NeetCode: Mảng và chuỗi**. Post của ga dùng bài này làm ví dụ "một phần tử, nhiều khóa"; trang này so ba cách cài đặt và đo chúng. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn chỉ cần biết vòng lặp, mảng hai chiều và luật Sudoku.
+> Bài LeetCode 36, thuộc [[posts/2026-11-22-neetcode-counting-keys|ga 2: Khóa chuẩn và đếm tần suất]] trên **tuyến NeetCode: Mảng và chuỗi**. Post của ga dùng bài này làm ví dụ "một phần tử, nhiều khóa"; trang này so ba cách cài đặt và đo chúng. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn chỉ cần biết vòng lặp, mảng hai chiều và luật Sudoku.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Ô 3×3 (box)**: chín khối 3×3 chia bảng 9×9, đánh số 0..8 từ trái sang phải, trên xuống dưới.
@@ -124,7 +124,7 @@ Một lượt lại chậm hơn ba lượt: cả hai đều tạo 27 Set, nhưng
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-valid-sudoku/valid-sudoku.ts) · [Python](../code/neetcode-valid-sudoku/valid_sudoku.py) · [Go](../code/neetcode-valid-sudoku/valid_sudoku.go) · [Java](../code/neetcode-valid-sudoku/valid-sudoku.java) · [JavaScript](../code/neetcode-valid-sudoku/valid-sudoku.js)
+[TypeScript](../code/neetcode-valid-sudoku/valid-sudoku.ts) · [Python](../code/neetcode-valid-sudoku/valid_sudoku.py) · [Go](../code/neetcode-valid-sudoku/valid_sudoku.go) · [Java](../code/neetcode-valid-sudoku/valid-sudoku.java) · [PHP](../code/neetcode-valid-sudoku/valid-sudoku.php) · [Rust](../code/neetcode-valid-sudoku/valid_sudoku.rs) · [JavaScript](../code/neetcode-valid-sudoku/valid-sudoku.js)
 
 Mỗi file có cả ba cách và tự chạy 6 ca kiểm tra. Dưới đây là cách một lượt và cách bitmask.
 
@@ -298,6 +298,46 @@ function bitmask(board) {
 }
 ```
 
+```php
+function isValidSudoku(array $board): bool {
+    // array_fill với [] an toàn: mảng PHP là giá trị, chín ô là chín bản riêng
+    $rows = array_fill(0, 9, []); $cols = array_fill(0, 9, []); $boxes = array_fill(0, 9, []);
+    for ($r = 0; $r < 9; $r++) {
+        for ($c = 0; $c < 9; $c++) {
+            $d = $board[$r][$c];
+            if ($d === '.') continue;
+            $b = intdiv($r, 3) * 3 + intdiv($c, 3);
+            if (isset($rows[$r][$d]) || isset($cols[$c][$d]) || isset($boxes[$b][$d])) return false;
+            $rows[$r][$d] = $cols[$c][$d] = $boxes[$b][$d] = true;
+        }
+    }
+    return true;
+}
+```
+
+```rust
+fn is_valid_sudoku(board: Vec<Vec<char>>) -> bool {
+    let (mut rows, mut cols, mut boxes) = ([0u16; 9], [0u16; 9], [0u16; 9]);
+    for r in 0..9 {
+        for c in 0..9 {
+            let d = board[r][c];
+            if d == '.' {
+                continue;
+            }
+            let bit = 1u16 << (d as u8 - b'1'); // char → u8: '1' là 49
+            let b = r / 3 * 3 + c / 3;
+            if (rows[r] | cols[c] | boxes[b]) & bit != 0 { // Rust: & đứng trước != nên không cần thêm ngoặc
+                return false;
+            }
+            rows[r] |= bit;
+            cols[c] |= bit;
+            boxes[b] |= bit;
+        }
+    }
+    true
+}
+```
+
 
 File TypeScript chạy thêm bản sai công thức ô 3×3, rồi đo:
 
@@ -324,7 +364,7 @@ bitmask               6/6 ca đúng
 one_pass_shared_sets  4/6 ca đúng; sai ở: ví dụ hợp lệ, hai số 1 ở hai ô khác nhau
 ```
 
-Chín "set của hàng" thật ra là một set, nên chữ số 5 ở hàng 0 và chữ số 5 ở hàng 4 bị coi là cùng hàng. Go, Java và JavaScript in `6/6 ca đúng` cho cả ba cách.
+Chín "set của hàng" thật ra là một set, nên chữ số 5 ở hàng 0 và chữ số 5 ở hàng 4 bị coi là cùng hàng. Go, Java, JavaScript, PHP và Rust in `6/6 ca đúng` cho cả ba cách, và cũng bắt được bản sai công thức (`4/6`). Trong PHP, `array_fill(0, 9, [])` không dính bẫy này: mảng là giá trị, mỗi ô là một bản sao riêng.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -333,6 +373,8 @@ Chín "set của hàng" thật ra là một set, nên chữ số 5 ở hàng 0 v
 - **Tạo nhiều Set bằng phép nhân hay `fill`.** `[set()] * 9` và `Array(9).fill(new Set())` lặp lại **cùng một** object chín lần. Dùng list comprehension hoặc `Array.from({ length: 9 }, () => new Set())`.
 - **Java: `x & bit != 0` không biên dịch.** `!=` được tính trước, thành `x & true`. Phải có ngoặc.
 - **"O(1) thì cách nào cũng như nhau."** Cùng O(1) nhưng bitmask nhanh hơn 10 lần trong phép đo trên. Hằng số chỉ quan trọng khi hàm được gọi rất nhiều lần, như trong một bộ giải Sudoku thử hàng triệu bảng.
+- **PHP: `$x & $bit != 0` biên dịch được nhưng sai.** Như Java và C, `!=` được tính trước, thành `$x & true`, rồi `true` bị ép thành `1`. Khác Java, PHP không báo lỗi: file PHP cho `0b101 & 0b010 != 0` ra `1` (tưởng là có). Luôn đặt ngoặc quanh `&`.
+- **Rust: `char` không phải số.** `d - '1'` không biên dịch; phải đổi `d as u8 - b'1'`. Ngược lại, độ ưu tiên của Rust đặt `&` trước `!=`, nên `x & bit != 0` đúng nghĩa. Và `vec![HashSet::new(); 9]` clone từng phần tử, nên không dính bẫy chín ô dùng chung như JS và Python.
 
 ## Câu hỏi tự kiểm tra
 

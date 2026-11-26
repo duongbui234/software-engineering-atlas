@@ -246,7 +246,7 @@ Với số nút chẵn, thỏ đi `head → 3 → 5 → null` và dừng gọn. 
 
 Bản thứ ba là nhớ giá trị thay vì nút, đã chạy ở Cách 1.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới sáu ngôn ngữ
 
 | | Tập các nút | So hai con trỏ | Bẫy riêng |
 |---|---|---|---|
@@ -254,6 +254,7 @@ Bản thứ ba là nhớ giá trị thay vì nút, đã chạy ở Cách 1.
 | Python | `set()`, object thường băm theo `id` | `is` | `@dataclass` mặc định `eq=True`: không băm được (`TypeError` ở 9/10 ca), và `slow == fast` so theo `(val, next)` nên đệ quy mãi trong vòng toàn số 0 (`RecursionError`) |
 | Go | `map[*ListNode]bool`, khóa là địa chỉ | `==` trên con trỏ | quên `fast.Next != nil` thì panic nil pointer ở danh sách lẻ |
 | Java | `HashSet<ListNode>`, mặc định `Object.equals` là `==` | `==` | lớp nút ghi đè `equals`/`hashCode` theo `val` thì HashSet thành tập giá trị: sai ở `[1, 1, 1]`; Floyd dùng `==` nên vẫn đúng |
+| PHP | `SplObjectStorage`, khóa là chính object | `===` | `==` so thuộc tính theo thứ tự khai báo, đi theo `->next` mãi trong vòng: Fatal `Nesting level too deep`; quên kiểm `->next` chỉ ra cảnh báo và báo nhầm danh sách một nút |
 
 Bẫy của Python đáng nói kỹ vì nhiều người viết `ListNode` bằng `@dataclass` cho gọn. Dataclass mặc định sinh `__eq__` so từng trường và đặt `__hash__ = None`. Hệ quả chạy thật trong [file Python](../code/neetcode-linked-list-cycle/list_cycle.py): `set().add(node)` ném `TypeError: unhashable type`, còn Floyd viết `slow == fast` thì với hai nút khác nhau cùng giá trị, Python so tiếp `next` của chúng, rồi `next` của `next`… vòng không có điểm dừng nên ném `RecursionError`. Viết `slow is fast` thì đúng cả 10/10 ca dù nút là dataclass.
 
@@ -276,7 +277,7 @@ Các ngôn ngữ khác ở 10⁶ nút (không vòng / vòng ở giữa): Python 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-linked-list-cycle/list-cycle.ts) · [Python](../code/neetcode-linked-list-cycle/list_cycle.py) · [Go](../code/neetcode-linked-list-cycle/list_cycle.go) · [Java](../code/neetcode-linked-list-cycle/list-cycle.java) · [JavaScript](../code/neetcode-linked-list-cycle/list-cycle.js)
+[TypeScript](../code/neetcode-linked-list-cycle/list-cycle.ts) · [Python](../code/neetcode-linked-list-cycle/list_cycle.py) · [Go](../code/neetcode-linked-list-cycle/list_cycle.go) · [Java](../code/neetcode-linked-list-cycle/list-cycle.java) · [JavaScript](../code/neetcode-linked-list-cycle/list-cycle.js) · [PHP](../code/neetcode-linked-list-cycle/list-cycle.php)
 
 Mỗi file chạy 10 ca chung: ba ví dụ của đề, danh sách rỗng, một nút tự trỏ, `[1, 1, 1]` không vòng (bắt lỗi nhớ giá trị), danh sách chẵn và lẻ không vòng (bắt lỗi quên `fast.next`), nút cuối tự trỏ, và `[0, 0, 0, 0, 0]` có vòng (bắt lỗi `==` của dataclass). Đề LeetCode cho `pos` để mô tả vòng nhưng không truyền nó vào hàm; các file dùng `pos` chỉ để dựng danh sách.
 
@@ -341,6 +342,19 @@ function hasCycleSet(head) {
     seen.add(cur);
   }
   return false;
+}
+```
+
+```php
+// Cách 1: SplObjectStorage là tập object theo danh tính (khóa là chính object, không phải giá trị).
+function hasCycleSet(?ListNode $head): bool
+{
+    $seen = new SplObjectStorage();
+    for ($cur = $head; $cur !== null; $cur = $cur->next) {
+        if ($seen->contains($cur)) return true;
+        $seen->attach($cur);
+    }
+    return false;
 }
 ```
 
@@ -410,6 +424,20 @@ function hasCycleFloyd(head) {
     if (slow === fast) return true;
   }
   return false;
+}
+```
+
+```php
+// Cách 2: rùa 1 bước, thỏ 2 bước. === so danh tính object.
+function hasCycleFloyd(?ListNode $head): bool
+{
+    $slow = $fast = $head;
+    while ($fast !== null && $fast->next !== null) {
+        $slow = $slow->next;
+        $fast = $fast->next->next;
+        if ($slow === $fast) return true;
+    }
+    return false;
 }
 ```
 
@@ -503,6 +531,24 @@ function detectCycle(head) {
 }
 ```
 
+```php
+// LC 142: gặp nhau xong, đưa một con về đầu; cùng đi 1 bước, chỗ gặp lại là đầu vòng.
+function detectCycle(?ListNode $head): ?ListNode
+{
+    $slow = $fast = $head;
+    while ($fast !== null && $fast->next !== null) {
+        $slow = $slow->next;
+        $fast = $fast->next->next;
+        if ($slow === $fast) {
+            $a = $head;
+            while ($a !== $slow) { $a = $a->next; $slow = $slow->next; }
+            return $a;
+        }
+    }
+    return null;
+}
+```
+
 
 Kết quả `node list-cycle.ts`:
 
@@ -593,6 +639,25 @@ detectCycle     10/10 ca đúng (LC 142)
 khóa object của một nút: ["[object Object]"]
 ```
 
+PHP (`php -d xdebug.mode=off list-cycle.php`). Bản `wrongLooseEquals` viết `==` thay vì `===`; mỗi ca của nó chạy trong một tiến trình con riêng, vì lỗi của nó là lỗi Fatal, `try` không bắt được:
+
+```text
+hasCycleSet       10/10 ca đúng
+hasCycleFloyd     10/10 ca đúng
+hasCycleBrent     10/10 ca đúng
+wrongValueSet     9/10 ca đúng; sai ở giá trị trùng, không vòng → true
+wrongCompareFirst 7/10 ca đúng; sai ở giá trị trùng, không vòng → true, chẵn, không vòng → true, lẻ, không vòng → true
+wrongNoNextCheck  9/10 ca đúng; sai ở ví dụ 3 của đề → true; 3 cảnh báo đọc thuộc tính của null
+wrongLooseEquals  7/10 ca đúng; sai ở ví dụ 1 của đề → Fatal error: Nesting level too deep, ví dụ 2 của đề → Fatal error: Nesting level too deep, toàn số 0, có vòng → Fatal error: Nesting level too deep
+detectCycle       10/10 ca đúng (LC 142: trả nút đầu vòng)
+n = 100000, vòng ở giữa: hasCycleSet 7.82 ms, hasCycleFloyd 1.05 ms, hasCycleBrent 2.22 ms
+n = 1000000, vòng ở giữa: hasCycleSet 176.51 ms, hasCycleFloyd 44.74 ms, hasCycleBrent 55.95 ms
+```
+
+LeetCode không có Rust cho bài này: đề dựng một nút có **hai** con trỏ chỉ tới (nút trước nó và nút cuối vòng), mà `Option<Box<ListNode>>` chỉ cho mỗi nút một chủ. Vì vậy trang này có sáu ngôn ngữ, không có tab Rust.
+
+Hai điều PHP cho thấy. Thứ nhất, quên `$fast->next !== null` không làm PHP dừng: đọc `->next` của `null` chỉ là cảnh báo và trả `null`, nên ở danh sách một nút `$slow` và `$fast` cùng thành `null`, `null === null` là `true`, và hàm báo có vòng. Thứ hai, `==` trên object so từng thuộc tính theo thứ tự khai báo; lớp ở đây khai báo `$next` trước `$val`, nên PHP so `->next` trước, rồi `->next->next`…, và trong vòng thì sập với lỗi Fatal `Nesting level too deep`. Hai ca nút tự trỏ vẫn đúng vì ở đó `$slow` và `$fast` là cùng một object.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Gặp lại một giá trị đã thấy là có vòng."** Giá trị được phép trùng. Vòng là gặp lại **chính nút** đó.
@@ -602,6 +667,7 @@ khóa object của một nút: ["[object Object]"]
 - **Chỉ kiểm `fast`.** Thỏ nhảy hai mũi tên một lúc, nên phải kiểm cả `fast.next`; thiếu thì danh sách lẻ ném lỗi.
 - **Ghi đè bằng nhau theo giá trị.** Dataclass của Python, `equals` tự viết trong Java: Set và `==` khi đó so giá trị, không còn so danh tính.
 - **Sửa danh sách để đánh dấu** (ví dụ gán `val` thành một giá trị lạ). Chạy được với O(1) bộ nhớ nhưng phá dữ liệu của người gọi, và sai nếu giá trị lạ đó tình cờ có trong danh sách.
+- **PHP: so hai nút bằng `==`.** `==` trên object so giá trị từng thuộc tính, đệ quy theo `->next`; trong danh sách có vòng nó sập cả tiến trình (`Nesting level too deep`), không ném ngoại lệ nào để bắt. So danh tính phải dùng `===`, và tập các nút đã thăm là `SplObjectStorage` (hoặc mảng khóa `spl_object_id($node)`), không phải mảng khóa `$node->val`.
 
 ## Câu hỏi tự kiểm tra
 

@@ -20,7 +20,7 @@ sources:
 > - Hai bẫy: so **tập** ký tự (bỏ qua số lần, 6/8 ca), và so hai mảng đếm bằng `===` hay `==` trong JS và Java (so tham chiếu, 4/8 ca).
 
 > [!info] Bối cảnh
-> Bài LeetCode 567, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Bài này là [[problems/valid-anagram|Valid Anagram]] đặt trong một cửa sổ trượt: thay vì so hai chuỗi một lần, so s1 với mọi đoạn dài `|s1|` của s2. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn cần biết vòng lặp, chuỗi và mảng đếm.
+> Bài LeetCode 567, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Bài này là [[problems/valid-anagram|Valid Anagram]] đặt trong một cửa sổ trượt: thay vì so hai chuỗi một lần, so s1 với mọi đoạn dài `|s1|` của s2. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn cần biết vòng lặp, chuỗi và mảng đếm.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Hoán vị (permutation)**: cùng các ký tự với cùng số lần, chỉ khác thứ tự. `"ba"` là hoán vị của `"ab"`.
@@ -119,7 +119,7 @@ TypeScript, s2 ngẫu nhiên, s1 là `"zz…z"` nên không có hoán vị và m
 
 So 26 ô thường **không** so đủ 26 ô: `every` dừng ở ô lệch đầu tiên, và với dữ liệu ngẫu nhiên ô `a` thường đã lệch. Hàng cuối dựng ca xấu nhất cho nó: mọi cửa sổ khớp 24 ô đầu, lệch ở ô `y`. Khi đó bộ đếm số ô khớp nhanh hơn 3 lần. Cách sắp xếp tăng theo m: m = 1 000 đã gần một giây với n = 10⁴.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | So hai bảng đếm | Bẫy riêng |
 |---|---|---|
@@ -127,10 +127,12 @@ So 26 ô thường **không** so đủ 26 ô: `every` dừng ở ô lệch đầ
 | Python | `need == have` (list so theo giá trị) | không có bẫy so sánh; `Counter` cũng so được bằng `==` |
 | Go | `need == have` với `[26]int` | mảng cố định so được bằng `==`; slice `[]int` thì không biên dịch |
 | Java | `Arrays.equals(need, have)` | `need == have` với `int[]` so tham chiếu: luôn `false` |
+| PHP | `$need === $have` | `===` trên mảng so **giá trị** (cùng khóa, cùng giá trị, cùng thứ tự), nên bản "so mảng" sai ở JS/Java lại đúng ở PHP |
+| Rust | `need == have` với `[u32; 26]` | mảng cố định so theo giá trị; closure giữ `&mut diff` thì không đọc `diff` chỗ khác được, nên `bump` là hàm thường |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-permutation-in-string/permutation-in-string.ts) · [Python](../code/neetcode-permutation-in-string/permutation_in_string.py) · [Go](../code/neetcode-permutation-in-string/permutation_in_string.go) · [Java](../code/neetcode-permutation-in-string/permutation-in-string.java) · [JavaScript](../code/neetcode-permutation-in-string/permutation-in-string.js)
+[TypeScript](../code/neetcode-permutation-in-string/permutation-in-string.ts) · [Python](../code/neetcode-permutation-in-string/permutation_in_string.py) · [Go](../code/neetcode-permutation-in-string/permutation_in_string.go) · [Java](../code/neetcode-permutation-in-string/permutation-in-string.java) · [JavaScript](../code/neetcode-permutation-in-string/permutation-in-string.js) · [PHP](../code/neetcode-permutation-in-string/permutation-in-string.php) · [Rust](../code/neetcode-permutation-in-string/permutation_in_string.rs)
 
 Mỗi file có ba cách và chạy 8 ca. Dưới đây là bảng đếm trượt và bộ đếm số ô khớp.
 
@@ -335,6 +337,81 @@ function matchesCounter(s1, s2) {
 }
 ```
 
+```php
+function slideCompare26(string $s1, string $s2): bool {
+    $m = strlen($s1);
+    if ($m > strlen($s2)) return false;
+    $need = array_fill(0, 26, 0);
+    $have = array_fill(0, 26, 0);
+    for ($i = 0; $i < $m; $i++) { $need[at($s1, $i)]++; $have[at($s2, $i)]++; }
+    if ($need === $have) return true; // mảng PHP so theo GIÁ TRỊ: cùng khóa, cùng giá trị, cùng thứ tự
+    for ($r = $m; $r < strlen($s2); $r++) {
+        $have[at($s2, $r)]++;
+        $have[at($s2, $r - $m)]--;
+        if ($need === $have) return true;
+    }
+    return false;
+}
+
+function matchesCounter(string $s1, string $s2): bool {
+    $m = strlen($s1);
+    if ($m > strlen($s2)) return false;
+    $diff = array_fill(0, 26, 0);
+    for ($i = 0; $i < $m; $i++) { $diff[at($s1, $i)]--; $diff[at($s2, $i)]++; }
+    $matches = count(array_filter($diff, fn($d) => $d === 0));
+    // closure PHP chép biến vào lúc tạo: phải "use (&...)" thì mới sửa được diff và matches bên ngoài
+    $bump = function (int $c, int $delta) use (&$diff, &$matches): void {
+        if ($diff[$c] === 0) $matches--;
+        $diff[$c] += $delta;
+        if ($diff[$c] === 0) $matches++;
+    };
+    for ($r = $m; $r < strlen($s2) && $matches < 26; $r++) {
+        $bump(at($s2, $r), 1);
+        $bump(at($s2, $r - $m), -1);
+    }
+    return $matches === 26;
+}
+```
+
+```rust
+fn slide_compare_26(s1: &str, s2: &str) -> bool {
+    let (a, b) = (s1.as_bytes(), s2.as_bytes());
+    let m = a.len();
+    if m > b.len() { return false; }
+    let (mut need, mut have) = ([0u32; 26], [0u32; 26]);
+    for i in 0..m { need[at(a, i)] += 1; have[at(b, i)] += 1; }
+    if need == have { return true; } // [u32; 26] so theo giá trị, từng ô một
+    for r in m..b.len() {
+        have[at(b, r)] += 1;
+        have[at(b, r - m)] -= 1;
+        if need == have { return true; }
+    }
+    false
+}
+
+fn matches_counter(s1: &str, s2: &str) -> bool {
+    let (a, b) = (s1.as_bytes(), s2.as_bytes());
+    let m = a.len();
+    if m > b.len() { return false; }
+    let mut diff = [0i32; 26];
+    for i in 0..m { diff[at(a, i)] -= 1; diff[at(b, i)] += 1; }
+    let mut matches = diff.iter().filter(|&&d| d == 0).count();
+    // hàm thường thay cho closure: closure giữ &mut diff thì vòng for không đọc diff được nữa
+    fn bump(diff: &mut [i32; 26], matches: &mut usize, c: usize, delta: i32) {
+        if diff[c] == 0 { *matches -= 1; }
+        diff[c] += delta;
+        if diff[c] == 0 { *matches += 1; }
+    }
+    let mut r = m;
+    while r < b.len() && matches < 26 {
+        bump(&mut diff, &mut matches, at(b, r), 1);
+        bump(&mut diff, &mut matches, at(b, r - m), -1);
+        r += 1;
+    }
+    matches == 26
+}
+```
+
 
 File TypeScript chạy thêm hai bản sai rồi đo:
 
@@ -364,7 +441,19 @@ matchesCounter   8/8 ca đúng
 wrongArrayEquals 4/8 ca đúng
 ```
 
-Python, Go và JavaScript in `8/8 ca đúng` cho cả ba cách.
+Python, Go, JavaScript, PHP và Rust in `8/8 ca đúng` cho cả ba cách. File PHP chạy thêm hai bản để thấy chỗ PHP khác các ngôn ngữ kia:
+
+```text
+$ php permutation-in-string.php
+sortEachWindow      8/8 ca đúng
+slideCompare26      8/8 ca đúng
+matchesCounter      8/8 ca đúng
+wrongSetOnly        6/8 ca đúng; sai ở (aab, abbab) (hello, ooolleoooleh)
+arrayIdentical      8/8 ca đúng
+wrongClosureByValue 5/8 ca đúng; sai ở (ab, eidbaooo) (adc, dcda) (aab, xxbaa)
+```
+
+`arrayIdentical` so hai bảng đếm bằng `===` như bản sai của JS, nhưng ở PHP nó đúng. `wrongClosureByValue` quên `&` trong `use`, nên `bump` chỉ sửa bản sao và `matches` không bao giờ lên 26.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -373,6 +462,8 @@ Python, Go và JavaScript in `8/8 ca đúng` cho cả ba cách.
 - **So hai mảng bằng `===` (JS) hay `==` (Java).** Không báo lỗi, chỉ luôn sai. Go và Python thì so theo giá trị.
 - **Quên ca s1 dài hơn s2.** Phải trả `false` trước khi lập bảng đếm, nếu không chỉ số `s2[i]` vượt biên (Go, Java ném lỗi; JS ra `NaN`).
 - **"O(n) luôn nhanh hơn O(26·n)."** Phép so 26 ô dừng ở ô lệch đầu tiên, nên với dữ liệu ngẫu nhiên nó thường nhanh hơn bộ đếm. Bộ đếm chỉ thắng rõ khi các cửa sổ gần khớp.
+- **PHP: closure không có `&` sửa bản sao.** `function (...) use ($diff, $matches)` chép hai biến vào lúc tạo closure; mọi lần `bump` đổi bản sao đó rồi bỏ đi. Viết `use (&$diff, &$matches)`. Ngược lại, `$need === $have` trên mảng đã so giá trị, không cần vòng lặp.
+- **Rust: closure mượn `&mut` chặn mọi lần đọc khác.** Một closure `bump` sửa `diff` giữ khoản mượn `&mut diff` suốt đời của nó, nên đọc `diff` trong vòng lặp sẽ không biên dịch. Truyền `&mut diff` vào một hàm thường mỗi lần gọi là cách gọn nhất.
 
 ## Câu hỏi tự kiểm tra
 

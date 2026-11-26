@@ -110,7 +110,7 @@ Mỗi chuỗi thành `<độ dài>#<nội dung>`. Bộ giải mã:
 | Phân biệt `[]` và `[""]` | không | có | có |
 | Độ dài thêm | n − 1 ký tự | tới gấp đôi nếu nội dung đầy ký tự đặc biệt | số chữ số của độ dài + 1, mỗi chuỗi |
 
-### Bên dưới năm ngôn ngữ: "độ dài" là gì
+### Bên dưới bảy ngôn ngữ: "độ dài" là gì
 
 | | `"😀"` dài | Cắt chuỗi theo |
 |---|---|---|
@@ -118,12 +118,14 @@ Mỗi chuỗi thành `<độ dài>#<nội dung>`. Bộ giải mã:
 | Java | `length()` = 2 (đơn vị UTF-16) | đơn vị UTF-16 |
 | Python | `len` = 1 (code point) | code point |
 | Go | `len` = 4 (byte UTF-8) | byte |
+| PHP | `strlen` = 4 (byte); `mb_strlen` = 1 (code point) | byte với `substr`, code point với `mb_substr` |
+| Rust | `len()` = 4 (byte UTF-8); `chars().count()` = 1 | byte (cắt giữa ký tự thì panic) |
 
 Trong **cùng** một ngôn ngữ, đếm và cắt dùng cùng một đơn vị, nên tiền tố độ dài luôn đúng. Lỗi xuất hiện khi hai bên dùng hai đơn vị: mã hóa bằng JS rồi giải mã bằng Python, hoặc trong cùng JS mà một bên dùng `length`, bên kia dùng `[...s]` (đếm code point). File TypeScript tái hiện đúng ca đó. Giao thức thật vì vậy luôn định nghĩa độ dài bằng **byte** sau khi mã hóa UTF-8.
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-encode-and-decode-strings/encode-decode.ts) · [Python](../code/neetcode-encode-and-decode-strings/encode_decode.py) · [Go](../code/neetcode-encode-and-decode-strings/encode_decode.go) · [Java](../code/neetcode-encode-and-decode-strings/encode-decode.java) · [JavaScript](../code/neetcode-encode-and-decode-strings/encode-decode.js)
+[TypeScript](../code/neetcode-encode-and-decode-strings/encode-decode.ts) · [Python](../code/neetcode-encode-and-decode-strings/encode_decode.py) · [Go](../code/neetcode-encode-and-decode-strings/encode_decode.go) · [Java](../code/neetcode-encode-and-decode-strings/encode-decode.java) · [PHP](../code/neetcode-encode-and-decode-strings/encode-decode.php) · [Rust](../code/neetcode-encode-and-decode-strings/encode_decode.rs) · [JavaScript](../code/neetcode-encode-and-decode-strings/encode-decode.js)
 
 Mỗi file có cả ba cách và chạy 9 ca, gồm `[]`, `[""]`, chuỗi chứa `,`, `#`, `/` và emoji. Dưới đây là cách tiền tố độ dài.
 
@@ -221,6 +223,41 @@ function lengthDecode(s) {
 }
 ```
 
+```php
+function lengthEncode(array $strs): string {
+    return implode('', array_map(fn($s) => strlen($s) . '#' . $s, $strs)); // strlen đếm BYTE
+}
+
+function lengthDecode(string $s): array {
+    $out = []; $i = 0;
+    while ($i < strlen($s)) {
+        $h = strpos($s, '#', $i);
+        $n = (int) substr($s, $i, $h - $i);
+        $out[] = substr($s, $h + 1, $n); // substr cũng đếm byte: khớp với lúc mã hóa
+        $i = $h + 1 + $n;
+    }
+    return $out;
+}
+```
+
+```rust
+fn length_encode(strs: &[String]) -> String {
+    strs.iter().map(|s| format!("{}#{}", s.len(), s)).collect() // len() đếm byte UTF-8
+}
+
+fn length_decode(s: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < s.len() {
+        let h = i + s[i..].find('#').unwrap();
+        let n: usize = s[i..h].parse().unwrap();
+        out.push(s[h + 1..h + 1 + n].to_string()); // cắt theo byte; cắt giữa một ký tự thì panic
+        i = h + 1 + n;
+    }
+    out
+}
+```
+
 
 ```text
 $ node encode-decode.ts
@@ -233,7 +270,7 @@ ví dụ: ["12#ab","#"] → "5#12#ab1##"
 "😀".length = 2, [..."😀"].length = 1
 ```
 
-Dòng thứ tư mã hóa bằng `s.length` (2 cho emoji) nhưng giải mã bằng cách đếm code point (1 cho emoji), nên lấy thừa một ký tự và lệch luôn phần sau. Các file khác in độ dài của emoji theo cách đếm của ngôn ngữ đó: Python `len("😀") = 1, len("😀".encode()) = 4`; Go `len("😀") = 4, utf8.RuneCountInString("😀") = 1`; Java `"😀".length() = 2, codePointCount = 1`. Cả năm ngôn ngữ cho `9/9 ca đúng` với thoát ký tự và tiền tố độ dài.
+Dòng thứ tư mã hóa bằng `s.length` (2 cho emoji) nhưng giải mã bằng cách đếm code point (1 cho emoji), nên lấy thừa một ký tự và lệch luôn phần sau. Các file khác in độ dài của emoji theo cách đếm của ngôn ngữ đó: Python `len("😀") = 1, len("😀".encode()) = 4`; Go `len("😀") = 4, utf8.RuneCountInString("😀") = 1`; Java `"😀".length() = 2, codePointCount = 1`; PHP `strlen("😀") = 4, mb_strlen("😀") = 1`; Rust `"😀".len() = 4, "😀".chars().count() = 1`. Cả bảy ngôn ngữ cho `9/9 ca đúng` với thoát ký tự và tiền tố độ dài.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -243,6 +280,8 @@ Dòng thứ tư mã hóa bằng `s.length` (2 cho emoji) nhưng giải mã bằn
 - **Tìm `#` bằng `lastIndexOf` hay `split("#")`.** Nội dung có thể chứa `#`. Chỉ dấu `#` **đầu tiên** tính từ vị trí hiện tại mới chắc chắn thuộc phần độ dài.
 - **Java: `split(",")` bỏ các chuỗi rỗng ở cuối.** `"a,,".split(",")` ra `[a]`. Phải truyền `split(",", -1)`.
 - **Hai bên đếm độ dài khác đơn vị.** Đúng trong mỗi ngôn ngữ, sai khi nối hai ngôn ngữ với nhau. Định nghĩa độ dài bằng byte UTF-8 nếu dữ liệu đi qua mạng.
+- **PHP: trộn hàm byte với hàm `mb_`.** `strlen`/`substr` đếm byte, `mb_strlen`/`mb_substr` đếm ký tự. Mã hóa bằng một loại, giải mã bằng loại kia là đúng lỗi lệch đơn vị ở trên (file PHP in `8/9`). Thoát ký tự thì dùng `strtr` với mảng: nó thay mọi cặp trong một lượt, còn hai lần `str_replace` nối nhau có thể thay lại chính phần vừa sinh ra.
+- **Rust: cắt `&str` theo byte.** `s[a..b]` dùng chỉ số byte, khớp với `len()`, nên tiền tố độ dài chạy đúng với emoji. Nhưng nếu độ dài lệch đơn vị và vị trí cắt rơi vào giữa một ký tự nhiều byte, chương trình **panic** thay vì trả rác. Dùng `s.get(a..b)` khi dữ liệu không đáng tin.
 
 ## Câu hỏi tự kiểm tra
 

@@ -145,7 +145,7 @@ Duplicates (the LeetCode 81 version, target 2 absent):
 | 10 000 | 1 012 steps | 14 steps |
 | 100 000 | 10 016 steps | 17 steps |
 
-### Under the hood in five languages
+### Under the hood in seven languages
 
 | | Built-in binary search | Language-specific trap |
 |---|---|---|
@@ -153,10 +153,12 @@ Duplicates (the LeetCode 81 version, target 2 absent):
 | Python | `bisect_left(a, x, lo, hi)` | `hi` is the **open** end; `nums[lo] <= target < nums[mid]` works because Python chains comparisons |
 | Go | `sort.Search(n, f)`, `sort.SearchInts`, `slices.BinarySearch` | `sort.Search` returns `n` when no cell satisfies `f`: check `i < n` before reading `nums[i]`. Slicing `nums[a:b]` does not copy, but the returned index counts from a |
 | Java | `Arrays.binarySearch(a, from, to, key)` | when absent it returns `−(insertion point) − 1`, not −1: `binarySearch([1, 3, 5], 4)` gives `-3`. Check `>= 0`. The `to` end is open |
+| PHP | none; `array_search` is a linear scan | `array_search` returns `false` when missing, not `-1`; writing `if (!array_search(...))` also misfires when the value is found at index 0. Pass `true` as the third argument to compare with `===` |
+| Rust | `slice::binary_search` on a subslice | slicing `&nums[pivot..]` and searching returns an index relative to the subslice: add `pivot` back. The closed interval's `hi = mid - 1` reaches −1, so the one-pass version keeps indices in `i64` |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.ts) · [Python](../code/neetcode-search-in-rotated-sorted-array/search_rotated.py) · [Go](../code/neetcode-search-in-rotated-sorted-array/search_rotated.go) · [Java](../code/neetcode-search-in-rotated-sorted-array/search-rotated.java) · [JavaScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.js)
+[TypeScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.ts) · [Python](../code/neetcode-search-in-rotated-sorted-array/search_rotated.py) · [Go](../code/neetcode-search-in-rotated-sorted-array/search_rotated.go) · [Java](../code/neetcode-search-in-rotated-sorted-array/search-rotated.java) · [JavaScript](../code/neetcode-search-in-rotated-sorted-array/search-rotated.js) · [PHP](../code/neetcode-search-in-rotated-sorted-array/search-rotated.php) · [Rust](../code/neetcode-search-in-rotated-sorted-array/search_rotated.rs)
 
 Each file has the scan, one pass and two passes, run on 9 cases. The TypeScript file adds the wrong version, the duplicates version, the exhaustive small-case check and the measurements. Below are the one-pass and two-pass approaches.
 
@@ -346,6 +348,97 @@ function pivotThenSearch(nums, target) {
 }
 ```
 
+```php
+// One-pass approach: at every step, at least one half [lo, mid] or [mid, hi] is sorted. Ask whether target lies in that half.
+function onePass(array $nums, int $target): int
+{
+    $lo = 0;
+    $hi = count($nums) - 1;
+    while ($lo <= $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$lo] <= $nums[$mid]) { // left half is increasing (the = is needed for lo == mid)
+            if ($nums[$lo] <= $target && $target < $nums[$mid]) $hi = $mid - 1;
+            else $lo = $mid + 1;
+        } else { // right half is increasing
+            if ($nums[$mid] < $target && $target <= $nums[$hi]) $lo = $mid + 1;
+            else $hi = $mid - 1;
+        }
+    }
+    return -1;
+}
+
+// Two-pass approach: find the break point (index of the minimum, as in problem 153), then a plain binary search on the half that holds target.
+function pivotThenSearch(array $nums, int $target): int
+{
+    $n = count($nums);
+    $lo = 0;
+    $hi = $n - 1;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] > $nums[$hi]) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    $pivot = $lo; // nums[pivot..] and nums[..pivot-1] are both increasing
+    [$a, $b] = $target >= $nums[$pivot] && $target <= $nums[$n - 1] ? [$pivot, $n - 1] : [0, $pivot - 1];
+    return binarySearch($nums, $target, $a, $b);
+}
+
+function binarySearch(array $nums, int $target, int $lo, int $hi): int
+{
+    while ($lo <= $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($nums[$mid] === $target) return $mid;
+        if ($nums[$mid] < $target) $lo = $mid + 1;
+        else $hi = $mid - 1;
+    }
+    return -1;
+}
+```
+
+```rust
+// One-pass approach: at every step, at least one half [lo, mid] or [mid, hi] is sorted.
+// The closed interval needs hi = mid - 1, which can reach -1, so indices stay in i64.
+fn one_pass(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0i64, nums.len() as i64 - 1);
+    while lo <= hi {
+        let mid = lo + (hi - lo) / 2;
+        let (l, m, h) = (nums[lo as usize], nums[mid as usize], nums[hi as usize]);
+        if m == target {
+            return mid as i32;
+        }
+        if l <= m {
+            // left half [lo, mid] is increasing (the = is needed for lo == mid)
+            if l <= target && target < m { hi = mid - 1 } else { lo = mid + 1 }
+        } else {
+            // right half [mid, hi] is increasing
+            if m < target && target <= h { lo = mid + 1 } else { hi = mid - 1 }
+        }
+    }
+    -1
+}
+
+// Two-pass approach: find the break point (index of the minimum, as in problem 153), then binary_search on the half that holds target.
+fn pivot_then_search(nums: &[i32], target: i32) -> i32 {
+    let (mut lo, mut hi) = (0, nums.len() - 1);
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if nums[mid] > nums[hi] { lo = mid + 1 } else { hi = mid }
+    }
+    let pivot = lo; // nums[pivot..] and nums[..pivot] are both increasing
+    // Slice instead of passing two bounds: the left half is nums[..pivot], empty when pivot = 0.
+    let (offset, half) = if target >= nums[pivot] && target <= nums[nums.len() - 1] {
+        (pivot, &nums[pivot..])
+    } else {
+        (0, &nums[..pivot])
+    };
+    match half.binary_search(&target) {
+        Ok(i) => (offset + i) as i32, // an index within the subslice needs the offset added back
+        Err(_) => -1,
+    }
+}
+```
+
 Output of the TypeScript file:
 
 ```text
@@ -382,6 +475,8 @@ Arrays.binarySearch([1, 3, 5], 4) = -3
 
 Python, Go and JavaScript print `9/9 ca đúng` ("9/9 cases passed") for all three approaches.
 
+PHP (`php search-rotated.php`) and Rust (`rustc --edition 2021 -O search_rotated.rs`) also run the broken version, the exhaustive small-case check and the duplicates version: `9/9` for the three correct approaches, `8/9` for `wrongStrict` (wrong on `[3,1] t=1`), 0 of 806 pairs off (18 for the broken one), and 109 / 1 012 / 10 016 steps for LeetCode 81, matching TypeScript.
+
 ## Misconceptions and common traps
 
 - **"You must find the break first."** Not required: one pass only needs to know which half is intact at each step. Finding the break first (two passes) is the easier-to-get-right option, not a requirement.
@@ -390,6 +485,8 @@ Python, Go and JavaScript print `9/9 ca đúng` ("9/9 cases passed") for all thr
 - **Asking about the unsorted half.** "target > nums[mid]" means nothing if the right half contains the drop. Always ask about the sorted half and deduce the other by elimination.
 - **Java: comparing the result of `Arrays.binarySearch` with −1.** It returns `−(insertion point) − 1`, so −1 only means "the insertion point is 0". Check `>= 0`.
 - **Reusing the solution on an array with duplicates.** You must add the `lo++, hi--` branch when three cells are equal, and accept O(n) in the worst case.
+- **PHP: `array_search` as the reference.** It returns `false` when missing and `0` when found at the front; a loose `== -1` or `!` gets both wrong. The sample file turns `false` into `-1` with `=== false`.
+- **Rust: forgetting to add the `offset` after searching a subslice.** `nums[pivot..].binary_search(&t)` returns an index within the subslice; returning it directly is wrong whenever the target is in the right half. With `pivot = 0` the left half `&nums[..0]` is empty, not a panic.
 
 ## Self-check questions
 

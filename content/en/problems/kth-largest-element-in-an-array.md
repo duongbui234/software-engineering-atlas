@@ -240,9 +240,9 @@ In Python, hand-written quickselect loses to `sorted`, because `sorted` runs in 
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.ts) · [Python](../code/neetcode-kth-largest-element-in-an-array/kth_largest.py) · [Go](../code/neetcode-kth-largest-element-in-an-array/kth_largest.go) · [Java](../code/neetcode-kth-largest-element-in-an-array/kth-largest.java) · [JavaScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.js)
+[TypeScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.ts) · [Python](../code/neetcode-kth-largest-element-in-an-array/kth_largest.py) · [Go](../code/neetcode-kth-largest-element-in-an-array/kth_largest.go) · [Java](../code/neetcode-kth-largest-element-in-an-array/kth-largest.java) · [JavaScript](../code/neetcode-kth-largest-element-in-an-array/kth-largest.js) · [PHP](../code/neetcode-kth-largest-element-in-an-array/kth-largest.php) · [Rust](../code/neetcode-kth-largest-element-in-an-array/kth_largest.rs)
 
-Each file runs 10 cases: the problem's two examples, a single element, all-equal values, all negatives, the two value bounds, an ascending array, a descending array with k = n, `[10, 9, 1]` (the string-comparison trap) and `[2, -1, 10, -20]`.
+Each of the original five files runs 10 cases: the problem's two examples, a single element, all-equal values, all negatives, the two value bounds, an ascending array, a descending array with k = n, `[10, 9, 1]` (the string-comparison trap) and `[2, -1, 10, -20]`.
 
 The k-element min-heap. TypeScript and JavaScript have no built-in heap, so we write one; Go needs a type declared for `container/heap`:
 
@@ -368,6 +368,41 @@ function sortThenPick(nums, k) {
 function typedSort(nums, k) {
   const a = Int32Array.from(nums).sort();
   return a[a.length - k];
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+function findKthLargest(array $nums, int $k): int
+{
+    $top = new SplMinHeap();
+    foreach ($nums as $num) {
+        if ($top->count() < $k) {
+            $top->insert($num);
+        } elseif ($num > $top->top()) {
+            $top->extract();
+            $top->insert($num);
+        }
+    }
+    return $top->top();
+}
+```
+
+```rust
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
+
+fn find_kth_largest(nums: &[i32], k: usize) -> i32 {
+    let mut top: BinaryHeap<_> = nums[..k].iter().copied().map(Reverse).collect();
+    for &num in &nums[k..] {
+        let mut smallest = top.peek_mut().unwrap();
+        if num > smallest.0 {
+            *smallest = Reverse(num);
+        }
+    }
+    top.peek().unwrap().0
 }
 ```
 
@@ -540,6 +575,8 @@ maxHeapSubtract  10/10 correct
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 JavaScript prints `[10, 9, 1].sort() = [1,10,9]`, `[-1, -2, -3].sort() = [-1,-2,-3]` and `Int32Array.from([10, 9, 1]).sort() = [1,9,10]`. Python prints the measurement table above; all five approaches pass 10/10.
+
+PHP uses `SplMinHeap`. Rust wraps each number in `Reverse` and uses `peek_mut` to replace the root and restore the heap. PHP prints `6/6 ca đúng` and Rust prints `6/6 ca đúng`.
 
 ## Misconceptions and common traps
 

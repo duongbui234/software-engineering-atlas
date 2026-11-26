@@ -123,7 +123,7 @@ The outer scan takes `O(mn)`. In the two solutions each land cell joins the work
 
 The files parse digit rows into an integer grid of 0 and 1, then run both approaches. When submitting LC-0200, you can keep the character grid and compare against `'1'`, marking with `'0'`. The six cases include the grid above, diagonal land, all water, one row of land, a square with a cycle, and a full `300 × 300` grid. Each case also checks that BFS preserves every cell and DFS clears all land.
 
-[TypeScript](../code/neetcode-number-of-islands/count-islands.ts) · [Python](../code/neetcode-number-of-islands/count_islands.py) · [Go](../code/neetcode-number-of-islands/count_islands.go) · [Java](../code/neetcode-number-of-islands/count-islands.java) · [JavaScript](../code/neetcode-number-of-islands/count-islands.js)
+[TypeScript](../code/neetcode-number-of-islands/count-islands.ts) · [Python](../code/neetcode-number-of-islands/count_islands.py) · [Go](../code/neetcode-number-of-islands/count_islands.go) · [Java](../code/neetcode-number-of-islands/count-islands.java) · [JavaScript](../code/neetcode-number-of-islands/count-islands.js) · [PHP](../code/neetcode-number-of-islands/count-islands.php) · [Rust](../code/neetcode-number-of-islands/count_islands.rs)
 
 ```ts
 const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]
@@ -552,6 +552,206 @@ for (const {grid, want} of cases) {
 console.log(`${cases.length}/${cases.length} ca đúng`)
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+const DIRECTIONS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+function floodBfs(array $grid): int
+{
+    $rows = count($grid);
+    $cols = count($grid[0]);
+    $seen = array_fill(0, $rows * $cols, false);
+    $result = 0;
+
+    for ($start = 0; $start < $rows * $cols; $start++) {
+        if ($grid[intdiv($start, $cols)][$start % $cols] !== 1 || $seen[$start]) {
+            continue;
+        }
+
+        $result++;
+        $queue = [$start];
+        $seen[$start] = true;
+        for ($head = 0; $head < count($queue); $head++) {
+            $cell = $queue[$head];
+            $row = intdiv($cell, $cols);
+            $col = $cell % $cols;
+            foreach (DIRECTIONS as [$dr, $dc]) {
+                $r = $row + $dr;
+                $c = $col + $dc;
+                if ($r < 0 || $r >= $rows || $c < 0 || $c >= $cols || $grid[$r][$c] !== 1) {
+                    continue;
+                }
+                $next = $r * $cols + $c;
+                if ($seen[$next]) {
+                    continue;
+                }
+                $seen[$next] = true;
+                $queue[] = $next;
+            }
+        }
+    }
+    return $result;
+}
+
+function floodDfsInPlace(array &$grid): int
+{
+    $rows = count($grid);
+    $cols = count($grid[0]);
+    $result = 0;
+
+    for ($start = 0; $start < $rows * $cols; $start++) {
+        $row = intdiv($start, $cols);
+        $col = $start % $cols;
+        if ($grid[$row][$col] !== 1) {
+            continue;
+        }
+
+        $result++;
+        $stack = [$start];
+        $grid[$row][$col] = 0;
+        while ($stack) {
+            $cell = array_pop($stack);
+            $cr = intdiv($cell, $cols);
+            $cc = $cell % $cols;
+            foreach (DIRECTIONS as [$dr, $dc]) {
+                $r = $cr + $dr;
+                $c = $cc + $dc;
+                if ($r < 0 || $r >= $rows || $c < 0 || $c >= $cols || $grid[$r][$c] !== 1) {
+                    continue;
+                }
+                $grid[$r][$c] = 0;
+                $stack[] = $r * $cols + $c;
+            }
+        }
+    }
+    return $result;
+}
+
+$cases = [
+    [["10011", "00011", "01010", "11000"], 3],
+    [["100", "010", "001"], 3],
+    [["000", "000"], 0],
+    [["11111"], 1],
+    [["11", "11"], 1],
+    [array_fill(0, 300, str_repeat("1", 300)), 1],
+];
+foreach ($cases as [$rows, $want]) {
+    $cells = array_map(fn(string $row): array => array_map('intval', str_split($row)), $rows);
+    $before = $cells;
+    if (floodBfs($cells) !== $want || $cells !== $before) {
+        throw new RuntimeException("BFS sai");
+    }
+    if (floodDfsInPlace($cells) !== $want) {
+        throw new RuntimeException("DFS sai");
+    }
+    foreach ($cells as $row) {
+        if (array_sum($row) !== 0) {
+            throw new RuntimeException("DFS sai");
+        }
+    }
+}
+$n = count($cases);
+echo "{$n}/{$n} ca đúng\n";
+```
+
+```rust
+const DIRECTIONS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+
+fn flood_bfs(grid: &[Vec<u8>]) -> usize {
+    let (rows, cols) = (grid.len(), grid[0].len());
+    let mut seen = vec![false; rows * cols];
+    let mut result = 0;
+
+    for start in 0..rows * cols {
+        if grid[start / cols][start % cols] != 1 || seen[start] {
+            continue;
+        }
+
+        result += 1;
+        let mut queue = vec![start];
+        seen[start] = true;
+        let mut head = 0;
+        while head < queue.len() {
+            let cell = queue[head];
+            head += 1;
+            let (row, col) = ((cell / cols) as i32, (cell % cols) as i32);
+            for (dr, dc) in DIRECTIONS {
+                let (r, c) = (row + dr, col + dc);
+                if r < 0 || r >= rows as i32 || c < 0 || c >= cols as i32 {
+                    continue;
+                }
+                let (r, c) = (r as usize, c as usize);
+                let next = r * cols + c;
+                if grid[r][c] != 1 || seen[next] {
+                    continue;
+                }
+                seen[next] = true;
+                queue.push(next);
+            }
+        }
+    }
+    result
+}
+
+fn flood_dfs_in_place(grid: &mut [Vec<u8>]) -> usize {
+    let (rows, cols) = (grid.len(), grid[0].len());
+    let mut result = 0;
+
+    for start in 0..rows * cols {
+        let (row, col) = (start / cols, start % cols);
+        if grid[row][col] != 1 {
+            continue;
+        }
+
+        result += 1;
+        let mut stack = vec![start];
+        grid[row][col] = 0;
+        while let Some(cell) = stack.pop() {
+            let (cr, cc) = ((cell / cols) as i32, (cell % cols) as i32);
+            for (dr, dc) in DIRECTIONS {
+                let (r, c) = (cr + dr, cc + dc);
+                if r < 0 || r >= rows as i32 || c < 0 || c >= cols as i32 {
+                    continue;
+                }
+                let (r, c) = (r as usize, c as usize);
+                if grid[r][c] != 1 {
+                    continue;
+                }
+                grid[r][c] = 0;
+                stack.push(r * cols + c);
+            }
+        }
+    }
+    result
+}
+
+fn main() {
+    let big = vec!["1".repeat(300); 300];
+    let mut cases: Vec<(Vec<String>, usize)> = vec![
+        (vec!["10011", "00011", "01010", "11000"].into_iter().map(String::from).collect(), 3),
+        (vec!["100", "010", "001"].into_iter().map(String::from).collect(), 3),
+        (vec!["000", "000"].into_iter().map(String::from).collect(), 0),
+        (vec!["11111".to_string()], 1),
+        (vec!["11".to_string(), "11".to_string()], 1),
+    ];
+    cases.push((big, 1));
+
+    for (rows, want) in &cases {
+        let mut cells: Vec<Vec<u8>> = rows.iter().map(|row| row.bytes().map(|b| b - b'0').collect()).collect();
+        let before = cells.clone();
+        if flood_bfs(&cells) != *want || cells != before {
+            panic!("BFS sai");
+        }
+        if flood_dfs_in_place(&mut cells) != *want || cells.iter().flatten().any(|&v| v != 0) {
+            panic!("DFS sai");
+        }
+    }
+    println!("{}/{} ca đúng", cases.len(), cases.len());
+}
+```
+
 ```text
 6/6 cases passed
 ```
@@ -565,6 +765,8 @@ console.log(`${cases.length}/${cases.length} ca đúng`)
 - **Use `shift()` or `pop(0)` with a dynamic array.** Moving the remaining elements adds work. Use a head index or a deque.
 - **Call a second function with the same grid after in-place DFS.** Copy each row if you need to reuse it. Copying just the outer array still shares the rows.
 - **Mix characters and integers.** JavaScript distinguishes `'1'` and `1` in strict comparison. The examples consistently use integers after parsing.
+- **PHP: assuming an array is passed by reference.** PHP arrays are copy-on-write, so `floodDfsInPlace` must take `array &$grid` for the land it clears to stay cleared outside the function. In turn, `floodBfs` gets a copy and cannot change the grid by accident.
+- **Rust: subtracting below zero on a `usize` index.** `row - 1` with `row = 0` panics in a debug build. The Rust version switches to `i32` to add the direction, checks the bounds, and only then converts back to `usize` to index.
 
 ## Self-check questions
 

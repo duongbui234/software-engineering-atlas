@@ -302,9 +302,9 @@ Go và Java dịch vòng đếm thành mã máy chạy rất nhanh trên mảng 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-find-the-duplicate-number/find-duplicate.ts) · [Python](../code/neetcode-find-the-duplicate-number/find_duplicate.py) · [Go](../code/neetcode-find-the-duplicate-number/find_duplicate.go) · [Java](../code/neetcode-find-the-duplicate-number/find-duplicate.java) · [JavaScript](../code/neetcode-find-the-duplicate-number/find-duplicate.js)
+[TypeScript](../code/neetcode-find-the-duplicate-number/find-duplicate.ts) · [Python](../code/neetcode-find-the-duplicate-number/find_duplicate.py) · [Go](../code/neetcode-find-the-duplicate-number/find_duplicate.go) · [Java](../code/neetcode-find-the-duplicate-number/find-duplicate.java) · [JavaScript](../code/neetcode-find-the-duplicate-number/find-duplicate.js) · [PHP](../code/neetcode-find-the-duplicate-number/find-duplicate.php) · [Rust](../code/neetcode-find-the-duplicate-number/find_duplicate.rs)
 
-Mỗi file chạy 10 ca chung: ba ví dụ của đề, `[1, 1]`, số trùng ở đầu, ở cuối, lặp nhiều lần (`[2, 2, 2, 2, 2]`, `[1, 4, 4, 2, 4]`), một vòng tự trỏ, và mảng mười phần tử. File JavaScript thêm `[10, 2, 9, …, 10]` để thử `sort()` theo chuỗi. File TypeScript còn kiểm vét cạn mọi mảng hợp lệ với n từ 1 tới 6 và 2 000 mảng ngẫu nhiên (mulberry32); Go, Java và Python đối chiếu thêm 2 000 hoặc 500 mảng ngẫu nhiên.
+Mỗi file trong năm bản đầu chạy 10 ca chung: ba ví dụ của đề, `[1, 1]`, số trùng ở đầu, ở cuối, lặp nhiều lần (`[2, 2, 2, 2, 2]`, `[1, 4, 4, 2, 4]`), một vòng tự trỏ, và mảng mười phần tử. File JavaScript thêm `[10, 2, 9, …, 10]` để thử `sort()` theo chuỗi. File TypeScript còn kiểm vét cạn mọi mảng hợp lệ với n từ 1 tới 6 và 2 000 mảng ngẫu nhiên (mulberry32); Go, Java và Python đối chiếu thêm 2 000 hoặc 500 mảng ngẫu nhiên.
 
 Rùa và thỏ:
 
@@ -393,6 +393,44 @@ function floyd(nums) {
     slow = nums[slow];
   }
   return a;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+function findDuplicate(array $nums): int {
+    $slow = $fast = 0;
+    do {
+        $slow = $nums[$slow];
+        $fast = $nums[$nums[$fast]];
+    } while ($slow !== $fast);
+    $entry = 0;
+    while ($entry !== $slow) {
+        $entry = $nums[$entry];
+        $slow = $nums[$slow];
+    }
+    return $entry;
+}
+```
+
+```rust
+fn find_duplicate(nums: &[usize]) -> usize {
+    let (mut slow, mut fast) = (0, 0);
+    loop {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+        if slow == fast {
+            break;
+        }
+    }
+    let mut entry = 0;
+    while entry != slow {
+        entry = nums[entry];
+        slow = nums[slow];
+    }
+    entry
 }
 ```
 
@@ -570,6 +608,8 @@ sortInPlace      11/11 ca đúng
 [10, 2, 9, 10].sort() = [10,10,2,9]
 sortInPlace([3, 1, 3, 4, 2]) = 3; mảng của người gọi giờ là [1,2,3,3,4]
 ```
+
+Hai bản bổ sung chạy Floyd với chỉ số làm nút. Mọi giá trị đầu vào hợp lệ đều dùng được làm chỉ số bước tiếp theo. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

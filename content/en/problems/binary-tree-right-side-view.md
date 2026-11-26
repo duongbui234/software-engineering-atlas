@@ -197,7 +197,7 @@ BFS is O(n) only if taking the front item of the queue costs O(1). A plain array
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-binary-tree-right-side-view/right-side.ts) · [Python](../code/neetcode-binary-tree-right-side-view/right_side.py) · [Go](../code/neetcode-binary-tree-right-side-view/right_side.go) · [Java](../code/neetcode-binary-tree-right-side-view/right-side.java) · [JavaScript](../code/neetcode-binary-tree-right-side-view/right-side.js)
+[TypeScript](../code/neetcode-binary-tree-right-side-view/right-side.ts) · [Python](../code/neetcode-binary-tree-right-side-view/right_side.py) · [Go](../code/neetcode-binary-tree-right-side-view/right_side.go) · [Java](../code/neetcode-binary-tree-right-side-view/right-side.java) · [JavaScript](../code/neetcode-binary-tree-right-side-view/right-side.js) · [PHP](../code/neetcode-binary-tree-right-side-view/right-side.php) · [Rust](../code/neetcode-binary-tree-right-side-view/right_side.rs)
 
 Each file builds trees from LeetCode-style level-order arrays (`null` is a gap) and runs 11 shared cases: empty tree, single node, full 7-node tree, left branch deeper (`[1, 2, 3, 4]`), left branch only, right branch only, bottom under the left subtree (the figure at the top), zigzag (`[1, 2, 3, 4, null, null, null, null, 5]`, where the seen nodes go right, then left, then the right child of a left node), negative and boundary values ±100, a 100-node left chain, and a 100-node complete tree. Each file also cross-checks the five correct approaches on 3,000 random trees of 0 to 30 nodes.
 
@@ -309,6 +309,45 @@ function bfsLast(root) {
 }
 ```
 
+```php
+// Approach 1: BFS, snapshot the level size, the level's last node is the one you see.
+function bfsLast(?TreeNode $root): array {
+    $res = [];
+    if ($root === null) return $res;
+    $queue = [$root];
+    while ($queue) {
+        $size = count($queue); // snapshot the level size
+        $next = [];
+        foreach ($queue as $i => $node) {
+            if ($i === $size - 1) $res[] = $node->val;
+            if ($node->left !== null) $next[] = $node->left;
+            if ($node->right !== null) $next[] = $node->right;
+        }
+        $queue = $next;
+    }
+    return $res;
+}
+```
+
+```rust
+// Approach 1: level-by-level BFS, the level's last node is the one you see.
+fn bfs_last(root: &Node) -> Vec<i32> {
+    let mut res = Vec::new();
+    let mut queue: Vec<Rc<RefCell<TreeNode>>> = root.iter().cloned().collect();
+    while !queue.is_empty() {
+        res.push(queue.last().unwrap().borrow().val); // last node of the level
+        let mut next = Vec::new();
+        for node in &queue {
+            let n = node.borrow();
+            if let Some(l) = &n.left { next.push(l.clone()); }
+            if let Some(r) = &n.right { next.push(r.clone()); }
+        }
+        queue = next;
+    }
+    res
+}
+```
+
 Right-first DFS, recording on reaching a new level:
 
 ```ts
@@ -386,6 +425,37 @@ function dfsRightFirst(root) {
   };
   go(root, 0);
   return res;
+}
+```
+
+```php
+// Approach 3: right-first DFS; the first node to reach a new depth is the one you see.
+function dfsRightFirst(?TreeNode $root): array {
+    $res = [];
+    $go = function (?TreeNode $node, int $depth) use (&$res, &$go): void {
+        if ($node === null) return;
+        if ($depth === count($res)) $res[] = $node->val;
+        $go($node->right, $depth + 1);
+        $go($node->left, $depth + 1);
+    };
+    $go($root, 0);
+    return $res;
+}
+```
+
+```rust
+// Approach 3: right-first DFS; the first node to reach a new depth is the one you see.
+fn dfs_right_first(root: &Node) -> Vec<i32> {
+    fn go(node: &Node, depth: usize, res: &mut Vec<i32>) {
+        let Some(n) = node else { return };
+        let n = n.borrow();
+        if depth == res.len() { res.push(n.val); }
+        go(&n.right, depth + 1, res);
+        go(&n.left, depth + 1, res);
+    }
+    let mut res = Vec::new();
+    go(root, 0, &mut res);
+    res
 }
 ```
 
@@ -501,9 +571,39 @@ wrongLiveLength        5/11 cases passed; wrong on full 7-node tree → [4,6,7],
 cross-check on 3000 random trees of 0..30 nodes: the five correct approaches agree 3000/3000; wrongRightPointers wrong on 2552 trees
 ```
 
-The number of random trees that `wrongRightPointers` gets wrong differs between languages (2,534 to 2,571) because each language has its own random generator; TypeScript and JavaScript share mulberry32 with seed 42 and so print the same number. The timings were taken while the machine was busy with other work, so read the ratios, not the last digits.
+`php right-side.php` (on a machine with Xdebug, add `-d xdebug.mode=off`):
 
-### Under the five languages
+```text
+bfsLast                11/11 cases passed
+bfsRightFirst          11/11 cases passed
+dfsRightFirst          11/11 cases passed
+dfsRightFirstIterative 11/11 cases passed
+dfsOverwrite           11/11 cases passed
+wrongRightPointers     4/11 cases passed; wrong on left branch deeper → [1,3], left branch only → [1], bottom under left subtree → [1,3], zigzag → [1,3], negative and boundary values → [0,100], 100-node left chain → [1], 100-node complete tree → [1,3,7,15,31,63]
+wrongLeftFirst         5/11 cases passed; wrong on full 7-node tree → [1,2,4], left branch deeper → [1,2,4], bottom under left subtree → [1,2,5,6], zigzag → [1,2,4,5], negative and boundary values → [0,-100,-50], 100-node complete tree → [1,2,4,8,16,32,64]
+wrongLiveLength        5/11 cases passed; wrong on full 7-node tree → [4,6,7], left branch deeper → [2,3,4], bottom under left subtree → [2,3,5,6], zigzag → [2,3,4,5], negative and boundary values → [-100,100,-50], 100-node complete tree → [50,75,88,94,97,99,100]
+
+cross-check on 3000 random trees of 0..30 nodes: the five correct approaches agree 3000/3000; wrongRightPointers wrong on 2543 trees
+```
+
+`rustc --edition 2021 -O right_side.rs && ./right_side`:
+
+```text
+bfs_last                  11/11 cases passed
+bfs_right_first           11/11 cases passed
+dfs_right_first           11/11 cases passed
+dfs_right_first_iterative 11/11 cases passed
+dfs_overwrite             11/11 cases passed
+wrong_right_pointers      4/11 cases passed; wrong on left branch deeper → [1,3], left branch only → [1], bottom under left subtree → [1,3], zigzag → [1,3], negative and boundary values → [0,100], 100-node left chain → [1], 100-node complete tree → [1,3,7,15,31,63]
+wrong_left_first          5/11 cases passed; wrong on full 7-node tree → [1,2,4], left branch deeper → [1,2,4], bottom under left subtree → [1,2,5,6], zigzag → [1,2,4,5], negative and boundary values → [0,-100,-50], 100-node complete tree → [1,2,4,8,16,32,64]
+wrong_live_length         5/11 cases passed; wrong on full 7-node tree → [4,6,7], left branch deeper → [2,3,4], bottom under left subtree → [2,3,5,6], zigzag → [2,3,4,5], negative and boundary values → [-100,100,-50], 100-node complete tree → [50,75,88,94,97,99,100]
+
+cross-check on 3000 random trees of 0..30 nodes: the five correct approaches agree 3000/3000; wrong_right_pointers wrong on 2532 trees
+```
+
+The number of random trees that `wrongRightPointers` gets wrong differs between languages (2,532 to 2,571) because each language has its own random generator; TypeScript and JavaScript share mulberry32 with seed 42 and so print the same number. The timings were taken while the machine was busy with other work, so read the ratios, not the last digits.
+
+### Under the seven languages
 
 | | The queue to use | Language-specific trap |
 |---|---|---|
@@ -511,6 +611,8 @@ The number of random trees that `wrongRightPointers` gets wrong differs between 
 | Python | `collections.deque` with `popleft()`, or two lists | `list.pop(0)` is O(n); `for node in q` while modifying the `deque` inside the loop throws `RuntimeError: deque mutated during iteration`; `for _ in range(len(q))` is safe because the `range` is computed once |
 | Go | a slice, cut with `queue = queue[size:]` after each level | `for i := 0; i < len(queue); i++` recomputes `len` on every pass; together with `append` inside the loop the whole tree becomes one level (2/11) |
 | Java | `ArrayDeque` | `ArrayDeque` forbids `null` elements, so check `node.left != null` before `offer`; `i < q.size()` in the condition is also re-read each pass (5/11); recursion on a 10⁵-node chain throws `StackOverflowError` |
+| PHP | `SplQueue`, or two arrays `level`/`next` | `array_shift` renumbers the whole array, so it is O(n), the same trap as `shift()`; `count($queue)` in the `for` condition is re-read each pass too (5/11); a recursive closure needs `use (&$res, &$go)` |
+| Rust | `VecDeque` | `for _ in 0..queue.len()` evaluates the range once, so it snapshots the level size by itself; to hit the re-read bug you have to write `while i < queue.len()` (5/11). Holding one node's `borrow()` while you `borrow_mut()` another is fine, but holding it across a reassignment of that same node panics with `already borrowed` |
 
 Recursion is not a problem at the problem's limit (depth at most 100), but it is one when the function is reused on large trees: Python throws `RecursionError` on a 5,000-node chain, Java throws `StackOverflowError` on a 10⁵-node chain, and Go handles a 10⁶-node chain because goroutine stacks grow on their own.
 
@@ -522,6 +624,8 @@ Recursion is not a problem at the problem's limit (depth at most 100), but it is
 - **Swapping the two calls in the DFS.** "Record the first time a level is met" is only right when you go right first. Going left first gives the left side view, unless you switch to overwriting.
 - **Using `shift()` or `list.pop(0)` as the queue.** The result is right, but BFS becomes O(n²). At 100 nodes you do not notice; at 10⁵ nodes you do.
 - **Taking the largest value of each level.** The problem asks for the **rightmost** node, not the **largest**. The tree `[1, 5, 2]` has level 1 as 5 then 2; from the right you see 2, even though 5 is larger. In the file's "negative and boundary values" case the rightmost node happens to be the largest too, so that case does not catch this bug.
+- **PHP: `array_shift` as the queue.** The result is right but each take is O(n) because PHP renumbers the keys. Use `SplQueue` (`dequeue`, `bottom()` to peek at the head) or two arrays per level.
+- **Rust: thinking `for _ in 0..queue.len()` re-reads the length.** It does not: the range `0..n` is evaluated once before the loop, so it is exactly the level-size snapshot. The re-read bug only appears with `while i < queue.len()`.
 
 ## Self-check questions
 

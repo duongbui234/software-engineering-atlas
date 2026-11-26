@@ -344,9 +344,9 @@ Other languages (10⁶ tasks, n = 100): Python heap + deque 326.3 ms, formula 30
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-task-scheduler/task-scheduler.ts) · [Python](../code/neetcode-task-scheduler/task_scheduler.py) · [Go](../code/neetcode-task-scheduler/task_scheduler.go) · [Java](../code/neetcode-task-scheduler/task-scheduler.java) · [JavaScript](../code/neetcode-task-scheduler/task-scheduler.js)
+[TypeScript](../code/neetcode-task-scheduler/task-scheduler.ts) · [Python](../code/neetcode-task-scheduler/task_scheduler.py) · [Go](../code/neetcode-task-scheduler/task_scheduler.go) · [Java](../code/neetcode-task-scheduler/task-scheduler.java) · [JavaScript](../code/neetcode-task-scheduler/task-scheduler.js) · [PHP](../code/neetcode-task-scheduler/task-scheduler.php) · [Rust](../code/neetcode-task-scheduler/task_scheduler.rs)
 
-Every file runs 10 shared cases: the problem's three examples, n = 0, a single task with n = 100, `AAAAAABCDEFG` (many idle intervals), `ABBB` (catches picking the wrong task), `AABBCCDD` and `AAABBBCCCDDE` (the task count beats the frame formula), and `AAAB` with n = 3. The JavaScript file adds `AAAAAAAAAABBBCC` to catch the `sort()` bug.
+Each of the original five files runs 10 shared cases: the problem's three examples, n = 0, a single task with n = 100, `AAAAAABCDEFG` (many idle intervals), `ABBB` (catches picking the wrong task), `AABBCCDD` and `AAABBBCCCDDE` (the task count beats the frame formula), and `AAAB` with n = 3. The JavaScript file adds `AAAAAAAAAABBBCC` to catch the `sort()` bug.
 
 Simulation with a heap and a cooldown queue:
 
@@ -525,6 +525,42 @@ function formula(tasks, n) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function leastInterval(array $tasks, int $cooldown): int
+{
+    if ($tasks === []) {
+        return 0;
+    }
+    $counts = array_count_values($tasks);
+    $most = max($counts);
+    $leaders = 0;
+    foreach ($counts as $count) {
+        if ($count === $most) {
+            $leaders++;
+        }
+    }
+    return max(count($tasks), ($most - 1) * ($cooldown + 1) + $leaders);
+}
+```
+
+```rust
+fn least_interval(tasks: &[u8], cooldown: usize) -> usize {
+    if tasks.is_empty() {
+        return 0;
+    }
+    let mut counts = [0; 26];
+    for &task in tasks {
+        counts[usize::from(task - b'A')] += 1;
+    }
+    let most = *counts.iter().max().unwrap();
+    let leaders = counts.iter().filter(|&&count| count == most).count();
+    tasks.len().max((most - 1) * (cooldown + 1) + leaders)
+}
+```
+
 
 Output of `node task-scheduler.ts`:
 
@@ -620,6 +656,8 @@ tasks     n      heap       sort/round    formula
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+The two added versions use the frame formula. Rust uses 26 counters for the ASCII bytes `A` through `Z`. PHP prints `10/10 ca đúng` and Rust prints `10/10 ca đúng`.
 
 ## Misconceptions and common traps
 

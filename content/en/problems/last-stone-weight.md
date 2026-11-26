@@ -333,9 +333,9 @@ Python, 10⁵ stones: `heapq` 30.2 ms, counting by weight 2.0 ms.
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-last-stone-weight/last-stone.ts) · [Python](../code/neetcode-last-stone-weight/last_stone.py) · [Go](../code/neetcode-last-stone-weight/last_stone.go) · [Java](../code/neetcode-last-stone-weight/last-stone.java) · [JavaScript](../code/neetcode-last-stone-weight/last-stone.js)
+[TypeScript](../code/neetcode-last-stone-weight/last-stone.ts) · [Python](../code/neetcode-last-stone-weight/last_stone.py) · [Go](../code/neetcode-last-stone-weight/last_stone.go) · [Java](../code/neetcode-last-stone-weight/last-stone.java) · [JavaScript](../code/neetcode-last-stone-weight/last-stone.js) · [PHP](../code/neetcode-last-stone-weight/last-stone.php) · [Rust](../code/neetcode-last-stone-weight/last_stone.rs)
 
-Each file runs 9 cases: the problem's example, one stone, two equal stones (answer 0), three equal stones, two cancelling pairs, `[10, 2, 9]` to catch string comparison, a large gap `[1000, 1]`, and two many-round cases.
+Each of the original five files runs 9 cases: the problem's example, one stone, two equal stones (answer 0), three equal stones, two cancelling pairs, `[10, 2, 9]` to catch string comparison, a large gap `[1000, 1]`, and two many-round cases.
 
 ```ts
 // Max-heap: take the two heaviest stones, push the remainder (if any) back. O(n log n).
@@ -406,6 +406,45 @@ function heapSim(stones) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function lastStoneWeight(array $stones): int
+{
+    $heap = new SplMaxHeap();
+    foreach ($stones as $stone) {
+        $heap->insert($stone);
+    }
+
+    while ($heap->count() > 1) {
+        $heavier = $heap->extract();
+        $lighter = $heap->extract();
+        if ($heavier > $lighter) {
+            $heap->insert($heavier - $lighter);
+        }
+    }
+
+    return $heap->isEmpty() ? 0 : $heap->extract();
+}
+```
+
+```rust
+use std::collections::BinaryHeap;
+
+fn last_stone_weight(stones: Vec<i32>) -> i32 {
+    let mut heap = BinaryHeap::from(stones);
+    while heap.len() > 1 {
+        let heavier = heap.pop().unwrap();
+        let lighter = heap.pop().unwrap();
+        if heavier > lighter {
+            heap.push(heavier - lighter);
+        }
+    }
+    heap.pop().unwrap_or(0)
+}
+```
+
 
 Output of `node last-stone.ts`:
 
@@ -438,6 +477,8 @@ wrongDirectPop   5/9 cases correct; wrong on [2 7 4 1 8 1] → 5, [10 2 9] → 3
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 `java last-stone.java` gives 9/9 for `lastStoneWeight`, `subtractComparator` and `counting`; `node last-stone.js` gives 9/9 for `heapSim` and `sortedInsert`.
+
+Both versions use a standard-library max-heap (`SplMaxHeap` and `BinaryHeap`). PHP prints `7/7 ca đúng` and Rust prints `7/7 ca đúng`.
 
 ## Misconceptions and common traps
 

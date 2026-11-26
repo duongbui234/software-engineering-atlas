@@ -139,7 +139,7 @@ Code JS này đúng chỉ nhờ `Infinity`; dịch nó sang Python hay Java là 
 
 **`hi = Integer.MAX_VALUE` cho "chắc ăn"** là bẫy khác: `(1 + Integer.MAX_VALUE) / 2` tràn thành −1 073 741 824 ([[concepts/midpoint-overflow|tràn điểm giữa]] của ga 1). Với tốc độ âm, phép tính giờ ra số nhỏ, `mid` "kịp", `hi` thành số âm và vòng lặp thoát với `lo = 1`. Sai 8/10 ca.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | ⌈p / k⌉ | Tổng giờ | Thư viện | Bẫy riêng |
 |---|---|---|---|---|
@@ -147,6 +147,8 @@ Code JS này đúng chỉ nhờ `Infinity`; dịch nó sang Python hay Java là 
 | Python | `-(-p // k)` | `int` không giới hạn | `bisect_left(range(1, m + 1), True, key=…)` (3.10+) | `math.ceil(p / k)` sai khi p > 2⁵³; `range` cho `bisect` đọc từng phần tử khi cần, không tạo danh sách |
 | Go | `(p + k - 1) / k` | `int` 64 bit | `sort.Search(n, f)` | `sort.Search` tìm trên `[0, n)`, nên chỉ số `i` ứng với tốc độ `i + 1` |
 | Java | `(p + k - 1) / k` | nên là `long` | không có cho hàm; `Arrays.binarySearch` chỉ cho mảng | `int` tràn khi thử lần lượt; `p + k - 1` vừa `int` chỉ vì p, k ≤ 10⁹; `/ 0` ném `ArithmeticException` |
+| PHP | `intdiv($p + $k - 1, $k)` | `int` 64 bit | không có tìm nhị phân trên hàm | `$p / $k` ra float; `intdiv($p, 0)` ném `DivisionByZeroError` (bản `lo = 0` sai 2/10 ca). Tràn `int` thì PHP lặng lẽ đổi sang float chứ không cuộn vòng |
+| Rust | `(p + k - 1) / k` hoặc `div_ceil` | cộng trong `i64` | `partition_point` chỉ cho slice, không cho khoảng số | cộng trong `i32` thì ca ba đống 805 306 368 tràn: debug panic, `-O` cuộn vòng; chia cho 0 luôn panic. `piles.iter().max()` trả `Option` |
 
 ### Đo
 
@@ -165,7 +167,7 @@ Python, cùng cỡ với đống tới 10⁹: vòng lặp viết tay và `bisect
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-koko-eating-bananas/koko-eating.ts) · [Python](../code/neetcode-koko-eating-bananas/koko_eating.py) · [Go](../code/neetcode-koko-eating-bananas/koko_eating.go) · [Java](../code/neetcode-koko-eating-bananas/koko-eating.java) · [JavaScript](../code/neetcode-koko-eating-bananas/koko-eating.js)
+[TypeScript](../code/neetcode-koko-eating-bananas/koko-eating.ts) · [Python](../code/neetcode-koko-eating-bananas/koko_eating.py) · [Go](../code/neetcode-koko-eating-bananas/koko_eating.go) · [Java](../code/neetcode-koko-eating-bananas/koko-eating.java) · [JavaScript](../code/neetcode-koko-eating-bananas/koko-eating.js) · [PHP](../code/neetcode-koko-eating-bananas/koko-eating.php) · [Rust](../code/neetcode-koko-eating-bananas/koko_eating.rs)
 
 Mỗi file chạy 10 ca: ba ví dụ của đề, một đống, đáp án 1, đống 10⁹ chia đôi, h chỉ kém tổng số chuối 1 (đáp án 2), và ca ba đống 805 306 368 làm tràn `int`. Python và Go có thêm bản dùng thư viện chuẩn.
 
@@ -283,6 +285,50 @@ function minEatingSpeed(piles, h) {
 }
 ```
 
+```php
+// Số giờ để ăn hết với tốc độ k: mỗi đống mất ⌈p / k⌉ giờ. intdiv giữ mọi thứ là int.
+function hoursNeeded(array $piles, int $k): int
+{
+    $hours = 0;
+    foreach ($piles as $p) $hours += intdiv($p + $k - 1, $k); // int PHP 64 bit: tổng tới 10¹³ không tràn
+    return $hours;
+}
+
+// Tìm nhị phân trên đáp án. Bất biến: hi luôn kịp; mọi tốc độ nhỏ hơn lo đều không kịp.
+function minEatingSpeed(array $piles, int $h): int
+{
+    $lo = 1;
+    $hi = max($piles); // tốc độ max(piles) ăn mỗi đống trong 1 giờ, luôn kịp vì h >= n
+    while ($lo < $hi) {
+        $mid = $lo + intdiv($hi - $lo, 2);
+        if (hoursNeeded($piles, $mid) <= $h) $hi = $mid; // mid kịp: có thể chính là đáp án, giữ lại
+        else $lo = $mid + 1;
+    }
+    return $lo;
+}
+```
+
+```rust
+// Số giờ để ăn hết với tốc độ k: mỗi đống mất ⌈p / k⌉ giờ. Cộng trong i64: tổng có thể tới 10¹³.
+fn hours_needed(piles: &[i32], k: i64) -> i64 {
+    piles.iter().map(|&p| (p as i64 + k - 1) / k).sum() // i64::div_ceil cũng được (Rust 1.73+)
+}
+
+// Tìm nhị phân trên đáp án. Bất biến: hi luôn kịp; mọi tốc độ nhỏ hơn lo đều không kịp.
+fn min_eating_speed(piles: &[i32], h: i32) -> i32 {
+    let (mut lo, mut hi) = (1i64, *piles.iter().max().unwrap() as i64); // max() trả Option: mảng rỗng thì None
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        if hours_needed(piles, mid) <= h as i64 {
+            hi = mid; // mid kịp: có thể chính là đáp án, giữ lại
+        } else {
+            lo = mid + 1;
+        }
+    }
+    lo as i32
+}
+```
+
 
 Kết quả `node koko-eating.ts`, gồm ba bản sai:
 
@@ -313,6 +359,8 @@ ngẫu nhiên: tổng int lệch tổng long ở 0/100000 bộ
 
 Python in `ZeroDivisionError` cho `lo_from_zero` và cặp `math.ceil` sai ở 2⁵³ + 1; Go in tổng `int32` là `-1879048192`; JavaScript in `Math.ceil(p / k) lệch cách số nguyên ở 0/1000000 cặp`.
 
+PHP (`php koko-eating.php`) và Rust (`rustc --edition 2021 -O koko_eating.rs`) in cùng số ca như bản TypeScript cho bốn bản đầu, và `2000/2000` ở phần kiểm ngẫu nhiên. Bản `lo = 0` giống Java: PHP sai 2/10 ca vì `DivisionByZeroError`, Rust sai 2/10 ca vì `checked_div` báo chia cho 0. Rust in thêm `tổng ba đống 805306368 trong i32: None`.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Tìm kiếm nhị phân cần một mảng đã sắp."** Nó cần một câu hỏi có/không đổi chiều một lần. Khoảng `[1, max]` với phép thử "kịp giờ" là đủ; không cần tạo mảng tốc độ.
@@ -322,6 +370,8 @@ Python in `ZeroDivisionError` cho `lo_from_zero` và cặp `math.ceil` sai ở 2
 - **`hi` quá lớn "cho chắc".** `hi = 10⁹` vẫn đúng (chỉ thêm vài lần thử), nhưng `Integer.MAX_VALUE` cùng `(lo + hi) / 2` làm `mid` âm.
 - **Tổng giờ trong `int`.** Thử lần lượt thì tràn thật. Tìm nhị phân thì không tràn nhờ một lập luận về `mid >= k* / 2`, nhưng dùng `long` an toàn hơn và không tốn gì.
 - **Quên rằng h có thể rất lớn.** Với h ≥ tổng số chuối, đáp án là 1. Khoảng `[1, max]` xử lý tự nhiên, không cần ca riêng.
+- **PHP: `ceil($p / $k)`.** Ra float, phải ép về int; `intdiv($p + $k - 1, $k)` giữ mọi thứ là int. Bản `lo = 0` không im lặng như JS: `intdiv($p, 0)` ném `DivisionByZeroError`.
+- **Rust: cộng số giờ trong `i32`.** Ca ba đống 805 306 368 vượt `i32::MAX`: bản debug panic, bản `-O` cuộn vòng ra số âm và trả tốc độ sai. Cộng trong `i64` như `hours_needed`; `checked_add` cho thấy tổng `i32` ra `None`.
 
 ## Câu hỏi tự kiểm tra
 

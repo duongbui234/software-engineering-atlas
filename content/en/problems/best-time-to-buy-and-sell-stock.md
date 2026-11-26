@@ -21,7 +21,7 @@ sources:
 > - Traps: `max − min` ignores the order of days (wrong on 3/6 cases). In JS, `Math.min(...prices)` also throws `RangeError` on a 10⁶-element array.
 
 > [!info] Context
-> LeetCode problem 121, the opening problem of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. It is the simplest window: no count table, just one remembered number. The solutions come in TypeScript, Python, Go, Java and JavaScript. All you need to know is loops and arrays.
+> LeetCode problem 121, the opening problem of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. It is the simplest window: no count table, just one remembered number. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. All you need to know is loops and arrays.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Profit**: selling price minus buying price. No trade means a profit of 0.
@@ -110,7 +110,7 @@ TypeScript, random prices 0..10⁴, median:
 
 Brute force has exactly the n² shape: double n and the time goes up 4 times. At the problem's n = 10⁵ it would need about 3.6 seconds. At 10⁶, the two-pointer version is about 4 times faster than the lowest-price version: both are O(n), but the lowest-price version calls `Math.max` and `Math.min` every day, while the two-pointer version only compares once on days when the price falls. The difference is in the constant.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Starting value of `minSoFar` | Language-specific trap |
 |---|---|---|
@@ -118,10 +118,12 @@ Brute force has exactly the n² shape: double n and the time goes up 4 times. At
 | Python | `math.inf` | `max(...)` on an empty sequence raises `ValueError`; brute force must start with `best = 0` |
 | Go | `math.MaxInt` | uses the built-in `min` and `max` (since Go 1.21) |
 | Java | `Integer.MAX_VALUE` | `p − MAX_VALUE` doesn't overflow because prices are ≥ 0; with negative prices it would |
+| PHP | `PHP_INT_MAX` | `max([])` on an empty array throws `ValueError` (PHP 8) |
+| Rust | `i32::MAX` | `iter().max()` returns an `Option`; on an empty slice `unwrap()` panics; a debug build panics on overflow |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.ts) · [Python](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.py) · [Go](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.go) · [Java](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.java) · [JavaScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.js)
+[TypeScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.ts) · [Python](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.py) · [Go](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.go) · [Java](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.java) · [JavaScript](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.js) · [PHP](../code/neetcode-best-time-to-buy-and-sell-stock/best-time-stock.php) · [Rust](../code/neetcode-best-time-to-buy-and-sell-stock/best_time_stock.rs)
 
 Each file has brute force, lowest price and two pointers, and runs 6 cases. Below are the two O(n) approaches.
 
@@ -231,6 +233,53 @@ function twoPointers(prices) {
 }
 ```
 
+```php
+function runningMin(array $prices): int {
+    $minSoFar = PHP_INT_MAX;
+    $best = 0;
+    foreach ($prices as $p) {
+        // first day: p - PHP_INT_MAX is negative (no overflow since p ≥ 0), so best stays 0
+        $best = max($best, $p - $minSoFar);
+        $minSoFar = min($minSoFar, $p);
+    }
+    return $best;
+}
+
+function twoPointers(array $prices): int {
+    $left = 0;
+    $best = 0;
+    for ($right = 1; $right < count($prices); $right++) {
+        if ($prices[$right] < $prices[$left]) $left = $right;
+        else $best = max($best, $prices[$right] - $prices[$left]);
+    }
+    return $best;
+}
+```
+
+```rust
+fn running_min(prices: &[i32]) -> i32 {
+    let (mut min_so_far, mut best) = (i32::MAX, 0);
+    for &p in prices {
+        // p - i32::MAX doesn't overflow since p ≥ 0; on day one it is negative, so best stays 0
+        best = best.max(p - min_so_far);
+        min_so_far = min_so_far.min(p);
+    }
+    best
+}
+
+fn two_pointers(prices: &[i32]) -> i32 {
+    let (mut left, mut best) = (0, 0);
+    for right in 1..prices.len() {
+        if prices[right] < prices[left] {
+            left = right;
+        } else {
+            best = best.max(prices[right] - prices[left]);
+        }
+    }
+    best
+}
+```
+
 
 ```text
 $ node best-time-stock.ts
@@ -261,7 +310,7 @@ Math.min(...array of 100000) works
 Math.min(...array of 1000000): RangeError: Maximum call stack size exceeded
 ```
 
-Spread turns every element into an argument on the stack, and the stack is limited. At 10⁵ elements (the problem's limit) it still works on this machine, but the limit differs between engines; a plain loop never hits this error. Python, Go and Java print `6/6 ca đúng` ("6/6 cases passed") for all three approaches.
+Spread turns every element into an argument on the stack, and the stack is limited. At 10⁵ elements (the problem's limit) it still works on this machine, but the limit differs between engines; a plain loop never hits this error. Python, Go, Java, PHP and Rust print `6/6 ca đúng` ("6/6 cases passed") for all three approaches.
 
 ## Misconceptions and common traps
 
@@ -270,6 +319,8 @@ Spread turns every element into an argument on the stack, and the stack is limit
 - **`Math.min(...prices)` in JS.** Calling a function with millions of arguments overflows the stack. Use a loop or `reduce`.
 - **Thinking you must find both the buy day and the sell day.** The problem only asks for the profit. Once you know the sell day, the best buy day is fixed by the lowest earlier price.
 - **Mixing it up with the many-trades problem (LeetCode 122).** There you add up every rising stretch; here there is a single trade.
+- **PHP: `max()` / `min()` on an empty array.** Since PHP 8 they throw `ValueError` instead of returning `false`. The problem guarantees at least one price, but the wrong `maxMinusMin` would blow up on an empty array.
+- **Rust: subtracting from `i32::MAX` when prices can be negative.** A debug build panics on overflow; an `-O` build silently wraps. Prices here are ≥ 0, so it never overflows, but starting with `min_so_far = prices[0]` is safer.
 
 ## Self-check questions
 

@@ -204,7 +204,7 @@ function wrongNoCut(head: ListNode | null): void {
 
 Without `slow.next = null`, the middle node still points to the old first node of the second half, and after the reversal that node is the **tail** of the second half and gets woven in next to the middle node. With `1 2 3 4 5` the result reads `1 5 2 4 3`, but 3 still points to 4, so 3 → 4 → 3 is a cycle. With `1 2 3 4` it is even tighter: the last weave sets `3.next` to the old `2.next`, and the old `2.next` is 3 itself, so node 3 points to itself. The file reads the result with a limit of 2n + 2 steps and finds a cycle in 6/8 cases; only the 0-node and 1-node cases (which skip the work) get through. This bug is dangerous because the function returns normally; the caller only hangs when it walks the whole list.
 
-### Under the five languages
+### Under the seven languages
 
 | | Remembering the nodes | Language-specific trap |
 |---|---|---|
@@ -212,6 +212,8 @@ Without `slow.next = null`, the middle node still points to the old first node o
 | Python | `collections.deque`, `popleft()` and `pop()` in O(1) | reversing with `prev, cur, cur.next = cur, cur.next, prev`: wrong assignment order, throws `AttributeError` on 6/8 cases; building a new list and rebinding `head = …`: the caller sees no change, wrong on 5/8 |
 | Go | a slice `[]*ListNode` | the slice doubles as it grows, so total allocation exceeds n pointers: 44.9 MB for 10⁶ nodes |
 | Java | `ArrayDeque<ListNode>`, `pollFirst`/`pollLast` | a wrong cut that makes the second half longer: `NullPointerException` on odd lengths |
+| PHP | an array with two indices | `array_shift` is correct 8/8 but renumbers the whole array every time: 2.3 seconds at 10⁵ nodes |
+| Rust | `Vec<Box<ListNode>>` after detaching each node with `take()` | tortoise and hare need two overlapping borrows; count the length, then walk to the middle |
 
 The Python multiple-assignment trap is worth explaining. The statement `a, b, c = x, y, z` evaluates **the whole right-hand side first**, then assigns **from left to right**. With `prev, cur, cur.next = cur, cur.next, prev`, the right side is (the current node, the next node, the old prev); `prev` is assigned, then `cur` becomes the next node, and when `cur.next` comes up, `cur` is already **the next node**: we change the arrow of the wrong node. At the last node `cur` becomes `None` and `cur.next = …` throws `AttributeError`. Writing `cur.next, prev, cur = prev, cur, cur.next` (assign `cur.next` before `cur` changes) is right; the [Python file](../code/neetcode-reorder-list/reorder_list.py) uses that order.
 
@@ -231,7 +233,7 @@ The other languages at 10⁶ nodes: Python three steps 32.2 ms, deque 47.2 ms an
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-reorder-list/reorder-list.ts) · [Python](../code/neetcode-reorder-list/reorder_list.py) · [Go](../code/neetcode-reorder-list/reorder_list.go) · [Java](../code/neetcode-reorder-list/reorder-list.java) · [JavaScript](../code/neetcode-reorder-list/reorder-list.js)
+[TypeScript](../code/neetcode-reorder-list/reorder-list.ts) · [Python](../code/neetcode-reorder-list/reorder_list.py) · [Go](../code/neetcode-reorder-list/reorder_list.go) · [Java](../code/neetcode-reorder-list/reorder-list.java) · [JavaScript](../code/neetcode-reorder-list/reorder-list.js) · [PHP](../code/neetcode-reorder-list/reorder-list.php) · [Rust](../code/neetcode-reorder-list/reorder_list.rs)
 
 Each file runs 8 shared cases: the two examples of the problem (`1 2 3 4` and `1 2 3 4 5`), lists of 1, 2 and 3 nodes, an empty list, 6 nodes, and `7 7 7 8 8` (repeated values). The result is read back with a limit of 2n + 2 steps so that a cycle is reported instead of hanging.
 
@@ -330,6 +332,66 @@ function reorderThreeSteps(head) {
 }
 ```
 
+```php
+// Approach 1: three steps, O(1) extra memory.
+function reorderThreeSteps(?ListNode $head): void
+{
+    if ($head === null || $head->next === null) return;
+    // step 1: slow stops at the end of the first half
+    $slow = $fast = $head;
+    while ($fast->next !== null && $fast->next->next !== null) { $slow = $slow->next; $fast = $fast->next->next; }
+    // step 2: cut, then reverse the second half
+    $second = reverse($slow->next);
+    $slow->next = null;
+    // step 3: interleave
+    $first = $head;
+    while ($second !== null) {
+        $n1 = $first->next;
+        $n2 = $second->next;
+        $first->next = $second;
+        $second->next = $n1;
+        $first = $n1;
+        $second = $n2;
+    }
+}
+```
+
+```rust
+// Approach 1: three steps. Box won't let two pointers slow and fast walk one list
+// (fast borrows the whole chain while slow wants to edit its middle), so step 1 counts the length and walks to the middle.
+pub fn reorder_three_steps(head: &mut List) {
+    let mut n = 0;
+    let mut p = head.as_ref();
+    while let Some(x) = p {
+        n += 1;
+        p = x.next.as_ref();
+    }
+    if n < 3 {
+        return;
+    }
+    // step 1: walk to the last node of the first half ((n + 1) / 2 nodes)
+    let mut mid = head.as_mut().unwrap();
+    for _ in 1..(n + 1) / 2 {
+        mid = mid.next.as_mut().unwrap();
+    }
+    // step 2: take() cuts and grabs the second half in one move, then reverses it
+    let mut second = reverse(mid.next.take());
+    // step 3: interleave; tail is the last next slot of the result
+    let mut first = head.take();
+    let mut tail = head;
+    while let Some(mut a) = first {
+        first = a.next.take();
+        *tail = Some(a);
+        tail = &mut tail.as_mut().unwrap().next;
+        if let Some(mut b) = second {
+            second = b.next.take();
+            *tail = Some(b);
+            tail = &mut tail.as_mut().unwrap().next;
+        }
+    }
+}
+```
+
 
 The reverse function used in step 2:
 
@@ -376,6 +438,30 @@ function reverse(head) {
   let prev = null, cur = head;
   while (cur !== null) { const nxt = cur.next; cur.next = prev; prev = cur; cur = nxt; }
   return prev;
+}
+```
+
+```php
+// Reverse a list in place, return the new head.
+function reverse(?ListNode $head): ?ListNode
+{
+    $prev = null;
+    $cur = $head;
+    while ($cur !== null) { $nxt = $cur->next; $cur->next = $prev; $prev = $cur; $cur = $nxt; }
+    return $prev;
+}
+```
+
+```rust
+// Reverse a list: take() moves the rest out before flipping the arrow.
+fn reverse(mut cur: List) -> List {
+    let mut prev = None;
+    while let Some(mut node) = cur {
+        cur = node.next.take();
+        node.next = prev;
+        prev = Some(node);
+    }
+    prev
 }
 ```
 
@@ -476,6 +562,55 @@ function reorderArray(head) {
 }
 ```
 
+```php
+// Approach 2: copy the nodes into an array, then relink them with two indices.
+function reorderArray(?ListNode $head): void
+{
+    $nodes = [];
+    for ($cur = $head; $cur !== null; $cur = $cur->next) $nodes[] = $cur;
+    $i = 0;
+    $j = count($nodes) - 1;
+    while ($i < $j) {
+        $nodes[$i]->next = $nodes[$j];
+        $i++;
+        if ($i === $j) break;
+        $nodes[$j]->next = $nodes[$i];
+        $j--;
+    }
+    if ($nodes) $nodes[$i]->next = null;
+}
+```
+
+```rust
+// Approach 2: detach every node into a Vec, then relink from the end of the order L0, Ln, L1, …
+pub fn reorder_vec(head: &mut List) {
+    let mut nodes: Vec<Box<ListNode>> = vec![];
+    let mut cur = head.take();
+    while let Some(mut node) = cur {
+        cur = node.next.take();
+        nodes.push(node);
+    }
+    let mut order = Vec::with_capacity(nodes.len());
+    let (mut i, mut j) = (0usize, nodes.len());
+    while i < j {
+        order.push(i);
+        i += 1;
+        if i < j {
+            j -= 1;
+            order.push(j);
+        }
+    }
+    let mut slots: Vec<Option<Box<ListNode>>> = nodes.into_iter().map(Some).collect();
+    let mut result = None;
+    for &k in order.iter().rev() {
+        let mut node = slots[k].take().unwrap();
+        node.next = result;
+        result = Some(node);
+    }
+    *head = result;
+}
+```
+
 
 Output of `node reorder-list.ts`:
 
@@ -544,6 +679,33 @@ n nodes    three steps  array       shift()
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
+PHP (`php -d xdebug.mode=off reorder-list.php`; warnings about reading a property of `null` are turned into exceptions). `reorderShift` takes the front of the array with `array_shift`:
+
+```text
+reorderThreeSteps   8/8 cases correct
+reorderArray        8/8 cases correct
+reorderShift        8/8 cases correct
+wrongNoCut          2/8 cases correct; wrong on [1,2,3,4] → cycle, [1,2,3,4,5] → cycle, [1,2] → cycle, [1,2,3] → cycle, [10,20,30,40,50,60] → cycle, [7,7,7,8,8] → cycle
+wrongSecondLonger   5/8 cases correct; wrong on [1,2,3,4,5] → throws ErrorException, [1,2,3] → throws ErrorException, [7,7,7,8,8] → throws ErrorException
+
+n = 10000: reorderThreeSteps 0.34 ms, reorderArray 0.31 ms, reorderShift 20.10 ms
+n = 100000: reorderThreeSteps 7.28 ms, reorderArray 6.20 ms, reorderShift 2105.83 ms
+```
+
+Rust (`rustc --edition 2021 -O reorder_list.rs`):
+
+```text
+reorder_three_steps 8/8 cases correct
+reorder_vec         8/8 cases correct
+wrong_second_longer 5/8 cases correct; wrong on [1,2,3,4,5] → panic (unwrap on None), [1,2,3] → panic (unwrap on None), [7,7,7,8,8] → panic (unwrap on None)
+wrongNoCut: rejected by the compiler (a node cannot have two owners), cannot run
+
+n = 100000: three steps 0.97 ms, Vec of nodes 1.09 ms
+n = 1000000: three steps 6.07 ms, Vec of nodes 10.55 ms
+```
+
+PHP's `array_shift` behaves like JavaScript's `shift()`: after removing the first element, PHP renumbers every remaining element, so the whole loop becomes O(n²): 2.3 seconds at 10⁵ nodes against 7.6 ms with two indices. In Rust, the three-step version cannot use the fast and slow pointers the other languages use, because a `&mut` into the middle of the list and another pointer walking the same list cannot be alive at once; counting the length first costs one extra pass but stays O(n) time and O(1) memory.
+
 ## Misconceptions and common traps
 
 - **"You must find the exact middle; one node off is wrong."** A first half longer than the second by 1 or 2 nodes is fine. It is only wrong when the second half is longer than the first.
@@ -553,6 +715,8 @@ n nodes    three steps  array       shift()
 - **Multiple assignment in Python when reversing a list.** The right side is evaluated first, the left side assigned from left to right: `cur.next` must come before `cur`.
 - **Using `shift()` as a queue in JavaScript.** Right, but O(n) each time; use two indices.
 - **Copying values instead of relinking nodes.** Reading the values into an array and overwriting `val` in the new order prints the right result, but it is not "reordering the nodes": the problem forbids changing values.
+- **PHP: `array_shift` to take the front of an array.** Correct 8/8, but every call makes PHP renumber the whole array: 2.3 seconds at 10⁵ nodes. Use two indices, or `SplDoublyLinkedList`/`SplQueue` if you really need a double-ended queue.
+- **Rust: translating tortoise and hare literally.** Holding `slow` as a `&mut` to cut the middle while `fast` still reads the same list is two overlapping borrows, and the compiler refuses. Count the length, then walk to the middle; and the other languages' "forgot to cut" bug cannot even be written, because a node has no second owner.
 
 ## Self-check questions
 

@@ -138,7 +138,7 @@ Python, cùng máy:
 
 Nối chuỗi `s + "("` tạo một chuỗi mới mỗi bước, nhưng chuỗi chỉ dài tối đa 2n = 24 ký tự, nên rẻ hơn việc `"".join(cur)` ở mỗi lá. Lời khuyên "đừng nối chuỗi trong vòng lặp" đúng với chuỗi **dài**, không đúng ở đây.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Chuỗi đang dựng | Bẫy riêng |
 |---|---|---|
@@ -146,10 +146,12 @@ Nối chuỗi `s + "("` tạo một chuỗi mới mỗi bước, nhưng chuỗi 
 | Python | `str` bất biến: nối chuỗi; hoặc `list` + `"".join` | giới hạn đệ quy mặc định 1 000 tầng, ở đây chỉ cần 2n + 1 |
 | Go | `[]byte` với `append` và cắt `buf[:len(buf)-1]` | giữ lại chính `buf` thay vì `string(buf)`: mọi kết quả trỏ vào cùng một mảng nền |
 | Java | một `StringBuilder` dùng chung, gỡ bằng `setLength` | quên `setLength`: ký tự của nhánh trước nằm lại |
+| PHP | chuỗi là **giá trị** (chép khi ghi): `$s . '('` là chuỗi mới; hoặc một chuỗi dùng chung truyền tham chiếu `&$buf` | dùng `&$buf` mà quên `substr($buf, 0, -1)`: ký tự cũ nằm lại, như Java |
+| Rust | một `String` dùng chung, `push` rồi `pop` | `out.push(cur)` không biên dịch (cur đang được mượn): phải `cur.clone()`, nên lỗi "giữ bộ đệm" của Go không thể xảy ra |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-generate-parentheses/generate-parentheses.ts) · [Python](../code/neetcode-generate-parentheses/generate_parentheses.py) · [Go](../code/neetcode-generate-parentheses/generate_parentheses.go) · [Java](../code/neetcode-generate-parentheses/generate-parentheses.java) · [JavaScript](../code/neetcode-generate-parentheses/generate-parentheses.js)
+[TypeScript](../code/neetcode-generate-parentheses/generate-parentheses.ts) · [Python](../code/neetcode-generate-parentheses/generate_parentheses.py) · [Go](../code/neetcode-generate-parentheses/generate_parentheses.go) · [Java](../code/neetcode-generate-parentheses/generate-parentheses.java) · [JavaScript](../code/neetcode-generate-parentheses/generate-parentheses.js) · [PHP](../code/neetcode-generate-parentheses/generate-parentheses.php) · [Rust](../code/neetcode-generate-parentheses/generate_parentheses.rs)
 
 Mỗi file kiểm n = 1..8: đủ C(n) chuỗi, không trùng, chuỗi nào cũng dài 2n và hợp lệ (ba điều đó cùng nhau nghĩa là đúng tập đáp án). Dưới đây là cách quay lui.
 
@@ -248,6 +250,47 @@ function backtrack(n) {
 }
 ```
 
+```php
+// Cách 2: quay lui, chuỗi truyền theo giá trị: $s . '(' là chuỗi mới, không cần gỡ.
+function backtrack(int $n): array {
+    $out = [];
+    $go = function (string $s, int $open, int $close) use (&$go, &$out, $n): void {
+        if (strlen($s) === 2 * $n) {
+            $out[] = $s;
+            return;
+        }
+        if ($open < $n) $go($s . '(', $open + 1, $close);
+        if ($close < $open) $go($s . ')', $open, $close + 1);
+    };
+    $go('', 0, 0);
+    return $out;
+}
+```
+
+```rust
+// Cách 2: quay lui với MỘT String dùng chung; push rồi pop để gỡ.
+fn backtrack(n: usize) -> Vec<String> {
+    fn go(cur: &mut String, open: usize, close: usize, n: usize, out: &mut Vec<String>) {
+        if cur.len() == 2 * n {
+            out.push(cur.clone()); // clone sao chép; borrow checker không cho đẩy chính cur vào out
+            return;
+        }
+        if open < n {
+            cur.push('(');
+            go(cur, open + 1, close, n, out);
+            cur.pop(); // bỏ ký tự vừa thêm
+        }
+        if close < open {
+            cur.push(')');
+            go(cur, open, close + 1, n, out);
+            cur.pop();
+        }
+    }
+    let mut out = Vec::new();
+    go(&mut String::with_capacity(2 * n), 0, 0, n, &mut out);
+    out
+}
+```
 
 File TypeScript chạy thêm bản dùng `close < n`, rồi in bảng Catalan và đo:
 
@@ -306,12 +349,39 @@ forgetUndo(2) = [(()), (()))]
 
 Sau nhánh `((…))`, các ký tự cũ còn trong bộ đệm, nên nhánh `()…` bắt đầu từ `(())` thay vì `(`. Python in `8/8 ca đúng` cho cả bốn cách (sinh hết rồi lọc, quay lui list + join, quay lui nối chuỗi, ngăn xếp tự quản); JavaScript in `8/8 ca đúng` cho hai cách.
 
+File PHP và Rust:
+
+```text
+$ php generate-parentheses.php
+generateAllFilter  8/8 ca đúng
+backtrack          8/8 ca đúng
+explicitStack      8/8 ca đúng
+wrongCloseLtN      0/8 ca đúng
+forgetUndo         1/8 ca đúng
+
+forgetUndo(2) = ["(())","(()))"]
+backtrack(3)  = ["((()))","(()())","(())()","()(())","()()()"]
+
+$ rustc --edition 2021 -O generate_parentheses.rs -o generate_parentheses && ./generate_parentheses
+generate_all_filter  8/8 ca đúng
+backtrack            8/8 ca đúng
+explicit_stack       8/8 ca đúng
+wrong_close_lt_n     0/8 ca đúng
+
+wrong_close_lt_n(2) = ["(())", "()()", "())(", ")(()", ")()(", "))(("]
+backtrack(3)        = ["((()))", "(()())", "(())()", "()(())", "()()()"]
+```
+
+Bản `forgetUndo` của PHP hỏng y như Java: chuỗi dùng chung truyền tham chiếu mà không gỡ. Bản `wrong_close_lt_n` của Rust ra đúng sáu chuỗi như TypeScript.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **Điều kiện đóng là `close < n`.** Phải là `close < open`. Đếm đủ n ký tự `)` không có nghĩa là thứ tự đúng.
 - **"Quay lui là thử hết rồi bỏ cái sai."** Đó là cách 1. Quay lui tốt cắt nhánh **trước khi** đi vào; ở bài này mọi nhánh còn lại đều dẫn tới đáp án.
 - **Ghi nhận bộ đệm thay vì bản sao.** Go (`buf` thay vì `string(buf)`), Java (giữ `sb` thay vì `sb.toString()`), Python (giữ `cur` thay vì `"".join(cur)`): mọi kết quả là cùng một object, bị sửa tiếp sau khi ghi.
 - **Quên gỡ lựa chọn khi dùng bộ đệm chung.** Java `StringBuilder`, Go `[]byte`, mảng ký tự trong TS: thêm vào thì phải bỏ ra sau khi thử. Dùng chuỗi bất biến (`s + "("`) thì không cần gỡ.
+- **PHP: truyền chuỗi tham chiếu (`&$buf`) để "tiết kiệm".** Chuỗi PHP vốn chép khi ghi, nên `$s . '('` truyền theo giá trị đã rẻ và không cần gỡ. Đổi sang `&$buf` là nhận lại bẫy của Java: quên `substr($buf, 0, -1)` thì nhánh sau mang ký tự của nhánh trước (`forgetUndo(2)` ra `["(())","(()))"]`).
+- **Rust: đẩy `cur` vào `out` mà không `clone`.** Trình biên dịch từ chối vì `cur` đang được mượn khả biến; phải `out.push(cur.clone())`. Ngược lại, `cur.pop()` trả `Option<char>`, nên quên gỡ vẫn biên dịch bình thường và sinh chuỗi sai như Java.
 - **"Phải tối ưu xuống dưới O(4ⁿ)."** Không được: đầu ra đã có C(n) chuỗi, tăng cỡ 4ⁿ / n^1,5. Tối ưu chỉ là bớt phần phí ngoài đầu ra.
 
 ## Câu hỏi tự kiểm tra

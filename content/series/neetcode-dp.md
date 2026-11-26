@@ -21,7 +21,7 @@ Tuyến này cần đệ quy và hash map. Duyệt cây ở [[series/neetcode-li
 
 ## Một ga, nhiều bài
 
-Mỗi **ga** là một *pattern*, tức một kỹ thuật giải lặp lại ở nhiều bài. Post của ga dạy kỹ thuật đó qua một bài neo, rồi chỉ ra từng bài còn lại dùng nó khác đi ở đâu. Mỗi bài LeetCode có **trang riêng** trong [[problems/index|kho bài NeetCode 150]], giải kỹ bằng năm ngôn ngữ (TypeScript, Python, Go, Java, JavaScript), có độ phức tạp, phép đo và bẫy hay gặp.
+Mỗi **ga** là một *pattern*, tức một kỹ thuật giải lặp lại ở nhiều bài. Post của ga dạy kỹ thuật đó qua một bài neo, rồi chỉ ra từng bài còn lại dùng nó khác đi ở đâu. Mỗi bài LeetCode có **trang riêng** trong [[problems/index|kho bài NeetCode 150]], giải kỹ bằng bảy ngôn ngữ (TypeScript, Python, Go, Java, JavaScript, PHP, Rust), có độ phức tạp, phép đo và bẫy hay gặp.
 
 ## Vì sao xếp theo thứ tự này
 
@@ -31,6 +31,6 @@ Mỗi **ga** là một *pattern*, tức một kỹ thuật giải lặp lại �
 
 ## Phiên bản và nguồn
 
-Lời giải chạy thật trên **Node.js 24** (chạy thẳng file `.ts`), **Python 3.12**, **Go 1.25** và **Java 21** (`java File.java`, không cần `javac`). Số đo thời gian đổi theo máy và theo lần chạy; tỉ lệ giữa các cách thì ổn định.
+Lời giải chạy thật trên **Node.js 24** (chạy thẳng file `.ts`), **Python 3.12**, **Go 1.25**, **Java 21** (`java File.java`, không cần `javac`), **PHP 8.2** và **Rust 1.99** (`rustc -O`, chỉ thư viện chuẩn). Vài bài LeetCode không mở Rust (bài dựa vào danh tính nút, như Clone Graph) nên trang bài đó có sáu ngôn ngữ. Số đo thời gian đổi theo máy và theo lần chạy; tỉ lệ giữa các cách thì ổn định.
 
 Đề bài thuộc về LeetCode; mỗi trang bài chỉ tóm tắt đề bằng lời của mình và dẫn link. Danh sách và nhóm bài lấy từ dữ liệu công khai của [NeetCode 150](https://neetcode.io/practice); cách gom bài thành ga là của mình. Lời giải, phép đo và sơ đồ là của mình.

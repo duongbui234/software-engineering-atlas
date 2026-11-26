@@ -112,7 +112,7 @@ TypeScript, mảng `0, 1, …, n − 1` và target là tổng hai số lớn nh�
 
 Hash map chậm nhất trong ba cách nhanh dù cùng O(n) như hai con trỏ: mỗi bước phải băm và ghi vào bảng, bảng còn phải nới ra nhiều lần. Hai con trỏ chỉ đọc mảng theo thứ tự, thứ bộ nhớ đệm của CPU làm rất tốt.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Tìm nhị phân có sẵn | Bẫy riêng |
 |---|---|---|
@@ -120,10 +120,12 @@ Hash map chậm nhất trong ba cách nhanh dù cùng O(n) như hai con trỏ: m
 | Python | `bisect_left(a, x, lo)` | phải truyền `lo = i + 1`, không thì tìm cả bên trái i |
 | Go | `sort.SearchInts(rest, x)` trên slice con | chỉ số trả về tính từ đầu slice con, phải cộng lại `i + 1` |
 | Java | `Arrays.binarySearch(a, from, to, x)` | không thấy thì trả số **âm**, không phải −1; mảng có số trùng thì không chắc trả vị trí nào |
+| PHP | không có; tự viết | `($lo + $hi) / 2` ra **float** khi tổng lẻ; dùng `intdiv` |
+| Rust | `slice.binary_search(&x)` trên `nums[i + 1..]` | trả `Result`: `Ok(k)` với `k` tính từ đầu slice con; có số trùng thì không chắc trả vị trí nào |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.ts) · [Python](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.py) · [Go](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.go) · [Java](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.java) · [JavaScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.js)
+[TypeScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.ts) · [Python](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.py) · [Go](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.go) · [Java](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.java) · [JavaScript](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.js) · [PHP](../code/neetcode-two-sum-ii-input-array-is-sorted/two-sum-ii.php) · [Rust](../code/neetcode-two-sum-ii-input-array-is-sorted/two_sum_ii.rs)
 
 Mỗi file có cả bốn cách và chạy 6 ca, gồm số âm và số trùng. Dưới đây là tìm nhị phân và hai con trỏ.
 
@@ -249,6 +251,63 @@ function twoPointers(nums, target) {
 }
 ```
 
+```php
+// Với mỗi nums[i], tìm nhị phân phần bù trong đoạn BÊN PHẢI i. O(n log n), O(1) bộ nhớ.
+function binarySearch(array $nums, int $target): array {
+    $n = count($nums);
+    for ($i = 0; $i < $n; $i++) {
+        $lo = $i + 1; $hi = $n - 1;
+        $want = $target - $nums[$i];
+        while ($lo <= $hi) {
+            $mid = intdiv($lo + $hi, 2); // ($lo + $hi) / 2 cho ra float khi tổng lẻ
+            if ($nums[$mid] === $want) return [$i + 1, $mid + 1];
+            if ($nums[$mid] < $want) $lo = $mid + 1; else $hi = $mid - 1;
+        }
+    }
+    return [];
+}
+// Hai con trỏ: tổng nhỏ quá thì tăng trái, lớn quá thì giảm phải. O(n), O(1) bộ nhớ.
+function twoPointers(array $nums, int $target): array {
+    $i = 0; $j = count($nums) - 1;
+    while ($i < $j) {
+        $sum = $nums[$i] + $nums[$j];
+        if ($sum === $target) return [$i + 1, $j + 1];
+        if ($sum < $target) $i++; // nums[i] cộng với số LỚN NHẤT còn lại vẫn thiếu
+        else $j--;                // nums[j] cộng với số NHỎ NHẤT còn lại vẫn thừa
+    }
+    return [];
+}
+```
+
+```rust
+// Với mỗi nums[i], tìm nhị phân phần bù trong đoạn BÊN PHẢI i. O(n log n), O(1) bộ nhớ.
+// binary_search có sẵn trên slice con nums[i + 1..]; chỉ số trả về tính từ đầu slice con.
+fn binary_search(nums: &[i32], target: i32) -> Vec<i32> {
+    for i in 0..nums.len() {
+        if let Ok(k) = nums[i + 1..].binary_search(&(target - nums[i])) {
+            return vec![i as i32 + 1, (i + 1 + k) as i32 + 1];
+        }
+    }
+    vec![]
+}
+// Hai con trỏ: tổng nhỏ quá thì tăng trái, lớn quá thì giảm phải. O(n), O(1) bộ nhớ.
+fn two_pointers(nums: &[i32], target: i32) -> Vec<i32> {
+    let (mut i, mut j) = (0, nums.len() - 1);
+    while i < j {
+        let sum = nums[i] + nums[j];
+        if sum == target {
+            return vec![i as i32 + 1, j as i32 + 1];
+        }
+        if sum < target {
+            i += 1; // nums[i] cộng với số LỚN NHẤT còn lại vẫn thiếu
+        } else {
+            j -= 1; // nums[j] cộng với số NHỎ NHẤT còn lại vẫn thừa
+        }
+    }
+    vec![]
+}
+```
+
 
 ```text
 $ node two-sum-ii.ts
@@ -265,7 +324,7 @@ n          vét cạn  tìm nhị phân  hash map  hai con trỏ   (ms, trung v�
 1000000          —         15.92     99.75         1.20
 ```
 
-Bản tìm nhị phân trên cả mảng tìm thấy phần bù 3 của số 3 **ở chính vị trí của nó**, và trả `[1, 1]`. Chỉ ca có hai số bằng nhau và bằng `target / 2` mới lộ lỗi này. Python, Go, Java và JavaScript in `6/6 ca đúng` cho cả bốn cách.
+Bản tìm nhị phân trên cả mảng tìm thấy phần bù 3 của số 3 **ở chính vị trí của nó**, và trả `[1, 1]`. Chỉ ca có hai số bằng nhau và bằng `target / 2` mới lộ lỗi này. Python, Go, Java và JavaScript in `6/6 ca đúng` cho cả bốn cách. PHP và Rust cũng in `6/6 ca đúng` cho bốn cách, và bản tìm trên cả mảng in `4/6 ca đúng` với đúng hai ca sai như TypeScript.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -274,6 +333,8 @@ Bản tìm nhị phân trên cả mảng tìm thấy phần bù 3 của số 3 *
 - **Dời cả hai con trỏ khi tổng sai.** Chỉ dời bên có bằng chứng: thiếu thì `i`, thừa thì `j`. Dời cả hai có thể bỏ lỡ cặp `(i, j − 1)`.
 - **"O(n) thì như nhau."** Hash map và hai con trỏ cùng O(n) nhưng chênh 80 lần ở 10⁶ phần tử.
 - **Lo tràn số khi cộng.** Với giới hạn ±1000 thì không. Ở bài khác có giá trị tới 2³¹, `nums[i] + nums[j]` tràn `int` trong Java và Go 32 bit; khi đó so `nums[i] < target − nums[j]` hoặc dùng `long`.
+- **PHP: chia đôi bằng `/`.** `($lo + $hi) / 2` trả `float` khi tổng lẻ (`7 / 2 = 3.5`), và `$nums[3.5]` bị ép về chỉ số 3 kèm cảnh báo "Deprecated: implicit conversion" từ PHP 8.1. Dùng `intdiv($lo + $hi, 2)`.
+- **Rust: quên rằng `binary_search` trả chỉ số trong slice con.** `nums[i + 1..].binary_search(&want)` trả `Ok(k)` tính từ `i + 1`, nên chỉ số thật là `i + 1 + k`. Thêm nữa, `nums.len() - 1` trên `usize` tràn khi mảng rỗng; đề hứa có ít nhất hai phần tử.
 
 ## Câu hỏi tự kiểm tra
 

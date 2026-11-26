@@ -23,7 +23,7 @@ sources:
 > - Java has two traps of its own: comparing `peek()` of two `Deque<Integer>` with `==` (wrong from 128 up), and storing the difference `x − min` in an `int` (overflows at the 32-bit edges).
 
 > [!info] Context
-> LeetCode problem 155, part of [[en/posts/2026-11-23-neetcode-stack|station 6: Stack]] on **the NeetCode line: Arrays and Strings**. This is a **design** problem: you write a class, not a function. The solutions come in TypeScript, Python, Go, Java and JavaScript. You need to know a [[en/concepts/stack|stack]] (push, pop) and how to write a class with methods.
+> LeetCode problem 155, part of [[en/posts/2026-11-23-neetcode-stack|station 6: Stack]] on **the NeetCode line: Arrays and Strings**. This is a **design** problem: you write a class, not a function. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. You need to know a [[en/concepts/stack|stack]] (push, pop) and how to write a class with methods.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Stack**: add and remove at the same end (the top); last in, first out. See [[en/concepts/stack|Stack]].
@@ -125,7 +125,7 @@ From 20 000 to 40 000, doubling n makes scanning 3.9 times slower: the n² shape
 
 An earlier version of this page gave 4 seconds for scanning at 40 000. That was measured on data from the old random generator (`seed * 1103515245` computed in floating point), which lost precision and repeated after about 10 thousand values; why the repeated data made the scan loop 5 times slower I haven't measured. The file now uses the mulberry32 generator (every multiplication goes through `Math.imul`).
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | One level of the pair approach | Language-specific trap |
 |---|---|---|
@@ -133,10 +133,12 @@ An earlier version of this page gave 4 seconds for scanning at 40 000. That was 
 | Python | a tuple `(x, min)` | `min(self.a)` is short but O(n); ints never overflow |
 | Go | a struct `pair{val, min}`, stored inline in the slice | `int32` wraps around silently on overflow; `int` is 64-bit on 64-bit machines |
 | Java | an `int[2]` in an `ArrayDeque<int[]>` | `a.pop() == mins.peek()` compares two `Integer` **references**; an `int` difference overflows |
+| PHP | an array `[$x, $min]` | `int` is 64-bit, so the difference doesn't overflow; reading an empty stack only warns and returns `null` |
+| Rust | a tuple `(i32, i32)`, stored inline in a `Vec` | the difference of two `i32` must be stored as `i64`; on an empty stack `unwrap()` panics |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-min-stack/min-stack.ts) · [Python](../code/neetcode-min-stack/min_stack.py) · [Go](../code/neetcode-min-stack/min_stack.go) · [Java](../code/neetcode-min-stack/min-stack.java) · [JavaScript](../code/neetcode-min-stack/min-stack.js)
+[TypeScript](../code/neetcode-min-stack/min-stack.ts) · [Python](../code/neetcode-min-stack/min_stack.py) · [Go](../code/neetcode-min-stack/min_stack.go) · [Java](../code/neetcode-min-stack/min-stack.java) · [JavaScript](../code/neetcode-min-stack/min-stack.js) · [PHP](../code/neetcode-min-stack/min-stack.php) · [Rust](../code/neetcode-min-stack/min_stack.rs)
 
 Each file runs 6 sequences of operations, including a repeated min, both 32-bit edges and values above 127. Below are the pair and two-stack approaches.
 
@@ -292,6 +294,66 @@ class TwoStackMinStack {
 }
 ```
 
+```php
+class PairMinStack implements MinStackLike {
+    private array $a = [];
+    function push(int $x): void {
+        $m = $this->a ? min($x, $this->a[count($this->a) - 1][1]) : $x;
+        $this->a[] = [$x, $m];
+    }
+    function pop(): void { array_pop($this->a); }
+    function top(): int { return $this->a[count($this->a) - 1][0]; }
+    function getMin(): int { return $this->a[count($this->a) - 1][1]; }
+}
+
+class TwoStackMinStack implements MinStackLike {
+    protected array $a = [];
+    protected array $mins = [];
+    function push(int $x): void {
+        $this->a[] = $x;
+        if (!$this->mins || $x <= $this->mins[count($this->mins) - 1]) $this->mins[] = $x;
+    }
+    function pop(): void {
+        // int vs int with ===: no reference trap like Java's Integer
+        if (array_pop($this->a) === $this->mins[count($this->mins) - 1]) array_pop($this->mins);
+    }
+    function top(): int { return $this->a[count($this->a) - 1]; }
+    function getMin(): int { return $this->mins[count($this->mins) - 1]; } // empty stack: reads key -1, PHP only warns and returns null
+}
+```
+
+```rust
+#[derive(Default)]
+struct PairMinStack { a: Vec<(i32, i32)> }
+impl MinStackLike for PairMinStack {
+    fn push(&mut self, x: i32) {
+        let m = self.a.last().map_or(x, |&(_, m)| m.min(x));
+        self.a.push((x, m));
+    }
+    fn pop(&mut self) { self.a.pop(); }
+    fn top(&self) -> i32 { self.a.last().unwrap().0 }
+    fn get_min(&self) -> i32 { self.a.last().unwrap().1 }
+}
+
+#[derive(Default)]
+struct TwoStackMinStack { a: Vec<i32>, mins: Vec<i32>, strict: bool }
+impl MinStackLike for TwoStackMinStack {
+    fn push(&mut self, x: i32) {
+        self.a.push(x);
+        let take = match self.mins.last() {
+            None => true,
+            Some(&m) => if self.strict { x < m } else { x <= m }, // strict = the wrong version without the =
+        };
+        if take { self.mins.push(x); }
+    }
+    fn pop(&mut self) {
+        if self.a.pop() == self.mins.last().copied() { self.mins.pop(); } // compares two Option<i32> by value
+    }
+    fn top(&self) -> i32 { *self.a.last().unwrap() }
+    fn get_min(&self) -> i32 { *self.mins.last().unwrap() } // empty helper stack: unwrap panics
+}
+```
+
 
 The TypeScript file runs all four approaches and the version without the equals sign, then measures:
 
@@ -343,7 +405,25 @@ DiffMinStack      6/6 cases passed
 Diff32MinStack    5/6 cases passed; wrong on: [32-bit edges → [-2147483648 -2147483647 -2147483648 -2147483648]]
 ```
 
-JavaScript prints `6/6 ca đúng` ("6/6 cases passed") for all three approaches.
+JavaScript prints `6/6 ca đúng` ("6/6 cases passed") for all three approaches. PHP and Rust run all four approaches plus the version without the equals sign:
+
+```text
+$ php min-stack.php
+ScanMinStack        6/6 ca đúng
+PairMinStack        6/6 ca đúng
+TwoStackMinStack    6/6 ca đúng
+DiffMinStack        6/6 ca đúng
+StrictLessMinStack  5/6 ca đúng; sai ở: min lặp lại (ErrorException: Undefined array key -1)
+
+$ ./min_stack
+ScanMinStack        6/6 ca đúng
+PairMinStack        6/6 ca đúng
+TwoStackMinStack    6/6 ca đúng
+DiffMinStack        6/6 ca đúng
+StrictLessMinStack  5/6 ca đúng; sai ở: min lặp lại (panic)
+```
+
+In PHP, reading the empty helper stack only prints a warning and returns `null` by default; the file turns warnings into exceptions to show where it breaks. The Rust difference version stores `i64`, so the 32-bit edge case passes.
 
 ## Misconceptions and common traps
 
@@ -352,6 +432,8 @@ JavaScript prints `6/6 ca đúng` ("6/6 cases passed") for all three approaches.
 - **Java: comparing `Integer`s with `==`.** Right for every test with small numbers, wrong from 128. Use `equals`, or compare after assigning to an `int`.
 - **Storing the difference in a 32-bit type.** The difference of two 32-bit numbers needs 33 bits. Java uses `long`; Go uses `int` (64-bit); C/C++ also need a wider type.
 - **"Storing differences is always better because it uses less memory."** It is harder to read, easy to overflow, and the measurement above shows it is not clearly faster than two stacks.
+- **PHP: reading the last element of an empty array doesn't throw.** `$mins[count($mins) - 1]` on an empty array is key `-1`: PHP prints an "Undefined array key" warning, returns `null` and carries on. With an `int` return type and `strict_types`, the error only surfaces somewhere else, far from its cause.
+- **Rust: the difference approach with `i32`.** `2147483647 - (-2147483648)` exceeds `i32`: a debug build panics, an `-O` build wraps like Go's `int32`. Store the difference and the min as `i64`, and cast back to `i32` only when returning.
 
 ## Self-check questions
 

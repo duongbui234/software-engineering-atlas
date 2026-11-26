@@ -21,7 +21,7 @@ sources:
 > - Bẫy: chỉ xét t có **chữ nào** mà quên số lần (6/8 ca); trong Java, so hai `Integer` đếm bằng `==` sai khi t cần từ 128 chữ giống nhau.
 
 > [!info] Bối cảnh
-> Bài LeetCode 76, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Post của ga dùng bài này làm ví dụ cho hướng "tìm ngắn nhất"; trang này đi sâu vào cách biết cửa sổ đã đủ và đo các cách. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn nên đọc trước [[problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]] (hướng "tìm dài nhất") và [[problems/valid-anagram|Valid Anagram]] (bảng đếm).
+> Bài LeetCode 76, thuộc [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Post của ga dùng bài này làm ví dụ cho hướng "tìm ngắn nhất"; trang này đi sâu vào cách biết cửa sổ đã đủ và đo các cách. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn nên đọc trước [[problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]] (hướng "tìm dài nhất") và [[problems/valid-anagram|Valid Anagram]] (bảng đếm).
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Cửa sổ đủ (cover)**: đoạn `s[l..r]` có mỗi ký tự c ít nhất bằng số lần c xuất hiện trong t.
@@ -132,7 +132,7 @@ Thêm vào t một ký tự không có trong s (không có đáp án):
 
 Ở ca này vét cạn đúng dáng n² (gấp đôi n, gấp 4 thời gian). Biến `missing` nhanh hơn so cả bảng khoảng 45 lần ở 10⁶: cùng O(n), khác hằng số 128.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Bảng đếm | Bẫy riêng |
 |---|---|---|
@@ -140,10 +140,12 @@ Thêm vào t một ký tự không có trong s (không có đáp án):
 | Python | `Counter` | `Counter` trả 0 cho khóa chưa có, nên `need[c] -= 1` an toàn; `dict` thường thì ném `KeyError` |
 | Go | mảng `[128]int` | cắt chuỗi `s[a:b]` không sao chép: đáp án nhỏ giữ cả `s` lớn trong bộ nhớ |
 | Java | `int[128]` | với `HashMap<Character, Integer>`, `window.get(c) == need.get(c)` so **tham chiếu**: sai khi số lần ≥ 128 |
+| PHP | `array_fill(0, 128, 0)` theo `ord` | `$need['x']--` với khóa chưa có chỉ báo warning và để lại `NULL`: trừ `null` không ra −1 |
+| Rust | `[i32; 128]` | `need` phải là số có dấu vì xuống âm; `&s[a..b]` cắt theo byte và panic nếu rơi giữa một ký tự nhiều byte |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-minimum-window-substring/min-window.ts) · [Python](../code/neetcode-minimum-window-substring/min_window.py) · [Go](../code/neetcode-minimum-window-substring/min_window.go) · [Java](../code/neetcode-minimum-window-substring/min-window.java) · [JavaScript](../code/neetcode-minimum-window-substring/min-window.js)
+[TypeScript](../code/neetcode-minimum-window-substring/min-window.ts) · [Python](../code/neetcode-minimum-window-substring/min_window.py) · [Go](../code/neetcode-minimum-window-substring/min_window.go) · [Java](../code/neetcode-minimum-window-substring/min-window.java) · [JavaScript](../code/neetcode-minimum-window-substring/min-window.js) · [PHP](../code/neetcode-minimum-window-substring/min-window.php) · [Rust](../code/neetcode-minimum-window-substring/min_window.rs)
 
 Mỗi file có vét cạn và cách biến `missing`, chạy 8 ca gồm `t` dài hơn `s`, `t` có chữ lặp và không có đáp án. Dưới đây là cách biến `missing`.
 
@@ -245,6 +247,47 @@ function windowMissing(s, t) {
 }
 ```
 
+```php
+function windowMissing(string $s, string $t): string {
+    $need = array_fill(0, 128, 0);
+    for ($i = 0; $i < strlen($t); $i++) $need[ord($t[$i])]++;
+    $missing = strlen($t);
+    $l = 0;
+    $bestL = 0;
+    $bestLen = PHP_INT_MAX;
+    for ($r = 0; $r < strlen($s); $r++) {
+        if ($need[ord($s[$r])]-- > 0) $missing--;
+        while ($missing === 0) {
+            if ($r - $l + 1 < $bestLen) { $bestL = $l; $bestLen = $r - $l + 1; }
+            if (++$need[ord($s[$l++])] > 0) $missing++;
+        }
+    }
+    return $bestLen === PHP_INT_MAX ? '' : substr($s, $bestL, $bestLen);
+}
+```
+
+```rust
+fn window_missing(s: &str, t: &str) -> String {
+    let b = s.as_bytes();
+    let mut need = [0i32; 128]; // need[c] > 0: còn thiếu c; < 0: cửa sổ có thừa c (nên phải là số có dấu)
+    for c in t.bytes() { need[c as usize] += 1; }
+    let (mut missing, mut l, mut best_l, mut best_len) = (t.len(), 0, 0, usize::MAX);
+    for r in 0..b.len() {
+        let c = b[r] as usize;
+        if need[c] > 0 { missing -= 1; }
+        need[c] -= 1;
+        while missing == 0 {
+            if r - l + 1 < best_len { best_l = l; best_len = r - l + 1; }
+            let d = b[l] as usize;
+            need[d] += 1;
+            if need[d] > 0 { missing += 1; }
+            l += 1;
+        }
+    }
+    if best_len == usize::MAX { String::new() } else { s[best_l..best_l + best_len].to_string() }
+}
+```
+
 
 File TypeScript chạy thêm cách so cả bảng và bản quên số lần lặp, rồi đo:
 
@@ -276,7 +319,7 @@ windowMissing          9/9 ca đúng
 windowFormedIntegerEq  8/9 ca đúng; sai ở t = "a" × 200 → ""
 ```
 
-Khi cửa sổ có đủ 200 chữ a, `window.get('a')` và `need.get('a')` là hai object `Integer` khác nhau cùng giá trị 200, nên `==` ra false và chữ a không bao giờ được tính là đủ. Với mọi ca có số lần ≤ 127 bản này lại đúng, nên test nhỏ không bắt được. Python, Go và JavaScript in `8/8 ca đúng` cho cả hai cách.
+Khi cửa sổ có đủ 200 chữ a, `window.get('a')` và `need.get('a')` là hai object `Integer` khác nhau cùng giá trị 200, nên `==` ra false và chữ a không bao giờ được tính là đủ. Với mọi ca có số lần ≤ 127 bản này lại đúng, nên test nhỏ không bắt được. Python, Go, JavaScript, PHP và Rust in `8/8 ca đúng` cho cả hai cách.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -286,6 +329,8 @@ Khi cửa sổ có đủ 200 chữ a, `window.get('a')` và `need.get('a')` là 
 - **Java: so `Integer` bằng `==`.** Đúng tới 127, sai từ 128. Dùng mảng `int[]`, hoặc `.equals`, hoặc `.intValue()`.
 - **"Vét cạn qua được vì dữ liệu ngẫu nhiên chạy nhanh."** Ca không có đáp án là O(n²); với n = 10⁵ của đề, đó là khoảng 10¹⁰ bước.
 - **"Cùng O(n) thì như nhau."** So cả bảng 128 ô mỗi bước chậm hơn biến `missing` khoảng 45 lần trong phép đo trên.
+- **PHP: `--` trên khóa chưa có không ra −1.** `$need['x']--` chỉ báo warning "Undefined array key" và để lại `NULL` (trừ `null` không đổi gì), nên ký tự thừa không bao giờ được ghi âm. Khởi tạo đủ 128 ô bằng `array_fill`, hoặc viết `($need[$c] ?? 0) - 1`.
+- **Rust: bảng `need` kiểu `usize`.** `need[c] -= 1` khi cửa sổ có thừa ký tự sẽ xuống dưới 0: bản build debug panic, bản `-O` quay vòng thành số rất lớn và làm `missing` sai. Dùng `i32`.
 
 ## Câu hỏi tự kiểm tra
 

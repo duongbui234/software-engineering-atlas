@@ -115,7 +115,7 @@ Bản TypeScript và JavaScript chèn 676 từ có dạng `a` + hai chữ thư�
 
 ## Ví dụ chạy được
 
-Mỗi file chạy 11 ca trên từng cách trong ba cách. Các ca bao gồm kho rỗng, chèn lặp, tiền tố đi tới nút trong, cạnh thiếu và từ 2.000 ký tự. TypeScript và JavaScript còn kiểm con số cho truy vấn trượt ở gốc.
+Mỗi file trong năm bản đầu chạy 11 ca trên từng cách trong ba cách. Các ca bao gồm kho rỗng, chèn lặp, tiền tố đi tới nút trong, cạnh thiếu và từ 2.000 ký tự. TypeScript và JavaScript còn kiểm con số cho truy vấn trượt ở gốc.
 
 ```typescript
 import assert from "node:assert/strict"
@@ -711,12 +711,104 @@ console.log(`${cases}/33 ca đúng`)
 console.log(`Lượt thử tiền tố: ${probes.map((index) => index.lastChecks).join(", ")}`)
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TrieNode
+{
+    public array $children = [];
+    public bool $terminal = false;
+}
+
+final class Trie
+{
+    private TrieNode $root;
+
+    public function __construct()
+    {
+        $this->root = new TrieNode();
+    }
+
+    public function insert(string $word): void
+    {
+        $node = $this->root;
+        for ($i = 0, $length = strlen($word); $i < $length; $i++) {
+            $node = $node->children[$word[$i]] ??= new TrieNode();
+        }
+        $node->terminal = true;
+    }
+
+    private function find(string $text): ?TrieNode
+    {
+        $node = $this->root;
+        for ($i = 0, $length = strlen($text); $i < $length; $i++) {
+            $node = $node->children[$text[$i]] ?? null;
+            if ($node === null) {
+                return null;
+            }
+        }
+        return $node;
+    }
+
+    public function search(string $word): bool
+    {
+        return $this->find($word)?->terminal ?? false;
+    }
+
+    public function startsWith(string $prefix): bool
+    {
+        return $this->find($prefix) !== null;
+    }
+}
+```
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Default)]
+struct Trie {
+    children: HashMap<u8, Trie>,
+    terminal: bool,
+}
+
+impl Trie {
+    fn insert(&mut self, word: &str) {
+        let mut node = self;
+        for letter in word.bytes() {
+            node = node.children.entry(letter).or_default();
+        }
+        node.terminal = true;
+    }
+
+    fn find(&self, text: &str) -> Option<&Trie> {
+        let mut node = self;
+        for letter in text.bytes() {
+            node = node.children.get(&letter)?;
+        }
+        Some(node)
+    }
+
+    fn search(&self, word: &str) -> bool {
+        self.find(word).is_some_and(|node| node.terminal)
+    }
+
+    fn starts_with(&self, prefix: &str) -> bool {
+        self.find(prefix).is_some()
+    }
+}
+```
+
 ```text
 33/33 ca đúng
 Lượt thử tiền tố: 676, 1, 1
 ```
 
-Dòng thứ hai chỉ do TypeScript và JavaScript in. Tải file [TypeScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.ts), [Python](../code/neetcode-implement-trie-prefix-tree/prefix_index.py), [Go](../code/neetcode-implement-trie-prefix-tree/prefix_index.go), [Java](../code/neetcode-implement-trie-prefix-tree/prefix-index.java) hoặc [JavaScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.js). Chạy theo thứ tự bằng `node prefix-index.ts`, `python3 prefix_index.py`, `go run prefix_index.go`, `java prefix-index.java` và `node prefix-index.js`.
+Dòng thứ hai chỉ do TypeScript và JavaScript in. Tải file [TypeScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.ts) · [Python](../code/neetcode-implement-trie-prefix-tree/prefix_index.py) · [Go](../code/neetcode-implement-trie-prefix-tree/prefix_index.go) · [Java](../code/neetcode-implement-trie-prefix-tree/prefix-index.java) · [JavaScript](../code/neetcode-implement-trie-prefix-tree/prefix-index.js) · [PHP](../code/neetcode-implement-trie-prefix-tree/prefix-index.php) · [Rust](../code/neetcode-implement-trie-prefix-tree/prefix_index.rs). Chạy năm bản đầu bằng `node prefix-index.ts`, `python3 prefix_index.py`, `go run prefix_index.go`, `java prefix-index.java` và `node prefix-index.js`.
+
+Chạy hai file mới bằng `php prefix-index.php` và `rustc --edition 2021 -O prefix_index.rs -o /tmp/prefix-index && /tmp/prefix-index`.
+
+Bản PHP và Rust dùng trie thưa và kiểm tra kho rỗng, chèn lặp, tiền tố chưa thành từ và chuỗi 2.000 ký tự. PHP dùng mảng kết hợp, còn Rust dùng `HashMap<u8, Trie>` vì đầu vào chỉ có chữ ASCII. PHP `15/15 ca đúng` · Rust `15/15 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

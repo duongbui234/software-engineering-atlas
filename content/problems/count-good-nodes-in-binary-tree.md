@@ -1,6 +1,6 @@
 ---
 title: "Count Good Nodes in Binary Tree: mang kỷ lục của đường đi xuống từng nút, bằng kỷ lục vẫn là tốt, và vì sao 10⁵ nút làm hỏng bản đệ quy"
-description: "Đếm nút không thua nút nào phía trên nó trên đường từ gốc: vét cạn leo ngược về gốc tốn O(n·h), mang max của đường đi xuống bằng DFS hay BFS chỉ O(n); trang chạy 10 ca chung trong năm ngôn ngữ, gồm số âm, giá trị bằng nhau và hai chuỗi 10⁵ nút, đo vét cạn trên chuỗi, chỉ ra ba bản sai (so ngặt, max khởi tạo bằng 0, max dùng chung) và bẫy hàng đợi shift()/pop(0)/remove(0)."
+description: "Đếm nút không thua nút nào phía trên nó trên đường từ gốc: vét cạn leo ngược về gốc tốn O(n·h), mang max của đường đi xuống bằng DFS hay BFS chỉ O(n); trang chạy 10 ca chung trong bảy ngôn ngữ, gồm số âm, giá trị bằng nhau và hai chuỗi 10⁵ nút, đo vét cạn trên chuỗi, chỉ ra ba bản sai (so ngặt, max khởi tạo bằng 0, max dùng chung) và bẫy hàng đợi shift()/pop(0)/remove(0)."
 date: 2026-11-25T21:00:00+07:00
 tags: [algorithms, neetcode, tree, recursion]
 type: problem
@@ -18,7 +18,7 @@ sources:
 > - Vét cạn: với mỗi nút, leo ngược lên gốc và so với từng tổ tiên. Đúng, nhưng O(n·h): chuỗi 10⁴ nút tốn 49 995 000 phép so.
 > - Cách O(n): đi từ gốc xuống và **mang theo giá trị lớn nhất của đường đi** ([[concepts/path-state|trạng thái đường đi]]). Ở mỗi nút chỉ một phép so `val >= max`, rồi đưa `max(max, val)` xuống cho hai con. Đệ quy, ngăn xếp hay [[concepts/breadth-first-search|BFS]] đều được, miễn mỗi nút giữ max **của riêng đường nó**.
 > - Ba bản sai chạy thật: so ngặt `>` (sai 4/10 ca), khởi tạo max bằng 0 trong khi giá trị có thể âm (sai 3/10), một biến max dùng chung cho cả cây để kỷ lục của nhánh trái rò sang nhánh phải (sai 1/10, lệch 802 trên 3 000 cây ngẫu nhiên).
-> - Đề cho tới **10⁵ nút**. Chuỗi lệch 10⁵ nút làm bản đệ quy ném lỗi ở TypeScript, JavaScript, Python và Java; chỉ Go qua. Hàng đợi bằng `shift()`, `pop(0)` hay `remove(0)` đúng nhưng chậm hơn 100 tới 200 lần trên cây 10⁵ nút.
+> - Đề cho tới **10⁵ nút**. Chuỗi lệch 10⁵ nút làm bản đệ quy ném lỗi ở TypeScript, JavaScript, Python và Java; Go, PHP (khi tắt Xdebug) và Rust (bản `-O`) qua. Hàng đợi bằng `shift()`, `pop(0)` hay `remove(0)` đúng nhưng chậm hơn 100 tới 200 lần trên cây 10⁵ nút.
 
 > [!info] Bối cảnh
 > Bài LeetCode 1448 (Medium), thuộc [[posts/2026-11-25-neetcode-level-order|ga 5: Duyệt theo tầng và mang trạng thái]] trên **tuyến NeetCode: Cấu trúc liên kết**. Ở [[posts/2026-11-25-neetcode-tree-recursion|ga 3]], kết quả đi **từ dưới lên** (chiều cao trả về cho cha). Ở [[posts/2026-11-25-neetcode-binary-search-tree|ga 4]], bài [[problems/validate-binary-search-tree|Validate BST]] mang một khoảng **từ trên xuống**. Bài này cũng đi từ trên xuống, nhưng thứ được mang là một con số tóm tắt cả đường đi: giá trị lớn nhất từ gốc tới đây. Hai bài cùng ga, [[problems/binary-tree-level-order-traversal|Binary Tree Level Order Traversal]] và [[problems/binary-tree-right-side-view|Binary Tree Right Side View]], duyệt theo tầng; bài này giải được cả theo chiều sâu lẫn theo tầng. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn chỉ cần biết đệ quy là gì.
@@ -172,7 +172,7 @@ function goodIterative(root: TreeNode | null): number {
 }
 ```
 
-Cùng O(n) thời gian; bộ nhớ là O(h) cho ngăn xếp (mỗi tầng còn chờ tối đa một anh em). Không có giới hạn độ sâu đệ quy, nên chuỗi 10⁵ nút chạy được ở cả năm ngôn ngữ.
+Cùng O(n) thời gian; bộ nhớ là O(h) cho ngăn xếp (mỗi tầng còn chờ tối đa một anh em). Không có giới hạn độ sâu đệ quy, nên chuỗi 10⁵ nút chạy được ở cả bảy ngôn ngữ.
 
 ### Cách 4: BFS theo tầng
 
@@ -186,6 +186,8 @@ Bẫy nằm ở **cách lấy phần tử đầu hàng đợi**:
 | Python | `list.pop(0)`: dời cả list (tài liệu Python ghi rõ O(n)) | `collections.deque` với `popleft()` |
 | Java | `ArrayList.remove(0)`: dời mọi phần tử phía sau | `ArrayDeque` với `poll()` |
 | Go | không có cách chậm phổ biến | `queue = queue[1:]` chỉ dời đầu lát cắt, O(1) |
+| PHP | `array_shift($queue)`: đánh lại chỉ số cả mảng | `SplQueue` với `dequeue()` |
+| Rust | `Vec::remove(0)`: dời mọi phần tử phía sau | `VecDeque` với `pop_front()` |
 
 Ba cách chậm đều cho đáp án đúng, nên chỉ phép đo mới lộ ra. Ở phần đo dưới đây, trên cây 10⁵ nút, chúng chậm hơn bản nhanh 100 tới 200 lần.
 
@@ -250,7 +252,7 @@ Lỗi là 9 không phải tổ tiên của các nút bên phải, nhưng nó v�
 
 n gấp đôi thì số phép so gấp bốn, đúng dáng n². Bản DFS lặp ghé đúng n nút. Vét cạn của TypeScript và Go chậm cỡ nhau ở đây vì mỗi bước leo là một lần tra bảng băm `parent`, không phải một lần đọc con trỏ.
 
-**Cây đầy đủ 10⁵ nút** (cao 17), giá trị sinh bằng cùng một bộ sinh tuyến tính ở cả năm ngôn ngữ, nên cả năm đều đếm ra 8 191 nút tốt. Vét cạn chỉ tốn 330 132 phép so (khoảng 3,3 lần n) vì giá trị ngẫu nhiên làm nó gặp tổ tiên lớn hơn rất sớm. Trung vị 5 lần (ms):
+**Cây đầy đủ 10⁵ nút** (cao 17), giá trị sinh bằng cùng một bộ sinh tuyến tính ở năm ngôn ngữ có phần đo (file PHP và Rust không đo phần này), nên cả năm đều đếm ra 8 191 nút tốt. Vét cạn chỉ tốn 330 132 phép so (khoảng 3,3 lần n) vì giá trị ngẫu nhiên làm nó gặp tổ tiên lớn hơn rất sớm. Trung vị 5 lần (ms):
 
 | | TypeScript | Python | Go | Java |
 |---|---|---|---|---|
@@ -264,7 +266,7 @@ Ba ô in đậm là cùng một thuật toán O(n) với ô ngay phía trên, ch
 
 Số đo đổi theo máy và theo lần chạy; tỉ lệ giữa các cách thì ổn định. Mình đo lúc máy đang chạy song song việc khác.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Đệ quy trên chuỗi 10⁵ nút | Bẫy riêng |
 |---|---|---|
@@ -272,10 +274,12 @@ Số đo đổi theo máy và theo lần chạy; tỉ lệ giữa các cách th�
 | Python | `RecursionError` (giới hạn mặc định 1 000 tầng); `sys.setrecursionlimit(200000)` thì chạy được | quên `nonlocal` khi đếm bằng biến ngoài: `count += 1` biến `count` thành biến cục bộ chưa gán, ném `UnboundLocalError` ở cả 10/10 ca; `list.pop(0)` |
 | Go | chạy được: ngăn xếp goroutine tự lớn lên | truyền biến đếm kiểu `int` vào hàm đệ quy là truyền bản sao; muốn đếm qua tham số thì dùng `*int` hoặc trả về giá trị |
 | Java | `StackOverflowError` trên luồng chính; luồng tự tạo với ngăn xếp 256 MB thì chạy được | `int` luôn truyền theo giá trị, nên `countInto(node, max, count)` không bao giờ đổi được `count` của người gọi: 0/10 ca; `ArrayList.remove(0)` |
+| PHP | chạy được khi tắt Xdebug: PHP không đặt giới hạn độ sâu; bật Xdebug thì ném `Error` ở tầng 512 (8/10 ca) | closure đệ quy phải tự bắt chính nó qua `use (&$go)`; object không làm khóa mảng được, nên bảng `parent` của vét cạn là `SplObjectStorage` |
+| Rust | bản `-O` chạy được trên luồng chính 8 MB; bản debug (không `-O`) tràn ngăn xếp và tiến trình chết, không bắt được | thả một chuỗi `Rc<RefCell<TreeNode>>` dài 10⁵ nút cũng đệ quy trong `drop`, nên file tháo cây bằng vòng lặp trước khi thả |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.ts) · [Python](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.py) · [Go](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.go) · [Java](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.java) · [JavaScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.js)
+[TypeScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.ts) · [Python](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.py) · [Go](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.go) · [Java](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.java) · [JavaScript](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.js) · [PHP](../code/neetcode-count-good-nodes-in-binary-tree/good-nodes.php) · [Rust](../code/neetcode-count-good-nodes-in-binary-tree/good_nodes.rs)
 
 Mỗi file dựng cây từ mảng theo tầng kiểu LeetCode (`null` là chỗ trống) và chạy 10 ca chung: một nút, một nút âm (−10⁴), ba nút, ba nút cùng giá trị, cây toàn số âm, cây ở hình đầu trang, cây đầy 7 nút, nhánh xuống thấp rồi vượt lại kỷ lục (`[6, 2, null, 1, 7]`), chuỗi phải không giảm 10⁵ nút (mọi nút tốt) và chuỗi trái không tăng 10⁵ nút (chỉ 5 nút đầu, bằng gốc, là tốt). Vét cạn bỏ qua ca chuỗi không giảm 10⁵ nút (5·10⁹ phép so) và được đo riêng ở cỡ nhỏ hơn. File TypeScript và JavaScript còn đối chiếu bốn cách đúng với vét cạn trên 3 000 cây ngẫu nhiên 1 tới 12 nút, giá trị −3 tới 3 (sinh bằng mulberry32), để hay có giá trị bằng và giá trị âm.
 
@@ -343,6 +347,31 @@ function goodDfs(root) {
     return good + go(node.left, m) + go(node.right, m);
   };
   return go(root, -Infinity);
+}
+```
+
+```php
+function goodDfs(?TreeNode $root): int {
+    $go = function (?TreeNode $node, int $maxSoFar) use (&$go): int {
+        if ($node === null) return 0;
+        $good = $node->val >= $maxSoFar ? 1 : 0; // bằng max vẫn là tốt
+        $m = max($maxSoFar, $node->val);
+        return $good + $go($node->left, $m) + $go($node->right, $m);
+    };
+    return $go($root, PHP_INT_MIN);
+}
+```
+
+```rust
+fn good_dfs(root: &Node) -> i32 {
+    fn go(node: &Node, max_so_far: i32) -> i32 {
+        let Some(n) = node else { return 0 };
+        let n = n.borrow();
+        let good = if n.val >= max_so_far { 1 } else { 0 }; // bằng max vẫn là tốt
+        let m = max_so_far.max(n.val);
+        good + go(&n.left, m) + go(&n.right, m)
+    }
+    go(root, i32::MIN)
 }
 ```
 
@@ -444,6 +473,38 @@ function goodIterative(root) {
     if (node.left !== null) stack.push([node.left, m]);
   }
   return good;
+}
+```
+
+```php
+function goodIterative(?TreeNode $root): int {
+    if ($root === null) return 0;
+    $good = 0;
+    $stack = [[$root, $root->val]];
+    while ($stack) {
+        [$node, $maxSoFar] = array_pop($stack);
+        if ($node->val >= $maxSoFar) $good++;
+        $m = max($maxSoFar, $node->val);
+        if ($node->right !== null) $stack[] = [$node->right, $m];
+        if ($node->left !== null) $stack[] = [$node->left, $m];
+    }
+    return $good;
+}
+```
+
+```rust
+fn good_iterative(root: &Node) -> i32 {
+    let Some(r) = root else { return 0 };
+    let mut good = 0;
+    let mut stack = vec![(r.clone(), r.borrow().val)];
+    while let Some((node, max_so_far)) = stack.pop() {
+        let n = node.borrow();
+        if n.val >= max_so_far { good += 1; }
+        let m = max_so_far.max(n.val);
+        if let Some(c) = &n.right { stack.push((c.clone(), m)); }
+        if let Some(c) = &n.left { stack.push((c.clone(), m)); }
+    }
+    good
 }
 ```
 
@@ -572,15 +633,51 @@ luồng có ngăn xếp 256 MB: goodDfs trên chuỗi 10^5 nút → 100000
 
 `node good-nodes.js` in đúng các dòng ca chạy thử và đối chiếu như bản TypeScript; số đo xê dịch vài phần trăm (`BFS shift()` 308,79 ms), và chuỗi dài nhất bản đệ quy chạy được là 7 421 nút.
 
+`php -d xdebug.mode=off good-nodes.php`:
+
+```text
+goodBrute       10/10 ca đúng
+goodDfs         10/10 ca đúng
+goodIterative   10/10 ca đúng
+goodBfs         10/10 ca đúng
+wrongStrict     6/10 ca đúng; sai ở bằng max vẫn tốt → 1, max nhánh trái lớn → 4, chuỗi không giảm 10^5 nút → 20000, chuỗi không tăng 10^5 nút → 1
+wrongInitZero   7/10 ca đúng; sai ở một nút âm → 0, toàn số âm → 0, chuỗi không giảm 10^5 nút → 50000
+wrongSharedMax  9/10 ca đúng; sai ở max nhánh trái lớn → 2
+
+đối chiếu 3000 cây ngẫu nhiên 1..12 nút, giá trị -3..3: ba cách đúng khớp vét cạn 3000/3000
+bản sai lệch với vét cạn: wrongStrict 1516, wrongInitZero 1257, wrongSharedMax 734 cây
+```
+
+Chạy `php good-nodes.php` trên máy có Xdebug thì `goodDfs` còn 8/10: Xdebug ném `Error` khi đệ quy quá 512 tầng.
+
+`rustc --edition 2021 -O good_nodes.rs && ./good_nodes`:
+
+```text
+good_brute       10/10 ca đúng
+good_dfs         10/10 ca đúng
+good_iterative   10/10 ca đúng
+good_bfs         10/10 ca đúng
+wrong_strict     6/10 ca đúng; sai ở bằng max vẫn tốt → 1, max nhánh trái lớn → 4, chuỗi không giảm 10^5 nút → 20000, chuỗi không tăng 10^5 nút → 1
+wrong_init_zero  7/10 ca đúng; sai ở một nút âm → 0, toàn số âm → 0, chuỗi không giảm 10^5 nút → 50000
+wrong_shared_max 9/10 ca đúng; sai ở max nhánh trái lớn → 2
+
+đối chiếu 3000 cây ngẫu nhiên 1..12 nút, giá trị -3..3: ba cách đúng khớp vét cạn 3000/3000
+bản sai lệch với vét cạn: wrong_strict 1522, wrong_init_zero 1281, wrong_shared_max 772 cây
+```
+
+Số cây lệch ở PHP và Rust khác bản TypeScript một chút vì mỗi file sinh cây ngẫu nhiên bằng bộ sinh của riêng nó.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Nút tốt phải lớn hơn mọi nút phía trên."** Đề nói không có nút nào phía trên **lớn hơn** nó; bằng thì vẫn tốt. `>` thay cho `>=` sai 4/10 ca và lệch 1 546 trên 3 000 cây ngẫu nhiên.
 - **"Phía trên" là mọi nút đã thăm trước.** Chỉ tổ tiên mới tính. Một biến max chung cho cả lần duyệt để kỷ lục của nhánh trái rò sang nhánh phải: cây `[1, 9, 2, null, null, 2, 3]` ra 2 thay vì 5.
 - **Khởi tạo max bằng 0.** Giá trị xuống tới −10⁴. Khởi tạo bằng `root.val` hoặc âm vô cực.
-- **"Đệ quy là đủ, cây của LeetCode đâu có sâu."** Đề cho phép 10⁵ nút, tức một chuỗi sâu 10⁵ tầng. Bản đệ quy ném lỗi ở TypeScript, JavaScript (khoảng 7 400 tới 7 800 tầng), Python (1 000 tầng) và Java (luồng chính); chỉ Go qua. Bản lặp với cặp (nút, max) thì không có giới hạn này.
+- **"Đệ quy là đủ, cây của LeetCode đâu có sâu."** Đề cho phép 10⁵ nút, tức một chuỗi sâu 10⁵ tầng. Bản đệ quy ném lỗi ở TypeScript, JavaScript (khoảng 7 400 tới 7 800 tầng), Python (1 000 tầng) và Java (luồng chính); Go qua, PHP qua khi tắt Xdebug, Rust qua ở bản `-O`. Bản lặp với cặp (nút, max) thì không có giới hạn này.
 - **Đếm bằng biến ngoài trong Python mà quên `nonlocal`.** Phép gán `count += 1` trong hàm lồng làm `count` thành biến cục bộ, và lần đọc đầu tiên ném `UnboundLocalError`. Trả số đếm qua giá trị trả về thì khỏi cần biến ngoài.
 - **Truyền biến đếm vào tham số `int` ở Go hay Java.** Mỗi lời gọi tăng bản sao của riêng nó; người gọi không thấy gì. Java ra 0 ở mọi ca, Go ra 1.
 - **Hàng đợi bằng `shift()`, `pop(0)`, `remove(0)`.** Đúng nhưng dời cả mảng mỗi lần lấy: 287 ms, 328 ms, 170 ms trên cây 10⁵ nút, so với 1 tới 30 ms của hàng đợi đúng kiểu.
+- **PHP: closure đệ quy quên `&` trong `use`.** `use ($go)` chụp giá trị của `$go` lúc tạo closure, khi đó biến còn chưa gán, nên lần gọi đệ quy đầu tiên ném `Error`. Phải viết `use (&$go)`. Xdebug còn chặn đệ quy ở tầng 512, nên trên máy dev bản đệ quy hỏng ở hai chuỗi 10⁵ nút dù trên máy chấm thì chạy.
+- **Rust: tin bản debug như bản `-O`.** Cùng hàm `good_dfs`, bản build `-O` đi hết chuỗi 10⁵ nút trên luồng chính, còn bản debug (khung ngăn xếp to hơn) tràn ngăn xếp và tiến trình chết luôn, không có `catch` nào bắt được. Thả cây cũng vậy: `drop` một chuỗi `Rc` dài là đệ quy, nên file tháo cây bằng vòng lặp.
 
 ## Câu hỏi tự kiểm tra
 

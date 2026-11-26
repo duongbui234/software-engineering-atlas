@@ -201,7 +201,7 @@ The problem allows only 100 digits, so on LeetCode every approach runs under 1 m
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-add-two-numbers/add-two-numbers.ts) · [Python](../code/neetcode-add-two-numbers/add_two_numbers.py) · [Go](../code/neetcode-add-two-numbers/add_two_numbers.go) · [Java](../code/neetcode-add-two-numbers/add-two-numbers.java) · [JavaScript](../code/neetcode-add-two-numbers/add-two-numbers.js)
+[TypeScript](../code/neetcode-add-two-numbers/add-two-numbers.ts) · [Python](../code/neetcode-add-two-numbers/add_two_numbers.py) · [Go](../code/neetcode-add-two-numbers/add_two_numbers.go) · [Java](../code/neetcode-add-two-numbers/add-two-numbers.java) · [JavaScript](../code/neetcode-add-two-numbers/add-two-numbers.js) · [PHP](../code/neetcode-add-two-numbers/add-two-numbers.php) · [Rust](../code/neetcode-add-two-numbers/add_two_numbers.rs)
 
 The files share these cases: the three examples of the problem, `[9,9] + [1]`, two numbers of different lengths (`1 + 899999`), and two random 100-digit numbers (the problem's limit). TypeScript adds a 16-digit case and 10 000 random pairs (mulberry32); Python adds a 5000-digit case. The expected answer comes from a separate function that adds digit arrays.
 
@@ -292,6 +292,87 @@ function addDigits(l1, l2) {
     l2 = l2?.next ?? null;
   }
   return dummy.next;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class ListNode {
+    public function __construct(public int $val, public ?ListNode $next = null) {}
+}
+
+function addTwoNumbers(?ListNode $a, ?ListNode $b): ?ListNode {
+    $dummy = $tail = new ListNode(0);
+    $carry = 0;
+    while ($a !== null || $b !== null || $carry !== 0) {
+        $sum = ($a->val ?? 0) + ($b->val ?? 0) + $carry;
+        $carry = intdiv($sum, 10);
+        $tail->next = new ListNode($sum % 10);
+        $tail = $tail->next;
+        $a = $a->next ?? null;
+        $b = $b->next ?? null;
+    }
+    return $dummy->next;
+}
+
+function listFrom(array $values): ?ListNode {
+    $head = null;
+    foreach (array_reverse($values) as $val) $head = new ListNode($val, $head);
+    return $head;
+}
+
+function valuesOf(?ListNode $head): array {
+    $values = [];
+    for (; $head !== null; $head = $head->next) $values[] = $head->val;
+    return $values;
+}
+```
+
+```rust
+type Link = Option<Box<ListNode>>;
+
+struct ListNode {
+    val: i32,
+    next: Link,
+}
+
+fn add_two_numbers(a: &Link, b: &Link) -> Link {
+    let (mut a, mut b) = (a.as_deref(), b.as_deref());
+    let mut result = None;
+    let mut tail = &mut result;
+    let mut carry = 0;
+    while a.is_some() || b.is_some() || carry != 0 {
+        let sum = a.map_or(0, |n| n.val) + b.map_or(0, |n| n.val) + carry;
+        carry = sum / 10;
+        tail = &mut tail
+            .insert(Box::new(ListNode {
+                val: sum % 10,
+                next: None,
+            }))
+            .next;
+        a = a.and_then(|n| n.next.as_deref());
+        b = b.and_then(|n| n.next.as_deref());
+    }
+    result
+}
+
+fn list_from(values: &[i32]) -> Link {
+    values
+        .iter()
+        .rev()
+        .fold(None, |next, &val| Some(Box::new(ListNode { val, next })))
+}
+
+fn values_of(head: &Link) -> Vec<i32> {
+    let mut out = Vec::new();
+    let mut current = head.as_deref();
+    while let Some(node) = current {
+        out.push(node.val);
+        current = node.next.as_deref();
+    }
+    out
 }
 ```
 
@@ -463,6 +544,8 @@ addDigits (string) 1/5 cases correct; wrong on example 1 of the problem → [0,5
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+Both added versions add one digit pair at a time. PHP uses `intdiv` for the carry. Rust keeps a mutable reference to the final `next` link. PHP `4/4 ca đúng` · Rust `4/4 ca đúng`.
 
 ## Misconceptions and common traps
 

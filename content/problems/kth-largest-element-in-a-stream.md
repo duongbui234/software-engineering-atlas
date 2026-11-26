@@ -129,7 +129,7 @@ Lời giải ở trên nạp `nums` bằng cách thêm từng số. Có cách nh
 
 Với số ngẫu nhiên, thêm lần lượt chỉ tốn trung bình khoảng 1,3 lần đổi mỗi số (số mới thường dừng sớm), nên heapify chỉ nhanh hơn khoảng hai lần. Ca giảm dần mới cho thấy khoảng cách O(n log n) so với O(n): gấp gần 18 lần. Trong Python, `heapq.heapify` trên 10⁶ số mất 25,6 ms, còn 10⁶ lần `heappush` mất 50,6 ms. Ở bài này `nums` có tối đa 10⁴ số nên khác biệt nhỏ; bản Python và Go vẫn dùng heapify rồi bỏ bớt tới k, vì viết cũng gọn như thêm lần lượt.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Heap có sẵn | Mặc định | Bẫy riêng |
 |---|---|---|---|
@@ -137,6 +137,8 @@ Với số ngẫu nhiên, thêm lần lượt chỉ tốn trung bình khoảng 1
 | Python | `heapq` (hàm trên `list`) | chỉ có min-heap | đảo dấu để có max-heap; `heapq.heapreplace` thay đỉnh trong một lần chìm |
 | Go | `container/heap` (bạn cài `heap.Interface`) | do `Less` quyết định | `Push`, `Pop` phải nhận con trỏ; phải gọi `heap.Push(h, x)`, không phải `h.Push(x)` |
 | Java | `PriorityQueue` | min-heap | max-heap bằng `Collections.reverseOrder()`; comparator `(a, b) -> b - a` tràn `int` |
+| PHP | `SplMinHeap`, `SplMaxHeap`, `SplPriorityQueue` | `SplPriorityQueue` lấy ưu tiên **cao** ra trước | `SplMinHeap` không có "thay đỉnh": `extract()` rồi `insert()`. Phần tử cùng ưu tiên trong `SplPriorityQueue` ra theo thứ tự không bảo đảm |
+| Rust | `std::collections::BinaryHeap` | max-heap | bọc `Reverse(x)` để có min-heap; `peek_mut()` sửa đỉnh rồi tự chìm khi ra khỏi phạm vi; `peek()` trả `Option` |
 
 Ba bẫy được chạy thật:
 
@@ -157,7 +159,7 @@ Cột heap gần như không đổi theo số lần `add`, vì với số ngẫu
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.ts) · [Python](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.py) · [Go](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.go) · [Java](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.java) · [JavaScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.js)
+[TypeScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.ts) · [Python](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.py) · [Go](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.go) · [Java](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.java) · [JavaScript](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.js) · [PHP](../code/neetcode-kth-largest-element-in-a-stream/kth-largest-stream.php) · [Rust](../code/neetcode-kth-largest-element-in-a-stream/kth_largest_stream.rs)
 
 Mỗi file chạy 7 hoặc 8 ca: ví dụ của đề, một luồng nhiều số 7 trùng, `nums` rỗng với k = 1, `nums` ít hơn k (đề cho phép k = `nums.length + 1`), số trùng, số âm, và (trừ JS) một luồng ngẫu nhiên 200 + 500 số với k = 50, đáp án lấy bằng cách sắp lại mỗi lần.
 
@@ -341,6 +343,60 @@ class KthLargest {
 }
 ```
 
+```php
+// Min-heap k chỗ: SplMinHeap giữ k số lớn nhất đã thấy; đỉnh (top) là số lớn thứ k.
+final class KthLargest implements Stream
+{
+    private SplMinHeap $heap;
+    public function __construct(private int $k, array $nums)
+    {
+        $this->heap = new SplMinHeap();
+        foreach ($nums as $x) $this->add($x);
+    }
+    public function add(int $val): int
+    {
+        if ($this->heap->count() < $this->k) $this->heap->insert($val);
+        elseif ($val > $this->heap->top()) { // mạnh hơn ứng viên yếu nhất: thay nó
+            $this->heap->extract(); // SplMinHeap không có "thay đỉnh": lấy ra rồi thêm vào
+            $this->heap->insert($val);
+        }
+        return $this->heap->top();
+    }
+}
+```
+
+```rust
+// Min-heap k chỗ. BinaryHeap của Rust là max-heap; bọc Reverse để số nhỏ nhất nằm ở đỉnh.
+struct KthLargest {
+    k: usize,
+    heap: BinaryHeap<Reverse<i32>>,
+}
+
+impl KthLargest {
+    fn new(k: i32, nums: Vec<i32>) -> Self {
+        let mut s = KthLargest { k: k as usize, heap: BinaryHeap::with_capacity(k as usize + 1) };
+        for x in nums {
+            s.add(x);
+        }
+        s
+    }
+}
+
+impl Stream for KthLargest {
+    fn add(&mut self, val: i32) -> i32 {
+        if self.heap.len() < self.k {
+            self.heap.push(Reverse(val));
+        } else if let Some(mut top) = self.heap.peek_mut() {
+            // peek_mut cho sửa đỉnh tại chỗ; khi `top` ra khỏi phạm vi, heap tự cho nó chìm xuống một lần.
+            if val > top.0 {
+                *top = Reverse(val);
+            }
+        }
+        self.heap.peek().unwrap().0 // đề hứa luôn có đủ k số khi gọi add, nên đỉnh tồn tại
+    }
+}
+```
+
 
 Kết quả `node kth-largest-stream.ts`, gồm bản sắp lại mỗi lần, hai bản sai và hai phép đo:
 
@@ -401,14 +457,18 @@ DefaultSortKthLargest  3/7 ca đúng; sai ở: ví dụ của đề → [4, 5, 5
 [4, 5, 8, 2, 10].sort() = [10,2,4,5,8]
 ```
 
+PHP (`php kth-largest-stream.php`) và Rust (`rustc --edition 2021 -O kth_largest_stream.rs`): bản đúng 8/8 ca, bản sai lấy max-heap thay min-heap (`SplPriorityQueue` trong PHP, `BinaryHeap<i32>` quên `Reverse` trong Rust) 1/8 ca, sai đúng các ca như `MaxHeapKthLargest` của TS. PHP in thêm `ba phần tử cùng ưu tiên 1, thêm a, b, c, lấy ra: a, c, b`; Rust in `heap rỗng: peek() = None`.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Tìm số lớn thì dùng max-heap."** Cho số **lớn nhất** thì đúng. Cho số lớn **thứ k** thì cần min-heap k chỗ: đỉnh phải là số yếu nhất trong top k, vì đó là số bị so và bị thay.
 - **Quên bỏ bớt khi heap quá k.** Đỉnh thành số nhỏ nhất của cả luồng, và heap phình ra.
 - **Lấy đỉnh rồi mới thêm.** Đúng, nhưng chìm một lần và nổi một lần. Thay đỉnh rồi chìm một lần (`heapreplace`, `heap.Fix(h, 0)`) chỉ đi một đường.
 - **So `>=` hay `>` với đỉnh.** Cả hai đều đúng: số bằng đỉnh thay vào hay không thì heap vẫn chứa cùng các giá trị. `>` đỡ một lần chìm.
-- **`nums` có ít hơn k số.** Đề cho phép (k tới `nums.length + 1`) và hứa có đủ k số khi cần trả lời. Nạp mà không kiểm tra "đã đủ k chưa" thì đọc đỉnh của heap thiếu là sai; cả năm bản đều nhận hết khi heap chưa đủ.
+- **`nums` có ít hơn k số.** Đề cho phép (k tới `nums.length + 1`) và hứa có đủ k số khi cần trả lời. Nạp mà không kiểm tra "đã đủ k chưa" thì đọc đỉnh của heap thiếu là sai; cả bảy bản đều nhận hết khi heap chưa đủ.
 - **JS: `sort()` mặc định.** So theo chuỗi, nên `10` đứng trước `2`. Luôn truyền `(a, b) => a - b`.
+- **PHP: tưởng `SplPriorityQueue` là min-heap.** Nó lấy ưu tiên cao nhất ra trước, nên `extract()` để bỏ bớt lại bỏ số lớn nhất: 1/8 ca. Dùng `SplMinHeap`, hoặc đảo dấu ưu tiên.
+- **Rust: quên `Reverse`.** `BinaryHeap<i32>` là max-heap, cũng 1/8 ca. `BinaryHeap<Reverse<i32>>` cho min-heap, và `peek_mut()` thay đỉnh trong một lần chìm như `heapreplace` của Python.
 
 ## Câu hỏi tự kiểm tra
 

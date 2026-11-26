@@ -223,7 +223,7 @@ Tripling the board side (30 → 90) makes brute force about 94 times slower, rig
 
 Each file runs all six correct approaches and the three wrong versions on 10 shared cases: the example board, a single `O`, a single `X`, a `3 × 3` board full of `O`, a ring of `X` around one cell, a single row `OXO`, two cells that touch only at a corner, a winding path out to the border, a `200 × 200` board full of `O`, and a `200 × 200` board with an `X` border and an all-`O` interior. Then the file cross-checks the five correct approaches against brute force on 2,000 random boards up to `8 × 8`, and takes the measurement above. The snippets below are approach 2 from each file.
 
-[TypeScript](../code/neetcode-surrounded-regions/surrounded.ts) · [Python](../code/neetcode-surrounded-regions/surrounded.py) · [Go](../code/neetcode-surrounded-regions/surrounded.go) · [Java](../code/neetcode-surrounded-regions/surrounded.java) · [JavaScript](../code/neetcode-surrounded-regions/surrounded.js)
+[TypeScript](../code/neetcode-surrounded-regions/surrounded.ts) · [Python](../code/neetcode-surrounded-regions/surrounded.py) · [Go](../code/neetcode-surrounded-regions/surrounded.go) · [Java](../code/neetcode-surrounded-regions/surrounded.java) · [JavaScript](../code/neetcode-surrounded-regions/surrounded.js) · [PHP](../code/neetcode-surrounded-regions/surrounded.php) · [Rust](../code/neetcode-surrounded-regions/surrounded.rs)
 
 ```ts
 const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]]
@@ -420,6 +420,97 @@ function finish(board) {
 }
 ```
 
+```php
+<?php
+const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+// Cách 2 (nên dùng): đi ngược từ biên. Ô O trên biên vào hàng đợi, đánh dấu an toàn 'S',
+// BFS lan 'S' vào trong. Cuối cùng: O còn lại thành X, S trả lại thành O.
+function borderBfs(array &$board): void
+{
+    $m = count($board);
+    $n = count($board[0]);
+    $queue = [];
+    $seed = function (int $r, int $c) use (&$board, &$queue, $n): void {
+        if ($board[$r][$c] === 'O') { $board[$r][$c] = 'S'; $queue[] = $r * $n + $c; }
+    };
+    for ($r = 0; $r < $m; $r++) { $seed($r, 0); $seed($r, $n - 1); }
+    for ($c = 0; $c < $n; $c++) { $seed(0, $c); $seed($m - 1, $c); }
+    for ($head = 0; $head < count($queue); $head++) {
+        $cr = intdiv($queue[$head], $n);
+        $cc = $queue[$head] % $n;
+        foreach (DIRS as [$dr, $dc]) {
+            $nr = $cr + $dr;
+            $nc = $cc + $dc;
+            if ($nr < 0 || $nr >= $m || $nc < 0 || $nc >= $n || $board[$nr][$nc] !== 'O') continue;
+            $board[$nr][$nc] = 'S';
+            $queue[] = $nr * $n + $nc;
+        }
+    }
+    finish($board);
+}
+
+function finish(array &$board): void
+{
+    foreach ($board as &$row) {
+        foreach ($row as &$cell) $cell = $cell === 'O' ? 'X' : ($cell === 'S' ? 'O' : $cell);
+        unset($cell);
+    }
+    unset($row);
+}
+```
+
+```rust
+const DIRS: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
+
+// Hàng xóm trong bảng m×n của ô (r, c), đã lọc ô ra ngoài biên.
+fn neighbors(m: usize, n: usize, r: usize, c: usize) -> impl Iterator<Item = (usize, usize)> {
+    DIRS.iter().filter_map(move |&(dr, dc)| {
+        let (nr, nc) = (r as i32 + dr, c as i32 + dc);
+        if nr < 0 || nr >= m as i32 || nc < 0 || nc >= n as i32 {
+            None
+        } else {
+            Some((nr as usize, nc as usize))
+        }
+    })
+}
+
+// Các ô O trên biên: điểm xuất phát của những cách đi ngược.
+fn border_cells(m: usize, n: usize) -> Vec<(usize, usize)> {
+    let mut cells = Vec::new();
+    for r in 0..m { cells.push((r, 0)); cells.push((r, n - 1)); }
+    for c in 0..n { cells.push((0, c)); cells.push((m - 1, c)); }
+    cells
+}
+
+// Cách 2 (nên dùng): đi ngược từ biên. Ô O trên biên vào hàng đợi, đánh dấu an toàn 'S',
+// BFS lan 'S' vào trong. Cuối cùng: O còn lại thành X, S trả lại thành O.
+fn border_bfs(board: &mut Board) {
+    let (m, n) = (board.len(), board[0].len());
+    let mut queue = Vec::new();
+    for (r, c) in border_cells(m, n) {
+        if board[r][c] == b'O' { board[r][c] = b'S'; queue.push(r * n + c); }
+    }
+    let mut head = 0;
+    while head < queue.len() {
+        let (cr, cc) = (queue[head] / n, queue[head] % n);
+        head += 1;
+        for (nr, nc) in neighbors(m, n, cr, cc) {
+            if board[nr][nc] != b'O' { continue; }
+            board[nr][nc] = b'S';
+            queue.push(nr * n + nc);
+        }
+    }
+    finish(board);
+}
+
+fn finish(board: &mut Board) {
+    for cell in board.iter_mut().flatten() {
+        *cell = match *cell { b'O' => b'X', b'S' => b'O', other => other };
+    }
+}
+```
+
 Output of `node surrounded.ts`:
 
 ```text
@@ -440,9 +531,11 @@ random cross-check: 2000/2000 boards, all five correct approaches match brute fo
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
-The other four files give the same pass/fail results, with two exceptions:
+The other six files give the same pass/fail results, with four exceptions:
 - **Go:** `borderDfsRecursive` passes all 10/10, because the goroutine stack grows. The wrong `wrongFlipDuringSearch` does not overflow either, so it also gets the `200 × 200` X-border case right (3/10 instead of 2/10). In that case every inside cell is surrounded, so flipping right away happens to give the correct answer.
 - **Python:** prints one extra line for a Python-only trap: `bảng là list[str]: ném TypeError ('str' object does not support item assignment)` ("board is a list[str]: throws TypeError"). Python measures smaller boards (20, 30, 40) because it is slower: `40 × 40` costs 2,085,136 visits, about 1,068 ms for brute force and 0.54 ms for region fill.
+- **PHP** (`php surrounded.php`): `borderDfsRecursive` passes 10/10, because PHP function calls live on the heap, not on the thread's stack (on a machine with Xdebug, Xdebug stops at 512 levels; turn it off with `php -d xdebug.mode=off`). So `wrongFlipDuringSearch` also gets 3/10, like Go. The third wrong version is rewritten in PHP's own way: the function takes `array $board` instead of `array &$board`, that is, it **forgets the `&`**, so it changes a copy and still gets 6/10. PHP only measures `30 × 30` and `60 × 60`: brute force on `60 × 60` already takes about 3,500 ms, and `90 × 90` about 20 seconds.
+- **Rust** (`rustc --edition 2021 -O surrounded.rs`): `border_dfs_recursive` passes 10/10 on the main thread's 8 MB stack, and `wrong_flip_during_search` gets 3/10 like Go. The third wrong version shadows the name with `let mut board = board.clone()`, so it changes a copy too. Rust is the fastest in the measurement: brute force on `90 × 90` takes about 520 ms, region fill 0.07 ms.
 
 ## Misconceptions and common traps
 
@@ -456,6 +549,8 @@ The other four files give the same pass/fail results, with two exceptions:
 - **TypeScript/JavaScript: rows as strings.** Assigning `board[r][c] = 'X'` to a string **raises no error at all** in a file that is not in strict mode (I tried it: the string `'XOX'` stays `'XOX'`). In strict mode it throws `TypeError: Cannot assign to read only property`. The board must be an array of character arrays.
 - **Java: comparing `char` with `String`.** Writing `board[r][c] == "O"` (double quotes) is a compile error, `bad operand types for binary operator '=='`. Use `'O'` (single quotes).
 - **Go and Java: shallow board copies.** `copy(dst, board)` in Go or `board.clone()` in Java copies only the outer array; the rows are still shared. When you need a copy to experiment on, copy row by row like the `clone`/`copy` helpers in the files.
+- **PHP: `foreach ($board as $row)` and then changing `$row`.** `$row` is a copy of the row, so changing it leaves the board alone. The `finish` function in the PHP version loops by reference (`foreach ($board as &$row)`) and calls `unset($row)` right after the loop; forget the `unset` and the next `foreach` overwrites the last row.
+- **Rust: a recursive function that borrows `&mut board` twice.** You cannot write `dfs` as a closure that both reads and changes `board` and also calls itself; the borrow checker refuses. The Rust version makes `mark_safe` a plain function that takes `board: &mut Board` and `i32` indices, so `r - 1` on row 0 becomes `-1` and is caught by the bounds check instead of panicking.
 
 ## Self-check questions
 

@@ -315,9 +315,9 @@ Chênh lệch ba bậc độ lớn: mỗi câu hỏi bằng ngăn xếp thăm tr
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.ts) · [Python](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.py) · [Go](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.go) · [Java](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.java) · [JavaScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.js)
+[TypeScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.ts) · [Python](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.py) · [Go](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.go) · [Java](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.java) · [JavaScript](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.js) · [PHP](../code/neetcode-kth-smallest-element-in-a-bst/kth-smallest.php) · [Rust](../code/neetcode-kth-smallest-element-in-a-bst/kth_smallest.rs)
 
-Mỗi file dựng cây từ mảng theo tầng kiểu LeetCode và chạy 10 ca chung: một nút; cây đầy 7 nút với k = 1, 4 (gốc) và 7; cây có giá trị 0 với k = 1 và 2; một cây mà đáp án nằm trong cây con phải của con trái; chuỗi lệch trái 10⁴ nút với k = 1 và k = 5 000; chuỗi lệch phải 10⁴ nút với k = 10⁴. Sau mỗi lần gọi, file kiểm tra lại mọi con trỏ của cây (bắt Morris dừng sớm). TypeScript, Python, Go và Java còn đối chiếu sáu cách trên 2 000 cây tìm kiếm ngẫu nhiên và đo. Cả năm file chạy 5 000 thao tác chèn, xóa, hỏi trên cây có size.
+Mỗi file trong năm bản đầu dựng cây từ mảng theo tầng kiểu LeetCode và chạy 10 ca chung: một nút; cây đầy 7 nút với k = 1, 4 (gốc) và 7; cây có giá trị 0 với k = 1 và 2; một cây mà đáp án nằm trong cây con phải của con trái; chuỗi lệch trái 10⁴ nút với k = 1 và k = 5 000; chuỗi lệch phải 10⁴ nút với k = 10⁴. Sau mỗi lần gọi, file kiểm tra lại mọi con trỏ của cây (bắt Morris dừng sớm). TypeScript, Python, Go và Java còn đối chiếu sáu cách trên 2 000 cây tìm kiếm ngẫu nhiên và đo. Cả năm file chạy 5 000 thao tác chèn, xóa, hỏi trên cây có size.
 
 Trung thứ tự đệ quy, dừng ở nút thứ k:
 
@@ -505,6 +505,68 @@ function kthIterative(root, k) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function kthSmallest(?TreeNode $root, int $k): int {
+    $stack = [];
+    while ($root !== null || $stack) {
+        while ($root !== null) {
+            $stack[] = $root;
+            $root = $root->left;
+        }
+        $root = array_pop($stack);
+        if (--$k === 0) return $root->val;
+        $root = $root->right;
+    }
+    throw new InvalidArgumentException('k nằm ngoài số nút');
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn kth_smallest(root: &Node, mut k: usize) -> Option<i32> {
+    let mut current = root.clone();
+    let mut stack = Vec::new();
+    while k > 0 {
+        while let Some(node) = current {
+            current = node.borrow().left.clone();
+            stack.push(node);
+        }
+        let node = stack.pop()?;
+        let node = node.borrow();
+        k -= 1;
+        if k == 0 {
+            return Some(node.val);
+        }
+        current = node.right.clone();
+    }
+    None
+}
+```
+
 Kết quả `node kth-smallest.ts`:
 
 ```text
@@ -633,6 +695,8 @@ wrongFalsyZero        7/10 ca đúng; sai ở có giá trị 0, k = 1 → null, 
 
 cây có size: 5000 thao tác chèn/xóa/hỏi ngẫu nhiên, 1491/1491 câu hỏi khớp mảng sắp xếp
 ```
+
+Hai bản bổ sung dùng ngăn xếp cho lượt trung thứ tự và dừng ở nút thứ k. PHP `5/5 ca đúng` · Rust `6/6 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

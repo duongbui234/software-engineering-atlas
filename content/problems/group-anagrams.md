@@ -116,7 +116,7 @@ Map chứa mọi từ một lần, cộng một khóa cho mỗi nhóm: O(n·k) c
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-group-anagrams/group-anagrams.ts) · [JavaScript](../code/neetcode-group-anagrams/group-anagrams.js) · [Python](../code/neetcode-group-anagrams/group_anagrams.py) · [Go](../code/neetcode-group-anagrams/group_anagrams.go) · [Java](../code/neetcode-group-anagrams/group-anagrams.java)
+[TypeScript](../code/neetcode-group-anagrams/group-anagrams.ts) · [JavaScript](../code/neetcode-group-anagrams/group-anagrams.js) · [Python](../code/neetcode-group-anagrams/group_anagrams.py) · [Go](../code/neetcode-group-anagrams/group_anagrams.go) · [Java](../code/neetcode-group-anagrams/group-anagrams.java) · [PHP](../code/neetcode-group-anagrams/group-anagrams.php) · [Rust](../code/neetcode-group-anagrams/group_anagrams.rs)
 
 ```ts
 // TypeScript: khóa đếm, nối có dấu phân cách
@@ -204,6 +204,33 @@ function groupAnagrams(strs) {
 }
 ```
 
+```php
+function groupAnagrams(array $strs): array {
+    $groups = [];
+    foreach ($strs as $s) {
+        $count = array_fill(0, 26, 0);
+        for ($i = 0, $n = strlen($s); $i < $n; $i++) $count[ord($s[$i]) - 97]++;
+        $groups[implode('#', $count)][] = $s; // mảng không làm khóa được: nối thành chuỗi
+    }
+    return array_values($groups); // bỏ khóa chuỗi, chỉ giữ các nhóm
+}
+```
+
+```rust
+fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
+    // [u8; 26] có Hash + Eq theo nội dung: dùng thẳng làm khóa, không cần nối chuỗi
+    let mut groups: HashMap<[u8; 26], Vec<String>> = HashMap::new();
+    for s in strs {
+        let mut count = [0u8; 26]; // k ≤ 100 nên u8 đủ
+        for b in s.bytes() {
+            count[(b - b'a') as usize] += 1;
+        }
+        groups.entry(count).or_default().push(s);
+    }
+    groups.into_values().collect()
+}
+```
+
 ```text
 $ node group-anagrams.ts
 bySortedKey            4/4 ca đúng
@@ -245,9 +272,21 @@ $ java group-anagrams.java
 [[tan, nat], [eat, tea, ate], [bat]]
 [[eat, tea, ate], [bat], [tan, nat]]
 int[] làm khóa: get(new int[]{1, 2}) = null
+
+$ php group-anagrams.php
+...
+  mảng PHP giữ thứ tự chèn:       [["eat","tea","ate"],["tan","nat"],["bat"]]
+
+$ rustc --edition 2021 -O group_anagrams.rs && ./group_anagrams
+bySortedKey            4/4 ca đúng
+byCountKey             4/4 ca đúng
+byCountKeyNoSeparator  4/4 ca đúng
+...
+  byCountKeyNoSeparator: 1 nhóm
+  byCountKey:            2 nhóm
 ```
 
-Cùng input, Go trả các nhóm theo thứ tự khác nhau mỗi lần chạy: đặc tả Go nói thứ tự duyệt map không được xác định, và runtime cố ý xáo trộn. Java cũng không giữ thứ tự (`HashMap`). Python và JS giữ thứ tự chèn. Test cho bài này phải chuẩn hóa (sắp xếp trong nhóm, rồi sắp xếp các nhóm) trước khi so.
+Cùng input, Go trả các nhóm theo thứ tự khác nhau mỗi lần chạy: đặc tả Go nói thứ tự duyệt map không được xác định, và runtime cố ý xáo trộn. Java cũng không giữ thứ tự (`HashMap`). Python, JS và PHP giữ thứ tự chèn; `HashMap` của Rust thì không. Test cho bài này phải chuẩn hóa (sắp xếp trong nhóm, rồi sắp xếp các nhóm) trước khi so.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -258,6 +297,8 @@ Cùng input, Go trả các nhóm theo thứ tự khác nhau mỗi lần chạy: 
 - **So output với một thứ tự cố định.** Đề cho phép thứ tự bất kỳ, và Go đổi thứ tự mỗi lần chạy. Chuẩn hóa trước khi so.
 - **"Khóa đếm luôn nhanh hơn vì O(k) < O(k log k)."** Với từ ngắn, hằng số (dựng 26 ô, nối 51 ký tự) lớn hơn chi phí sắp xếp vài chữ.
 - **Khóa đếm với Unicode.** 26 ô chỉ dành cho a–z. Với chữ bất kỳ, khóa sắp xếp theo code point (hoặc một bảng đếm dạng map, đã sắp xếp và nối lại) mới đúng.
+- **PHP: dùng mảng làm khóa.** `$groups[$count]` báo lỗi `Illegal offset type` (PHP 8 ném `TypeError`). Phải nối thành chuỗi, và vẫn cần dấu phân cách như mọi ngôn ngữ khác. Nhớ `array_values` ở cuối, nếu không kết quả là một object JSON có khóa chuỗi chứ không phải danh sách.
+- **Rust: `HashMap` duyệt theo thứ tự ngẫu nhiên, như Go.** Băm dùng seed ngẫu nhiên mỗi lần chạy, nên thứ tự nhóm đổi giữa các lần. Khóa `[u8; 26]` thì gọn, nhưng `u8` tràn ở 256: bản debug panic, bản `-O` quấn vòng và gom sai. Từ dài hơn 255 chữ thì dùng `[u16; 26]`.
 
 ## Câu hỏi tự kiểm tra
 

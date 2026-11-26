@@ -23,7 +23,7 @@ The stations on this line are fairly independent of each other; backtracking use
 
 ## One station, many problems
 
-Each **station** is a *pattern*, a solving technique that repeats across several problems. The station's post teaches the technique through one anchor problem, then shows where each other problem uses it differently. Every LeetCode problem has **its own page** in [[en/problems/index|the NeetCode 150 problem set]], solved in depth in five languages (TypeScript, Python, Go, Java, JavaScript), with complexity, measurements and common traps.
+Each **station** is a *pattern*, a solving technique that repeats across several problems. The station's post teaches the technique through one anchor problem, then shows where each other problem uses it differently. Every LeetCode problem has **its own page** in [[en/problems/index|the NeetCode 150 problem set]], solved in depth in seven languages (TypeScript, Python, Go, Java, JavaScript, PHP, Rust), with complexity, measurements and common traps.
 
 ## Why this order
 
@@ -33,6 +33,6 @@ Each **station** is a *pattern*, a solving technique that repeats across several
 
 ## Versions and sources
 
-The solutions really run on **Node.js 24** (running `.ts` files directly), **Python 3.12**, **Go 1.25** and **Java 21** (`java File.java`, no `javac` needed). Timings change with the machine and the run; the ratios between approaches stay stable.
+The solutions really run on **Node.js 24** (running `.ts` files directly), **Python 3.12**, **Go 1.25**, **Java 21** (`java File.java`, no `javac` needed), **PHP 8.2** and **Rust 1.99** (`rustc -O`, standard library only). A few problems have no Rust option on LeetCode (those built on node identity, like Clone Graph), so their pages have six languages. Timings change with the machine and the run; the ratios between approaches stay stable.
 
 The problems belong to LeetCode; each problem page only restates the problem in my own words and links to it. The list and its groups come from the public data of [NeetCode 150](https://neetcode.io/practice); grouping problems into stations is my own. The solutions, measurements and diagrams are my own.

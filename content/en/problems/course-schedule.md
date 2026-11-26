@@ -198,21 +198,21 @@ I default to Kahn: no recursion, easy to explain, and the next problem reuses it
 
 ### Measured on 2,000 courses
 
-The runnable file uses two inputs of 2,000 courses. **Reversed chain**: course `i` needs course `i + 1`, the worst case for Approach 1. **Random**: 5,000 pairs with no cycle, course numbers shuffled. The "edge looks" column counts how many times a method looks at one prerequisite pair; all five languages produce exactly the same number.
+The runnable file uses two inputs of 2,000 courses. **Reversed chain**: course `i` needs course `i + 1`, the worst case for Approach 1. **Random**: 5,000 pairs with no cycle, course numbers shuffled. The "edge looks" column counts how many times a method looks at one prerequisite pair; all seven languages produce exactly the same number.
 
-| Reversed chain, 1,999 edges | Edge looks | TS | Python | Go | Java |
-|---|---:|---:|---:|---:|---:|
-| Approach 1: rescan, 2,001 passes | 2,000,999 | 29 ms | 136 ms | 3.6 ms | 5.5 ms |
-| Approach 2: Kahn | 1,999 | 0.3 ms | 0.3 ms | 0.1 ms | 0.2 ms |
-| Approach 3: recursive DFS | 1,999 | 0.1 ms | 0.3 ms | 0.1 ms | 0.1 ms |
-| Approach 3b: DFS with own stack | 1,999 | 0.1 ms | 0.5 ms | 0.1 ms | 0.4 ms |
+| Reversed chain, 1,999 edges | Edge looks | TS | Python | Go | Java | PHP | Rust |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Approach 1: rescan, 2,001 passes | 2,000,999 | 29 ms | 136 ms | 3.6 ms | 5.5 ms | 59 ms | 3.1 ms |
+| Approach 2: Kahn | 1,999 | 0.3 ms | 0.3 ms | 0.1 ms | 0.2 ms | 0.1 ms | 0.1 ms |
+| Approach 3: recursive DFS | 1,999 | 0.1 ms | 0.3 ms | 0.1 ms | 0.1 ms | 0.2 ms | < 0.1 ms |
+| Approach 3b: DFS with own stack | 1,999 | 0.1 ms | 0.5 ms | 0.1 ms | 0.4 ms | 0.3 ms | 0.1 ms |
 
-| Random, 5,000 edges | Edge looks | TS | Python | Go | Java |
-|---|---:|---:|---:|---:|---:|
-| Approach 1: rescan, 10 passes | 12,033 | 0.4 ms | 1.1 ms | 0.3 ms | 0.2 ms |
-| Approach 2: Kahn | 5,000 | 0.3 ms | 0.7 ms | 0.2 ms | 0.3 ms |
-| Approach 3: recursive DFS | 5,000 | 0.3 ms | 0.6 ms | 0.2 ms | 0.2 ms |
-| Approach 3b: DFS with own stack | 5,000 | 0.2 ms | 1.0 ms | 0.3 ms | 0.3 ms |
+| Random, 5,000 edges | Edge looks | TS | Python | Go | Java | PHP | Rust |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Approach 1: rescan, 10 passes | 12,033 | 0.4 ms | 1.1 ms | 0.3 ms | 0.2 ms | 0.6 ms | 0.1 ms |
+| Approach 2: Kahn | 5,000 | 0.3 ms | 0.7 ms | 0.2 ms | 0.3 ms | 0.4 ms | 0.1 ms |
+| Approach 3: recursive DFS | 5,000 | 0.3 ms | 0.6 ms | 0.2 ms | 0.2 ms | 0.5 ms | 0.1 ms |
+| Approach 3b: DFS with own stack | 5,000 | 0.2 ms | 1.0 ms | 0.3 ms | 0.3 ms | 0.6 ms | 0.1 ms |
 
 On the reversed chain, recursive DFS does not stumble, because the arrows point from larger to smaller course numbers, so a DFS starting at course 0 goes nowhere; each walk is only one level deep. The opposite direction is what makes DFS run the whole chain in one go; see the deep-recursion table below. Two things worth remembering:
 
@@ -221,19 +221,19 @@ On the reversed chain, recursive DFS does not stumble, because the arrows point 
 
 Deep recursion: the chain "course `i + 1` needs course `i`", so DFS from course 0 runs the whole chain in one go.
 
-| Depth | TS and JS | Python | Go | Java |
-|---|---|---|---|---|
-| 2,000 levels, recursive DFS | correct | `RecursionError` | correct | correct |
-| 100,000 levels, recursive DFS | `RangeError` | `RecursionError` | correct | `StackOverflowError` |
-| 100,000 levels, DFS with own stack and Kahn | correct | correct | correct | correct |
+| Depth | TS and JS | Python | Go | Java | PHP | Rust |
+|---|---|---|---|---|---|---|
+| 2,000 levels, recursive DFS | correct | `RecursionError` | correct | correct | correct | correct |
+| 100,000 levels, recursive DFS | `RangeError` | `RecursionError` | correct | `StackOverflowError` | correct | correct (main thread) |
+| 100,000 levels, DFS with own stack and Kahn | correct | correct | correct | correct | correct | correct |
 
-Go does not break because each goroutine's stack grows on its own, by default up to 1 GB on a 64-bit machine. The other three languages have a fixed ceiling. The problem allows at most 2,000 courses, so on LeetCode only Python trips; but on real data (a build system with hundreds of thousands of steps), JavaScript and Java trip too.
+Go does not break because each goroutine's stack grows on its own, by default up to 1 GB on a 64-bit machine. The other three languages have a fixed ceiling. PHP does not break because PHP function calls live on the virtual machine's heap, not on the thread's stack; on a machine with Xdebug enabled, Xdebug stops recursion at 512 levels, so the PHP files run with `php -d xdebug.mode=off`. Rust runs 100,000 levels on the main thread (8 MB stack), but the same function on a new thread (2 MB by default) overflows and the whole process stops. The problem allows at most 2,000 courses, so on LeetCode only Python trips; but on real data (a build system with hundreds of thousands of steps), JavaScript and Java trip too.
 
 ## Runnable example
 
-Each file runs the same 8 cases: two courses, two courses waiting for each other, a diamond, the five-course example, one course taken then stuck, a course that requires itself, no prerequisites, and two separate pieces where the second has a cycle. The file also cross-checks the four correct approaches on 2,000 small random graphs (generated by the same pseudo-random sequence in all five languages), measures the two 2,000-course inputs and tries deep recursion. Below are the graph building, Kahn and recursive three-color DFS; Approach 1, Approach 3b and the two wrong versions are in the full file.
+Each file runs the same 8 cases: two courses, two courses waiting for each other, a diamond, the five-course example, one course taken then stuck, a course that requires itself, no prerequisites, and two separate pieces where the second has a cycle. The file also cross-checks the four correct approaches on 2,000 small random graphs (generated by the same pseudo-random sequence in all seven languages), measures the two 2,000-course inputs and tries deep recursion. Below are the graph building, Kahn and recursive three-color DFS; Approach 1, Approach 3b and the two wrong versions are in the full file.
 
-[TypeScript](../code/neetcode-course-schedule/course-schedule.ts) · [Python](../code/neetcode-course-schedule/course_schedule.py) · [Go](../code/neetcode-course-schedule/course_schedule.go) · [Java](../code/neetcode-course-schedule/course-schedule.java) · [JavaScript](../code/neetcode-course-schedule/course-schedule.js)
+[TypeScript](../code/neetcode-course-schedule/course-schedule.ts) · [Python](../code/neetcode-course-schedule/course_schedule.py) · [Go](../code/neetcode-course-schedule/course_schedule.go) · [Java](../code/neetcode-course-schedule/course-schedule.java) · [JavaScript](../code/neetcode-course-schedule/course-schedule.js) · [PHP](../code/neetcode-course-schedule/course-schedule.php) · [Rust](../code/neetcode-course-schedule/course_schedule.rs)
 
 ```ts
 // Cặp [a, b] nghĩa là "muốn học a phải học b trước": cạnh đi từ b sang a.
@@ -517,8 +517,132 @@ function canFinishDfs(n, prerequisites) {
   return true
 }
 ```
+```php
+// Cặp [a, b] nghĩa là "muốn học a phải học b trước": cạnh đi từ b sang a.
+function buildGraph(int $n, array $prerequisites): array
+{
+    $adj = array_fill(0, $n, []);
+    $indegree = array_fill(0, $n, 0);
+    foreach ($prerequisites as [$a, $b]) {
+        $adj[$b][] = $a;
+        $indegree[$a]++;
+    }
+    return [$adj, $indegree];
+}
 
-Output of `node course-schedule.ts` (the other four print the same case lines and the same edge-look counts; timings and the deep-recursion lines differ as in the tables above). The lines say how many cases pass ("ca đúng"), which cases fail ("sai ở"), and for each input the answer, the edge looks ("lần nhìn cạnh"), the passes ("lượt quét") and the time; "lỗi … (tràn ngăn xếp)" means the call failed with a stack overflow:
+// Cách 2: Kahn. Môn có bậc vào 0 thì học được ngay; học xong thì trừ bậc vào
+// của các môn đứng sau. Đếm số môn học được. O(V + E).
+function canFinishKahn(int $n, array $prerequisites): bool
+{
+    global $work;
+    [$adj, $indegree] = buildGraph($n, $prerequisites);
+    $queue = [];
+    for ($c = 0; $c < $n; $c++) if ($indegree[$c] === 0) $queue[] = $c;
+    $taken = 0;
+    for ($head = 0; $head < count($queue); $head++) { // giữ chỉ số đầu, không array_shift
+        $u = $queue[$head];
+        $taken++;
+        foreach ($adj[$u] as $v) {
+            $work++;
+            if (--$indegree[$v] === 0) $queue[] = $v;
+        }
+    }
+    return $taken === $n; // thiếu môn nào là môn đó kẹt trong một vòng
+}
+
+const WHITE = 0;
+const GRAY = 1;
+const BLACK = 2;
+
+// Cách 3: DFS ba màu, đệ quy. Trắng = chưa đụng, xám = đang trên đường đi,
+// đen = đã xong. Gặp lại một đỉnh xám là có vòng. O(V + E).
+function canFinishDfs(int $n, array $prerequisites): bool
+{
+    [$adj] = buildGraph($n, $prerequisites);
+    $color = array_fill(0, $n, WHITE);
+    // $color truyền theo tham chiếu (&): mảng PHP là giá trị, không có & thì mỗi lời gọi sửa một bản sao
+    $visit = function (int $u) use (&$visit, &$color, $adj): bool {
+        global $work;
+        $color[$u] = GRAY;
+        foreach ($adj[$u] as $v) {
+            $work++;
+            if ($color[$v] === GRAY) return false; // quay về đỉnh đang trên đường: vòng
+            if ($color[$v] === WHITE && !$visit($v)) return false;
+        }
+        $color[$u] = BLACK;
+        return true;
+    };
+    for ($u = 0; $u < $n; $u++) {
+        if ($color[$u] === WHITE && !$visit($u)) return false;
+    }
+    return true;
+}
+```
+```rust
+// Cặp [a, b] nghĩa là "muốn học a phải học b trước": cạnh đi từ b sang a.
+fn build_graph(n: usize, prerequisites: &[[usize; 2]]) -> (Vec<Vec<usize>>, Vec<usize>) {
+    let mut adj = vec![Vec::new(); n];
+    let mut indegree = vec![0usize; n];
+    for &[a, b] in prerequisites {
+        adj[b].push(a);
+        indegree[a] += 1;
+    }
+    (adj, indegree)
+}
+
+// Cách 2: Kahn. Môn có bậc vào 0 thì học được ngay; học xong thì trừ bậc vào
+// của các môn đứng sau. Đếm số môn học được. O(V + E).
+fn can_finish_kahn(n: usize, prerequisites: &[[usize; 2]]) -> bool {
+    let (adj, mut indegree) = build_graph(n, prerequisites);
+    let mut queue: VecDeque<usize> = (0..n).filter(|&c| indegree[c] == 0).collect();
+    let mut taken = 0;
+    while let Some(u) = queue.pop_front() {
+        taken += 1;
+        for &v in &adj[u] {
+            tick();
+            indegree[v] -= 1; // usize: chỉ trừ khi chắc > 0, nếu không bản debug panic
+            if indegree[v] == 0 {
+                queue.push_back(v);
+            }
+        }
+    }
+    taken == n // thiếu môn nào là môn đó kẹt trong một vòng
+}
+
+const WHITE: u8 = 0;
+const GRAY: u8 = 1;
+const BLACK: u8 = 2;
+
+// Cách 3: DFS ba màu, đệ quy. Trắng = chưa đụng, xám = đang trên đường đi,
+// đen = đã xong. Gặp lại một đỉnh xám là có vòng. O(V + E).
+fn can_finish_dfs(n: usize, prerequisites: &[[usize; 2]]) -> bool {
+    let (adj, _) = build_graph(n, prerequisites);
+    let mut color = vec![WHITE; n];
+    // Hàm lồng thay cho closure: closure đệ quy cần mượn &mut color hai lần, borrow checker không cho.
+    fn visit(u: usize, adj: &[Vec<usize>], color: &mut [u8]) -> bool {
+        color[u] = GRAY;
+        for &v in &adj[u] {
+            tick();
+            if color[v] == GRAY {
+                return false; // quay về đỉnh đang trên đường: vòng
+            }
+            if color[v] == WHITE && !visit(v, adj, color) {
+                return false;
+            }
+        }
+        color[u] = BLACK;
+        true
+    }
+    for u in 0..n {
+        if color[u] == WHITE && !visit(u, &adj, &mut color) {
+            return false;
+        }
+    }
+    true
+}
+```
+
+Output of `node course-schedule.ts` (the other six print the same case lines and the same edge-look counts; timings and the deep-recursion lines differ as in the tables above). The lines say how many cases pass ("ca đúng"), which cases fail ("sai ở"), and for each input the answer, the edge looks ("lần nhìn cạnh"), the passes ("lượt quét") and the time; "lỗi … (tràn ngăn xếp)" means the call failed with a stack overflow:
 
 ```text
 canFinishScan        8/8 ca đúng
@@ -555,6 +679,8 @@ ngẫu nhiên 2000 môn, 5000 cặp, không vòng:
 - **TypeScript and JavaScript: `queue.shift()`.** Each removal from the front shifts the whole array. Keep a `head` index that walks along the array, as the file does. Recursive DFS survives 2,000 levels but breaks with `RangeError` at 100,000.
 - **Java: `List<List<Integer>>` and recursion.** Each number is boxed into an `Integer`, which costs more memory than `int[]`; with 5,000 edges this does not matter. Recursive DFS throws `StackOverflowError` at 100,000 levels with the default stack.
 - **Go: no overflow, but still a cost.** Goroutine stacks grow on their own, so 100,000 levels of recursion still run. Taking the front of the queue with `queue = queue[1:]` keeps the original array alive until the queue is done; a `head` index is tidier.
+- **PHP: arrays are values, so the closure needs `&$color`.** With `use ($color)` the closure gets a copy taken when it is created, every recursive call sees an all-white array and never meets a gray vertex; on a graph with a cycle it recurses until PHP runs out of memory (a fatal error that cannot be caught). Write `use (&$visit, &$color)`. Also, Xdebug, if enabled, stops recursion at 512 levels even though a 2,000-course chain is perfectly valid.
+- **Rust: recursive closures and spawned threads.** A closure cannot call itself while it still borrows `&mut color`, so the Rust version writes `visit` as a nested `fn` that takes `&mut [u8]`. A stack overflow in Rust is not an exception: the process is aborted. The 100,000-course chain runs on the main thread (8 MB) but overflows on a default `thread::spawn` (2 MB); Kahn with a `VecDeque` does not depend on the stack.
 
 ## Self-check questions
 

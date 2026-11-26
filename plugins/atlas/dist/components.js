@@ -182,7 +182,7 @@ document.addEventListener("themechange", atlasRenderMermaid);
 
 // ── Tab code: các khối code liền nhau, khác ngôn ngữ → một thanh tab ngang ──────
 // Viết bài: chỉ cần đặt các khối ```ts, ```python, ```go… liền nhau (không xen đoạn văn).
-// Script gom chúng thành một nhóm tab, xếp theo thứ tự TS · Python · Go · Java · JS.
+// Script gom chúng thành một nhóm tab, xếp theo thứ tự TS · Python · Go · Java · JS · PHP · Rust.
 // Chọn một ngôn ngữ thì mọi nhóm trên trang cùng chuyển, và lựa chọn được nhớ (localStorage).
 // Không có JS: các khối vẫn hiện dọc như cũ.
 export const CODETABS_SCRIPT = `
@@ -196,7 +196,7 @@ var ATLAS_TAB_LANGS = {
   c: ["c", "C"], cpp: ["cpp", "C++"], csharp: ["csharp", "C#"], cs: ["csharp", "C#"],
   ruby: ["ruby", "Ruby"], swift: ["swift", "Swift"], php: ["php", "PHP"],
 };
-var ATLAS_TAB_ORDER = ["ts", "python", "go", "java", "js"];
+var ATLAS_TAB_ORDER = ["ts", "python", "go", "java", "js", "php", "rust"];
 var ATLAS_TAB_KEY = "atlas-code-lang";
 function atlasTabLang(fig) {
   var pre = fig.matches && fig.matches("figure[data-rehype-pretty-code-figure]") && fig.querySelector(":scope > pre[data-language]");

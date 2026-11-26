@@ -203,6 +203,8 @@ The problem allows up to 10⁴ nodes and does not promise a balanced tree. A ske
 | Node (after JIT optimization) | 13,909 | same as above | passes |
 | Java (main thread) | 39,299 | `StackOverflowError` (an `Error`, not an `Exception`) | passes |
 | Go | no limit hit at 10⁷ | past 1 GB the whole program dies, not catchable | passes |
+| PHP 8.2 (Xdebug off) | no level count; frames live on the heap | past `memory_limit` it is a fatal error; with Xdebug on it stops at 512 levels | passes |
+| Rust (main thread, 8 MB) | threshold not measured | the process dies with `has overflowed its stack`, not catchable | passes |
 
 - **Python** counts frames, not memory: the default limit is 1,000, minus a few frames for the calling code, which leaves 998. `sys.setrecursionlimit(200_000)` lets a 10⁵-node chain run in about 20 ms. Since Python 3.11, a Python function calling a Python function uses almost no C stack, so raising the limit is fairly safe; on older versions, raising it too far can crash the whole process.
 - **Node** has a fixed stack (about 1 MB by default), and the number of levels depends on the frame size. On the first run the function is still interpreted, frames are large, and it only gets 7,827 levels; the JavaScript file calls it straight on a 10⁴-node chain and gets `RangeError`. The TypeScript file runs the function many times before measuring, the frames shrink, and it gets 13,909 levels. Same function, same machine, two numbers.
@@ -226,7 +228,7 @@ All O(n), within 3 times of each other. The most interesting one is Python: BFS 
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.ts) · [Python](../code/neetcode-maximum-depth-of-binary-tree/max_depth.py) · [Go](../code/neetcode-maximum-depth-of-binary-tree/max_depth.go) · [Java](../code/neetcode-maximum-depth-of-binary-tree/max-depth.java) · [JavaScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.js)
+[TypeScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.ts) · [Python](../code/neetcode-maximum-depth-of-binary-tree/max_depth.py) · [Go](../code/neetcode-maximum-depth-of-binary-tree/max_depth.go) · [Java](../code/neetcode-maximum-depth-of-binary-tree/max-depth.java) · [JavaScript](../code/neetcode-maximum-depth-of-binary-tree/max-depth.js) · [PHP](../code/neetcode-maximum-depth-of-binary-tree/max-depth.php) · [Rust](../code/neetcode-maximum-depth-of-binary-tree/max_depth.rs)
 
 Each file builds trees from level-order arrays and runs 8 shared cases: empty tree, one node, right child only, a complete 3-level tree, a deep right branch, a 6-node left chain, a 5-level zigzag, negative values and 0. The TypeScript, Python, Go and Java files also cross-check 2,000 random trees (mulberry32, up to 40 nodes), with the correct depth recorded while each tree is built.
 
@@ -271,6 +273,28 @@ static int maxDepthRecursive(TreeNode root) {
 function maxDepthRecursive(root) {
   if (root === null) return 0;
   return 1 + Math.max(maxDepthRecursive(root.left), maxDepthRecursive(root.right));
+}
+```
+
+```php
+// Approach 1: recursion. Depth = 1 + the larger depth of the two subtrees; an empty tree has depth 0.
+function maxDepthRecursive(?TreeNode $root): int
+{
+    if ($root === null) return 0;
+    return 1 + max(maxDepthRecursive($root->left), maxDepthRecursive($root->right));
+}
+```
+
+```rust
+// Approach 1: recursion. Depth = 1 + the larger depth of the two subtrees; an empty tree (None) has depth 0.
+fn max_depth_recursive(root: &Node) -> i32 {
+    match root {
+        None => 0,
+        Some(n) => {
+            let b = n.borrow();
+            1 + max_depth_recursive(&b.left).max(max_depth_recursive(&b.right))
+        }
+    }
 }
 ```
 
@@ -373,7 +397,45 @@ function maxDepthBfs(root) {
 }
 ```
 
-The hand-managed stack version in all five languages is in the files above.
+```php
+// Approach 3: level-order BFS with SplQueue; each outer round takes out exactly the nodes of one level.
+function maxDepthBfs(?TreeNode $root): int
+{
+    if ($root === null) return 0;
+    $queue = new SplQueue();
+    $queue->enqueue($root);
+    $depth = 0;
+    while (!$queue->isEmpty()) {
+        $depth++;
+        for ($k = $queue->count(); $k > 0; $k--) {
+            $node = $queue->dequeue();
+            if ($node->left !== null) $queue->enqueue($node->left);
+            if ($node->right !== null) $queue->enqueue($node->right);
+        }
+    }
+    return $depth;
+}
+```
+
+```rust
+// Approach 3: level-order BFS with VecDeque; each outer round takes out exactly the nodes of one level.
+fn max_depth_bfs(root: &Node) -> i32 {
+    let mut queue: std::collections::VecDeque<Rc<RefCell<TreeNode>>> = root.iter().cloned().collect();
+    let mut depth = 0;
+    while !queue.is_empty() {
+        depth += 1;
+        for _ in 0..queue.len() {
+            let n = queue.pop_front().unwrap();
+            let b = n.borrow();
+            queue.extend(b.left.iter().cloned());
+            queue.extend(b.right.iter().cloned());
+        }
+    }
+    depth
+}
+```
+
+The hand-managed stack version in all seven languages is in the files above.
 
 Output of `node max-depth.ts`:
 
@@ -487,6 +549,32 @@ chain of 100000 nodes, maxDepthRecursive: threw RangeError: Maximum call stack s
 chain of 100000 nodes, maxDepthStack: 100000
 ```
 
+`php -d xdebug.mode=off max-depth.php`:
+
+```text
+maxDepthRecursive  8/8 ca đúng
+maxDepthStack      8/8 ca đúng
+maxDepthBfs        8/8 ca đúng
+wrongBfsPerNode    5/8 ca đúng; sai ở cây đủ 3 tầng → 7 (đúng là 3), nhánh sâu bên phải → 9 (đúng là 4), giá trị âm và 0 → 4 (đúng là 3)
+
+ngẫu nhiên: maxDepthRecursive 2000/2000, maxDepthStack 2000/2000, maxDepthBfs 2000/2000
+chuỗi trái 10000 nút: đệ quy → 10000, ngăn xếp → 10000
+```
+
+`rustc --edition 2021 -O max_depth.rs && ./max_depth`:
+
+```text
+max_depth_recursive 8/8 ca đúng
+max_depth_stack     8/8 ca đúng
+max_depth_bfs       8/8 ca đúng
+wrong_bfs_per_node  5/8 ca đúng; sai ở cây đủ 3 tầng → 7 (đúng là 3), nhánh sâu bên phải → 9 (đúng là 4), giá trị âm và 0 → 4 (đúng là 3)
+
+ngẫu nhiên: max_depth_recursive 2000/2000, max_depth_stack 2000/2000, max_depth_bfs 2000/2000
+chuỗi trái 10000 nút: đệ quy → 10000, ngăn xếp → 10000
+```
+
+PHP and Rust are not timed; the two files check correctness, run the random cross-check (each language has its own random generator) and try a 10⁴-node chain, the largest the problem allows.
+
 ## Misconceptions and common traps
 
 - **"The base case is a leaf returning 1."** Choosing the empty tree returning 0 is cleaner: no special case for one-child nodes, and an empty input tree is handled for free.
@@ -496,6 +584,8 @@ chain of 100000 nodes, maxDepthStack: 100000
 - **"Node survives N levels" is a fixed number.** The same function gives 7,827 before optimization and 13,909 after the JIT optimizes it.
 - **`catch (Exception e)` in Java catches a stack overflow.** It does not: `StackOverflowError` is an `Error`.
 - **A list as a default value in Python.** It is created once and shared between calls; use `None` and create a fresh list in the body, or pass the result through the return value like the standard recursive version.
+- **PHP: assuming PHP limits recursion like Python.** PHP 8.2 does not count levels: a 10⁴-node chain runs recursively without trouble. What stops you is Xdebug (512 levels, reported as "possible infinite loop") or `memory_limit`. Run the file with `-d xdebug.mode=off` if Xdebug is installed.
+- **Rust: matching without borrowing.** With `match root { Some(n) => … }` on `Option<Rc<RefCell<TreeNode>>>`, you must go through `n.borrow()` to read `left`; pass `&Node` instead of `Node` so you do not `clone()` at every level.
 
 ## Self-check questions
 

@@ -110,7 +110,7 @@ Ngay cả code point cũng chưa phải "ký tự người đọc thấy": cờ 
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-valid-anagram/valid-anagram.ts) · [JavaScript](../code/neetcode-valid-anagram/valid-anagram.js) · [Python](../code/neetcode-valid-anagram/valid_anagram.py) · [Go](../code/neetcode-valid-anagram/valid_anagram.go) · [Java](../code/neetcode-valid-anagram/valid-anagram.java)
+[TypeScript](../code/neetcode-valid-anagram/valid-anagram.ts) · [JavaScript](../code/neetcode-valid-anagram/valid-anagram.js) · [Python](../code/neetcode-valid-anagram/valid_anagram.py) · [Go](../code/neetcode-valid-anagram/valid_anagram.go) · [Java](../code/neetcode-valid-anagram/valid-anagram.java) · [PHP](../code/neetcode-valid-anagram/valid-anagram.php) · [Rust](../code/neetcode-valid-anagram/valid_anagram.rs)
 
 ```ts
 // TypeScript: mảng 26 ô cho đề gốc (chỉ a–z)
@@ -193,6 +193,33 @@ function isAnagram(s, t) {
 }
 ```
 
+```php
+function isAnagram(string $s, string $t): bool {
+    if (strlen($s) !== strlen($t)) return false; // strlen đếm BYTE
+    $count = array_fill(0, 26, 0);
+    for ($i = 0, $n = strlen($s); $i < $n; $i++) {
+        $count[ord($s[$i]) - 97]++; // $s[$i] là một byte, ord() lấy mã của nó
+        $count[ord($t[$i]) - 97]--;
+    }
+    foreach ($count as $c) if ($c !== 0) return false;
+    return true;
+}
+```
+
+```rust
+fn is_anagram(s: &str, t: &str) -> bool {
+    if s.len() != t.len() {
+        return false; // len() là số byte UTF-8
+    }
+    let mut count = [0i32; 26];
+    for (a, b) in s.bytes().zip(t.bytes()) {
+        count[(a - b'a') as usize] += 1; // byte ngoài a..z thì panic, không âm thầm ghi sai
+        count[(b - b'a') as usize] -= 1;
+    }
+    count == [0; 26] // mảng cố định so sánh được bằng ==
+}
+```
+
 ```text
 $ node valid-anagram.ts
 test chữ thường: 3 cách × 5 ca, 0 ca sai
@@ -226,13 +253,23 @@ $ java valid-anagram.java
 true false
 emoji, sắp xếp char[]: true (sai) | theo code point: false
 café vs éfac: false | NFC: true
+$ php valid-anagram.php
+test chữ thường: 3 cách × 5 ca, 0 ca sai
+"café" vs "éfac": strlen 5 vs 6, mb_strlen 4 vs 5
+  bySorting: false, byMap (NFC): true
+  "éè" vs byte xáo trộn: bySorting true (sai), byMap false
+$ rustc --edition 2021 -O valid_anagram.rs && ./valid_anagram
+test chữ thường: 3 cách × 5 ca, 0 ca sai
+"café" vs "éfac": len 5 vs 6 byte, chars 4 vs 5
+  by_sorting: false, by_map: false (không có NFC thì cả hai sai)
+  emoji: by_sorting false, by_map false (char là code point, không vỡ)
 ```
 
 Đọc kết quả:
 
 - **Tốc độ**: mảng 26 ô nhanh hơn sắp xếp khoảng 60 lần và hash map khoảng 12 lần. Cả ba đều cho đáp án đúng với chữ thường.
 - **"café"** viết theo hai cách có độ dài khác nhau (4 và 5), nên mọi cách không chuẩn hóa đều trả `false`. Sau NFC thì đúng.
-- **Emoji**: cách sắp xếp code unit của JS và Java trả `true`, sai. Python sắp xếp theo code point nên đúng; Go duyệt theo `rune` cũng đúng.
+- **Emoji**: cách sắp xếp code unit của JS và Java trả `true`, sai. Python sắp xếp theo code point nên đúng; Go duyệt theo `rune` cũng đúng. PHP sắp theo byte nên cũng sai với chữ nhiều byte; Rust sắp theo `char` (code point) nên đúng, nhưng thiếu NFC thì vẫn trả `false` cho "café".
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -243,6 +280,8 @@ café vs éfac: false | NFC: true
 - **Sắp xếp `split('')` với chuỗi Unicode.** Vỡ cặp surrogate, cho ra anagram sai như ví dụ emoji.
 - **Không chuẩn hóa.** Hai chuỗi trông giống hệt nhau có thể khác nhau từng byte. Dữ liệu người dùng gõ từ các bàn phím khác nhau, hoặc copy từ macOS, hay gặp dạng tách (NFD).
 - **Go: `len(s)` là số byte.** Cách mảng 26 ô theo byte chỉ đúng vì đề giới hạn a–z (mỗi chữ một byte). Với chữ có dấu, phải duyệt `range s` theo rune.
+- **PHP: chuỗi là dãy byte.** `strlen`, `$s[$i]`, `str_split` và `sort` đều làm việc trên byte. Chữ có dấu chiếm 2–3 byte, nên sắp xếp theo byte có thể coi hai chuỗi khác chữ là anagram. Dùng `mb_str_split` và `Normalizer::normalize` (extension intl) cho văn bản thật.
+- **Rust: thư viện chuẩn không chuẩn hóa Unicode.** `chars()` đi theo code point nên emoji không vỡ, nhưng `"café"` dựng sẵn và dạng tách vẫn khác nhau; cần crate `unicode-normalization`. Ngược lại, chỉ số ngoài mảng 26 ô làm chương trình panic, không ghi đè bộ nhớ.
 
 ## Câu hỏi tự kiểm tra
 

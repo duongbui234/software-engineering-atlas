@@ -120,7 +120,7 @@ I ran JavaScript with a counter for each brute-force candidate and one for each 
 
 ## Runnable example
 
-Download [TypeScript](../code/neetcode-binary-tree-maximum-path-sum/max-path.ts), [Python](../code/neetcode-binary-tree-maximum-path-sum/max_path.py), [Go](../code/neetcode-binary-tree-maximum-path-sum/max_path.go), [Java](../code/neetcode-binary-tree-maximum-path-sum/max-path.java), or [JavaScript](../code/neetcode-binary-tree-maximum-path-sum/max-path.js). Run the corresponding command: `node max-path.ts`, `python3 max_path.py`, `go run max_path.go`, `java max-path.java`, or `node max-path.js`.
+Download [TypeScript](../code/neetcode-binary-tree-maximum-path-sum/max-path.ts), [Python](../code/neetcode-binary-tree-maximum-path-sum/max_path.py), [Go](../code/neetcode-binary-tree-maximum-path-sum/max_path.go), [Java](../code/neetcode-binary-tree-maximum-path-sum/max-path.java), or [JavaScript](../code/neetcode-binary-tree-maximum-path-sum/max-path.js) · [PHP](../code/neetcode-binary-tree-maximum-path-sum/max-path.php) · [Rust](../code/neetcode-binary-tree-maximum-path-sum/max_path.rs). Run the corresponding command: `node max-path.ts`, `python3 max_path.py`, `go run max_path.go`, `java max-path.java`, or `node max-path.js`.
 
 All three implementations run on eight small fixtures. These include an all-negative tree, an optimum below the root, repeated node values, and a positive branch that passes through a negative node. The ninth case runs the iterative solution on a 30,000-node chain.
 
@@ -730,6 +730,62 @@ console.log(`${passed}/${cases.length + 1} ca đúng`)
 export {}
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function maxPathSum(TreeNode $root): int {
+    $best = $root->val;
+    $gain = function (?TreeNode $node) use (&$gain, &$best): int {
+        if ($node === null) return 0;
+        $left = max(0, $gain($node->left));
+        $right = max(0, $gain($node->right));
+        $best = max($best, $node->val + $left + $right);
+        return $node->val + max($left, $right);
+    };
+    $gain($root);
+    return $best;
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn max_path_sum(root: &Node) -> i32 {
+    fn gain(root: &Node, best: &mut i32) -> i32 {
+        let Some(root) = root else { return 0 };
+        let root = root.borrow();
+        let left = gain(&root.left, best).max(0);
+        let right = gain(&root.right, best).max(0);
+        *best = (*best).max(root.val + left + right);
+        root.val + left.max(right)
+    }
+    let mut best = i32::MIN;
+    gain(root, &mut best);
+    best
+}
+```
+
 All five files print the same line:
 
 ```text
@@ -737,6 +793,8 @@ All five files print the same line:
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+Both added versions walk in postorder. They drop negative branches only when joining them to the current node, so an all-negative tree still returns one node. PHP `4/4 ca đúng` · Rust `4/4 ca đúng`.
 
 ## Misconceptions and common traps
 

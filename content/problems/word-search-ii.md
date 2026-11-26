@@ -122,9 +122,9 @@ Ca đo dùng bảng `3 × 3` toàn chữ `a` và mười từ bắt đầu bằn
 
 ## Ví dụ chạy được
 
-Hai cách chạy trên cùng sáu ca, gồm từ là tiền tố của từ khác, nhiều đường cho cùng từ, bước chéo bị loại và từ cần dùng lại ô. Năm ca nhỏ còn kiểm tra bảng được khôi phục nguyên vẹn sau mỗi cách.
+Năm bản đầu chạy hai cách trên cùng sáu ca, gồm từ là tiền tố của từ khác, nhiều đường cho cùng từ, bước chéo bị loại và từ cần dùng lại ô. Năm ca nhỏ còn kiểm tra bảng được khôi phục nguyên vẹn sau mỗi cách.
 
-Tải [TypeScript](../code/neetcode-word-search-ii/search-grid.ts), [Python](../code/neetcode-word-search-ii/search-grid.py), [Go](../code/neetcode-word-search-ii/search-grid.go), [Java](../code/neetcode-word-search-ii/search-grid.java) hoặc [JavaScript](../code/neetcode-word-search-ii/search-grid.js). Chạy bằng `node search-grid.ts`, `python3 search-grid.py`, `go run search-grid.go`, `java search-grid.java` hoặc `node search-grid.js`.
+Tải [TypeScript](../code/neetcode-word-search-ii/search-grid.ts) · [Python](../code/neetcode-word-search-ii/search-grid.py) · [Go](../code/neetcode-word-search-ii/search-grid.go) · [Java](../code/neetcode-word-search-ii/search-grid.java) · [JavaScript](../code/neetcode-word-search-ii/search-grid.js) · [PHP](../code/neetcode-word-search-ii/search-grid.php) · [Rust](../code/neetcode-word-search-ii/search_grid.rs). Chạy năm bản đầu bằng `node search-grid.ts`, `python3 search-grid.py`, `go run search-grid.go`, `java search-grid.java` hoặc `node search-grid.js`.
 
 ```ts
 const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
@@ -741,12 +741,141 @@ console.log((cases.length + 1) + "/" + (cases.length + 1) + " ca đúng")
 console.log("Bước khớp: " + left.advances + " / " + right.advances)
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+final class TrieNode
+{
+    public array $children = [];
+    public ?string $word = null;
+}
+
+function findWords(array $board, array $words): array
+{
+    $root = new TrieNode();
+    foreach ($words as $word) {
+        $node = $root;
+        for ($i = 0, $length = strlen($word); $i < $length; $i++) {
+            $node = $node->children[$word[$i]] ??= new TrieNode();
+        }
+        $node->word = $word;
+    }
+
+    $found = [];
+    for ($row = 0; $row < count($board); $row++) {
+        for ($col = 0; $col < count($board[$row]); $col++) {
+            visit($board, $root, $row, $col, $found);
+        }
+    }
+    return $found;
+}
+
+function visit(array &$board, TrieNode $parent, int $row, int $col, array &$found): void
+{
+    $letter = $board[$row][$col] ?? '#';
+    $node = $parent->children[$letter] ?? null;
+    if ($node === null) {
+        return;
+    }
+
+    if ($node->word !== null) {
+        $found[] = $node->word;
+        $node->word = null;
+    }
+
+    if ($node->children !== []) {
+        $board[$row][$col] = '#';
+        visit($board, $node, $row - 1, $col, $found);
+        visit($board, $node, $row + 1, $col, $found);
+        visit($board, $node, $row, $col - 1, $found);
+        visit($board, $node, $row, $col + 1, $found);
+        $board[$row][$col] = $letter;
+    }
+
+    if ($node->children === []) {
+        unset($parent->children[$letter]);
+    }
+}
+```
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Default)]
+struct TrieNode<'a> {
+    children: HashMap<u8, TrieNode<'a>>,
+    word: Option<&'a str>,
+}
+
+fn find_words<'a>(board: &mut [Vec<u8>], words: &[&'a str]) -> Vec<&'a str> {
+    let mut root = TrieNode::default();
+    for &word in words {
+        let mut node = &mut root;
+        for letter in word.bytes() {
+            node = node.children.entry(letter).or_default();
+        }
+        node.word = Some(word);
+    }
+
+    let mut found = Vec::new();
+    for row in 0..board.len() {
+        for col in 0..board[row].len() {
+            visit(board, &mut root, row as isize, col as isize, &mut found);
+        }
+    }
+    found
+}
+
+fn visit<'a>(
+    board: &mut [Vec<u8>],
+    parent: &mut TrieNode<'a>,
+    row: isize,
+    col: isize,
+    found: &mut Vec<&'a str>,
+) {
+    if row < 0 || col < 0 {
+        return;
+    }
+    let Some(&letter) = board
+        .get(row as usize)
+        .and_then(|letters| letters.get(col as usize))
+    else {
+        return;
+    };
+    let Some(node) = parent.children.get_mut(&letter) else {
+        return;
+    };
+
+    if let Some(word) = node.word.take() {
+        found.push(word);
+    }
+
+    if !node.children.is_empty() {
+        board[row as usize][col as usize] = b'#';
+        visit(board, node, row - 1, col, found);
+        visit(board, node, row + 1, col, found);
+        visit(board, node, row, col - 1, found);
+        visit(board, node, row, col + 1, found);
+        board[row as usize][col as usize] = letter;
+    }
+
+    if node.children.is_empty() {
+        parent.children.remove(&letter);
+    }
+}
+```
+
 Cả năm file in cùng kết quả.
 
 ```text
 6/6 ca đúng
 Bước khớp: 2610 / 261
 ```
+
+Chạy hai file mới bằng `php search-grid.php` và `rustc --edition 2021 -O search_grid.rs -o /tmp/search-grid && /tmp/search-grid`.
+
+Bản PHP và Rust duyệt bảng với trie. Sau khi báo một từ, chúng xóa dấu kết thúc và chỉ cắt nhánh khi đã hết cạnh con. Cả hai khôi phục ô đã đánh dấu khi quay lui. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

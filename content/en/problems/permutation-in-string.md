@@ -21,7 +21,7 @@ sources:
 > - Two traps: comparing the **set** of characters (ignoring counts, 6/8 cases), and comparing two count arrays with `===` or `==` in JS and Java (comparing references, 4/8 cases).
 
 > [!info] Context
-> LeetCode problem 567, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. This problem is [[en/problems/valid-anagram|Valid Anagram]] inside a sliding window: instead of comparing two strings once, compare s1 against every substring of length `|s1|` of s2. The solutions come in TypeScript, Python, Go, Java and JavaScript. You need loops, strings and count arrays.
+> LeetCode problem 567, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. This problem is [[en/problems/valid-anagram|Valid Anagram]] inside a sliding window: instead of comparing two strings once, compare s1 against every substring of length `|s1|` of s2. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. You need loops, strings and count arrays.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Permutation**: the same characters with the same counts, only in a different order. `"ba"` is a permutation of `"ab"`.
@@ -120,7 +120,7 @@ TypeScript, random s2, s1 is `"zz…z"` so there is no permutation and every app
 
 Comparing 26 cells usually does **not** compare all 26: `every` stops at the first differing cell, and with random data cell `a` usually differs already. The last row builds the worst case for it: every window matches the first 24 cells and differs at cell `y`. There the matching-cell counter is 3 times faster. Sorting grows with m: m = 1 000 already takes almost a second at n = 10⁴.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Comparing two count tables | Language-specific trap |
 |---|---|---|
@@ -128,10 +128,12 @@ Comparing 26 cells usually does **not** compare all 26: `every` stops at the fir
 | Python | `need == have` (lists compare by value) | no comparison trap; a `Counter` also compares with `==` |
 | Go | `need == have` on `[26]int` | fixed-size arrays compare with `==`; a `[]int` slice doesn't compile |
 | Java | `Arrays.equals(need, have)` | `need == have` on `int[]` compares references: always `false` |
+| PHP | `$need === $have` | `===` on arrays compares **values** (same keys, values and order), so the "compare the arrays" version that is wrong in JS/Java is right in PHP |
+| Rust | `need == have` with `[u32; 26]` | fixed arrays compare by value; a closure holding `&mut diff` blocks every other read of `diff`, so `bump` is a plain fn |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-permutation-in-string/permutation-in-string.ts) · [Python](../code/neetcode-permutation-in-string/permutation_in_string.py) · [Go](../code/neetcode-permutation-in-string/permutation_in_string.go) · [Java](../code/neetcode-permutation-in-string/permutation-in-string.java) · [JavaScript](../code/neetcode-permutation-in-string/permutation-in-string.js)
+[TypeScript](../code/neetcode-permutation-in-string/permutation-in-string.ts) · [Python](../code/neetcode-permutation-in-string/permutation_in_string.py) · [Go](../code/neetcode-permutation-in-string/permutation_in_string.go) · [Java](../code/neetcode-permutation-in-string/permutation-in-string.java) · [JavaScript](../code/neetcode-permutation-in-string/permutation-in-string.js) · [PHP](../code/neetcode-permutation-in-string/permutation-in-string.php) · [Rust](../code/neetcode-permutation-in-string/permutation_in_string.rs)
 
 Each file has the three approaches and runs 8 cases. Below are the sliding count table and the matching-cell counter.
 
@@ -336,6 +338,81 @@ function matchesCounter(s1, s2) {
 }
 ```
 
+```php
+function slideCompare26(string $s1, string $s2): bool {
+    $m = strlen($s1);
+    if ($m > strlen($s2)) return false;
+    $need = array_fill(0, 26, 0);
+    $have = array_fill(0, 26, 0);
+    for ($i = 0; $i < $m; $i++) { $need[at($s1, $i)]++; $have[at($s2, $i)]++; }
+    if ($need === $have) return true; // PHP arrays compare by VALUE: same keys, same values, same order
+    for ($r = $m; $r < strlen($s2); $r++) {
+        $have[at($s2, $r)]++;
+        $have[at($s2, $r - $m)]--;
+        if ($need === $have) return true;
+    }
+    return false;
+}
+
+function matchesCounter(string $s1, string $s2): bool {
+    $m = strlen($s1);
+    if ($m > strlen($s2)) return false;
+    $diff = array_fill(0, 26, 0);
+    for ($i = 0; $i < $m; $i++) { $diff[at($s1, $i)]--; $diff[at($s2, $i)]++; }
+    $matches = count(array_filter($diff, fn($d) => $d === 0));
+    // a PHP closure copies variables when it is created: "use (&...)" is needed to change diff and matches outside
+    $bump = function (int $c, int $delta) use (&$diff, &$matches): void {
+        if ($diff[$c] === 0) $matches--;
+        $diff[$c] += $delta;
+        if ($diff[$c] === 0) $matches++;
+    };
+    for ($r = $m; $r < strlen($s2) && $matches < 26; $r++) {
+        $bump(at($s2, $r), 1);
+        $bump(at($s2, $r - $m), -1);
+    }
+    return $matches === 26;
+}
+```
+
+```rust
+fn slide_compare_26(s1: &str, s2: &str) -> bool {
+    let (a, b) = (s1.as_bytes(), s2.as_bytes());
+    let m = a.len();
+    if m > b.len() { return false; }
+    let (mut need, mut have) = ([0u32; 26], [0u32; 26]);
+    for i in 0..m { need[at(a, i)] += 1; have[at(b, i)] += 1; }
+    if need == have { return true; } // [u32; 26] compares by value, cell by cell
+    for r in m..b.len() {
+        have[at(b, r)] += 1;
+        have[at(b, r - m)] -= 1;
+        if need == have { return true; }
+    }
+    false
+}
+
+fn matches_counter(s1: &str, s2: &str) -> bool {
+    let (a, b) = (s1.as_bytes(), s2.as_bytes());
+    let m = a.len();
+    if m > b.len() { return false; }
+    let mut diff = [0i32; 26];
+    for i in 0..m { diff[at(a, i)] -= 1; diff[at(b, i)] += 1; }
+    let mut matches = diff.iter().filter(|&&d| d == 0).count();
+    // a plain fn instead of a closure: a closure holding &mut diff would stop the loop from reading diff
+    fn bump(diff: &mut [i32; 26], matches: &mut usize, c: usize, delta: i32) {
+        if diff[c] == 0 { *matches -= 1; }
+        diff[c] += delta;
+        if diff[c] == 0 { *matches += 1; }
+    }
+    let mut r = m;
+    while r < b.len() && matches < 26 {
+        bump(&mut diff, &mut matches, at(b, r), 1);
+        bump(&mut diff, &mut matches, at(b, r - m), -1);
+        r += 1;
+    }
+    matches == 26
+}
+```
+
 
 The TypeScript file also runs two wrong versions, then measures:
 
@@ -367,7 +444,19 @@ matchesCounter   8/8 cases passed
 wrongArrayEquals 4/8 cases passed
 ```
 
-Python, Go and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all three approaches.
+Python, Go, JavaScript, PHP and Rust print `8/8 ca đúng` ("8/8 cases passed") for all three approaches. The PHP file runs two extra versions to show where PHP differs from the others:
+
+```text
+$ php permutation-in-string.php
+sortEachWindow      8/8 ca đúng
+slideCompare26      8/8 ca đúng
+matchesCounter      8/8 ca đúng
+wrongSetOnly        6/8 ca đúng; sai ở (aab, abbab) (hello, ooolleoooleh)
+arrayIdentical      8/8 ca đúng
+wrongClosureByValue 5/8 ca đúng; sai ở (ab, eidbaooo) (adc, dcda) (aab, xxbaa)
+```
+
+`arrayIdentical` compares the two count tables with `===` like the wrong JS version, but in PHP it is right. `wrongClosureByValue` forgets the `&` in `use`, so `bump` only changes a copy and `matches` never reaches 26.
 
 ## Misconceptions and common traps
 
@@ -376,6 +465,8 @@ Python, Go and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all thr
 - **Comparing two arrays with `===` (JS) or `==` (Java).** No error, just always wrong. Go and Python compare by value.
 - **Forgetting the case where s1 is longer than s2.** Return `false` before building the count tables, or `s2[i]` goes out of bounds (Go and Java throw; JS gives `NaN`).
 - **"O(n) is always faster than O(26·n)."** The 26-cell comparison stops at the first differing cell, so on random data it is often faster than the counter. The counter only clearly wins when windows nearly match.
+- **PHP: a closure without `&` edits a copy.** `function (...) use ($diff, $matches)` copies both variables when the closure is created; every `bump` changes that copy and throws it away. Write `use (&$diff, &$matches)`. On the other hand, `$need === $have` on arrays already compares values, no loop needed.
+- **Rust: a closure borrowing `&mut` blocks every other read.** A `bump` closure that changes `diff` holds a `&mut diff` borrow for its whole life, so reading `diff` in the loop won't compile. Passing `&mut diff` to a plain function on each call is the simplest fix.
 
 ## Self-check questions
 

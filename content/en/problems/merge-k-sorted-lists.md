@@ -230,9 +230,9 @@ Other languages at N = 10⁶: Go heap 28.4 / 136.6 / 297.6 ms and divide and con
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.ts) · [Python](../code/neetcode-merge-k-sorted-lists/merge_k_lists.py) · [Go](../code/neetcode-merge-k-sorted-lists/merge_k_lists.go) · [Java](../code/neetcode-merge-k-sorted-lists/merge-k-lists.java) · [JavaScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.js)
+[TypeScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.ts) · [Python](../code/neetcode-merge-k-sorted-lists/merge_k_lists.py) · [Go](../code/neetcode-merge-k-sorted-lists/merge_k_lists.go) · [Java](../code/neetcode-merge-k-sorted-lists/merge-k-lists.java) · [JavaScript](../code/neetcode-merge-k-sorted-lists/merge-k-lists.js) · [PHP](../code/neetcode-merge-k-sorted-lists/merge-k-lists.php) · [Rust](../code/neetcode-merge-k-sorted-lists/merge_k_lists.rs)
 
-Every file runs the same 9 cases: the problem's example, an empty array, one empty list, empty lists interleaved, a single list, negative numbers, `9` with `10` (the string-sort trap), 20 single-element lists, and all-equal values. The TypeScript file also cross-checks 2,000 random inputs.
+Each of the original five files runs the same 9 cases: the problem's example, an empty array, one empty list, empty lists interleaved, a single list, negative numbers, `9` with `10` (the string-sort trap), 20 single-element lists, and all-equal values. The TypeScript file also cross-checks 2,000 random inputs.
 
 A heap of k list heads:
 
@@ -356,6 +356,106 @@ function mergeHeap(lists) {
     if (h.length > 0) down(0);
   }
   return dummy.next;
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class ListNode {
+    public function __construct(public int $val, public ?ListNode $next = null) {}
+}
+
+function mergeKLists(array $lists): ?ListNode {
+    $heap = new SplPriorityQueue();
+    foreach ($lists as $node) {
+        if ($node !== null) $heap->insert($node, -$node->val);
+    }
+    $dummy = $tail = new ListNode(0);
+    while (!$heap->isEmpty()) {
+        $node = $heap->extract();
+        if ($node->next !== null) $heap->insert($node->next, -$node->next->val);
+        $tail->next = $node;
+        $tail = $node;
+    }
+    return $dummy->next;
+}
+
+function listFrom(array $values): ?ListNode {
+    $head = null;
+    foreach (array_reverse($values) as $val) $head = new ListNode($val, $head);
+    return $head;
+}
+
+function valuesOf(?ListNode $head): array {
+    $values = [];
+    for (; $head !== null; $head = $head->next) $values[] = $head->val;
+    return $values;
+}
+```
+
+```rust
+type Link = Option<Box<ListNode>>;
+
+struct ListNode {
+    val: i32,
+    next: Link,
+}
+
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
+
+struct Entry(Box<ListNode>);
+
+impl Ord for Entry {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.0.val.cmp(&self.0.val)
+    }
+}
+
+impl PartialOrd for Entry {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for Entry {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.val == other.0.val
+    }
+}
+
+impl Eq for Entry {}
+
+fn merge_k_lists(lists: Vec<Link>) -> Link {
+    let mut heap: BinaryHeap<_> = lists.into_iter().flatten().map(Entry).collect();
+    let mut result = None;
+    let mut tail = &mut result;
+    while let Some(Entry(mut node)) = heap.pop() {
+        if let Some(next) = node.next.take() {
+            heap.push(Entry(next));
+        }
+        tail = &mut tail.insert(node).next;
+    }
+    result
+}
+
+fn list_from(values: &[i32]) -> Link {
+    values
+        .iter()
+        .rev()
+        .fold(None, |next, &val| Some(Box::new(ListNode { val, next })))
+}
+
+fn values_of(head: &Link) -> Vec<i32> {
+    let mut out = Vec::new();
+    let mut current = head.as_deref();
+    while let Some(node) = current {
+        out.push(node.val);
+        current = node.next.as_deref();
+    }
+    out
 }
 ```
 
@@ -590,6 +690,8 @@ wrongDefaultSort  6/9 cases correct; wrong on negative numbers → [-10,-3,-5,0,
 ```
 
 *(Output labels translated; the files themselves print Vietnamese.)*
+
+Both added versions use a heap and move the original nodes into the result. PHP negates the priority and Rust reverses `Ord` to pop the smallest value. PHP `4/4 ca đúng` · Rust `4/4 ca đúng`.
 
 ## Misconceptions and common traps
 

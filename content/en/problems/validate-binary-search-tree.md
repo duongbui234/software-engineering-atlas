@@ -276,9 +276,9 @@ Python 3.12, median of 5 runs: brute force on a 4,000-node right chain takes 1,3
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-validate-binary-search-tree/validate-bst.ts) · [Python](../code/neetcode-validate-binary-search-tree/validate_bst.py) · [Go](../code/neetcode-validate-binary-search-tree/validate_bst.go) · [Java](../code/neetcode-validate-binary-search-tree/validate-bst.java) · [JavaScript](../code/neetcode-validate-binary-search-tree/validate-bst.js)
+[TypeScript](../code/neetcode-validate-binary-search-tree/validate-bst.ts) · [Python](../code/neetcode-validate-binary-search-tree/validate_bst.py) · [Go](../code/neetcode-validate-binary-search-tree/validate_bst.go) · [Java](../code/neetcode-validate-binary-search-tree/validate-bst.java) · [JavaScript](../code/neetcode-validate-binary-search-tree/validate-bst.js) · [PHP](../code/neetcode-validate-binary-search-tree/validate-bst.php) · [Rust](../code/neetcode-validate-binary-search-tree/validate_bst.rs)
 
-Every file builds trees from a LeetCode-style level-order array (`null` marks an empty slot) and runs 13 shared cases: one node, three valid nodes, right grandchild smaller than grandparent (the tree at the top of the page), left grandchild larger than grandparent (`[8, 3, 10, 1, 9]`), a duplicate on the left, a duplicate on the right, a single INT_MIN node, a single INT_MAX node, INT_MIN with INT_MAX as its right child, two nodes both INT_MAX, a balanced 10⁴-node tree, a 10⁴-node right chain, and a 10⁴-node chain whose bottom node holds 0. The TypeScript file also cross-checks the six correct approaches on 5,000 random trees of 1 to 8 nodes with values 0 to 5 (generated with mulberry32, so duplicates and violations are common), and checks whether Morris returns the tree intact.
+Each of the original five files builds trees from a LeetCode-style level-order array (`null` marks an empty slot) and runs 13 shared cases: one node, three valid nodes, right grandchild smaller than grandparent (the tree at the top of the page), left grandchild larger than grandparent (`[8, 3, 10, 1, 9]`), a duplicate on the left, a duplicate on the right, a single INT_MIN node, a single INT_MAX node, INT_MIN with INT_MAX as its right child, two nodes both INT_MAX, a balanced 10⁴-node tree, a 10⁴-node right chain, and a 10⁴-node chain whose bottom node holds 0. The TypeScript file also cross-checks the six correct approaches on 5,000 random trees of 1 to 8 nodes with values 0 to 5 (generated with mulberry32, so duplicates and violations are common), and checks whether Morris returns the tree intact.
 
 Bounds, recursive:
 
@@ -343,6 +343,57 @@ function validBounds(root) {
     return go(node.left, lo, node.val) && go(node.right, node.val, hi);
   };
   return go(root, -Infinity, Infinity);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function isValidBst(?TreeNode $node, ?int $lo = null, ?int $hi = null): bool {
+    if ($node === null) return true;
+    if (($lo !== null && $node->val <= $lo) || ($hi !== null && $node->val >= $hi)) {
+        return false;
+    }
+    return isValidBst($node->left, $lo, $node->val)
+        && isValidBst($node->right, $node->val, $hi);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn is_valid_bst(root: &Node) -> bool {
+    fn check(root: &Node, lo: Option<i32>, hi: Option<i32>) -> bool {
+        let Some(root) = root else { return true };
+        let root = root.borrow();
+        let val = root.val;
+        if lo.is_some_and(|lo| val <= lo) || hi.is_some_and(|hi| val >= hi) {
+            return false;
+        }
+        check(&root.left, lo, Some(val)) && check(&root.right, Some(val), hi)
+    }
+    check(root, None, None)
 }
 ```
 
@@ -552,6 +603,8 @@ validMorris           13/13 cases passed
 wrongParentChild      10/13 cases passed; wrong on right grandchild smaller than grandparent → true, left grandchild larger than grandparent → true, 10^4-node chain, bad bottom → true
 wrongAllowDuplicates  10/13 cases passed; wrong on duplicate on the left → true, duplicate on the right → true, duplicate INT_MAX → true
 ```
+
+The added versions use open bounds, with PHP `null` and Rust `None` for an absent bound. The smallest and largest integers remain valid leaf values. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

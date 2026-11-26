@@ -196,7 +196,7 @@ BFS chỉ O(n) khi lấy phần tử đầu hàng đợi tốn O(1). Mảng thư
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-binary-tree-right-side-view/right-side.ts) · [Python](../code/neetcode-binary-tree-right-side-view/right_side.py) · [Go](../code/neetcode-binary-tree-right-side-view/right_side.go) · [Java](../code/neetcode-binary-tree-right-side-view/right-side.java) · [JavaScript](../code/neetcode-binary-tree-right-side-view/right-side.js)
+[TypeScript](../code/neetcode-binary-tree-right-side-view/right-side.ts) · [Python](../code/neetcode-binary-tree-right-side-view/right_side.py) · [Go](../code/neetcode-binary-tree-right-side-view/right_side.go) · [Java](../code/neetcode-binary-tree-right-side-view/right-side.java) · [JavaScript](../code/neetcode-binary-tree-right-side-view/right-side.js) · [PHP](../code/neetcode-binary-tree-right-side-view/right-side.php) · [Rust](../code/neetcode-binary-tree-right-side-view/right_side.rs)
 
 Mỗi file dựng cây từ mảng theo tầng kiểu LeetCode (`null` là chỗ trống) và chạy 11 ca chung: cây rỗng, một nút, cây đầy 7 nút, nhánh trái sâu hơn (`[1, 2, 3, 4]`), chỉ có nhánh trái, chỉ có nhánh phải, đáy nằm dưới cây con trái (hình đầu trang), zíc zắc (`[1, 2, 3, 4, null, null, null, null, 5]`, nhìn thấy lần lượt phải, trái, rồi con phải của nút trái), giá trị âm và biên ±100, chuỗi trái 100 nút, cây đầy đủ 100 nút. Mỗi file còn đối chiếu năm cách đúng trên 3 000 cây ngẫu nhiên 0 tới 30 nút.
 
@@ -308,6 +308,45 @@ function bfsLast(root) {
 }
 ```
 
+```php
+// Cách 1: BFS, chụp cỡ tầng, nút cuối của tầng là nút nhìn thấy.
+function bfsLast(?TreeNode $root): array {
+    $res = [];
+    if ($root === null) return $res;
+    $queue = [$root];
+    while ($queue) {
+        $size = count($queue); // chụp cỡ tầng
+        $next = [];
+        foreach ($queue as $i => $node) {
+            if ($i === $size - 1) $res[] = $node->val;
+            if ($node->left !== null) $next[] = $node->left;
+            if ($node->right !== null) $next[] = $node->right;
+        }
+        $queue = $next;
+    }
+    return $res;
+}
+```
+
+```rust
+// Cách 1: BFS theo tầng, nút cuối của tầng là nút nhìn thấy.
+fn bfs_last(root: &Node) -> Vec<i32> {
+    let mut res = Vec::new();
+    let mut queue: Vec<Rc<RefCell<TreeNode>>> = root.iter().cloned().collect();
+    while !queue.is_empty() {
+        res.push(queue.last().unwrap().borrow().val); // nút cuối của tầng
+        let mut next = Vec::new();
+        for node in &queue {
+            let n = node.borrow();
+            if let Some(l) = &n.left { next.push(l.clone()); }
+            if let Some(r) = &n.right { next.push(r.clone()); }
+        }
+        queue = next;
+    }
+    res
+}
+```
+
 DFS phải trước, ghi khi gặp tầng mới:
 
 ```ts
@@ -385,6 +424,37 @@ function dfsRightFirst(root) {
   };
   go(root, 0);
   return res;
+}
+```
+
+```php
+// Cách 3: DFS phải trước; nút đầu tiên chạm tới một độ sâu mới là nút nhìn thấy.
+function dfsRightFirst(?TreeNode $root): array {
+    $res = [];
+    $go = function (?TreeNode $node, int $depth) use (&$res, &$go): void {
+        if ($node === null) return;
+        if ($depth === count($res)) $res[] = $node->val;
+        $go($node->right, $depth + 1);
+        $go($node->left, $depth + 1);
+    };
+    $go($root, 0);
+    return $res;
+}
+```
+
+```rust
+// Cách 3: DFS phải trước; nút đầu tiên chạm tới một độ sâu mới là nút nhìn thấy.
+fn dfs_right_first(root: &Node) -> Vec<i32> {
+    fn go(node: &Node, depth: usize, res: &mut Vec<i32>) {
+        let Some(n) = node else { return };
+        let n = n.borrow();
+        if depth == res.len() { res.push(n.val); }
+        go(&n.right, depth + 1, res);
+        go(&n.left, depth + 1, res);
+    }
+    let mut res = Vec::new();
+    go(root, 0, &mut res);
+    res
 }
 ```
 
@@ -498,9 +568,39 @@ wrongLiveLength        5/11 ca đúng; sai ở cây đầy 7 nút → [4,6,7], n
 đối chiếu 3000 cây ngẫu nhiên 0..30 nút: năm cách đúng khớp nhau 3000/3000; wrongRightPointers sai 2552 cây
 ```
 
-Số cây ngẫu nhiên mà `wrongRightPointers` làm sai khác nhau giữa các ngôn ngữ (2 534 tới 2 571) vì mỗi ngôn ngữ có bộ sinh số ngẫu nhiên riêng; TypeScript và JavaScript dùng chung mulberry32 seed 42 nên ra cùng số. Thời gian đo lúc máy đang chạy việc khác, nên đọc tỉ lệ, đừng đọc chữ số lẻ.
+`php right-side.php` (máy có Xdebug thì thêm `-d xdebug.mode=off`):
 
-### Bên dưới năm ngôn ngữ
+```text
+bfsLast                11/11 ca đúng
+bfsRightFirst          11/11 ca đúng
+dfsRightFirst          11/11 ca đúng
+dfsRightFirstIterative 11/11 ca đúng
+dfsOverwrite           11/11 ca đúng
+wrongRightPointers     4/11 ca đúng; sai ở nhánh trái sâu hơn → [1,3], chỉ có nhánh trái → [1], đáy nằm dưới cây con trái → [1,3], zíc zắc → [1,3], giá trị âm và biên → [0,100], chuỗi trái 100 nút → [1], cây đầy đủ 100 nút → [1,3,7,15,31,63]
+wrongLeftFirst         5/11 ca đúng; sai ở cây đầy 7 nút → [1,2,4], nhánh trái sâu hơn → [1,2,4], đáy nằm dưới cây con trái → [1,2,5,6], zíc zắc → [1,2,4,5], giá trị âm và biên → [0,-100,-50], cây đầy đủ 100 nút → [1,2,4,8,16,32,64]
+wrongLiveLength        5/11 ca đúng; sai ở cây đầy 7 nút → [4,6,7], nhánh trái sâu hơn → [2,3,4], đáy nằm dưới cây con trái → [2,3,5,6], zíc zắc → [2,3,4,5], giá trị âm và biên → [-100,100,-50], cây đầy đủ 100 nút → [50,75,88,94,97,99,100]
+
+đối chiếu 3000 cây ngẫu nhiên 0..30 nút: năm cách đúng khớp nhau 3000/3000; wrongRightPointers sai 2543 cây
+```
+
+`rustc --edition 2021 -O right_side.rs && ./right_side`:
+
+```text
+bfs_last                  11/11 ca đúng
+bfs_right_first           11/11 ca đúng
+dfs_right_first           11/11 ca đúng
+dfs_right_first_iterative 11/11 ca đúng
+dfs_overwrite             11/11 ca đúng
+wrong_right_pointers      4/11 ca đúng; sai ở nhánh trái sâu hơn → [1,3], chỉ có nhánh trái → [1], đáy nằm dưới cây con trái → [1,3], zíc zắc → [1,3], giá trị âm và biên → [0,100], chuỗi trái 100 nút → [1], cây đầy đủ 100 nút → [1,3,7,15,31,63]
+wrong_left_first          5/11 ca đúng; sai ở cây đầy 7 nút → [1,2,4], nhánh trái sâu hơn → [1,2,4], đáy nằm dưới cây con trái → [1,2,5,6], zíc zắc → [1,2,4,5], giá trị âm và biên → [0,-100,-50], cây đầy đủ 100 nút → [1,2,4,8,16,32,64]
+wrong_live_length         5/11 ca đúng; sai ở cây đầy 7 nút → [4,6,7], nhánh trái sâu hơn → [2,3,4], đáy nằm dưới cây con trái → [2,3,5,6], zíc zắc → [2,3,4,5], giá trị âm và biên → [-100,100,-50], cây đầy đủ 100 nút → [50,75,88,94,97,99,100]
+
+đối chiếu 3000 cây ngẫu nhiên 0..30 nút: năm cách đúng khớp nhau 3000/3000; wrong_right_pointers sai 2532 cây
+```
+
+Số cây ngẫu nhiên mà `wrongRightPointers` làm sai khác nhau giữa các ngôn ngữ (2 532 tới 2 571) vì mỗi ngôn ngữ có bộ sinh số ngẫu nhiên riêng; TypeScript và JavaScript dùng chung mulberry32 seed 42 nên ra cùng số. Thời gian đo lúc máy đang chạy việc khác, nên đọc tỉ lệ, đừng đọc chữ số lẻ.
+
+### Bên dưới bảy ngôn ngữ
 
 | | Hàng đợi nên dùng | Bẫy riêng |
 |---|---|---|
@@ -508,6 +608,8 @@ Số cây ngẫu nhiên mà `wrongRightPointers` làm sai khác nhau giữa các
 | Python | `collections.deque` với `popleft()`, hoặc hai list | `list.pop(0)` là O(n); `for node in q` rồi sửa `deque` ngay trong vòng thì ném `RuntimeError: deque mutated during iteration`; `for _ in range(len(q))` thì an toàn vì `range` được tính một lần |
 | Go | slice, cắt `queue = queue[size:]` sau mỗi tầng | `for i := 0; i < len(queue); i++` tính lại `len` mỗi lượt, cộng với `append` trong vòng là cả cây thành một tầng (2/11) |
 | Java | `ArrayDeque` | `ArrayDeque` cấm phần tử `null`, nên phải kiểm `node.left != null` trước khi `offer`; `i < q.size()` trong điều kiện cũng đọc lại mỗi lượt (5/11); đệ quy trên chuỗi 10⁵ nút ném `StackOverflowError` |
+| PHP | `SplQueue`, hoặc hai mảng `level`/`next` | `array_shift` đánh lại chỉ số cả mảng nên O(n), cùng bẫy với `shift()`; `count($queue)` trong điều kiện `for` cũng đọc lại mỗi lượt (5/11); closure đệ quy cần `use (&$res, &$go)` |
+| Rust | `VecDeque` | `for _ in 0..queue.len()` tính khoảng một lần nên tự chụp cỡ tầng; muốn mắc lỗi đọc lại độ dài phải viết `while i < queue.len()` (5/11). Giữ `borrow()` của nút này trong lúc `borrow_mut()` nút khác thì không sao, nhưng giữ nó qua lúc gán lại chính nút đó thì panic `already borrowed` |
 
 Đệ quy không phải vấn đề ở giới hạn đề (độ sâu tối đa 100), nhưng là vấn đề khi dùng lại hàm cho cây lớn: Python ném `RecursionError` ở chuỗi 5 000 nút, Java ném `StackOverflowError` ở chuỗi 10⁵ nút, còn Go chạy được chuỗi 10⁶ nút vì ngăn xếp goroutine tự lớn lên.
 
@@ -519,6 +621,8 @@ Số cây ngẫu nhiên mà `wrongRightPointers` làm sai khác nhau giữa các
 - **Đổi thứ tự hai lời gọi trong DFS.** "Ghi lần đầu gặp tầng" chỉ đúng khi đi bên phải trước. Đi trái trước thì ra góc nhìn bên trái, trừ khi đổi sang ghi đè.
 - **Dùng `shift()` hay `list.pop(0)` làm hàng đợi.** Đúng kết quả, nhưng BFS thành O(n²). Ở 100 nút không thấy; ở 10⁵ nút thì thấy rõ.
 - **Lấy giá trị lớn nhất của mỗi tầng.** Đề hỏi nút **phải nhất**, không phải nút **lớn nhất**. Cây `[1, 5, 2]` có tầng 1 là 5 rồi 2; nhìn từ bên phải thấy 2, dù 5 lớn hơn. Ca "giá trị âm và biên" trong file tình cờ có nút phải nhất cũng là nút lớn nhất, nên nó không bắt được lỗi này.
+- **PHP: `array_shift` làm hàng đợi.** Đúng kết quả nhưng mỗi lần lấy là O(n) vì PHP đánh lại chỉ số. Dùng `SplQueue` (`dequeue`, `bottom()` để xem đầu hàng) hoặc hai mảng theo tầng.
+- **Rust: tưởng `for _ in 0..queue.len()` đọc lại độ dài.** Không: khoảng `0..n` được tính một lần trước vòng, nên nó chính là bước chụp cỡ tầng. Lỗi đọc lại chỉ xuất hiện với `while i < queue.len()`.
 
 ## Câu hỏi tự kiểm tra
 

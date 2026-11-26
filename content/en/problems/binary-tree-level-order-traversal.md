@@ -326,7 +326,7 @@ Go and Java, median of 5 runs (ms):
 
 In Go, `q = q[1:]` copies nothing, it only moves the start of the slice, so it is in the same range as keeping an index. In Java, the 10⁶-node row is dominated by the garbage collector and changes order between runs; read only the 131,071 row. The machine was running other work in parallel, so read the order and the ratios, not the last digits.
 
-### Under the five languages
+### Under the seven languages
 
 | | Queue to use | Language-specific traps |
 |---|---|---|
@@ -334,12 +334,14 @@ In Go, `q = q[1:]` copies nothing, it only moves the start of the slice, so it i
 | Python | `collections.deque`, or two lists | `list.pop(0)` is O(n); `for node in q` while appending to `q`; `res=[]` as a default value is shared between calls; recursive DFS exceeds 1,000 levels |
 | Go | slice plus index, or `q = q[1:]` | `i < len(queue)` is reread every round; passing `res` by value into a recursive function loses the appends made inside; `var res [][]int` becomes `null` through `json.Marshal`, `[][]int{}` becomes `[]` |
 | Java | `ArrayDeque` | `ArrayDeque` forbids `null`; `i < queue.size()` is reread every round |
+| PHP | `SplQueue`, or two lists | `array_shift` renumbers the whole array, so it is O(n): 218 ms against 1.5 ms on the 32,767-node tree; a closure with `use ($res)` and no `&` gets a copy, so `wrongUseByValue` returns `[]` for every tree except the empty one (1/10) |
+| Rust | `VecDeque` | `Vec::remove(0)` shifts every element: 474 ms against 1.2 ms on the 131,071-node tree; `for _ in 0..queue.len()` evaluates the length once, so the reread bug only happens if you write `while i < queue.len()` |
 
 Python's `res=[]` trap: a default value is created **once**, when the function is defined, so every call that does not pass `res` shares one list. The third call (the tree `[5, 2, 8, …]`) gets back `[[7,5],[2,8],[4,7,9]]`, including the 7 from the previous case. Go's pass-by-value trap: `res = append(res, []int{})` inside the child function creates a new slice header that the caller never sees, so `wrongPassByValue` returns `[]` for every tree.
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-binary-tree-level-order-traversal/level-order.ts) · [Python](../code/neetcode-binary-tree-level-order-traversal/level_order.py) · [Go](../code/neetcode-binary-tree-level-order-traversal/level_order.go) · [Java](../code/neetcode-binary-tree-level-order-traversal/level-order.java) · [JavaScript](../code/neetcode-binary-tree-level-order-traversal/level-order.js)
+[TypeScript](../code/neetcode-binary-tree-level-order-traversal/level-order.ts) · [Python](../code/neetcode-binary-tree-level-order-traversal/level_order.py) · [Go](../code/neetcode-binary-tree-level-order-traversal/level_order.go) · [Java](../code/neetcode-binary-tree-level-order-traversal/level-order.java) · [JavaScript](../code/neetcode-binary-tree-level-order-traversal/level-order.js) · [PHP](../code/neetcode-binary-tree-level-order-traversal/level-order.php) · [Rust](../code/neetcode-binary-tree-level-order-traversal/level_order.rs)
 
 Each file builds trees from a LeetCode-style level-order array (`null` is a gap) and runs 10 shared cases: the empty tree, one node, the three-level tree with gaps from the top of the page, left children only, right children only, a full 15-node tree, staggered branches `[1, 2, 3, 4, null, null, 5, 6, null, null, 7]`, negative and duplicate values, a full-size 2000-node tree, and a 2000-node left chain. Each file also cross-checks the correct approaches against each other on 2000 to 3000 random trees of 0 to 59 nodes.
 
@@ -462,6 +464,50 @@ function levelSnapshot(root) {
 }
 ```
 
+```php
+// Approach 1: BFS, snapshot the level's size before pushing children. SplQueue takes the head in O(1).
+function levelSnapshot(?TreeNode $root): array {
+    $res = [];
+    if ($root === null) return $res;
+    $queue = new SplQueue();
+    $queue->enqueue($root);
+    while (!$queue->isEmpty()) {
+        $size = count($queue); // snapshot once for the whole level
+        $level = [];
+        for ($i = 0; $i < $size; $i++) {
+            $node = $queue->dequeue();
+            $level[] = $node->val;
+            if ($node->left !== null) $queue->enqueue($node->left);
+            if ($node->right !== null) $queue->enqueue($node->right);
+        }
+        $res[] = $level;
+    }
+    return $res;
+}
+```
+
+```rust
+// Approach 1: BFS, snapshot the level's size before pushing children. VecDeque takes the head in O(1).
+fn level_snapshot(root: &Node) -> Vec<Vec<i32>> {
+    let mut res = Vec::new();
+    let Some(r) = root else { return res };
+    let mut queue = VecDeque::from([r.clone()]);
+    while !queue.is_empty() {
+        let size = queue.len(); // snapshot once for the whole level
+        let mut level = Vec::with_capacity(size);
+        for _ in 0..size {
+            let node = queue.pop_front().unwrap();
+            let n = node.borrow();
+            level.push(n.val);
+            if let Some(l) = &n.left { queue.push_back(l.clone()); }
+            if let Some(r) = &n.right { queue.push_back(r.clone()); }
+        }
+        res.push(level);
+    }
+    res
+}
+```
+
 DFS carrying the depth, recursive (this Python version breaks on the 2000-level chain; the iterative one in How it works does not):
 
 ```ts
@@ -550,6 +596,39 @@ function levelDfs(root) {
   };
   go(root, 0);
   return res;
+}
+```
+
+```php
+// Approach 4: pre-order DFS carrying the depth. $res is captured by reference (&), otherwise each call edits a copy.
+function levelDfs(?TreeNode $root): array {
+    $res = [];
+    $go = function (?TreeNode $node, int $depth) use (&$res, &$go): void {
+        if ($node === null) return;
+        if (count($res) === $depth) $res[] = []; // first time we reach this level
+        $res[$depth][] = $node->val;
+        $go($node->left, $depth + 1);
+        $go($node->right, $depth + 1);
+    };
+    $go($root, 0);
+    return $res;
+}
+```
+
+```rust
+// Approach 4: pre-order DFS carrying the depth; res is passed as &mut.
+fn level_dfs(root: &Node) -> Vec<Vec<i32>> {
+    fn go(node: &Node, depth: usize, res: &mut Vec<Vec<i32>>) {
+        let Some(n) = node else { return };
+        if res.len() == depth { res.push(Vec::new()); } // first time we reach this level
+        let n = n.borrow();
+        res[depth].push(n.val);
+        go(&n.left, depth + 1, res);
+        go(&n.right, depth + 1, res);
+    }
+    let mut res = Vec::new();
+    go(root, 0, &mut res);
+    res
 }
 ```
 
@@ -647,6 +726,49 @@ median time of 5 runs (ms), full tree, after warm-up
  1048575     524288       22.26       16.46          21.74      21.82   14.64
 ```
 
+`php level-order.php` (on a machine with Xdebug, add `-d xdebug.mode=off`):
+
+```text
+levelSnapshot      10/10 cases passed
+levelSnapshotShift 10/10 cases passed
+levelTwoLists      10/10 cases passed
+levelMarker        10/10 cases passed
+levelDfs           10/10 cases passed
+wrongLiveLength    5/10 cases passed; wrong on three levels with gaps → [[5,2],[8,4],[7],[9]], full 15-node tree → [[1,2,3,4,5,6,7,8],[9,10,11,12],[13,1..., staggered branches → [[1,2],[3,4],[5,6],[7]], negative and duplicate values → [[0,-1000],[1000,-1000],[1000]], full-size 2000-node tree → [[-1000,-963,-926,-889,-852,-815,-778...
+wrongRightFirst    5/10 cases passed; wrong on three levels with gaps → [[5],[8,2],[9,7,4]], full 15-node tree → [[1],[3,2],[7,6,5,4],[15,14,13,12,11,..., staggered branches → [[1],[3,2],[5,4],[7,6]], negative and duplicate values → [[0],[1000,-1000],[1000,-1000]], full-size 2000-node tree → [[-1000],[-926,-963],[-778,-815,-852,...
+wrongEmptyNull     9/10 cases passed; wrong on empty tree → null
+wrongUseByValue    1/10 cases passed; wrong on one node → [], three levels with gaps → [], left children only → [], right children only → [], full 15-node tree → [], staggered branches → [], negative and duplicate values → [], full-size 2000-node tree → [], 2000-node left chain → []
+
+cross-check on 3000 random trees of 0..59 nodes: the five approaches agree 3000/3000
+
+median time of 5 runs (ms), full tree
+        n  SplQueue  array_shift
+     2000      0.10         0.99
+    16383      0.75        58.09
+    32767      1.56       243.32
+```
+
+`rustc --edition 2021 -O level_order.rs && ./level_order`:
+
+```text
+level_snapshot         10/10 cases passed
+level_snapshot_remove0 10/10 cases passed
+level_two_lists        10/10 cases passed
+level_marker           10/10 cases passed
+level_dfs              10/10 cases passed
+wrong_live_length      5/10 cases passed; wrong on three levels with gaps → [[5,2],[8,4],[7],[9]], full 15-node tree → [[1,2,3,4,5,6,7,8],[9,10,11,12],[13,1..., staggered branches → [[1,2],[3,4],[5,6],[7]], negative and duplicate values → [[0,-1000],[1000,-1000],[1000]], full-size 2000-node tree → [[-1000,-963,-926,-889,-852,-815,-778...
+wrong_right_first      5/10 cases passed; wrong on three levels with gaps → [[5],[8,2],[9,7,4]], full 15-node tree → [[1],[3,2],[7,6,5,4],[15,14,13,12,11,..., staggered branches → [[1],[3,2],[5,4],[7,6]], negative and duplicate values → [[0],[1000,-1000],[1000,-1000]], full-size 2000-node tree → [[-1000],[-926,-963],[-778,-815,-852,...
+
+cross-check on 3000 random trees of 0..59 nodes: the five approaches agree 3000/3000
+
+median time of 5 runs (ms), full tree
+        n  VecDeque  Vec::remove(0)
+     2000      0.01            0.09
+    16383      0.10            6.05
+    32767      0.16           28.59
+   131071      0.65          497.88
+```
+
 `node level-order.js` prints the same test lines as the TypeScript version; the measurements are in the same range (the `shift()` column on the 131,071-node tree: 481 ms).
 
 ## Misconceptions and common traps
@@ -658,6 +780,8 @@ median time of 5 runs (ms), full tree, after warm-up
 - **`null` as a marker in Java.** `ArrayDeque` forbids `null`. Use a sentinel node, or snapshot the size.
 - **The empty tree.** Return an empty list, not `null`. In Go, a nil slice and an empty slice look the same to `len`, but `json.Marshal` turns nil into `null`.
 - **Python's mutable default value.** `def f(root, depth=0, res=[])` shares one `res` between all calls: the third case already contains numbers from the previous one.
+- **PHP: `array_shift` as a queue.** It renumbers every remaining element, so each take is O(n). Use `SplQueue` (or an array plus a head index). A recursive closure must `use (&$res, &$go)`: without `&`, `$res` is a copy and the result comes back empty.
+- **Rust: `Vec::remove(0)` as a queue.** The same O(n) trap as `shift()`, except nothing hides it: 474 ms at 131,071 nodes. Use `VecDeque::pop_front`.
 
 ## Self-check questions
 

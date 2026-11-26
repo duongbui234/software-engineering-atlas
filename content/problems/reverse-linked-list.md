@@ -122,7 +122,7 @@ Cách dễ nghĩ nhất là đọc mọi giá trị vào một mảng, rồi đi
 - **Python gán bộ ba sai thứ tự.** `cur.next, prev, cur = prev, cur, cur.next` đúng, vì vế phải được tính hết trước, rồi gán từ trái sang phải, nên `cur.next` ở vế trái còn là nút cũ. Viết `prev, cur, cur.next = cur, cur.next, prev` thì `cur` bị gán trước, và `cur.next` ở vế trái thuộc về nút **mới**; ở nút cuối, `cur` đã là `None` nên gán `None.next` ném `AttributeError`: 1/6 ca đúng.
 - **Go, Java: kiểm tra `head.next` trước `head`.** Với danh sách rỗng, đọc `.next` của con trỏ rỗng: Go panic `nil pointer dereference`, Java ném `NullPointerException`. Thứ tự `head == null || head.next == null` mới an toàn, vì `||` dừng ngay khi vế trái đúng.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Nút | "Không có nút" | Đệ quy sâu | Bẫy riêng |
 |---|---|---|---|---|
@@ -131,10 +131,12 @@ Cách dễ nghĩ nhất là đọc mọi giá trị vào một mảng, rồi đi
 | Go | `struct` với `Next *ListNode` | `nil` | không giới hạn thực tế | đọc trường qua con trỏ `nil` là panic; `var prev *ListNode` mặc định là `nil` |
 | Java | lớp lồng `static class ListNode` | `null` | 29 470 tầng | `NullPointerException`; thứ tự trong `\|\|` quan trọng |
 | JavaScript | `class ListNode` | `null` | khoảng 15 650 tầng | destructuring `[a, b, c] = [x, y, z]` đúng nhưng tạo mảng tạm: chậm hơn 6–11 lần ở 10⁶ nút |
+| PHP | `final class ListNode` với thuộc tính khai báo ở constructor | `null`; `?ListNode` bắt khai báo được rỗng | không giới hạn (khung nằm trên heap), trừ khi Xdebug chặn ở 512 | tự hủy một chuỗi 10⁵ nút là segfault |
+| Rust | `struct ListNode { val: i32, next: Option<Box<ListNode>> }` | `None`; phải `match`/`while let` mới đọc được | 8 MiB ngăn xếp; bản đệ quy đuôi chỉ sống nhờ `-O` | mỗi nút một chủ: `take()` thay cho gán thẳng; Drop mặc định đệ quy |
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-reverse-linked-list/reverse-list.ts) · [Python](../code/neetcode-reverse-linked-list/reverse_list.py) · [Go](../code/neetcode-reverse-linked-list/reverse_list.go) · [Java](../code/neetcode-reverse-linked-list/reverse-list.java) · [JavaScript](../code/neetcode-reverse-linked-list/reverse-list.js)
+[TypeScript](../code/neetcode-reverse-linked-list/reverse-list.ts) · [Python](../code/neetcode-reverse-linked-list/reverse_list.py) · [Go](../code/neetcode-reverse-linked-list/reverse_list.go) · [Java](../code/neetcode-reverse-linked-list/reverse-list.java) · [JavaScript](../code/neetcode-reverse-linked-list/reverse-list.js) · [PHP](../code/neetcode-reverse-linked-list/reverse-list.php) · [Rust](../code/neetcode-reverse-linked-list/reverse_list.rs)
 
 Mỗi file chạy 6 ca: hai ví dụ của đề, danh sách rỗng, một nút, giá trị trùng, và 5 000 nút (giới hạn đề). Bản TypeScript còn đối chiếu 2 000 danh sách ngẫu nhiên (sinh bằng mulberry32), đo độ sâu đệ quy, đo thời gian và bộ nhớ.
 
@@ -253,6 +255,62 @@ function reverseRecursive(head) {
 }
 ```
 
+```php
+// Lặp: giữ $next trước khi lật $cur->next.
+function reverseIterative(?ListNode $head): ?ListNode
+{
+    $prev = null;
+    $cur = $head;
+    while ($cur !== null) {
+        $next = $cur->next; // giữ phần còn lại trước khi cắt
+        $cur->next = $prev; // lật một con trỏ
+        $prev = $cur;
+        $cur = $next;
+    }
+    return $prev;
+}
+
+// Đệ quy: lật phần sau head, rồi gắn head vào cuối.
+function reverseRecursive(?ListNode $head): ?ListNode
+{
+    if ($head === null || $head->next === null) return $head;
+    $newHead = reverseRecursive($head->next);
+    $head->next->next = $head;
+    $head->next = null;
+    return $newHead;
+}
+```
+
+```rust
+// Lặp: take() lấy phần còn lại ra khỏi node.next, để lại None.
+fn reverse_iterative(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    let mut prev = None;
+    let mut cur = head;
+    while let Some(mut node) = cur {
+        cur = node.next.take(); // giữ phần còn lại
+        node.next = prev; // lật một con trỏ
+        prev = Some(node);
+    }
+    prev
+}
+
+// Đệ quy: Box không cho hai nút cùng trỏ tới một nút, nên không viết được
+// "head.next.next = head". Truyền phần đã lật xuống như một tham số.
+fn reverse_recursive(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    fn go(cur: Option<Box<ListNode>>, prev: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+        match cur {
+            None => prev,
+            Some(mut node) => {
+                let rest = node.next.take();
+                node.next = prev;
+                go(rest, Some(node))
+            }
+        }
+    }
+    go(head, None)
+}
+```
+
 
 Kết quả `node --expose-gc reverse-list.ts` (cờ `--expose-gc` chỉ cần cho dòng bộ nhớ cuối):
 
@@ -316,6 +374,37 @@ n = 10⁶: lặp 3.42 ms, destructuring 21.18 ms
 
 Go cho thấy đệ quy không miễn phí kể cả khi không tràn: 10⁶ nút mất 46 ms so với 1,6 ms của bản lặp, vì mỗi tầng phải cấp khung và stack của goroutine phải nới (chép sang vùng lớn hơn) nhiều lần.
 
+PHP (`php -d xdebug.mode=off reverse-list.php`; Xdebug ở chế độ develop chặn đệ quy ở 512 tầng). Đệ quy 10⁶ tầng vẫn chạy, nhưng để PHP tự hủy một danh sách 10⁵ nút thì cả tiến trình sập:
+
+```text
+reverseIterative  6/6 ca đúng
+reverseRecursive  6/6 ca đúng
+reverseViaArray   6/6 ca đúng
+wrongLoseNext     2/6 ca đúng; sai ở ví dụ 1 → [1], ví dụ 2 → [1], trùng giá trị → [3], 5000 nút (giới hạn đề) → [0]
+wrongNoNullHead   2/6 ca đúng; sai ở ví dụ 1 → VÒNG, ví dụ 2 → VÒNG, trùng giá trị → VÒNG, 5000 nút (giới hạn đề) → VÒNG
+n = 10000: đệ quy chạy xong; để PHP tự hủy danh sách chạy xong
+n = 100000: đệ quy chạy xong; để PHP tự hủy danh sách tiến trình sập, mã thoát 139
+n = 1000000: đệ quy chạy xong; để PHP tự hủy danh sách tiến trình sập, mã thoát 139
+n = 100000: lặp 2.40 ms, chép ra mảng 3.13 ms (PHP 8.2.34)
+n = 1000000: lặp 45.37 ms, chép ra mảng 99.69 ms (PHP 8.2.34)
+```
+
+Rust (`rustc --edition 2021 -O reverse_list.rs`). Hai bản sai không qua được trình biên dịch; Drop mặc định của một danh sách 10⁶ nút tràn ngăn xếp:
+
+```text
+reverse_iterative 6/6 ca đúng
+reverse_recursive 6/6 ca đúng
+reverse_via_vec   6/6 ca đúng
+wrongLoseNext, wrongNoNullHead: trình biên dịch từ chối, không chạy được
+n = 10000: đệ quy chạy xong; để Rust tự hủy danh sách chạy xong
+n = 100000: đệ quy chạy xong; để Rust tự hủy danh sách chạy xong
+n = 1000000: đệ quy chạy xong; để Rust tự hủy danh sách tiến trình sập (tràn ngăn xếp)
+n = 100000: lặp 0.23 ms
+n = 1000000: lặp 2.45 ms
+```
+
+Cả PHP lẫn Rust đều hủy chuỗi nút bằng đệ quy ẩn: nút đầu hủy kéo theo nút thứ hai, rồi thứ ba… Code của mình không đệ quy, nhưng bước dọn dẹp thì có. Giới hạn đề là 5 000 nút nên không chạm tới, nhưng muốn đo ở 10⁶ thì phải tự cắt từng mũi tên (`freeList`, `drop_iterative` trong file). Bản đệ quy Rust qua được 10⁶ tầng chỉ vì `-O` biến lời gọi đuôi `go(rest, …)` thành vòng lặp; bản build không `-O` sập từ 10⁵.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Đảo chiều thì phải đổi chỗ giá trị."** Chỉ cần đổi mũi tên. Đổi giá trị cũng ra đúng thứ tự in, nhưng tốn O(n) bộ nhớ và làm sai mọi con trỏ khác đang chỉ vào các nút.
@@ -324,6 +413,8 @@ Go cho thấy đệ quy không miễn phí kể cả khi không tràn: 10⁶ nú
 - **Quên cắt đuôi trong bản đệ quy.** Không có `head.next = null` thì nút đầu cũ và nút thứ hai trỏ vào nhau. Mọi vòng `while (p)` đọc kết quả sẽ chạy mãi.
 - **Thứ tự trong gán nhiều biến.** Python và JavaScript tính vế phải trước, nhưng gán vế trái lần lượt. Một biểu thức vế trái như `cur.next` đọc `cur` **tại lúc gán**, không phải lúc bắt đầu câu lệnh.
 - **"Lật xong thì GC phải dọn gì đó."** Không có nút nào bị bỏ: mọi nút vẫn nằm trong danh sách mới. Chỉ cách chép ra mảng tạo rác (chính cái mảng).
+- **PHP: "không có đệ quy thì không sập".** Gán `$h = null` cho một danh sách 10⁵ nút là đủ làm PHP 8.2 segfault: bộ đếm tham chiếu hủy nút này kéo theo nút sau, lồng nhau. Danh sách dài phải tự cắt `next` từng nút trước khi bỏ.
+- **Rust: dịch nguyên văn `head.next.next = head`.** Với `Option<Box<ListNode>>` mỗi nút chỉ có một chủ, nên dòng đó không biên dịch được. Cách đúng là `take()` phần còn lại rồi gắn `prev` vào, như bản lặp; bản đệ quy cũng phải truyền `prev` xuống.
 
 ## Câu hỏi tự kiểm tra
 

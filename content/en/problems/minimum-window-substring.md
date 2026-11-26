@@ -22,7 +22,7 @@ sources:
 > - Traps: checking only **which** letters t has and forgetting how many (6/8 cases); in Java, comparing two `Integer` counts with `==` fails once t needs 128 or more copies of a letter.
 
 > [!info] Context
-> LeetCode problem 76, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. The station post uses this problem as its "find shortest" example; this page digs into how to know the window is complete and measures the approaches. The solutions come in TypeScript, Python, Go, Java and JavaScript. Read [[en/problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]] ("find longest") and [[en/problems/valid-anagram|Valid Anagram]] (count tables) first.
+> LeetCode problem 76, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. The station post uses this problem as its "find shortest" example; this page digs into how to know the window is complete and measures the approaches. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. Read [[en/problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]] ("find longest") and [[en/problems/valid-anagram|Valid Anagram]] (count tables) first.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Complete window (cover)**: a substring `s[l..r]` with each character c at least as many times as c appears in t.
@@ -133,7 +133,7 @@ Add to t a character that never appears in s (no answer):
 
 In this case the brute force has exactly the n² shape (double n, 4 times the time). The `missing` variable is about 45 times faster than comparing the whole table at 10⁶: both O(n), different constant of 128.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Count table | Language-specific trap |
 |---|---|---|
@@ -141,10 +141,12 @@ In this case the brute force has exactly the n² shape (double n, 4 times the ti
 | Python | `Counter` | `Counter` returns 0 for a missing key, so `need[c] -= 1` is safe; a plain `dict` raises `KeyError` |
 | Go | a `[128]int` array | slicing a string `s[a:b]` doesn't copy: a small answer keeps the whole large `s` in memory |
 | Java | `int[128]` | with `HashMap<Character, Integer>`, `window.get(c) == need.get(c)` compares **references**: wrong once a count reaches 128 |
+| PHP | `array_fill(0, 128, 0)` indexed by `ord` | `$need['x']--` on a missing key only warns and leaves `NULL`: decrementing `null` doesn't give −1 |
+| Rust | `[i32; 128]` | `need` must be signed because it goes negative; `&s[a..b]` slices by byte and panics in the middle of a multi-byte character |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-minimum-window-substring/min-window.ts) · [Python](../code/neetcode-minimum-window-substring/min_window.py) · [Go](../code/neetcode-minimum-window-substring/min_window.go) · [Java](../code/neetcode-minimum-window-substring/min-window.java) · [JavaScript](../code/neetcode-minimum-window-substring/min-window.js)
+[TypeScript](../code/neetcode-minimum-window-substring/min-window.ts) · [Python](../code/neetcode-minimum-window-substring/min_window.py) · [Go](../code/neetcode-minimum-window-substring/min_window.go) · [Java](../code/neetcode-minimum-window-substring/min-window.java) · [JavaScript](../code/neetcode-minimum-window-substring/min-window.js) · [PHP](../code/neetcode-minimum-window-substring/min-window.php) · [Rust](../code/neetcode-minimum-window-substring/min_window.rs)
 
 Each file has the brute force and the `missing`-variable approach, and runs 8 cases including `t` longer than `s`, `t` with repeated letters, and no answer. Below is the `missing`-variable approach.
 
@@ -246,6 +248,47 @@ function windowMissing(s, t) {
 }
 ```
 
+```php
+function windowMissing(string $s, string $t): string {
+    $need = array_fill(0, 128, 0);
+    for ($i = 0; $i < strlen($t); $i++) $need[ord($t[$i])]++;
+    $missing = strlen($t);
+    $l = 0;
+    $bestL = 0;
+    $bestLen = PHP_INT_MAX;
+    for ($r = 0; $r < strlen($s); $r++) {
+        if ($need[ord($s[$r])]-- > 0) $missing--;
+        while ($missing === 0) {
+            if ($r - $l + 1 < $bestLen) { $bestL = $l; $bestLen = $r - $l + 1; }
+            if (++$need[ord($s[$l++])] > 0) $missing++;
+        }
+    }
+    return $bestLen === PHP_INT_MAX ? '' : substr($s, $bestL, $bestLen);
+}
+```
+
+```rust
+fn window_missing(s: &str, t: &str) -> String {
+    let b = s.as_bytes();
+    let mut need = [0i32; 128]; // need[c] > 0: c still missing; < 0: the window has extra c (so it must be signed)
+    for c in t.bytes() { need[c as usize] += 1; }
+    let (mut missing, mut l, mut best_l, mut best_len) = (t.len(), 0, 0, usize::MAX);
+    for r in 0..b.len() {
+        let c = b[r] as usize;
+        if need[c] > 0 { missing -= 1; }
+        need[c] -= 1;
+        while missing == 0 {
+            if r - l + 1 < best_len { best_l = l; best_len = r - l + 1; }
+            let d = b[l] as usize;
+            need[d] += 1;
+            if need[d] > 0 { missing += 1; }
+            l += 1;
+        }
+    }
+    if best_len == usize::MAX { String::new() } else { s[best_l..best_l + best_len].to_string() }
+}
+```
+
 
 The TypeScript file also runs the whole-table comparison and the version that forgets repeats, then measures:
 
@@ -279,7 +322,7 @@ windowMissing          9/9 cases passed
 windowFormedIntegerEq  8/9 cases passed; wrong on t = "a" × 200 → ""
 ```
 
-When the window holds all 200 a's, `window.get('a')` and `need.get('a')` are two different `Integer` objects with the value 200, so `==` is false and the letter a is never counted as satisfied. Every case with counts ≤ 127 passes, so small tests don't catch it. Python, Go and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for both approaches.
+When the window holds all 200 a's, `window.get('a')` and `need.get('a')` are two different `Integer` objects with the value 200, so `==` is false and the letter a is never counted as satisfied. Every case with counts ≤ 127 passes, so small tests don't catch it. Python, Go, JavaScript, PHP and Rust print `8/8 ca đúng` ("8/8 cases passed") for both approaches.
 
 ## Misconceptions and common traps
 
@@ -289,6 +332,8 @@ When the window holds all 200 a's, `window.get('a')` and `need.get('a')` are two
 - **Java: comparing `Integer`s with `==`.** Right up to 127, wrong from 128. Use an `int[]`, `.equals` or `.intValue()`.
 - **"The brute force passes because random data runs fast."** The no-answer case is O(n²); at the problem's n = 10⁵ that is about 10¹⁰ steps.
 - **"Same O(n), same speed."** Comparing the whole 128-slot table each step is about 45 times slower than the `missing` variable in the measurement above.
+- **PHP: `--` on a missing key doesn't give −1.** `$need['x']--` only warns "Undefined array key" and leaves `NULL` (decrementing `null` does nothing), so extra characters are never recorded as negative. Fill all 128 slots with `array_fill`, or write `($need[$c] ?? 0) - 1`.
+- **Rust: a `usize` `need` table.** `need[c] -= 1` when the window has an extra character goes below 0: a debug build panics, an `-O` build wraps to a huge number and breaks `missing`. Use `i32`.
 
 ## Self-check questions
 

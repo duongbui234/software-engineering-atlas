@@ -23,7 +23,7 @@ sources:
 > - Two things people forget: popping an **empty** stack (Python raises `IndexError`, Java throws `NoSuchElementException`, Go panics) and forgetting to check the stack is empty at the **end** (`"(("`).
 
 > [!info] Context
-> LeetCode problem 20, the anchor problem of [[en/posts/2026-11-23-neetcode-stack|station 6: Stack]] on **the NeetCode line: Arrays and Strings**. The solutions come in TypeScript, Python, Go, Java and JavaScript. All you need to know is loops, strings and arrays.
+> LeetCode problem 20, the anchor problem of [[en/posts/2026-11-23-neetcode-stack|station 6: Stack]] on **the NeetCode line: Arrays and Strings**. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. All you need to know is loops, strings and arrays.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Stack**: a list you only add to and take from at **one end** (the top). Last in, first out (LIFO). See [[en/concepts/stack|Stack]].
@@ -125,7 +125,7 @@ The deeply nested string `"(" × n/2 + ")" × n/2`, the worst case for pair remo
 
 Double n and pair removal gets about 4 times slower: exactly the n² shape. At the problem's limit of 10⁴ it still passes (between the measured 45.5 ms at n = 8 000 and 179.9 ms at n = 16 000), so LeetCode doesn't force you to use a stack; only measuring shows the difference.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | The stack | Popping an empty stack |
 |---|---|---|
@@ -133,12 +133,14 @@ Double n and pair removal gets about 4 times slower: exactly the n² shape. At t
 | Python | a `list`: `append`, `pop()` | `IndexError: pop from empty list` |
 | Go | a slice: `append`, reslice `st[:len(st)-1]` | `st[len(st)-1]` on an empty slice: panic |
 | Java | `ArrayDeque`: `push`, `pop`, `peek` | `NoSuchElementException` |
+| PHP | array: `$st[] = …`, `array_pop` | `array_pop` returns `null` without an error; `SplStack::pop` throws `RuntimeException` |
+| Rust | `Vec<char>`: `push`, `pop` | `pop()` returns an `Option`: empty is `None`, and the compiler makes you handle it |
 
 Java also has a `Stack` class, but the official documentation recommends `Deque` instead. The reason is not speed: measured on 10⁶ characters, `ArrayDeque` takes 5.2 ms and `Stack` 4.6 ms, because an uncontended `synchronized` lock costs almost nothing. The reason is design: `Stack` extends `Vector`, so anyone can call `get(i)` or `add(0, x)` into the middle of the stack.
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-valid-parentheses/valid-parentheses.ts) · [Python](../code/neetcode-valid-parentheses/valid_parentheses.py) · [Go](../code/neetcode-valid-parentheses/valid_parentheses.go) · [Java](../code/neetcode-valid-parentheses/valid-parentheses.java) · [JavaScript](../code/neetcode-valid-parentheses/valid-parentheses.js)
+[TypeScript](../code/neetcode-valid-parentheses/valid-parentheses.ts) · [Python](../code/neetcode-valid-parentheses/valid_parentheses.py) · [Go](../code/neetcode-valid-parentheses/valid_parentheses.go) · [Java](../code/neetcode-valid-parentheses/valid-parentheses.java) · [JavaScript](../code/neetcode-valid-parentheses/valid-parentheses.js) · [PHP](../code/neetcode-valid-parentheses/valid-parentheses.php) · [Rust](../code/neetcode-valid-parentheses/valid_parentheses.rs)
 
 Each file has the pair-removal and stack approaches and runs 9 cases, including the empty string, `"(("` and `"){"`. Below is the stack approach.
 
@@ -210,6 +212,33 @@ function stack(s) {
 }
 ```
 
+```php
+function stack(string $s): bool {
+    if (strlen($s) % 2 === 1) return false;
+    $st = [];
+    foreach (str_split($s) as $ch) {
+        if (!isset(OPEN[$ch])) $st[] = $ch;
+        elseif (array_pop($st) !== OPEN[$ch]) return false; // array_pop on an empty array returns null, which differs from "(", so it stays correct
+    }
+    return !$st;
+}
+```
+
+```rust
+fn stack(s: &str) -> bool {
+    if s.len() % 2 == 1 { return false; }
+    let mut st: Vec<char> = Vec::with_capacity(s.len());
+    for ch in s.chars() {
+        match open_of(ch) {
+            None => st.push(ch),
+            // pop() returns an Option: an empty stack gives None, which differs from Some('('), so no separate check
+            Some(o) => if st.pop() != Some(o) { return false; },
+        }
+    }
+    st.is_empty()
+}
+```
+
 
 The TypeScript file also runs three wrong versions, then measures:
 
@@ -251,7 +280,19 @@ legacyStack   9/9 cases passed
 10^6 characters: ArrayDeque 5.2 ms, Stack 4.6 ms
 ```
 
-Go and JavaScript print `9/9 ca đúng` ("9/9 cases passed") for both approaches.
+Go, JavaScript and Rust print `9/9 ca đúng` ("9/9 cases passed") for both approaches. The PHP file runs the same algorithm on two kinds of stack:
+
+```text
+$ php valid-parentheses.php
+singleCounter      7/9 ca đúng; sai ở "(]" "([)]"
+threeCounters      8/9 ca đúng; sai ở "([)]"
+replacePairs       9/9 ca đúng
+stack              9/9 ca đúng
+stackNoFinalCheck  8/9 ca đúng; sai ở "(("
+splStackUnguarded  8/9 ca đúng; sai ở "){": RuntimeException(Can't pop from an empty datastructure)
+```
+
+A PHP array forgives like JS (`array_pop` returns `null`), while `SplStack` throws like Python. In Rust `pop()` returns an `Option`, so there is no way to forget the empty case and still compile.
 
 ## Misconceptions and common traps
 
@@ -260,6 +301,8 @@ Go and JavaScript print `9/9 ca đúng` ("9/9 cases passed") for both approaches
 - **Popping an empty stack.** A `")"` at the start of the string. Python, Java and Go throw or panic; JS quietly returns `undefined`.
 - **Using `shift`/`unshift` as the stack in JS.** Adding at the front of an array moves every element: O(n) each time, and the whole algorithm becomes O(n²).
 - **"Java's `Stack` is slow because it is synchronized."** Measured, it isn't noticeably slower. Its problem is an API that also exposes operations that don't belong to a stack.
+- **PHP: `array_pop` and `SplStack::pop` treat an empty stack in opposite ways.** The array returns `null` and carries on; `SplStack` throws `RuntimeException`. Switching the stack type mid-way also switches the behavior on `"){"`.
+- **Rust: `s.len()` counts bytes, not characters.** The odd-length check is only right because the input has just six ASCII bracket characters; for strings with multi-byte characters use `s.chars().count()`.
 
 ## Self-check questions
 

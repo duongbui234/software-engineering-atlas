@@ -22,7 +22,7 @@ sources:
 > - Hai chỗ hay quên: lấy từ ngăn xếp **rỗng** (Python ném `IndexError`, Java ném `NoSuchElementException`, Go panic) và quên kiểm ngăn xếp rỗng ở **cuối** (`"(("`).
 
 > [!info] Bối cảnh
-> Bài LeetCode 20, bài neo của [[posts/2026-11-23-neetcode-stack|ga 6: Ngăn xếp]] trên **tuyến NeetCode: Mảng và chuỗi**. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn chỉ cần biết vòng lặp, chuỗi và mảng.
+> Bài LeetCode 20, bài neo của [[posts/2026-11-23-neetcode-stack|ga 6: Ngăn xếp]] trên **tuyến NeetCode: Mảng và chuỗi**. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn chỉ cần biết vòng lặp, chuỗi và mảng.
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Ngăn xếp (stack)**: danh sách chỉ thêm và lấy ở **một đầu** (đỉnh). Vào sau thì ra trước (LIFO). Xem [[concepts/stack|Stack]].
@@ -124,7 +124,7 @@ Chuỗi lồng sâu `"(" × n/2 + ")" × n/2`, ca tệ nhất của cách xóa c
 
 n gấp đôi, cách xóa cặp chậm gấp khoảng 4 lần: đúng dáng n². Với giới hạn 10⁴ của đề, nó vẫn qua (nằm giữa hai số đo 45,5 ms ở n = 8 000 và 179,9 ms ở n = 16 000), nên LeetCode không ép bạn phải dùng ngăn xếp; phép đo mới cho thấy khác biệt.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Ngăn xếp dùng | Lấy từ ngăn xếp rỗng |
 |---|---|---|
@@ -132,12 +132,14 @@ n gấp đôi, cách xóa cặp chậm gấp khoảng 4 lần: đúng dáng n².
 | Python | `list`: `append`, `pop()` | `IndexError: pop from empty list` |
 | Go | slice: `append`, cắt `st[:len(st)-1]` | `st[len(st)-1]` trên slice rỗng: panic |
 | Java | `ArrayDeque`: `push`, `pop`, `peek` | `NoSuchElementException` |
+| PHP | mảng: `$st[] = …`, `array_pop` | `array_pop` trả `null`, không báo lỗi; `SplStack::pop` thì ném `RuntimeException` |
+| Rust | `Vec<char>`: `push`, `pop` | `pop()` trả `Option`: rỗng là `None`, trình biên dịch bắt mình xử lý |
 
 Java còn có lớp `Stack`, nhưng tài liệu chính thức khuyên dùng `Deque` thay thế. Lý do không phải tốc độ: đo trên 10⁶ ký tự, `ArrayDeque` mất 5,2 ms còn `Stack` mất 4,6 ms, vì khóa `synchronized` không bị tranh chấp gần như không tốn gì. Lý do là thiết kế: `Stack` kế thừa `Vector`, nên ai cũng gọi được `get(i)` hay `add(0, x)` vào giữa ngăn xếp.
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-valid-parentheses/valid-parentheses.ts) · [Python](../code/neetcode-valid-parentheses/valid_parentheses.py) · [Go](../code/neetcode-valid-parentheses/valid_parentheses.go) · [Java](../code/neetcode-valid-parentheses/valid-parentheses.java) · [JavaScript](../code/neetcode-valid-parentheses/valid-parentheses.js)
+[TypeScript](../code/neetcode-valid-parentheses/valid-parentheses.ts) · [Python](../code/neetcode-valid-parentheses/valid_parentheses.py) · [Go](../code/neetcode-valid-parentheses/valid_parentheses.go) · [Java](../code/neetcode-valid-parentheses/valid-parentheses.java) · [JavaScript](../code/neetcode-valid-parentheses/valid-parentheses.js) · [PHP](../code/neetcode-valid-parentheses/valid-parentheses.php) · [Rust](../code/neetcode-valid-parentheses/valid_parentheses.rs)
 
 Mỗi file có cách xóa cặp và cách ngăn xếp, chạy 9 ca gồm chuỗi rỗng, `"(("` và `"){"`. Dưới đây là cách ngăn xếp.
 
@@ -209,6 +211,33 @@ function stack(s) {
 }
 ```
 
+```php
+function stack(string $s): bool {
+    if (strlen($s) % 2 === 1) return false;
+    $st = [];
+    foreach (str_split($s) as $ch) {
+        if (!isset(OPEN[$ch])) $st[] = $ch;
+        elseif (array_pop($st) !== OPEN[$ch]) return false; // array_pop trên mảng rỗng trả null, khác "(" nên vẫn đúng
+    }
+    return !$st;
+}
+```
+
+```rust
+fn stack(s: &str) -> bool {
+    if s.len() % 2 == 1 { return false; }
+    let mut st: Vec<char> = Vec::with_capacity(s.len());
+    for ch in s.chars() {
+        match open_of(ch) {
+            None => st.push(ch),
+            // pop() trả Option: ngăn xếp rỗng là None, khác Some('('), nên không cần kiểm riêng
+            Some(o) => if st.pop() != Some(o) { return false; },
+        }
+    }
+    st.is_empty()
+}
+```
+
 
 File TypeScript chạy thêm ba bản sai, rồi đo:
 
@@ -248,7 +277,19 @@ legacyStack   9/9 ca đúng
 10^6 ký tự: ArrayDeque 5.2 ms, Stack 4.6 ms
 ```
 
-Go và JavaScript in `9/9 ca đúng` cho cả hai cách.
+Go, JavaScript và Rust in `9/9 ca đúng` cho cả hai cách. File PHP chạy cùng thuật toán trên hai loại ngăn xếp:
+
+```text
+$ php valid-parentheses.php
+singleCounter      7/9 ca đúng; sai ở "(]" "([)]"
+threeCounters      8/9 ca đúng; sai ở "([)]"
+replacePairs       9/9 ca đúng
+stack              9/9 ca đúng
+stackNoFinalCheck  8/9 ca đúng; sai ở "(("
+splStackUnguarded  8/9 ca đúng; sai ở "){": RuntimeException(Can't pop from an empty datastructure)
+```
+
+Mảng PHP tha như JS (`array_pop` trả `null`), còn `SplStack` ném lỗi như Python. Ở Rust, `pop()` trả `Option`, nên không có cách nào quên trường hợp rỗng mà vẫn biên dịch được.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -257,6 +298,8 @@ Go và JavaScript in `9/9 ca đúng` cho cả hai cách.
 - **Lấy từ ngăn xếp rỗng.** `")"` ở đầu chuỗi. Python, Java, Go ném lỗi hoặc panic; JS lặng lẽ trả `undefined`.
 - **Dùng `shift`/`unshift` làm ngăn xếp trong JS.** Thêm ở đầu mảng phải dời mọi phần tử: O(n) mỗi lần, cả thuật toán thành O(n²).
 - **"Java `Stack` chậm vì synchronized."** Đo thì không chậm hơn đáng kể. Vấn đề của nó là API lộ cả các thao tác không phải của ngăn xếp.
+- **PHP: `array_pop` và `SplStack::pop` xử lý ngăn xếp rỗng ngược nhau.** Mảng trả `null` và chạy tiếp; `SplStack` ném `RuntimeException`. Đổi kiểu ngăn xếp giữa chừng là đổi luôn hành vi ở ca `"){"`.
+- **Rust: `s.len()` đếm byte, không đếm ký tự.** Phép kiểm độ dài lẻ chỉ đúng vì đề chỉ có sáu ký tự ngoặc ASCII; với chuỗi có ký tự nhiều byte phải dùng `s.chars().count()`.
 
 ## Câu hỏi tự kiểm tra
 

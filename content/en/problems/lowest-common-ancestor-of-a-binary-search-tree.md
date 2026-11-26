@@ -236,7 +236,7 @@ The other three languages, per query: Python (2¹⁷ − 1 nodes) general 8,578 
 
 On an increasing chain of 10⁵ nodes (a valid tree under the problem's limits), with p = 99998 and q = 99999: the loop walks all 99,999 steps in 0.19 ms; the recursive version throws `RangeError` in Node.
 
-### Under the hood in five languages
+### Under the hood in seven languages
 
 | | Comparing nodes | Language-specific trap |
 |---|---|---|
@@ -244,10 +244,12 @@ On an increasing chain of 10⁵ nodes (a valid tree under the problem's limits),
 | Python | `is` compares identity | `int` never overflows, so the multiplication trick is safe; the 10⁵-node chain exceeds the 1,000-frame limit and throws `RecursionError` |
 | Go | `==` on pointers | goroutine stacks grow on their own, so 10⁵ levels of recursion run fine; the 32-bit `int` on `GOARCH=386` makes the multiplication trick wrong on 2/10 cases |
 | Java | `==` compares references | `int * int` overflows silently: the multiplication trick is wrong on 2/10 cases, fixed with `(long)`. `StackOverflowError` is an `Error`, not an `Exception`, so `catch (Exception e)` does not catch it |
+| PHP | `===` on objects compares identity (the same object) | `int` is 64-bit, so the multiplication trick is safe; 10⁵ levels of recursion run fine (call frames live on the heap), but letting a 10⁵-node chain destroy itself makes PHP free it recursively in C and die with a segfault, so the file takes the tree apart with a loop |
+| Rust | `Rc::ptr_eq` on `Rc<RefCell<TreeNode>>` | LeetCode's `i32`: `10⁹ − (−10⁹)` already overflows, so cast to `i64` before subtracting. A stack overflow kills the process and cannot be caught, so the file runs on a thread with a 256 MB stack; even `Drop` on a long chain recurses |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.ts) · [Python](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.py) · [Go](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.go) · [Java](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.java) · [JavaScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.js)
+[TypeScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.ts) · [Python](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.py) · [Go](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.go) · [Java](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.java) · [JavaScript](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.js) · [PHP](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.php) · [Rust](../code/neetcode-lowest-common-ancestor-of-a-binary-search-tree/lca.rs)
 
 Each file builds trees from LeetCode-style level-order arrays and runs 10 shared cases on the tree `[20, 10, 30, 5, 15, 25, 35, null, null, 12, 17]` plus a few trees of their own: p and q on opposite sides of the root, both on the left, both on the right, p an ancestor of q, p larger than q, the root is p, a 2-node tree (the problem's smallest size), values at ±10⁹, two values around 5·10⁴ on the same side (to catch overflow), and an increasing chain of 10⁵ nodes (the problem's largest size). The TypeScript file also cross-checks five approaches on 3,000 random BSTs.
 
@@ -322,6 +324,34 @@ function lcaIterative(root, p, q) {
 }
 ```
 
+```php
+// Approach 4: a loop, O(1) memory.
+function lcaIterative(?TreeNode $root, TreeNode $p, TreeNode $q): ?TreeNode {
+    $node = $root;
+    while ($node !== null) {
+        if ($p->val < $node->val && $q->val < $node->val) $node = $node->left;
+        elseif ($p->val > $node->val && $q->val > $node->val) $node = $node->right;
+        else return $node;
+    }
+    return null;
+}
+```
+
+```rust
+// Approach 4: a loop, O(1) memory.
+fn lca_iterative(root: &Node, p: &R, q: &R) -> Node {
+    let (pv, qv) = (p.borrow().val, q.borrow().val);
+    let mut node = root.clone();
+    while let Some(n) = node {
+        let v = n.borrow().val;
+        if pv < v && qv < v { node = n.borrow().left.clone(); }
+        else if pv > v && qv > v { node = n.borrow().right.clone(); }
+        else { return Some(n); }
+    }
+    None
+}
+```
+
 The general LC 236 solution, for comparison:
 
 ```ts
@@ -383,6 +413,31 @@ function lcaGeneral(root, p, q) {
   const r = lcaGeneral(root.right, p, q);
   if (l !== null && r !== null) return root;
   return l !== null ? l : r;
+}
+```
+
+```php
+// Approach 1: LCA of any binary tree (LC 236), post-order, O(n).
+function lcaGeneral(?TreeNode $root, TreeNode $p, TreeNode $q): ?TreeNode {
+    if ($root === null || $root === $p || $root === $q) return $root; // === on objects: the same object
+    $l = lcaGeneral($root->left, $p, $q);
+    $r = lcaGeneral($root->right, $p, $q);
+    if ($l !== null && $r !== null) return $root;
+    return $l ?? $r;
+}
+```
+
+```rust
+// Approach 1: LCA of any binary tree (LC 236), post-order, O(n). Identity is compared with Rc::ptr_eq.
+fn lca_general(root: &Node, p: &R, q: &R) -> Node {
+    let n = root.as_ref()?;
+    if Rc::ptr_eq(n, p) || Rc::ptr_eq(n, q) { return Some(n.clone()); }
+    let l = lca_general(&n.borrow().left, p, q);
+    let r = lca_general(&n.borrow().right, p, q);
+    match (l, r) {
+        (Some(_), Some(_)) => Some(n.clone()),
+        (l, r) => l.or(r),
+    }
 }
 ```
 
@@ -467,6 +522,36 @@ lcaProduct         10/10 cases passed
 wrongNonStrict     4/10 cases passed; wrong on p is an ancestor of q (10, 12) → null, root is p (20, 17) → null, 2-node tree (2, 1) → null, values at ±10⁹ (10⁹, 10⁹ − 1) → null, same side, differences around 5·10⁴ (50000, 50001) → null, increasing chain of 10⁵ nodes (99998, 99999) → null
 ```
 
+`php lca.php` (on a machine with Xdebug, add `-d xdebug.mode=off`):
+
+```text
+lcaGeneral         10/10 cases passed
+lcaPaths           10/10 cases passed
+lcaRecursive       10/10 cases passed
+lcaIterative       10/10 cases passed
+lcaProduct         10/10 cases passed
+wrongAssumeOrdered 6/10 cases passed; wrong on p greater than q (17, 12) → null, root is p (20, 17) → null, 2-node tree (2, 1) → null, values at ±10⁹ (10⁹, 10⁹ − 1) → null
+wrongNonStrict     4/10 cases passed; wrong on p is an ancestor of q (10, 12) → null, root is p (20, 17) → null, 2-node tree (2, 1) → null, values at ±10⁹ (10⁹, 10⁹ − 1) → null, same side, differences around 5·10⁴ (50000, 50001) → null, increasing chain of 10⁵ nodes (99998, 99999) → null
+
+cross-check on 3000 random BSTs of 2..31 nodes: the five approaches agree 3000/3000
+```
+
+`rustc --edition 2021 -O lca.rs && ./lca` (run on a thread with a 256 MB stack):
+
+```text
+lca_general          10/10 cases passed
+lca_paths            10/10 cases passed
+lca_recursive        10/10 cases passed
+lca_iterative        10/10 cases passed
+lca_product          10/10 cases passed
+wrong_assume_ordered 6/10 cases passed; wrong on p greater than q (17, 12) → None, root is p (20, 17) → None, 2-node tree (2, 1) → None, values at ±10⁹ (10⁹, 10⁹ − 1) → None
+wrong_non_strict     4/10 cases passed; wrong on p is an ancestor of q (10, 12) → None, root is p (20, 17) → None, 2-node tree (2, 1) → None, values at ±10⁹ (10⁹, 10⁹ − 1) → None, same side, differences around 5·10⁴ (50000, 50001) → None, increasing chain of 10⁵ nodes (99998, 99999) → None
+
+cross-check on 3000 random BSTs of 2..31 nodes: the five approaches agree 3000/3000
+```
+
+The PHP and Rust files do not time anything; they only check correctness and run the random cross-check.
+
 On the increasing chain, the 32-bit `int` version stops wrongly at node 7317: from there on, (7317 − 99998)·(7317 − 99999) ≈ 8.6·10⁹ has already overflowed into a number ≤ 0 in 32 bits.
 
 ## Misconceptions and common traps
@@ -478,6 +563,8 @@ On the increasing chain, the 32-bit `int` version stops wrongly at node 7317: fr
 - **"O(h) means O(log n)."** Only for a balanced tree. The problem does not promise one; an increasing chain of 10⁵ nodes is a valid BST and the walk takes 10⁵ steps.
 - **Using the walk when p or q may be missing from the tree.** It still returns a split point even if q does not exist. This problem promises both are present; a variant that does not (LeetCode 1644, for ordinary trees) must confirm each node first.
 - **Comparing values or comparing nodes.** Here the values are distinct, so both work, but the general solution compares **references** (`root === p`), because in an ordinary tree two nodes can share a value.
+- **PHP: a long chain dies at cleanup, not during the work.** The function finishes and returns the right node, then the process segfaults when the variable holding the root goes out of scope, because PHP frees 10⁵ nested objects recursively in C. Take the tree apart with a loop (`teardown`) before dropping it. A machine with Xdebug also stops recursion at 512 levels.
+- **Rust: `i32` overflows before the multiplication.** With values at ±10⁹, the difference `node.val - p.val` already exceeds `i32`. A debug build panics, a `-O` build wraps silently and can flip the sign. Cast both operands to `i64` before subtracting.
 
 ## Self-check questions
 

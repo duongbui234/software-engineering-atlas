@@ -223,9 +223,9 @@ Các ngôn ngữ khác, cùng dữ liệu kiểu đó:
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-k-closest-points-to-origin/k-closest.ts) · [Python](../code/neetcode-k-closest-points-to-origin/k_closest.py) · [Go](../code/neetcode-k-closest-points-to-origin/k_closest.go) · [Java](../code/neetcode-k-closest-points-to-origin/k-closest.java) · [JavaScript](../code/neetcode-k-closest-points-to-origin/k-closest.js)
+[TypeScript](../code/neetcode-k-closest-points-to-origin/k-closest.ts) · [Python](../code/neetcode-k-closest-points-to-origin/k_closest.py) · [Go](../code/neetcode-k-closest-points-to-origin/k_closest.go) · [Java](../code/neetcode-k-closest-points-to-origin/k-closest.java) · [JavaScript](../code/neetcode-k-closest-points-to-origin/k-closest.js) · [PHP](../code/neetcode-k-closest-points-to-origin/k-closest.php) · [Rust](../code/neetcode-k-closest-points-to-origin/k_closest.rs)
 
-Mỗi file chạy 8 ca: hai ví dụ của đề, một điểm, hai điểm cùng khoảng cách nằm trong đáp án, k = n, toạ độ âm, toạ độ ở biên 10⁴, và một ca năm điểm. Đáp án được so sau khi sắp xếp, vì đề chấp nhận mọi thứ tự.
+Mỗi file trong năm bản đầu chạy 8 ca: hai ví dụ của đề, một điểm, hai điểm cùng khoảng cách nằm trong đáp án, k = n, toạ độ âm, toạ độ ở biên 10⁴, và một ca năm điểm. Đáp án được so sau khi sắp xếp, vì đề chấp nhận mọi thứ tự.
 
 ```ts
 // Max-heap giữ k điểm gần nhất đã thấy; đỉnh là điểm XA nhất trong số đó, bị thay khi có điểm gần hơn. O(n log k).
@@ -323,6 +323,53 @@ function quickselect(points, k) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function kClosest(array $points, int $k): array
+{
+    $heap = new SplPriorityQueue();
+    $heap->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
+
+    foreach ($points as [$x, $y]) {
+        $distance = $x * $x + $y * $y;
+        if ($heap->count() < $k) {
+            $heap->insert([$x, $y], $distance);
+        } elseif ($distance < $heap->top()['priority']) {
+            $heap->extract();
+            $heap->insert([$x, $y], $distance);
+        }
+    }
+
+    $result = [];
+    while (!$heap->isEmpty()) {
+        $result[] = $heap->extract()['data'];
+    }
+    return $result;
+}
+```
+
+```rust
+use std::collections::BinaryHeap;
+
+fn k_closest(points: &[[i32; 2]], k: usize) -> Vec<[i32; 2]> {
+    let mut heap = BinaryHeap::with_capacity(k);
+    for &[x, y] in points {
+        let distance = x * x + y * y;
+        if heap.len() < k {
+            heap.push((distance, [x, y]));
+        } else {
+            let mut farthest = heap.peek_mut().unwrap();
+            if distance < farthest.0 {
+                *farthest = (distance, [x, y]);
+            }
+        }
+    }
+    heap.into_iter().map(|(_, point)| point).collect()
+}
+```
+
 
 Kết quả `node k-closest.ts` (phần ca thử):
 
@@ -337,6 +384,8 @@ ngẫu nhiên (toạ độ -5..5, nhiều điểm hòa): bốn cách khớp nhau
 ```
 
 Ca ngẫu nhiên dùng toạ độ nhỏ để có nhiều điểm hòa ở ranh giới; khi hòa, nhiều đáp án cùng hợp lệ, nên file so dãy khoảng cách đã sắp thay vì so điểm. `python3 k_closest.py` cho `sort_all`, `via_nsmallest`, `max_heap_k` đều 8/8 và `forgot_negate` 2/8; Go, Java (cả bản `int` lẫn `long`) và JavaScript đều 8/8.
+
+PHP đặt bình phương khoảng cách làm độ ưu tiên của `SplPriorityQueue`. Rust đặt độ ưu tiên ở trường đầu của tuple trong `BinaryHeap`. PHP in `5/5 ca đúng` và Rust in `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

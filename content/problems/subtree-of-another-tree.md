@@ -222,9 +222,9 @@ Trong Python bộ `(val, id_left, id_right)` dùng thẳng làm khóa `dict`; Go
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-subtree-of-another-tree/subtree.ts) · [Python](../code/neetcode-subtree-of-another-tree/subtree.py) · [Go](../code/neetcode-subtree-of-another-tree/subtree.go) · [Java](../code/neetcode-subtree-of-another-tree/subtree.java) · [JavaScript](../code/neetcode-subtree-of-another-tree/subtree.js)
+[TypeScript](../code/neetcode-subtree-of-another-tree/subtree.ts) · [Python](../code/neetcode-subtree-of-another-tree/subtree.py) · [Go](../code/neetcode-subtree-of-another-tree/subtree.go) · [Java](../code/neetcode-subtree-of-another-tree/subtree.java) · [JavaScript](../code/neetcode-subtree-of-another-tree/subtree.js) · [PHP](../code/neetcode-subtree-of-another-tree/subtree.php) · [Rust](../code/neetcode-subtree-of-another-tree/subtree.rs)
 
-Mỗi file chạy 14 ca chung: khớp nhánh trái, nút 5 có thêm con, `12` và `2`, `-3` và `3`, trùng cả cây, sub là lá, lá và nút có con, giá trị lặp, trái và phải, cùng tổng giá trị, số âm, cặp trùng `Objects.hash`, hai cây lệch 2000 và 1000 nút, và cùng cặp đó nhưng khác ở đáy. File TypeScript đối chiếu thêm 3 000 cặp ngẫu nhiên (một nửa `subRoot` chép từ một cây con của `root`) với đáp án lấy từ tập JSON của mọi cây con.
+Mỗi file trong năm bản đầu chạy 14 ca chung: khớp nhánh trái, nút 5 có thêm con, `12` và `2`, `-3` và `3`, trùng cả cây, sub là lá, lá và nút có con, giá trị lặp, trái và phải, cùng tổng giá trị, số âm, cặp trùng `Objects.hash`, hai cây lệch 2000 và 1000 nút, và cùng cặp đó nhưng khác ở đáy. File TypeScript đối chiếu thêm 3 000 cặp ngẫu nhiên (một nửa `subRoot` chép từ một cây con của `root`) với đáp án lấy từ tập JSON của mọi cây con.
 
 So ở mọi nút, dạng đệ quy:
 
@@ -292,6 +292,72 @@ function isSameRec(p, q) {
 function isSubtreeRecursive(root, sub) {
   if (root === null) return sub === null;
   return isSameRec(root, sub) || isSubtreeRecursive(root.left, sub) || isSubtreeRecursive(root.right, sub);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function sameTree(?TreeNode $a, ?TreeNode $b): bool {
+    if ($a === null || $b === null) return $a === $b;
+    return $a->val === $b->val
+        && sameTree($a->left, $b->left)
+        && sameTree($a->right, $b->right);
+}
+
+function isSubtree(?TreeNode $root, ?TreeNode $sub): bool {
+    if ($sub === null) return true;
+    if ($root === null) return false;
+    return sameTree($root, $sub) || isSubtree($root->left, $sub) || isSubtree($root->right, $sub);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn same_tree(a: &Node, b: &Node) -> bool {
+    match (a, b) {
+        (None, None) => true,
+        (Some(a), Some(b)) => {
+            let a = a.borrow();
+            let b = b.borrow();
+            a.val == b.val && same_tree(&a.left, &b.left) && same_tree(&a.right, &b.right)
+        }
+        _ => false,
+    }
+}
+
+fn is_subtree(root: &Node, sub: &Node) -> bool {
+    if sub.is_none() {
+        return true;
+    }
+    if same_tree(root, sub) {
+        return true;
+    }
+    let Some(root) = root else { return false };
+    let root = root.borrow();
+    is_subtree(&root.left, sub) || is_subtree(&root.right, sub)
 }
 ```
 
@@ -534,6 +600,8 @@ cây lệch 10000 nút: isSubtreeJson → ném RangeError, isSubtreeKmp → true
 ```
 
 File JavaScript có thêm lối tắt `JSON.stringify(root).includes(JSON.stringify(sub))`. Nó đúng, vì JSON có ngoặc và ghi `null` cho mọi chỗ trống, nhưng `JSON.stringify` đi cây bằng đệ quy (dừng ở khoảng 4 456 tầng, đo ở [[problems/same-tree|Same Tree]]) và `includes` vẫn có thể chậm theo bình phương.
+
+Hai bản bổ sung thử so cây tại từng nút. Các ca kiểm tra cả nút có thêm con và nút khớp giá trị nhưng lệch hướng. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

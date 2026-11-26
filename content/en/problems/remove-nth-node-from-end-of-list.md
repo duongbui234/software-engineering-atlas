@@ -23,7 +23,7 @@ sources:
 > - Two wrong versions actually run: without a dummy node, deleting the head itself (n = L) throws `TypeError` / `NullPointerException` / panic (5/8); moving `fast` n ahead instead of n + 1 deletes the neighbouring node (0/8).
 
 > [!info] Context
-> LeetCode problem 19 on [[en/posts/2026-11-24-neetcode-linked-list|station 1: Linked List Pointers]] of **The NeetCode Line: Linked Structures**. It uses the same dummy node as [[en/problems/merge-two-sorted-lists|Merge Two Sorted Lists]], and the same "two pointers on different beats" idea as [[en/problems/linked-list-cycle|Linked List Cycle]] and the find-the-middle step of [[en/problems/reorder-list|Reorder List]]; here the two pointers move **at the same speed but a fixed distance apart**. Solutions come in TypeScript, Python, Go, Java and JavaScript. You only need loops and the `next` pointer.
+> LeetCode problem 19 on [[en/posts/2026-11-24-neetcode-linked-list|station 1: Linked List Pointers]] of **The NeetCode Line: Linked Structures**. It uses the same dummy node as [[en/problems/merge-two-sorted-lists|Merge Two Sorted Lists]], and the same "two pointers on different beats" idea as [[en/problems/linked-list-cycle|Linked List Cycle]] and the find-the-middle step of [[en/problems/reorder-list|Reorder List]]; here the two pointers move **at the same speed but a fixed distance apart**. Solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. You only need loops and the `next` pointer.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Singly linked list**: each node knows only the node **after** it, not the one before. See [[en/concepts/linked-list|Linked List]].
@@ -145,7 +145,7 @@ function wrongNoDummy(head: ListNode | null, n: number): ListNode | null {
 ```
 
 
-Both pointers start at `head` and `fast` moves n steps. When n = L, `fast` runs off the list to `null`, and `fast.next` throws. This version passes 5/8 cases and fails exactly the three head-deleting cases, in all five languages: `TypeError` (TS, JS), `AttributeError` (Python), panic *nil pointer dereference* (Go), `NullPointerException` (Java). A line `if (!fast) return head.next` would also fix it, but the dummy node removes that special case altogether.
+Both pointers start at `head` and `fast` moves n steps. When n = L, `fast` runs off the list to `null`, and `fast.next` throws. This version passes 5/8 cases and fails exactly the three head-deleting cases, in all seven languages: `TypeError` (TS, JS), `AttributeError` (Python), panic *nil pointer dereference* (Go), `NullPointerException` (Java), `ErrorException` (PHP, once Warnings are turned into exceptions), a panic on `unwrap()` of a `None` (Rust). A line `if (!fast) return head.next` would also fix it, but the dummy node removes that special case altogether.
 
 ### Does "one pass" save steps?
 
@@ -177,7 +177,7 @@ The "array of nodes" approach (one pass, store every node in an array, then take
 
 After `prev.next = prev.next.next`, the skipped node has no pointer from the list to it. In JavaScript, Python, Go and Java the garbage collector reclaims it once nothing else references it (for example a variable you still hold). No `delete` or `free` needed. In C or C++ you must free that node yourself, or it leaks.
 
-### Under the hood in five languages
+### Under the hood in seven languages
 
 | | Dummy node | Error when reading `.next` of null | Note |
 |---|---|---|---|
@@ -185,10 +185,12 @@ After `prev.next = prev.next.next`, the skipped node has no pointer from the lis
 | Python | `ListNode(0, head)` | `AttributeError: 'NoneType' object has no attribute 'next'` | `dummy = slow = fast = ListNode(0, head)`: three names point to one node, which is what we want here |
 | Go | `&ListNode{0, head}` | panic: *nil pointer dereference* | return `dummy.Next`, not `dummy` |
 | Java | `new ListNode(0, head)` | `NullPointerException` | Java 14 and later name the null expression in the error message |
+| PHP | `new ListNode(0, $head)` | only a Warning *Attempt to read property "next" on null*, then it carries on with `null` | the file turns Warnings into `ErrorException` with `set_error_handler` |
+| Rust | `Box::new(ListNode { val: 0, next: head })` | no null: `None.unwrap()` panics | the one-pass version needs a copy for `fast`, because the list cannot be borrowed for reading and writing at once |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.ts) · [Python](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.py) · [Go](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.go) · [Java](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.java) · [JavaScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.js)
+[TypeScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.ts) · [Python](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.py) · [Go](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.go) · [Java](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.java) · [JavaScript](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.js) · [PHP](../code/neetcode-remove-nth-node-from-end-of-list/remove-nth.php) · [Rust](../code/neetcode-remove-nth-node-from-end-of-list/remove_nth.rs)
 
 Each file runs 8 shared cases: the problem's three examples, three head deletions (n = L), one tail deletion (n = 1), and two longer lists.
 
@@ -255,6 +257,45 @@ function onePass(head, n) {
   while (fast) { fast = fast.next; slow = slow.next; }
   slow.next = slow.next.next;
   return dummy.next;
+}
+```
+
+```php
+// One pass: fast moves n + 1 steps ahead from the dummy node, then both pointers walk together.
+function onePass(?ListNode $head, int $n): ?ListNode
+{
+    $dummy = new ListNode(0, $head);
+    $fast = $dummy;
+    $slow = $dummy; // same object: PHP objects are passed by handle, not copied
+    for ($i = 0; $i <= $n; $i++) $fast = $fast->next;
+    while ($fast !== null) {
+        $fast = $fast->next;
+        $slow = $slow->next;
+    }
+    $slow->next = $slow->next->next;
+    return $dummy->next;
+}
+```
+
+```rust
+// One pass: Rust rejects fast (read-only) and slow (writing) on the same list,
+// because data cannot be borrowed for reading and writing at once. The safe way: fast runs
+// on a copy. Still one pass over the real list, but the copy costs O(L) memory.
+fn one_pass(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+    let mut dummy = Box::new(ListNode { val: 0, next: head });
+    let copy = dummy.clone();
+    let mut fast: &Option<Box<ListNode>> = &copy.next;
+    for _ in 0..n {
+        fast = &fast.as_ref().unwrap().next; // fast moves n + 1 steps ahead (counting the dummy)
+    }
+    let mut slow = &mut dummy;
+    while let Some(f) = fast {
+        fast = &f.next;
+        slow = slow.next.as_mut().unwrap();
+    }
+    let removed = slow.next.take().unwrap();
+    slow.next = removed.next;
+    dummy.next
 }
 ```
 
@@ -326,6 +367,41 @@ function twoPass(head, n) {
   for (let i = 0; i < len - n; i++) prev = prev.next;
   prev.next = prev.next.next;
   return dummy.next;
+}
+```
+
+```php
+// Two passes: count the length L, then walk L − n steps from the dummy to stand just before the node to delete.
+function twoPass(?ListNode $head, int $n): ?ListNode
+{
+    $len = 0;
+    for ($p = $head; $p !== null; $p = $p->next) $len++;
+    $dummy = new ListNode(0, $head);
+    $prev = $dummy;
+    for ($i = 0; $i < $len - $n; $i++) $prev = $prev->next;
+    $prev->next = $prev->next->next; // skip the nth node from the end
+    return $dummy->next;
+}
+```
+
+```rust
+// Two passes: count the length L with a read-only reference, then walk L − n steps from
+// the dummy with a writing reference (&mut). The two borrows do not overlap, so the borrow checker accepts it.
+fn two_pass(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+    let mut len = 0;
+    let mut p = &head;
+    while let Some(node) = p {
+        len += 1;
+        p = &node.next;
+    }
+    let mut dummy = Box::new(ListNode { val: 0, next: head });
+    let mut prev = &mut dummy;
+    for _ in 0..len - n {
+        prev = prev.next.as_mut().unwrap();
+    }
+    let removed = prev.next.take().unwrap();
+    prev.next = removed.next; // skip the nth node from the end
+    dummy.next
 }
 ```
 
@@ -402,16 +478,38 @@ onePass      8/8 cases correct
 wrongNoDummy 5/8 cases correct; wrong on [1] n=1 → TypeError, [1,2] n=2 → TypeError, [1,2,3] n=3 → TypeError
 ```
 
+`php -d xdebug.mode=off remove-nth.php`:
+
+```text
+twoPass      8/8 ca đúng
+onePass      8/8 ca đúng
+nodeArray    8/8 ca đúng
+wrongNoDummy 5/8 ca đúng; sai ở [1] n=1 → ErrorException, [1,2] n=2 → ErrorException, [1,2,3] n=3 → ErrorException
+wrongGap     0/8 ca đúng; sai ở [1,2,3,4,5] n=2 → [1,2,3,4], [1] n=1 → [1], [1,2] n=1 → [1,2], [1,2] n=2 → [1], [1,2,3] n=3 → [1,3], [1,2,3] n=1 → [1,2,3], [5,6,7,8] n=3 → [5,6,8], [1,2,3,4,5,6,7,8,9,10] n=5 → [1,2,3,4,5,6,8,9,10]
+```
+
+`rustc --edition 2021 -O remove_nth.rs && ./remove_nth`:
+
+```text
+two_pass       8/8 ca đúng
+one_pass       8/8 ca đúng
+value_vec      8/8 ca đúng
+wrong_no_dummy 5/8 ca đúng; sai ở [1] n=1 → panic, [1,2] n=2 → panic, [1,2,3] n=3 → panic
+wrong_gap      0/8 ca đúng; sai ở [1,2,3,4,5] n=2 → [1,2,3,4], [1] n=1 → [1], [1,2] n=1 → [1,2], [1,2] n=2 → [1], [1,2,3] n=3 → [1,3], [1,2,3] n=1 → [1,2,3], [5,6,7,8] n=3 → [5,6,8], [1,2,3,4,5,6,7,8,9,10] n=5 → [1,2,3,4,5,6,8,9,10]
+```
+
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 ## Misconceptions and common traps
 
 - **"One pass takes fewer steps than two."** The `.next` step counts are nearly equal (off by 1 at L = 10⁶). One pass only interleaves the two walks; it is faster in practice because of the cache (and the loop count in Python), not because it does less work.
 - **A gap of n instead of n + 1.** `slow` stops on the node to delete instead of the node before it; every case is off by one slot.
-- **No dummy node.** Deleting the head (n = L) turns `fast` into null; three of eight cases break in all five languages.
+- **No dummy node.** Deleting the head (n = L) turns `fast` into null; three of eight cases break in all seven languages.
 - **Returning `head` instead of `dummy.next`.** When the head was just deleted, `head` still points to the old, dropped node, so the result is wrong. Always return `dummy.next`.
-- **"You must free the deleted node."** Not in these five languages: the garbage collector handles it. Only C and C++ need it.
+- **"You must free the deleted node."** Not in these seven languages: the garbage collector handles it (Rust frees the node when the variable that owns it goes out of scope). Only C and C++ need it.
 - **Counting positions from 0 or from 1.** The problem counts from 1 ("the nth node from the end", n = 1 is the last node). One slip and you get the `wrongGap` version.
+- **PHP: reading `->next` of `null` does not stop the program.** PHP 8 only emits a Warning and returns `null`. Without catching the Warning, the version with no dummy node returns `[1]` for the case `[1] n=1` (wrong) instead of failing; the file uses `set_error_handler` so the error shows.
+- **Rust: `fast` and `slow` on the same list.** Written straight from TS, `fast` holds a read reference while `slow` needs a writing reference, and the borrow checker refuses. The two-pass version keeps the two borrows apart; the one-pass version lets `fast` run on a `clone()` of the list.
 
 ## Self-check questions
 

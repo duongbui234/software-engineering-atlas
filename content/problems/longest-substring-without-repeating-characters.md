@@ -20,7 +20,7 @@ sources:
 > - Vét cạn ở đây là O(n·k) với k là số ký tự khác nhau, nên với bảng chữ nhỏ nó chậm hơn chỉ vài lần, không phải hàng nghìn lần.
 
 > [!info] Bối cảnh
-> Bài LeetCode 3, bài neo của [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Post của ga dùng bài này để dựng khuôn cửa sổ co giãn; trang này đi sâu vào hai cách co và đo chúng. Lời giải có đủ TypeScript, Python, Go, Java và JavaScript. Bạn cần biết vòng lặp, chuỗi và Set ([[problems/contains-duplicate|Contains Duplicate]]).
+> Bài LeetCode 3, bài neo của [[posts/2026-11-23-neetcode-sliding-window|ga 5: Cửa sổ trượt]] trên **tuyến NeetCode: Mảng và chuỗi**. Post của ga dùng bài này để dựng khuôn cửa sổ co giãn; trang này đi sâu vào hai cách co và đo chúng. Lời giải có đủ TypeScript, Python, Go, Java, JavaScript, PHP và Rust. Bạn cần biết vòng lặp, chuỗi và Set ([[problems/contains-duplicate|Contains Duplicate]]).
 
 > [!abstract]- Từ điển nhanh cho bài này (bấm để mở)
 > - **Đoạn con (substring)**: các ký tự **liền nhau** trong chuỗi. `"wke"` là đoạn con của `"pwwkew"`; `"pwke"` thì không (đó là dãy con).
@@ -120,7 +120,7 @@ TypeScript, chuỗi ngẫu nhiên trên bảng chữ 26 hoặc 95 ký tự ASCII
 
 Vét cạn tăng theo k (26 → 95 thì chậm gấp đôi), hai cách cửa sổ thì không. Sổ vị trí nhanh hơn Set khoảng 3 lần: mỗi ký tự một lần tra và một lần ghi, thay vì thêm rồi xóa.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Sổ vị trí | Bẫy riêng |
 |---|---|---|
@@ -128,12 +128,14 @@ Vét cạn tăng theo k (26 → 95 thì chậm gấp đôi), hai cách cửa s�
 | Python | `dict` | `str` duyệt theo code point, nên emoji đúng |
 | Go | mảng `[128]int` | `s[i]` là **byte**; chuỗi ngoài ASCII phải duyệt `range` để lấy rune |
 | Java | mảng `int[128]` | `charAt` cũng là đơn vị UTF-16 như JS |
+| PHP | mảng `array` dùng ký tự làm khóa | `$s[$i]` là một **byte**: `"a😀😀"` dài 9 byte và ra 5 thay vì 2 |
+| Rust | `HashMap<char, usize>` | không có `s[i]` trên `&str`; phải chọn `as_bytes()` (byte) hay `chars()` (ký tự Unicode) |
 
-Đề chỉ có ASCII nên cả năm ngôn ngữ đều đúng trên LeetCode. Mảng 128 ô thay cho Map nhanh hơn, nhưng chỉ đúng khi chắc chắn đầu vào là ASCII.
+Đề chỉ có ASCII nên cả bảy ngôn ngữ đều đúng trên LeetCode. Mảng 128 ô thay cho Map nhanh hơn, nhưng chỉ đúng khi chắc chắn đầu vào là ASCII.
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.ts) · [Python](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.py) · [Go](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.go) · [Java](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.java) · [JavaScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.js)
+[TypeScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.ts) · [Python](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.py) · [Go](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.go) · [Java](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.java) · [JavaScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.js) · [PHP](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.php) · [Rust](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.rs)
 
 Mỗi file có vét cạn và hai cách cửa sổ, chạy 8 ca gồm `""`, `" "`, `"abba"` và `"tmmzuxt"`. Dưới đây là hai cách cửa sổ.
 
@@ -263,6 +265,63 @@ function windowLastSeen(s) {
 }
 ```
 
+```php
+function windowSet(string $s): int {
+    $inWindow = [];
+    $left = 0;
+    $best = 0;
+    for ($right = 0; $right < strlen($s); $right++) {
+        while (isset($inWindow[$s[$right]])) unset($inWindow[$s[$left++]]);
+        $inWindow[$s[$right]] = true;
+        $best = max($best, $right - $left + 1);
+    }
+    return $best;
+}
+
+function windowLastSeen(string $s): int {
+    $last = [];
+    $left = 0;
+    $best = 0;
+    for ($right = 0; $right < strlen($s); $right++) { // $s[$right] là một BYTE, không phải một ký tự
+        $prev = $last[$s[$right]] ?? -1;
+        if ($prev >= $left) $left = $prev + 1;
+        $last[$s[$right]] = $right;
+        $best = max($best, $right - $left + 1);
+    }
+    return $best;
+}
+```
+
+```rust
+fn window_set(s: &str) -> usize {
+    let c: Vec<char> = s.chars().collect(); // Rust không cho s[i] trên &str: chọn byte hay char
+    let mut in_window = HashSet::new();
+    let (mut left, mut best) = (0, 0);
+    for right in 0..c.len() {
+        while in_window.contains(&c[right]) {
+            in_window.remove(&c[left]);
+            left += 1;
+        }
+        in_window.insert(c[right]);
+        best = best.max(right - left + 1);
+    }
+    best
+}
+
+fn window_last_seen(s: &str) -> usize {
+    let mut last: HashMap<char, usize> = HashMap::new();
+    let (mut left, mut best) = (0, 0);
+    for (right, ch) in s.chars().enumerate() {
+        if let Some(&prev) = last.get(&ch) {
+            if prev >= left { left = prev + 1; }
+        }
+        last.insert(ch, right);
+        best = best.max(right - left + 1);
+    }
+    best
+}
+```
+
 
 ```text
 $ node longest-substring.ts
@@ -291,7 +350,7 @@ window_last_seen 8/8 ca đúng
 window_last_seen("a😀😀") = 2
 ```
 
-Go, Java và JavaScript in `8/8 ca đúng` cho cả ba cách.
+Go, Java, JavaScript, PHP và Rust in `8/8 ca đúng` cho cả ba cách. Với chuỗi emoji, PHP đếm theo byte nên ra 5; Rust duyệt `chars()` nên ra 2 như Python.
 
 ## Hiểu lầm và bẫy hay gặp
 
@@ -300,6 +359,8 @@ Go, Java và JavaScript in `8/8 ca đúng` cho cả ba cách.
 - **Đặt lại cửa sổ về rỗng khi gặp ký tự trùng.** `"dvdf"`: tới `d` thứ hai, cửa sổ đúng là `"vd"`, không phải `"d"`; đáp án là 3 (`"vdf"`).
 - **"Hai vòng lặp lồng là O(n²)."** Cách Set có `while` trong `for` nhưng là O(n); vét cạn có hai vòng nhưng thật ra O(n·k).
 - **Dùng `s[i]` với chuỗi Unicode.** JS và Java cắt emoji làm đôi, Go cắt chữ có dấu thành nhiều byte. Duyệt theo code point (`for…of` trong JS, `range` trong Go) nếu đầu vào không chỉ là ASCII.
+- **PHP: `strlen` và `$s[$i]` đếm byte.** Một emoji là 4 byte, một chữ có dấu tiếng Việt là 2–3 byte. Đề chỉ có ASCII nên không sao; với chuỗi Unicode phải tách bằng `mb_str_split($s)` trước.
+- **Rust: `s[i]` không biên dịch.** `&str` là UTF-8 nên Rust bắt mình chọn: `s.as_bytes()` nhanh và đúng cho ASCII, `s.chars()` đúng cho mọi ký tự nhưng phải gom vào `Vec<char>` nếu cần truy cập theo chỉ số.
 
 ## Câu hỏi tự kiểm tra
 

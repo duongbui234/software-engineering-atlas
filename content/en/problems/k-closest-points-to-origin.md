@@ -228,9 +228,9 @@ Other languages, same kind of data:
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-k-closest-points-to-origin/k-closest.ts) · [Python](../code/neetcode-k-closest-points-to-origin/k_closest.py) · [Go](../code/neetcode-k-closest-points-to-origin/k_closest.go) · [Java](../code/neetcode-k-closest-points-to-origin/k-closest.java) · [JavaScript](../code/neetcode-k-closest-points-to-origin/k-closest.js)
+[TypeScript](../code/neetcode-k-closest-points-to-origin/k-closest.ts) · [Python](../code/neetcode-k-closest-points-to-origin/k_closest.py) · [Go](../code/neetcode-k-closest-points-to-origin/k_closest.go) · [Java](../code/neetcode-k-closest-points-to-origin/k-closest.java) · [JavaScript](../code/neetcode-k-closest-points-to-origin/k-closest.js) · [PHP](../code/neetcode-k-closest-points-to-origin/k-closest.php) · [Rust](../code/neetcode-k-closest-points-to-origin/k_closest.rs)
 
-Each file runs 8 cases: the problem's two examples, a single point, two points at the same distance inside the answer, k = n, negative coordinates, coordinates at the 10⁴ edge, and a five-point case. Answers are compared after sorting, since the problem accepts any order.
+Each of the original five files runs 8 cases: the problem's two examples, a single point, two points at the same distance inside the answer, k = n, negative coordinates, coordinates at the 10⁴ edge, and a five-point case. Answers are compared after sorting, since the problem accepts any order.
 
 ```ts
 // Max-heap holding the k closest points seen; the top is the FARTHEST of them, replaced when a closer point comes. O(n log k).
@@ -328,6 +328,53 @@ function quickselect(points, k) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function kClosest(array $points, int $k): array
+{
+    $heap = new SplPriorityQueue();
+    $heap->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
+
+    foreach ($points as [$x, $y]) {
+        $distance = $x * $x + $y * $y;
+        if ($heap->count() < $k) {
+            $heap->insert([$x, $y], $distance);
+        } elseif ($distance < $heap->top()['priority']) {
+            $heap->extract();
+            $heap->insert([$x, $y], $distance);
+        }
+    }
+
+    $result = [];
+    while (!$heap->isEmpty()) {
+        $result[] = $heap->extract()['data'];
+    }
+    return $result;
+}
+```
+
+```rust
+use std::collections::BinaryHeap;
+
+fn k_closest(points: &[[i32; 2]], k: usize) -> Vec<[i32; 2]> {
+    let mut heap = BinaryHeap::with_capacity(k);
+    for &[x, y] in points {
+        let distance = x * x + y * y;
+        if heap.len() < k {
+            heap.push((distance, [x, y]));
+        } else {
+            let mut farthest = heap.peek_mut().unwrap();
+            if distance < farthest.0 {
+                *farthest = (distance, [x, y]);
+            }
+        }
+    }
+    heap.into_iter().map(|(_, point)| point).collect()
+}
+```
+
 
 Output of `node k-closest.ts` (the test part):
 
@@ -344,6 +391,8 @@ random (coordinates -5..5, many ties): the four approaches agree on 2000/2000 in
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 The random cases use small coordinates to get many ties at the boundary; with ties, several answers are valid, so the file compares the sorted list of distances instead of the points. `python3 k_closest.py` gives 8/8 for `sort_all`, `via_nsmallest` and `max_heap_k`, and 2/8 for `forgot_negate`; Go, Java (both the `int` and `long` versions) and JavaScript give 8/8.
+
+PHP uses squared distance as the `SplPriorityQueue` priority. Rust puts the priority first in each `BinaryHeap` tuple. PHP prints `5/5 ca đúng` and Rust prints `5/5 ca đúng`.
 
 ## Misconceptions and common traps
 

@@ -125,7 +125,7 @@ TypeScript, giá trị `2·k` ở ô có chỉ số phẳng k (nên nửa số t
 - Bậc thang đi tới m + n bước mỗi truy vấn. Với ma trận dẹt 10 × 100 000, đó là tới 100 010 bước so với khoảng 20 bước của chia đôi: chậm hơn khoảng 530 lần.
 - Hai lần chia đôi nhanh hơn chia đôi phẳng khoảng 1,5 lần dù cùng số bước. Mỗi bước của bản phẳng phải tính `Math.floor(mid / n)` và `mid % n`, còn bản hai lần chỉ đọc mảng.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Điểm giữa và phép chia | Bẫy riêng |
 |---|---|---|
@@ -133,12 +133,14 @@ TypeScript, giá trị `2·k` ở ô có chỉ số phẳng k (nên nửa số t
 | Python | `divmod(k, n)` trả cả thương và dư; int không tràn | `divmod(-7, 4)` là `(-2, 1)`: làm tròn xuống, khác Go và Java |
 | Go | `mid / n`, `mid % n` với `int` là chia lấy nguyên; `slices.BinarySearch` trả `(vị trí, có thấy)` | `-7 / 4` là `-1` (làm tròn về 0); `sort.Search` cần điều kiện đơn điệu false → true |
 | Java | `(lo + hi) >>> 1`; `Arrays.binarySearch` | `(lo + hi) / 2` tràn khi tổng vượt 2³¹ − 1: ra `-397483648`; `binarySearch` trả `-(vị trí chèn) - 1` khi không thấy |
+| PHP | `intdiv($k, $n)`, `$k % $n`; `($lo + $hi) >> 1` | `$k / $n` ra **float** khi chia không hết, và float làm chỉ số mảng bị cắt phần lẻ kèm cảnh báo deprecated (8.1+). `$matrix[-1]` không ném lỗi: ra `null` kèm warning, nên ca "target nhỏ hơn hết" phải chặn trước |
+| Rust | `mid / n`, `mid % n` trên `usize` là chia nguyên; `partition_point` + `binary_search` thay hai vòng tự viết | `rows - 1` với `rows = 0` làm chương trình panic (debug) hoặc cuộn thành số khổng lồ (`-O`). Bậc thang cần cột giảm xuống −1, nên giữ cột ở `i64` hoặc kiểm tra trước khi trừ |
 
 Tràn ở điểm giữa không xảy ra ở bài này (m·n ≤ 10⁴), nhưng là lỗi nổi tiếng: chia đôi trong thư viện chuẩn của Java từng có đúng lỗi `(low + high) / 2` này cho tới năm 2006 (xem Tham khảo).
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.ts) · [Python](../code/neetcode-search-a-2d-matrix/search_2d_matrix.py) · [Go](../code/neetcode-search-a-2d-matrix/search_2d_matrix.go) · [Java](../code/neetcode-search-a-2d-matrix/search-2d-matrix.java) · [JavaScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.js)
+[TypeScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.ts) · [Python](../code/neetcode-search-a-2d-matrix/search_2d_matrix.py) · [Go](../code/neetcode-search-a-2d-matrix/search_2d_matrix.go) · [Java](../code/neetcode-search-a-2d-matrix/search-2d-matrix.java) · [JavaScript](../code/neetcode-search-a-2d-matrix/search-2d-matrix.js) · [PHP](../code/neetcode-search-a-2d-matrix/search-2d-matrix.php) · [Rust](../code/neetcode-search-a-2d-matrix/search_2d_matrix.rs)
 
 Mỗi file có quét hết, hai lần chia đôi, chia đôi phẳng và bậc thang, chạy 10 ca (gồm phần tử đầu hàng cuối, phần tử cuối cùng, target nhỏ hơn hoặc lớn hơn mọi phần tử, ma trận một ô, một cột và vuông). Dưới đây là hai lần chia đôi và chia đôi phẳng.
 
@@ -294,6 +296,79 @@ function flatBinarySearch(matrix, target) {
 }
 ```
 
+```php
+// Cách 2, hai lần chia đôi: tìm hàng cuối cùng có phần tử đầu ≤ target, rồi chia đôi trong hàng đó.
+function twoBinarySearch(array $matrix, int $target): bool
+{
+    $lo = 0;
+    $hi = count($matrix); // nửa mở [lo, hi): đếm số hàng có phần tử đầu ≤ target
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        if ($matrix[$mid][0] <= $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    $r = $lo - 1; // hàng cuối cùng có phần tử đầu ≤ target
+    if ($r < 0) return false; // $matrix[-1] không lỗi trong PHP: ra null kèm cảnh báo
+    $row = $matrix[$r];
+    $a = 0;
+    $b = count($row);
+    while ($a < $b) {
+        $mid = ($a + $b) >> 1;
+        if ($row[$mid] < $target) $a = $mid + 1;
+        else $b = $mid;
+    }
+    return $a < count($row) && $row[$a] === $target;
+}
+
+// Cách 3, một lần chia đôi trên chỉ số phẳng k ∈ [0, m·n): hàng = ⌊k/n⌋, cột = k mod n (n là số CỘT).
+function flatBinarySearch(array $matrix, int $target): bool
+{
+    $m = count($matrix);
+    $n = count($matrix[0]);
+    $lo = 0;
+    $hi = $m * $n;
+    while ($lo < $hi) {
+        $mid = ($lo + $hi) >> 1;
+        $x = $matrix[intdiv($mid, $n)][$mid % $n]; // intdiv, không phải /: / ra float
+        if ($x === $target) return true;
+        if ($x < $target) $lo = $mid + 1;
+        else $hi = $mid;
+    }
+    return false;
+}
+```
+
+```rust
+// Cách 2, hai lần chia đôi: partition_point đếm số hàng có phần tử đầu ≤ target,
+// hàng cần tìm là hàng ngay trước đó; rồi binary_search trong hàng.
+fn two_binary_search(matrix: &[Vec<i32>], target: i32) -> bool {
+    let rows = matrix.partition_point(|row| row[0] <= target);
+    if rows == 0 {
+        return false; // target nhỏ hơn mọi phần tử; rows - 1 với usize sẽ panic
+    }
+    matrix[rows - 1].binary_search(&target).is_ok()
+}
+
+// Cách 3, một lần chia đôi trên chỉ số phẳng k ∈ [0, m·n): hàng = k / n, cột = k % n (n là số CỘT).
+fn flat_binary_search(matrix: &[Vec<i32>], target: i32) -> bool {
+    let (m, n) = (matrix.len(), matrix[0].len());
+    let (mut lo, mut hi) = (0usize, m * n);
+    while lo < hi {
+        let mid = lo + (hi - lo) / 2;
+        let x = matrix[mid / n][mid % n]; // usize chia usize là chia nguyên
+        if x == target {
+            return true;
+        }
+        if x < target {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    false
+}
+```
+
 
 File TypeScript chạy thêm hai bản sai, rồi đo:
 
@@ -328,6 +403,8 @@ Arrays.binarySearch([1, 3, 5, 7], 4) = -3
 
 `-3` nghĩa là "không có, vị trí chèn là 2" (`-(2) - 1`). Python, Go và JavaScript in `10/10 ca đúng` cho cả bốn cách, kèm dòng về phép chia của ngôn ngữ đó: Python `divmod(-7, 4) = (-2, 1)`, Go `-7 / 4 = -1, -7 % 4 = -3`, JavaScript `3000000000 >> 1 = -647483648, 3000000000 >>> 1 = 1500000000, 7 / 2 = 3.5`.
 
+PHP (`php search-2d-matrix.php`) và Rust (`rustc --edition 2021 -O search_2d_matrix.rs`) in `10/10 ca đúng` cho bốn cách đúng, `4/10` cho bản lấy nhầm hàng và `8/10` cho bản chia nhầm số hàng, cùng các ca sai như bản TypeScript.
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Ma trận cần chia đôi hai chiều."** Với điều kiện của bài 74, ma trận là một mảng tăng dần cắt khúc; chia đôi một chiều trên chỉ số phẳng là đủ.
@@ -337,6 +414,8 @@ Arrays.binarySearch([1, 3, 5, 7], 4) = -3
 - **Dùng bậc thang cho bài 74.** Đúng nhưng O(m + n); chậm hơn tới vài trăm lần ở ma trận dẹt. Để dành cho LeetCode 240.
 - **`(lo + hi) / 2` trong Java hay `>> 1` trong JS.** Không hỏng ở bài này, nhưng hỏng khi chỉ số vượt 2³⁰ (Java) hoặc 2³¹ (JS). Dùng `>>> 1` hoặc `lo + (hi − lo) / 2`.
 - **Python: dựng `[row[0] for row in matrix]` để đưa vào `bisect`.** Bước đó tốn O(m), làm hỏng O(log m) của bước tìm hàng. Từ Python 3.10, `bisect_right(matrix, target, key=lambda row: row[0])` so theo phần tử đầu mà không dựng list.
+- **PHP: `$matrix[$mid / $n]`.** Phép `/` ra float; PHP cắt phần lẻ làm chỉ số nhưng báo deprecated từ 8.1, và `$matrix[-1]` chỉ ra `null` kèm warning chứ không dừng chương trình. Dùng `intdiv` và chặn ca `r < 0`.
+- **Rust: `matrix[rows - 1]` khi `rows = 0`.** `usize` không âm được: bản debug panic, bản `-O` cuộn vòng thành chỉ số khổng lồ rồi panic vì vượt biên. Kiểm tra `rows == 0` trước, như `two_binary_search`.
 
 ## Câu hỏi tự kiểm tra
 

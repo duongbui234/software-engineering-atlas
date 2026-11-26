@@ -85,20 +85,20 @@ A problem that clearly belongs to another station may be moved by editing its ro
   - every approach from brute force to optimal, with time and space complexity;
   - a Mermaid diagram (no archify on problem pages, to keep the site under the size budget);
   - a measurement whenever two approaches have a real-world difference worth showing.
-- **Ví dụ chạy được:** the five-language tabs (below).
+- **Ví dụ chạy được:** the seven-language tabs (below).
 - **Hiểu lầm và bẫy**, including the traps specific to one language.
 - **Câu hỏi tự kiểm tra**.
 - **Tham khảo**, including the LeetCode link.
 
 The five existing pages (`problems/two-sum.md` …) are the reference.
 
-**Five languages, every problem.**
-- TypeScript, Python, Go, Java and JavaScript, as back-to-back fenced blocks in that order. No prose or callout between them; the theme turns them into tabs.
+**Seven languages, every problem.**
+- TypeScript, Python, Go, Java, JavaScript, PHP and Rust, as back-to-back fenced blocks in that order. Skip Rust only when LeetCode offers no Rust for the problem (check its language list), and say so on the page. No prose or callout between them; the theme turns them into tabs.
 - Every file runs standalone and checks its own cases:
-  - `node x.ts`, `python3 x.py`, `go run x.go`, `java x.java` (lowercase Java file names), `node x.js`;
+  - `node x.ts`, `python3 x.py`, `go run x.go`, `java x.java` (lowercase Java file names), `node x.js`, `php -d xdebug.mode=off x.php` (the local PHP loads Xdebug, which aborts recursion past 512 frames), `~/.cargo/bin/rustc --edition 2021 -O x_y.rs -o <scratchpad>/x && <scratchpad>/x` (snake_case Rust file names, std only, never build into content/);
   - each prints `<ok>/<n> ca đúng`;
   - paste the real output.
-- Re-run all five after any edit.
+- Re-run all available languages after an edit to the shared cases.
 
 Done when every catalog problem of the station has a VI and an EN page, all code runs, and the station table on the built post shows `k/k` written.
 
@@ -188,7 +188,7 @@ Every check below must pass:
    - every Mermaid block reads well: the render check proves it renders and is not shrunk, the screenshot proves the layout makes sense;
    - the code block matches the file;
    - concept notes link both ways;
-   - multi-language code shows as one tab bar (TS · Python · Go · Java · JS);
+   - multi-language code shows as one tab bar (TS · Python · Go · Java · JS · PHP · Rust);
    - NeetCode: the station table under the post lists every problem of the station as written, and each problem page's margin shows `LC-xxxx`, its difficulty and its station.
 
    Repeat the screenshots for the English edition: `/en/posts/<file>` at 1440px and 390px, plus `/en/`. Confirm:

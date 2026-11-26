@@ -107,7 +107,7 @@ TypeScript, a string of 10⁶ characters made of letters, commas and spaces, med
 
 Both are O(n) in the worst case. Two pointers win in the worst case because they build no new string, and win by far in the "fails early" case because they stop at once.
 
-### Under the hood of the five languages: what "letter or digit" means
+### Under the hood of the seven languages: what "letter or digit" means
 
 | | Built-in function | Matches the problem? |
 |---|---|---|
@@ -116,12 +116,14 @@ Both are O(n) in the worst case. Two pointers win in the worst case because they
 | Python | `str.isalnum()` | **not quite**: accepts `"é"`, `"²"`, CJK characters; add `isascii()` to restrict to ASCII |
 | Go | `unicode.IsLetter`, `IsDigit` | Unicode-aware; the problem is ASCII only, so comparing bytes directly is enough |
 | Java | `Character.isLetterOrDigit` | Unicode-aware, like Python |
+| PHP | `ctype_alnum` | yes: in the "C" locale it is ASCII only; but it takes a **string**, not a code |
+| Rust | `u8::is_ascii_alphanumeric` | yes; `char::is_alphanumeric` is Unicode-aware like Python |
 
 The problem is ASCII only, so `isalnum()` and `isLetterOrDigit` still pass on LeetCode. But copy that function somewhere that accepts Vietnamese text and "letter or digit" has quietly changed meaning.
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-valid-palindrome/valid-palindrome.ts) · [Python](../code/neetcode-valid-palindrome/valid_palindrome.py) · [Go](../code/neetcode-valid-palindrome/valid_palindrome.go) · [Java](../code/neetcode-valid-palindrome/valid-palindrome.java) · [JavaScript](../code/neetcode-valid-palindrome/valid-palindrome.js)
+[TypeScript](../code/neetcode-valid-palindrome/valid-palindrome.ts) · [Python](../code/neetcode-valid-palindrome/valid_palindrome.py) · [Go](../code/neetcode-valid-palindrome/valid_palindrome.go) · [Java](../code/neetcode-valid-palindrome/valid-palindrome.java) · [JavaScript](../code/neetcode-valid-palindrome/valid-palindrome.js) · [PHP](../code/neetcode-valid-palindrome/valid-palindrome.php) · [Rust](../code/neetcode-valid-palindrome/valid_palindrome.rs)
 
 Each file has both approaches and runs 8 cases (Python 9). Below is the two-pointer approach.
 
@@ -200,6 +202,42 @@ function twoPointers(s) {
 }
 ```
 
+```php
+function twoPointers(string $s): bool {
+    $i = 0; $j = strlen($s) - 1;
+    while ($i < $j) {
+        if (!ctype_alnum($s[$i])) { $i++; continue; } // ctype_alnum takes a STRING and follows the "C" locale: ASCII only
+        if (!ctype_alnum($s[$j])) { $j--; continue; }
+        if (strtolower($s[$i]) !== strtolower($s[$j])) return false; // different: stop right away
+        $i++; $j--;
+    }
+    return true;
+}
+```
+
+```rust
+fn two_pointers(s: &str) -> bool {
+    let b = s.as_bytes();
+    if b.is_empty() {
+        return true;
+    }
+    let (mut i, mut j) = (0usize, b.len() - 1); // b.len() - 1 on a usize underflows for an empty string, so check first
+    while i < j {
+        if !b[i].is_ascii_alphanumeric() {
+            i += 1;
+        } else if !b[j].is_ascii_alphanumeric() {
+            j -= 1;
+        } else if b[i].to_ascii_lowercase() != b[j].to_ascii_lowercase() {
+            return false; // different: stop right away
+        } else {
+            i += 1;
+            j -= 1;
+        }
+    }
+    true
+}
+```
+
 
 ```text
 $ node valid-palindrome.ts
@@ -221,7 +259,7 @@ two_pointers    9/9 cases passed
 unicode_isalnum 8/9 cases passed; wrong on ['a²']
 ```
 
-The `\w` version keeps the `_`, so `"a_"` becomes `a_`, which is not a palindrome. The Python version that uses only `isalnum()` keeps `²` (superscript two) because Unicode counts it as a digit. Go, Java and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for both approaches.
+The `\w` version keeps the `_`, so `"a_"` becomes `a_`, which is not a palindrome. The Python version that uses only `isalnum()` keeps `²` (superscript two) because Unicode counts it as a digit. Go, Java and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for both approaches. PHP and Rust also print `8/8 ca đúng` for both approaches, and the `\w`-style filter prints `7/8 ca đúng; sai ở "a_"` ("7/8 cases passed; wrong on \"a_\"") like TypeScript.
 
 ## Misconceptions and common traps
 
@@ -230,6 +268,8 @@ The `\w` version keeps the `_`, so `"a_"` becomes `a_`, which is not a palindrom
 - **Moving both pointers on a junk character.** Only the junk character on **one** side should be skipped; moving both skips a real character on the other side.
 - **Forgetting `i < j` in the skip loop.** A string of only punctuation such as `".,"` lets `i` run past `j`, or off the array if the skip loop is written separately without a bounds check.
 - **Comparing before lowercasing.** `"Aa"` is a palindrome by the problem's rules.
+- **PHP: `strrev` reverses bytes.** Right for the problem's ASCII, but a string with a UTF-8 letter such as `"é"` (two bytes) comes back as garbage bytes. Also, `ctype_alnum` takes a string; pass it an integer from `ord()` and PHP reads it as an ASCII code (behaviour deprecated since PHP 8.1).
+- **Rust: indexing a string.** `s[i]` does not compile because Rust strings are UTF-8; work on `s.as_bytes()` instead. And `b.len() - 1` on a `usize` underflows for an empty string (a panic in a debug build), so the file checks for the empty string first.
 
 ## Self-check questions
 

@@ -167,7 +167,7 @@ Python is much slower, so I only measured up to `40 × 40`: brute force 19.5 ms 
 
 Each file runs all four correct approaches and three wrong ones on 10 shared cases: one cell, one row, one column, a flat grid, a bowl (the middle cell is a pit), a low corner, the spiral grid above, equal steps, a `200 × 200` grid that rises row by row, and a flat `200 × 200` grid. Brute force skips the two `200 × 200` cases because it is too slow. Each file also compares the walking-back approaches with brute force on random grids. The excerpt below is the core of approach 2; the full file has every approach.
 
-[TypeScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.ts) · [Python](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.py) · [Go](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.go) · [Java](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.java) · [JavaScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.js)
+[TypeScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.ts) · [Python](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.py) · [Go](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.go) · [Java](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.java) · [JavaScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.js) · [PHP](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.php) · [Rust](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.rs)
 
 ```ts
 // Cách 2: đi ngược từ bờ. BFS nhiều nguồn, leo lên ô cao hơn hoặc bằng. O(mn).
@@ -399,6 +399,111 @@ function reverseBfs(heights) {
 }
 ```
 
+```php
+<?php
+// Cách 2: đi ngược từ bờ. BFS nhiều nguồn, leo lên ô cao hơn hoặc bằng. O(mn).
+function climbBfs(array $heights, array $seeds): array
+{
+    $m = count($heights);
+    $n = count($heights[0]);
+    $seen = array_fill(0, $m * $n, false);
+    $queue = [];
+    foreach ($seeds as $s) {
+        if (!$seen[$s]) { $seen[$s] = true; $queue[] = $s; }
+    }
+    for ($head = 0; $head < count($queue); $head++) {
+        $cr = intdiv($queue[$head], $n);
+        $cc = $queue[$head] % $n;
+        foreach (DIRS as [$dr, $dc]) {
+            $nr = $cr + $dr;
+            $nc = $cc + $dc;
+            if ($nr < 0 || $nr >= $m || $nc < 0 || $nc >= $n) continue;
+            if ($seen[$nr * $n + $nc] || $heights[$nr][$nc] < $heights[$cr][$cc]) continue;
+            $seen[$nr * $n + $nc] = true;
+            $queue[] = $nr * $n + $nc;
+        }
+    }
+    return $seen;
+}
+
+function borders(int $m, int $n): array
+{
+    $pacific = [];
+    $atlantic = [];
+    for ($c = 0; $c < $n; $c++) { $pacific[] = $c; $atlantic[] = ($m - 1) * $n + $c; }
+    for ($r = 0; $r < $m; $r++) { $pacific[] = $r * $n; $atlantic[] = $r * $n + $n - 1; }
+    return [$pacific, $atlantic];
+}
+
+function intersect(array $a, array $b, int $n): array
+{
+    $result = [];
+    foreach ($a as $i => $hit) {
+        if ($hit && $b[$i]) $result[] = [intdiv($i, $n), $i % $n];
+    }
+    return $result;
+}
+
+function reverseBfs(array $heights): array
+{
+    $n = count($heights[0]);
+    [$pacific, $atlantic] = borders(count($heights), $n);
+    return intersect(climbBfs($heights, $pacific), climbBfs($heights, $atlantic), $n);
+}
+```
+
+```rust
+// Hàng xóm trong lưới m×n của ô (r, c), đã lọc ô ra ngoài biên.
+fn neighbors(m: usize, n: usize, r: usize, c: usize) -> impl Iterator<Item = (usize, usize)> {
+    DIRS.iter().filter_map(move |&(dr, dc)| {
+        let (nr, nc) = (r as i32 + dr, c as i32 + dc);
+        if nr < 0 || nr >= m as i32 || nc < 0 || nc >= n as i32 {
+            None
+        } else {
+            Some((nr as usize, nc as usize))
+        }
+    })
+}
+
+// Cách 2: đi ngược từ bờ. BFS nhiều nguồn, leo lên ô cao hơn hoặc bằng. O(mn).
+fn climb_bfs(heights: &Grid, seeds: &[usize]) -> Vec<bool> {
+    let (m, n) = (heights.len(), heights[0].len());
+    let mut seen = vec![false; m * n];
+    let mut queue = Vec::new();
+    for &s in seeds {
+        if !seen[s] { seen[s] = true; queue.push(s); }
+    }
+    let mut head = 0;
+    while head < queue.len() {
+        let (cr, cc) = (queue[head] / n, queue[head] % n);
+        head += 1;
+        for (nr, nc) in neighbors(m, n, cr, cc) {
+            if seen[nr * n + nc] || heights[nr][nc] < heights[cr][cc] { continue; }
+            seen[nr * n + nc] = true;
+            queue.push(nr * n + nc);
+        }
+    }
+    seen
+}
+
+fn borders(m: usize, n: usize) -> (Vec<usize>, Vec<usize>) {
+    let (mut pacific, mut atlantic) = (Vec::new(), Vec::new());
+    for c in 0..n { pacific.push(c); atlantic.push((m - 1) * n + c); }
+    for r in 0..m { pacific.push(r * n); atlantic.push(r * n + n - 1); }
+    (pacific, atlantic)
+}
+
+fn intersect(a: &[bool], b: &[bool], n: usize) -> Vec<Cell> {
+    (0..a.len()).filter(|&i| a[i] && b[i]).map(|i| (i / n, i % n)).collect()
+}
+
+fn reverse_bfs(heights: &Grid) -> Vec<Cell> {
+    let (m, n) = (heights.len(), heights[0].len());
+    let (pacific, atlantic) = borders(m, n);
+    intersect(&climb_bfs(heights, &pacific), &climb_bfs(heights, &atlantic), n)
+}
+```
+
 Output of `node pacific-atlantic.ts` (the program prints in Vietnamese: `ca đúng` means "cases correct", `sai ở` "wrong on", `ném` "throws", `bỏ hai ca` "skips two cases", `ngẫu nhiên` "random", `vét cạn` "brute force", `đi ngược` "walking back", `mặt phẳng` "flat grid"):
 
 ```text
@@ -433,7 +538,7 @@ mặt phẳng 40×40: vét cạn 300.1 ms, đi ngược 1.02 ms
 mặt phẳng 200×200: mảng hai chiều 28.7 ms, set các tuple 54.4 ms
 ```
 
-Go (`go run pacific_atlantic.go`) is the only language where recursive DFS passes all 10, because a goroutine's stack grows on demand:
+Of the first five languages, Go (`go run pacific_atlantic.go`) is the only one where recursive DFS passes all 10, because a goroutine's stack grows on demand:
 
 ```text
 bruteForce           8/8 ca đúng (bỏ hai ca 200×200)
@@ -467,6 +572,40 @@ mặt phẳng 80×80: vét cạn 143.0 ms, đi ngược 0.29 ms
 mặt phẳng 200×200, DFS đệ quy trên luồng stack 64 MB: 40000 ô
 ```
 
+PHP (`php pacific-atlantic.php`) also passes all 10: PHP function calls live on the engine's heap, not on the thread's stack, so 40,000 levels only cost memory. On a machine with Xdebug enabled, Xdebug stops at 512 levels; the run below turns it off with `php -d xdebug.mode=off`:
+
+```text
+bruteForce           8/8 ca đúng (bỏ hai ca 200×200)
+reverseBfs           10/10 ca đúng
+reverseDfsIterative  10/10 ca đúng
+reverseDfsRecursive  10/10 ca đúng
+wrongDirection       6/10 ca đúng; sai ở cái chén, sống núi giữa, bậc bằng nhau, lưới tăng 200×200
+wrongStrict          5/10 ca đúng; sai ở mặt phẳng 3×3, cái chén, góc trũng, bậc bằng nhau, mặt phẳng 200×200
+wrongOneEdge         6/10 ca đúng; sai ở một cột, góc trũng, sống núi giữa, lưới tăng 200×200
+ngẫu nhiên: 2000/2000 lưới, ba cách đi ngược khớp vét cạn
+mặt phẳng 20×20: vét cạn 13.2 ms, đi ngược 0.17 ms
+mặt phẳng 40×40: vét cạn 222.1 ms, đi ngược 0.71 ms
+mặt phẳng 80×80: vét cạn 3648.2 ms, đi ngược 2.88 ms
+mặt phẳng 200×200: đi ngược BFS 19.2 ms
+```
+
+Rust (`rustc --edition 2021 -O pacific_atlantic.rs`) also passes all 10: the main thread has an 8 MB stack and each `visit` frame is a few dozen bytes. Brute force runs about three times faster than in Node:
+
+```text
+brute_force            8/8 ca đúng (bỏ hai ca 200×200)
+reverse_bfs            10/10 ca đúng
+reverse_dfs_iterative  10/10 ca đúng
+reverse_dfs_recursive  10/10 ca đúng
+wrong_direction        6/10 ca đúng; sai ở cái chén, sống núi giữa, bậc bằng nhau, lưới tăng 200×200
+wrong_strict           5/10 ca đúng; sai ở mặt phẳng 3×3, cái chén, góc trũng, bậc bằng nhau, mặt phẳng 200×200
+wrong_one_edge         6/10 ca đúng; sai ở một cột, góc trũng, sống núi giữa, lưới tăng 200×200
+ngẫu nhiên: 2000/2000 lưới, ba cách đi ngược khớp vét cạn
+mặt phẳng 20×20: vét cạn 0.5 ms, đi ngược 0.01 ms
+mặt phẳng 40×40: vét cạn 7.1 ms, đi ngược 0.03 ms
+mặt phẳng 80×80: vét cạn 110.0 ms, đi ngược 0.10 ms
+mặt phẳng 200×200: đi ngược BFS 0.7 ms
+```
+
 ## Misconceptions and common traps
 
 - **Walking backwards without flipping the comparison.** Going in from the coast, you must climb (`>=`). Keeping the downhill comparison (`<=`) walks downhill from the coast, which answers a different question. `wrongDirection` gets 4 of 10 cases wrong, including the bowl and the spiral grid.
@@ -474,9 +613,11 @@ mặt phẳng 200×200, DFS đệ quy trên luồng stack 64 MB: 40000 ô
 - **Seeding only one edge per ocean.** The Pacific is the top row **and** the left column; the Atlantic is the bottom row **and** the right column. `wrongOneEdge` seeds only the top and bottom rows, so it misses cells that reach the sea only through a column, such as the pit in the top-right corner of the "low corner" case. It only gets 6 of 10 right.
 - **Forgetting that two corners belong to both coasts.** The top-right corner `(0, n−1)` is in both the top row and the right column, so it is always in the answer. The bottom-left corner too. In a one-row or one-column grid, every cell is in the answer.
 - **One traversal for all four edges.** As above, you lose "which ocean". You need two mark arrays.
-- **Recursion on a large grid.** A flat `200 × 200` grid pushes recursive DFS to 40,000 levels. Python stops at about 1,000 (`RecursionError`), Java overflows the main thread's stack (`StackOverflowError`), and Node throws `RangeError`. Go survives because a goroutine's stack grows up to the 1 GB limit. BFS, or DFS with a self-managed stack, has no such limit.
+- **Recursion on a large grid.** A flat `200 × 200` grid pushes recursive DFS to 40,000 levels. Python stops at about 1,000 (`RecursionError`), Java overflows the main thread's stack (`StackOverflowError`), and Node throws `RangeError`. Go survives because a goroutine's stack grows up to the 1 GB limit. PHP survives because its calls live on the heap (unless Xdebug is on, which stops at 512 levels), and Rust survives thanks to the main thread's 8 MB stack and small frames. BFS, or DFS with a self-managed stack, has no such limit.
 - **Python: a set of tuples instead of a 2D array.** `(r, c) in seen` has to build and hash a tuple on every check. On a flat `200 × 200` grid the set version runs in 54.4 ms and the array version `[[False] * n for _ in range(m)]` in 28.7 ms. Both are correct; the array is almost twice as fast.
 - **JavaScript and TypeScript: `queue.shift()`.** Taking the front of an array with `shift()` can move every remaining element. The files here keep a `head` index and never remove anything from the array.
+- **PHP: a queue built on `array_shift`.** `array_shift` reindexes the whole array, so each removal costs O(queue length); on a `200 × 200` grid seeded with 800 border cells, BFS turns quadratic. The PHP version keeps a `$head` index and only appends at the end, like the TypeScript one.
+- **Rust: computing neighbors in `usize`.** `r - 1` with `r = 0` panics in a debug build and wraps to a huge number in an `-O` build. The `neighbors` helper in the Rust version adds the direction in `i32`, drops cells outside the grid, and only then converts back to `usize`.
 
 ## Self-check questions
 

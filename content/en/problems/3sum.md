@@ -116,7 +116,7 @@ TypeScript, n random numbers within ±10⁵, median:
 
 Hash per anchor and two pointers are both O(n²), but the hash version is about 15 times slower: each inner loop creates a new Set, hashes and writes. Two pointers only read the array sequentially.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Sorting numbers | Key for a triplet (if using a Set) |
 |---|---|---|
@@ -124,10 +124,12 @@ Hash per anchor and two pointers are both O(n²), but the hash version is about 
 | Python | `sorted(nums)` | a `tuple` (lists aren't hashable) |
 | Go | `slices.Sort` | a fixed array `[3]int` (slices can't be map keys) |
 | Java | `Arrays.sort(int[])` | `List.of(a, b, c)`: `List.equals` compares contents |
+| PHP | `sort($a)` sorts in place, returns a `bool` | the string `"a,b,c"` as an array key |
+| Rust | `a.sort_unstable()` | a fixed array `[i32; 3]` (hashable, compared by contents) |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-3sum/three-sum.ts) · [Python](../code/neetcode-3sum/three_sum.py) · [Go](../code/neetcode-3sum/three_sum.go) · [Java](../code/neetcode-3sum/three-sum.java) · [JavaScript](../code/neetcode-3sum/three-sum.js)
+[TypeScript](../code/neetcode-3sum/three-sum.ts) · [Python](../code/neetcode-3sum/three_sum.py) · [Go](../code/neetcode-3sum/three_sum.go) · [Java](../code/neetcode-3sum/three-sum.java) · [JavaScript](../code/neetcode-3sum/three-sum.js) · [PHP](../code/neetcode-3sum/three-sum.php) · [Rust](../code/neetcode-3sum/three_sum.rs)
 
 Each file has all three approaches and runs 7 cases, including `[0, 0, 0, 0]` and an array full of duplicates. Below is sort + two pointers.
 
@@ -254,6 +256,65 @@ function sortTwoPointers(nums) {
 }
 ```
 
+```php
+// Sort + two pointers: fix a = nums[i], find b + c = −a in the part to the right.
+// sort() sorts in place and returns a bool, so do NOT write $a = sort($nums).
+function sortTwoPointers(array $nums): array {
+    $a = $nums; sort($a); $out = []; $n = count($a);
+    for ($i = 0; $i < $n - 2; $i++) {
+        if ($a[$i] > 0) break; // smallest number already positive: three of them cannot sum to 0
+        if ($i > 0 && $a[$i] === $a[$i - 1]) continue; // same anchor value: every triplet was already found
+        $lo = $i + 1; $hi = $n - 1;
+        while ($lo < $hi) {
+            $s = $a[$i] + $a[$lo] + $a[$hi];
+            if ($s < 0) $lo++;
+            elseif ($s > 0) $hi--;
+            else {
+                $out[] = [$a[$i], $a[$lo], $a[$hi]];
+                $lo++; $hi--;
+                while ($lo < $hi && $a[$lo] === $a[$lo - 1]) $lo++; // jump past duplicate b
+            }
+        }
+    }
+    return $out;
+}
+```
+
+```rust
+// Sort + two pointers: fix a = nums[i], find b + c = −a in the part to the right.
+fn sort_two_pointers(nums: &[i32]) -> Vec<Vec<i32>> {
+    let mut a = nums.to_vec();
+    a.sort_unstable();
+    let mut out = vec![];
+    // a.len() - 2 on a usize underflows with fewer than 2 elements; saturating_sub keeps it at 0.
+    for i in 0..a.len().saturating_sub(2) {
+        if a[i] > 0 {
+            break; // smallest number already positive: three of them cannot sum to 0
+        }
+        if i > 0 && a[i] == a[i - 1] {
+            continue; // same anchor value: every triplet was already found
+        }
+        let (mut lo, mut hi) = (i + 1, a.len() - 1);
+        while lo < hi {
+            let s = a[i] + a[lo] + a[hi];
+            if s < 0 {
+                lo += 1;
+            } else if s > 0 {
+                hi -= 1;
+            } else {
+                out.push(vec![a[i], a[lo], a[hi]]);
+                lo += 1;
+                hi -= 1;
+                while lo < hi && a[lo] == a[lo - 1] {
+                    lo += 1; // jump past duplicate b
+                }
+            }
+        }
+    }
+    out
+}
+```
+
 
 The TypeScript file also runs two wrong versions, then measures:
 
@@ -277,7 +338,7 @@ n        brute   hash per anchor  sort + two pointers   (ms, median)
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
-The version without duplicate skipping fails on the problem's very first example (both `-1`s act as anchors). The version without a comparator passes 5/7: it only breaks when string order and numeric order differ enough to send the pointers the wrong way. Python, Go, Java and JavaScript print `7/7 ca đúng` ("7/7 cases passed") for all three approaches.
+The version without duplicate skipping fails on the problem's very first example (both `-1`s act as anchors). The version without a comparator passes 5/7: it only breaks when string order and numeric order differ enough to send the pointers the wrong way. Python, Go, Java and JavaScript print `7/7 ca đúng` ("7/7 cases passed") for all three approaches. PHP and Rust also print `7/7 ca đúng` for the three approaches and `4/7` for the version without duplicate skipping; the PHP version that sorts as strings (`SORT_STRING`) prints `5/7` with the same two failing cases as the JS version without a comparator.
 
 ## Misconceptions and common traps
 
@@ -286,6 +347,8 @@ The version without duplicate skipping fails on the problem's very first example
 - **Adding a Set "to be safe" on top of two pointers.** Correct but redundant, and it hides duplicate-skipping bugs.
 - **JS: `sort()` without a comparator.** `[-1, -4, 2, 10]` becomes `[-1, -4, 10, 2]`. Two pointers on an array that isn't truly ascending lose their pruning argument.
 - **Returning indices instead of values.** 3Sum returns values; Two Sum returns indices.
+- **PHP: writing `$a = sort($nums)`.** `sort` sorts in place and returns `true`, so `$a` becomes `true`, not the sorted array. Copy first (`$a = $nums; sort($a);`). And `sort($a, SORT_STRING)` reproduces the JS bug exactly: `5/7` cases.
+- **Rust: `a.len() - 2` on a `usize`.** With fewer than 2 elements the subtraction underflows: a panic in a debug build, a huge number with `-O`. The file uses `saturating_sub(2)`. The problem promises n ≥ 3, but a function reused elsewhere gets no such promise.
 
 ## Self-check questions
 

@@ -194,9 +194,9 @@ Số đo thời gian đổi theo máy và theo lần chạy; cột số cách th
 
 ## Ví dụ chạy được
 
-Mỗi file chạy cùng 8 ca: ví dụ trong trang, một từ duy nhất, ca phần đầu `abc, ab`, một vòng `a, b, a`, hai từ giống nhau, ca phần đầu hợp lệ `ab, abc`, cạnh trùng `ac, ab, zc, zb`, và `ab, ba` (chỉ chữ khác đầu tiên mới tính). Mỗi ca chạy cả bốn cách và kiểm tra bằng tính chất ở trên. File còn chạy bốn bản sai, đối chiếu với vét cạn trên 2 000 danh sách ngẫu nhiên, và đo như bảng trên. Bên dưới là Bước 1 và Cách 2; vét cạn, DFS, bản min-heap và các bản sai nằm trong file đầy đủ.
+Mỗi file trong năm bản đầu chạy cùng 8 ca: ví dụ trong trang, một từ duy nhất, ca phần đầu `abc, ab`, một vòng `a, b, a`, hai từ giống nhau, ca phần đầu hợp lệ `ab, abc`, cạnh trùng `ac, ab, zc, zb`, và `ab, ba` (chỉ chữ khác đầu tiên mới tính). Mỗi ca chạy cả bốn cách và kiểm tra bằng tính chất ở trên. File còn chạy bốn bản sai, đối chiếu với vét cạn trên 2 000 danh sách ngẫu nhiên, và đo như bảng trên. Bên dưới là Bước 1 và Cách 2; vét cạn, DFS, bản min-heap và các bản sai nằm trong file đầy đủ.
 
-[TypeScript](../code/neetcode-alien-dictionary/alien-dictionary.ts) · [Python](../code/neetcode-alien-dictionary/alien_dictionary.py) · [Go](../code/neetcode-alien-dictionary/alien_dictionary.go) · [Java](../code/neetcode-alien-dictionary/alien-dictionary.java) · [JavaScript](../code/neetcode-alien-dictionary/alien-dictionary.js)
+[TypeScript](../code/neetcode-alien-dictionary/alien-dictionary.ts) · [Python](../code/neetcode-alien-dictionary/alien_dictionary.py) · [Go](../code/neetcode-alien-dictionary/alien_dictionary.go) · [Java](../code/neetcode-alien-dictionary/alien-dictionary.java) · [JavaScript](../code/neetcode-alien-dictionary/alien-dictionary.js) · [PHP](../code/neetcode-alien-dictionary/alien-dictionary.php) · [Rust](../code/neetcode-alien-dictionary/alien_dictionary.rs)
 
 ```ts
 // Bước chung: so từng cặp từ KỀ NHAU, lấy chữ khác ĐẦU TIÊN làm một cạnh u → v.
@@ -486,6 +486,88 @@ function alienOrderKahn(words) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function alienOrder(array $words): string {
+    $edges = $indegree = [];
+    foreach ($words as $word) {
+        foreach (str_split($word) as $letter) {
+            $indegree[$letter] = 0;
+        }
+    }
+    for ($i = 1; $i < count($words); $i++) {
+        [$a, $b] = [$words[$i - 1], $words[$i]];
+        $limit = min(strlen($a), strlen($b));
+        $j = 0;
+        while ($j < $limit && $a[$j] === $b[$j]) {
+            $j++;
+        }
+        if ($j === $limit) {
+            if (strlen($a) > strlen($b)) return '';
+        } elseif (!isset($edges[$a[$j]][$b[$j]])) {
+            $edges[$a[$j]][$b[$j]] = true;
+            $indegree[$b[$j]]++;
+        }
+    }
+    $queue = array_keys(array_filter($indegree, fn(int $n): bool => $n === 0));
+    for ($head = 0; $head < count($queue); $head++) {
+        foreach ($edges[$queue[$head]] ?? [] as $next => $_) {
+            if (--$indegree[$next] === 0) $queue[] = $next;
+        }
+    }
+    return count($queue) === count($indegree) ? implode($queue) : '';
+}
+```
+
+```rust
+fn alien_order(words: &[&str]) -> String {
+    let index = |b: u8| usize::from(b - b'a');
+    let (mut present, mut indegree, mut edges) = ([false; 26], [0; 26], [[false; 26]; 26]);
+    for word in words {
+        for b in word.bytes() {
+            present[index(b)] = true;
+        }
+    }
+    for pair in words.windows(2) {
+        let (a, b) = (pair[0], pair[1]);
+        if let Some((u, v)) = a.bytes().zip(b.bytes()).find(|(u, v)| u != v) {
+            let (u, v) = (index(u), index(v));
+            if !edges[u][v] {
+                edges[u][v] = true;
+                indegree[v] += 1;
+            }
+        } else if a.len() > b.len() {
+            return String::new();
+        }
+    }
+    let mut queue: Vec<_> = (0..26)
+        .filter(|&i| present[i] && indegree[i] == 0)
+        .collect();
+    let mut head = 0;
+    while head < queue.len() {
+        let u = queue[head];
+        head += 1;
+        for (v, degree) in indegree.iter_mut().enumerate() {
+            if edges[u][v] {
+                *degree -= 1;
+                if *degree == 0 {
+                    queue.push(v);
+                }
+            }
+        }
+    }
+    if queue.len() != present.iter().filter(|&&found| found).count() {
+        return String::new();
+    }
+    queue
+        .into_iter()
+        .map(|i| char::from(b'a' + i as u8))
+        .collect()
+}
+```
+
 Kết quả chạy `node alien-dictionary.ts` (bốn ngôn ngữ còn lại in giống hệt, trừ số đo thời gian):
 
 ```text
@@ -507,6 +589,8 @@ bản sai dupIndeg: đúng 7/8 ca
 đo 8 chữ, 100 từ: vét cạn ra hgfedcba sau 40320 hoán vị, 4.8 ms; Kahn ra hgfedcba, 8.0 µs
 đo 9 chữ, 100 từ: vét cạn ra ihgfedcba sau 362880 hoán vị, 42.9 ms; Kahn ra ihgfedcba, 7.6 µs
 ```
+
+Hai bản bổ sung dùng Kahn. Chúng đếm bậc vào đúng một lần cho mỗi cạnh và giữ cả chữ xuất hiện mà không có cạnh. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

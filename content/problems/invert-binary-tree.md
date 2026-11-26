@@ -207,7 +207,7 @@ const node = stack.pop()
 
 Quy tắc tự chèn dấu chấm phẩy (ASI) của JavaScript chỉ chèn khi dòng sau không thể nối tiếp dòng trên. Dòng bắt đầu bằng `[` thì nối được: máy đọc thành `const node = stack.pop()[node.left, node.right] = [...]`, dùng `node` ngay trong câu khai báo nó, nên ném `ReferenceError: Cannot access 'node' before initialization`. Đúng 1/8 ca, chỉ cây rỗng (vòng lặp không chạy lần nào). Phong cách không chấm phẩy luôn đặt `;` ở đầu những dòng bắt đầu bằng `[` hoặc `(`.
 
-### Bên dưới năm ngôn ngữ
+### Bên dưới bảy ngôn ngữ
 
 | | Đổi hai con | Bẫy riêng |
 |---|---|---|
@@ -215,6 +215,8 @@ Quy tắc tự chèn dấu chấm phẩy (ASI) của JavaScript chỉ chèn khi 
 | Python | `a.left, a.right = a.right, a.left` | `list.pop(0)` là O(n), dùng `collections.deque`; đệ quy quá 1 000 tầng là `RecursionError` |
 | Go | `a.Left, a.Right = a.Right, a.Left` | không có `null`, kiểm `root == nil` trước khi đọc `root.Left` |
 | Java | biến tạm | không có gán bộ; `ArrayDeque` không nhận `null` (xem [[problems/maximum-depth-of-binary-tree\|bài 104]]) |
+| PHP | `[$a->left, $a->right] = [$a->right, $a->left]` | object truyền theo handle nên đổi tại chỗ là đổi trên cây gốc; máy có Xdebug chặn đệ quy ở 512 tầng (`-d xdebug.mode=off`) |
+| Rust | `std::mem::swap(&mut b.left, &mut b.right)` | phải mượn `borrow_mut()` trên `RefCell`; mượn hai lần cùng lúc làm chương trình panic lúc chạy, không phải lúc biên dịch |
 
 ### Đo
 
@@ -244,7 +246,7 @@ Chuỗi lệch trái 10⁵ nút:
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-invert-binary-tree/invert-tree.ts) · [Python](../code/neetcode-invert-binary-tree/invert_tree.py) · [Go](../code/neetcode-invert-binary-tree/invert_tree.go) · [Java](../code/neetcode-invert-binary-tree/invert-tree.java) · [JavaScript](../code/neetcode-invert-binary-tree/invert-tree.js)
+[TypeScript](../code/neetcode-invert-binary-tree/invert-tree.ts) · [Python](../code/neetcode-invert-binary-tree/invert_tree.py) · [Go](../code/neetcode-invert-binary-tree/invert_tree.go) · [Java](../code/neetcode-invert-binary-tree/invert-tree.java) · [JavaScript](../code/neetcode-invert-binary-tree/invert-tree.js) · [PHP](../code/neetcode-invert-binary-tree/invert-tree.php) · [Rust](../code/neetcode-invert-binary-tree/invert_tree.rs)
 
 Mỗi file dựng cây từ mảng theo tầng, chạy 8 ca chung (cây rỗng, một nút, chỉ có con trái, ba nút, cây đủ 3 tầng, chuỗi trái, cây lệch hai bên, giá trị âm và 0), rồi đối chiếu 2 000 cây ngẫu nhiên (mulberry32, tới 40 nút) với một "gương" độc lập: viết cây gốc theo thứ tự phải, gốc, trái phải ra đúng chuỗi của cây đã đảo viết theo thứ tự trái, gốc, phải.
 
@@ -297,6 +299,29 @@ function invertRecursive(root) {
   if (root === null) return null;
   [root.left, root.right] = [invertRecursive(root.right), invertRecursive(root.left)];
   return root;
+}
+```
+
+```php
+// Cách 1: đệ quy. Gán phá cấu trúc: PHP dựng xong mảng vế phải rồi mới gán.
+function invertRecursive(?TreeNode $root): ?TreeNode
+{
+    if ($root === null) return null;
+    [$root->left, $root->right] = [invertRecursive($root->right), invertRecursive($root->left)];
+    return $root;
+}
+```
+
+```rust
+// Cách 1: đệ quy. take() lấy hai con ra khỏi nút (để lại None), đảo từng con, rồi gắn chéo.
+fn invert_recursive(root: Node) -> Node {
+    if let Some(n) = &root {
+        let mut b = n.borrow_mut();
+        let (l, r) = (b.left.take(), b.right.take());
+        b.left = invert_recursive(r);
+        b.right = invert_recursive(l);
+    }
+    root
 }
 ```
 
@@ -383,6 +408,36 @@ function invertStack(root) {
     if (node.right !== null) stack.push(node.right);
   }
   return root;
+}
+```
+
+```php
+// Cách 2: ngăn xếp tự quản; thứ tự thăm không quan trọng.
+function invertStack(?TreeNode $root): ?TreeNode
+{
+    $stack = $root === null ? [] : [$root];
+    while ($stack) {
+        $node = array_pop($stack);
+        [$node->left, $node->right] = [$node->right, $node->left];
+        if ($node->left !== null) $stack[] = $node->left;
+        if ($node->right !== null) $stack[] = $node->right;
+    }
+    return $root;
+}
+```
+
+```rust
+// Cách 2: ngăn xếp tự quản; std::mem::swap đổi hai con tại chỗ.
+fn invert_stack(root: Node) -> Node {
+    let mut stack: Vec<Rc<RefCell<TreeNode>>> = root.iter().cloned().collect();
+    while let Some(n) = stack.pop() {
+        let mut b = n.borrow_mut();
+        let b = &mut *b;
+        std::mem::swap(&mut b.left, &mut b.right);
+        stack.extend(b.left.iter().cloned());
+        stack.extend(b.right.iter().cloned());
+    }
+    root
 }
 ```
 
@@ -486,6 +541,30 @@ wrongNoSemicolon 1/8 ca đúng; sai ở một nút → ném ReferenceError, ch�
 wrongNoSemicolon([1]): ReferenceError: Cannot access 'node' before initialization
 ```
 
+`php -d xdebug.mode=off invert-tree.php`:
+
+```text
+invertRecursive  8/8 ca đúng
+invertStack      8/8 ca đúng
+invertBfs        8/8 ca đúng
+wrongOverwrite   2/8 ca đúng; sai ở chỉ có con trái → [1], ba nút → [2,3,3], cây đủ 3 tầng → [5,8,8,9,9,9,9], chuỗi trái thành chuỗi phải → [1], lệch hai bên → [1,3,3,5,5,5,5], giá trị âm và 0 → [0]
+
+ngẫu nhiên: invertRecursive 2000/2000, invertStack 2000/2000, invertBfs 2000/2000
+```
+
+`rustc --edition 2021 -O invert_tree.rs && ./invert_tree`:
+
+```text
+invert_recursive 8/8 ca đúng
+invert_stack     8/8 ca đúng
+invert_bfs       8/8 ca đúng
+wrong_overwrite  2/8 ca đúng; sai ở chỉ có con trái → [1], ba nút → [2,3,3], cây đủ 3 tầng → [5,8,8,9,9,9,9], chuỗi trái thành chuỗi phải → [1], lệch hai bên → [1,3,3,5,5,5,5], giá trị âm và 0 → [0]
+
+ngẫu nhiên: invert_recursive 2000/2000, invert_stack 2000/2000, invert_bfs 2000/2000
+```
+
+PHP và Rust không đo thời gian; hai file chỉ kiểm đúng sai và đối chiếu ngẫu nhiên (bộ sinh số riêng của từng ngôn ngữ, nên cây ngẫu nhiên khác với bốn file kia).
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **"Phải đổi nút trái xa nhất với nút phải xa nhất."** Không cần nhìn xa: đổi hai con ở mọi nút là đủ, vị trí xa tự đúng vì nút đó được đổi ở mỗi tầng nó đi qua.
@@ -494,6 +573,8 @@ wrongNoSemicolon([1]): ReferenceError: Cannot access 'node' before initializatio
 - **"Phải tạo cây mới."** Đề cho sửa tại chỗ và trả lại chính gốc đó. Tạo cây mới cũng đúng nhưng tốn n nút.
 - **Bỏ chấm phẩy trong JavaScript.** Dòng bắt đầu bằng `[` bị nối vào dòng trên.
 - **"Đệ quy trên cây luôn an toàn vì cây chỉ sâu log n."** Chỉ đúng với cây cân đối. Đề không hứa cây cân đối; một chuỗi lệch sâu bằng số nút.
+- **PHP: tưởng `$node` là bản sao.** Object trong PHP đi theo handle: `$node = array_pop($stack)` vẫn trỏ vào nút thật, nên đổi con trên `$node` là đổi trên cây. Chỉ mảng mới được chép khi gán (copy-on-write).
+- **Rust: giữ một `borrow()` rồi gọi `borrow_mut()` trên cùng nút.** Trình biên dịch không bắt được; `RefCell` panic `already borrowed` lúc chạy. Lấy hai con ra bằng `take()` (hoặc `mem::swap`) trong một lần mượn `borrow_mut()` duy nhất.
 
 ## Câu hỏi tự kiểm tra
 

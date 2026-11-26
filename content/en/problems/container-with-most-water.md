@@ -119,9 +119,9 @@ Brute force quadruples when n doubles; at n = 10⁵ it would need about 5·10⁹
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-container-with-most-water/container-most-water.ts) · [Python](../code/neetcode-container-with-most-water/container_most_water.py) · [Go](../code/neetcode-container-with-most-water/container_most_water.go) · [Java](../code/neetcode-container-with-most-water/container-most-water.java) · [JavaScript](../code/neetcode-container-with-most-water/container-most-water.js)
+[TypeScript](../code/neetcode-container-with-most-water/container-most-water.ts) · [Python](../code/neetcode-container-with-most-water/container_most_water.py) · [Go](../code/neetcode-container-with-most-water/container_most_water.go) · [Java](../code/neetcode-container-with-most-water/container-most-water.java) · [JavaScript](../code/neetcode-container-with-most-water/container-most-water.js) · [PHP](../code/neetcode-container-with-most-water/container-most-water.php) · [Rust](../code/neetcode-container-with-most-water/container_most_water.rs)
 
-Each file has brute force and two pointers and runs 7 cases. Below is two pointers.
+Each of the original five files has brute force and two pointers and runs 7 cases. Below is two pointers.
 
 ```ts
 // Two pointers: always move the SHORTER wall inward.
@@ -186,6 +186,42 @@ function twoPointers(h) {
 }
 ```
 
+```php
+<?php
+declare(strict_types=1);
+
+function maxArea(array $height): int {
+    $left = 0;
+    $right = count($height) - 1;
+    $best = 0;
+    while ($left < $right) {
+        $best = max($best, ($right - $left) * min($height[$left], $height[$right]));
+        if ($height[$left] < $height[$right]) {
+            $left++;
+        } else {
+            $right--;
+        }
+    }
+    return $best;
+}
+```
+
+```rust
+fn max_area(height: &[i32]) -> i32 {
+    let (mut left, mut right) = (0, height.len().saturating_sub(1));
+    let mut best = 0;
+    while left < right {
+        best = best.max((right - left) as i32 * height[left].min(height[right]));
+        if height[left] < height[right] {
+            left += 1;
+        } else {
+            right -= 1;
+        }
+    }
+    best
+}
+```
+
 
 The TypeScript file also runs the move-the-taller-wall version, then measures:
 
@@ -206,6 +242,8 @@ n          brute   two pointers   (ms, median; random heights 0..10⁴)
 *(Output labels translated; the files themselves print Vietnamese.)*
 
 On the first example, the move-the-taller-wall version keeps wall 0 (height 1) to the end and only ever sees containers of height 1: it gets 8. Python, Go, Java and JavaScript print `7/7 ca đúng` ("7/7 cases passed") for both approaches.
+
+PHP and Rust use two pointers. Rust uses `saturating_sub(1)` so the loop condition also works for an empty slice. PHP `4/4 ca đúng` · Rust `4/4 ca đúng`.
 
 ## Misconceptions and common traps
 

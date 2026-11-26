@@ -166,7 +166,7 @@ Python chậm hơn nhiều nên mình chỉ đo tới `40 × 40`: vét cạn 19,
 
 Mỗi file chạy cả bốn cách đúng và ba cách sai trên 10 ca chung: một ô, một hàng, một cột, mặt phẳng, cái chén (ô giữa trũng), góc trũng, lưới xoắn ốc ở trên, bậc bằng nhau, lưới tăng dần `200 × 200` và mặt phẳng `200 × 200`. Vét cạn bỏ hai ca `200 × 200` vì quá chậm. Mỗi file còn so ba cách đi ngược với vét cạn trên lưới ngẫu nhiên. Đoạn dưới là phần lõi của cách 2; file đầy đủ có mọi cách.
 
-[TypeScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.ts) · [Python](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.py) · [Go](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.go) · [Java](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.java) · [JavaScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.js)
+[TypeScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.ts) · [Python](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.py) · [Go](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.go) · [Java](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.java) · [JavaScript](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.js) · [PHP](../code/neetcode-pacific-atlantic-water-flow/pacific-atlantic.php) · [Rust](../code/neetcode-pacific-atlantic-water-flow/pacific_atlantic.rs)
 
 ```ts
 // Cách 2: đi ngược từ bờ. BFS nhiều nguồn, leo lên ô cao hơn hoặc bằng. O(mn).
@@ -398,6 +398,111 @@ function reverseBfs(heights) {
 }
 ```
 
+```php
+<?php
+// Cách 2: đi ngược từ bờ. BFS nhiều nguồn, leo lên ô cao hơn hoặc bằng. O(mn).
+function climbBfs(array $heights, array $seeds): array
+{
+    $m = count($heights);
+    $n = count($heights[0]);
+    $seen = array_fill(0, $m * $n, false);
+    $queue = [];
+    foreach ($seeds as $s) {
+        if (!$seen[$s]) { $seen[$s] = true; $queue[] = $s; }
+    }
+    for ($head = 0; $head < count($queue); $head++) {
+        $cr = intdiv($queue[$head], $n);
+        $cc = $queue[$head] % $n;
+        foreach (DIRS as [$dr, $dc]) {
+            $nr = $cr + $dr;
+            $nc = $cc + $dc;
+            if ($nr < 0 || $nr >= $m || $nc < 0 || $nc >= $n) continue;
+            if ($seen[$nr * $n + $nc] || $heights[$nr][$nc] < $heights[$cr][$cc]) continue;
+            $seen[$nr * $n + $nc] = true;
+            $queue[] = $nr * $n + $nc;
+        }
+    }
+    return $seen;
+}
+
+function borders(int $m, int $n): array
+{
+    $pacific = [];
+    $atlantic = [];
+    for ($c = 0; $c < $n; $c++) { $pacific[] = $c; $atlantic[] = ($m - 1) * $n + $c; }
+    for ($r = 0; $r < $m; $r++) { $pacific[] = $r * $n; $atlantic[] = $r * $n + $n - 1; }
+    return [$pacific, $atlantic];
+}
+
+function intersect(array $a, array $b, int $n): array
+{
+    $result = [];
+    foreach ($a as $i => $hit) {
+        if ($hit && $b[$i]) $result[] = [intdiv($i, $n), $i % $n];
+    }
+    return $result;
+}
+
+function reverseBfs(array $heights): array
+{
+    $n = count($heights[0]);
+    [$pacific, $atlantic] = borders(count($heights), $n);
+    return intersect(climbBfs($heights, $pacific), climbBfs($heights, $atlantic), $n);
+}
+```
+
+```rust
+// Hàng xóm trong lưới m×n của ô (r, c), đã lọc ô ra ngoài biên.
+fn neighbors(m: usize, n: usize, r: usize, c: usize) -> impl Iterator<Item = (usize, usize)> {
+    DIRS.iter().filter_map(move |&(dr, dc)| {
+        let (nr, nc) = (r as i32 + dr, c as i32 + dc);
+        if nr < 0 || nr >= m as i32 || nc < 0 || nc >= n as i32 {
+            None
+        } else {
+            Some((nr as usize, nc as usize))
+        }
+    })
+}
+
+// Cách 2: đi ngược từ bờ. BFS nhiều nguồn, leo lên ô cao hơn hoặc bằng. O(mn).
+fn climb_bfs(heights: &Grid, seeds: &[usize]) -> Vec<bool> {
+    let (m, n) = (heights.len(), heights[0].len());
+    let mut seen = vec![false; m * n];
+    let mut queue = Vec::new();
+    for &s in seeds {
+        if !seen[s] { seen[s] = true; queue.push(s); }
+    }
+    let mut head = 0;
+    while head < queue.len() {
+        let (cr, cc) = (queue[head] / n, queue[head] % n);
+        head += 1;
+        for (nr, nc) in neighbors(m, n, cr, cc) {
+            if seen[nr * n + nc] || heights[nr][nc] < heights[cr][cc] { continue; }
+            seen[nr * n + nc] = true;
+            queue.push(nr * n + nc);
+        }
+    }
+    seen
+}
+
+fn borders(m: usize, n: usize) -> (Vec<usize>, Vec<usize>) {
+    let (mut pacific, mut atlantic) = (Vec::new(), Vec::new());
+    for c in 0..n { pacific.push(c); atlantic.push((m - 1) * n + c); }
+    for r in 0..m { pacific.push(r * n); atlantic.push(r * n + n - 1); }
+    (pacific, atlantic)
+}
+
+fn intersect(a: &[bool], b: &[bool], n: usize) -> Vec<Cell> {
+    (0..a.len()).filter(|&i| a[i] && b[i]).map(|i| (i / n, i % n)).collect()
+}
+
+fn reverse_bfs(heights: &Grid) -> Vec<Cell> {
+    let (m, n) = (heights.len(), heights[0].len());
+    let (pacific, atlantic) = borders(m, n);
+    intersect(&climb_bfs(heights, &pacific), &climb_bfs(heights, &atlantic), n)
+}
+```
+
 Kết quả chạy `node pacific-atlantic.ts`:
 
 ```text
@@ -432,7 +537,7 @@ mặt phẳng 40×40: vét cạn 300.1 ms, đi ngược 1.02 ms
 mặt phẳng 200×200: mảng hai chiều 28.7 ms, set các tuple 54.4 ms
 ```
 
-Go (`go run pacific_atlantic.go`) là ngôn ngữ duy nhất mà DFS đệ quy qua đủ 10/10, vì stack của goroutine tự nới rộng:
+Trong năm ngôn ngữ đầu, Go (`go run pacific_atlantic.go`) là ngôn ngữ duy nhất mà DFS đệ quy qua đủ 10/10, vì stack của goroutine tự nới rộng:
 
 ```text
 bruteForce           8/8 ca đúng (bỏ hai ca 200×200)
@@ -466,6 +571,40 @@ mặt phẳng 80×80: vét cạn 143.0 ms, đi ngược 0.29 ms
 mặt phẳng 200×200, DFS đệ quy trên luồng stack 64 MB: 40000 ô
 ```
 
+PHP (`php pacific-atlantic.php`) cũng qua đủ 10/10: lời gọi hàm PHP nằm trên vùng nhớ heap của máy ảo, không phải stack của luồng, nên 40 000 tầng chỉ tốn bộ nhớ. Máy nào bật Xdebug thì Xdebug tự chặn ở 512 tầng; lần chạy dưới tắt nó bằng `php -d xdebug.mode=off`:
+
+```text
+bruteForce           8/8 ca đúng (bỏ hai ca 200×200)
+reverseBfs           10/10 ca đúng
+reverseDfsIterative  10/10 ca đúng
+reverseDfsRecursive  10/10 ca đúng
+wrongDirection       6/10 ca đúng; sai ở cái chén, sống núi giữa, bậc bằng nhau, lưới tăng 200×200
+wrongStrict          5/10 ca đúng; sai ở mặt phẳng 3×3, cái chén, góc trũng, bậc bằng nhau, mặt phẳng 200×200
+wrongOneEdge         6/10 ca đúng; sai ở một cột, góc trũng, sống núi giữa, lưới tăng 200×200
+ngẫu nhiên: 2000/2000 lưới, ba cách đi ngược khớp vét cạn
+mặt phẳng 20×20: vét cạn 13.2 ms, đi ngược 0.17 ms
+mặt phẳng 40×40: vét cạn 222.1 ms, đi ngược 0.71 ms
+mặt phẳng 80×80: vét cạn 3648.2 ms, đi ngược 2.88 ms
+mặt phẳng 200×200: đi ngược BFS 19.2 ms
+```
+
+Rust (`rustc --edition 2021 -O pacific_atlantic.rs`) cũng qua 10/10: luồng chính có stack 8 MB, mỗi khung `visit` chỉ vài chục byte. Vét cạn chạy nhanh hơn Node khoảng ba lần:
+
+```text
+brute_force            8/8 ca đúng (bỏ hai ca 200×200)
+reverse_bfs            10/10 ca đúng
+reverse_dfs_iterative  10/10 ca đúng
+reverse_dfs_recursive  10/10 ca đúng
+wrong_direction        6/10 ca đúng; sai ở cái chén, sống núi giữa, bậc bằng nhau, lưới tăng 200×200
+wrong_strict           5/10 ca đúng; sai ở mặt phẳng 3×3, cái chén, góc trũng, bậc bằng nhau, mặt phẳng 200×200
+wrong_one_edge         6/10 ca đúng; sai ở một cột, góc trũng, sống núi giữa, lưới tăng 200×200
+ngẫu nhiên: 2000/2000 lưới, ba cách đi ngược khớp vét cạn
+mặt phẳng 20×20: vét cạn 0.5 ms, đi ngược 0.01 ms
+mặt phẳng 40×40: vét cạn 7.1 ms, đi ngược 0.03 ms
+mặt phẳng 80×80: vét cạn 110.0 ms, đi ngược 0.10 ms
+mặt phẳng 200×200: đi ngược BFS 0.7 ms
+```
+
 ## Hiểu lầm và bẫy hay gặp
 
 - **Đi ngược mà quên đổi chiều phép so.** Khi đi từ bờ vào, phải leo lên (`>=`). Giữ phép so của nước chảy xuôi (`<=`) là đi xuống dốc từ bờ, tức trả lời một câu hỏi khác hẳn. Bản `wrongDirection` sai 4/10 ca, kể cả cái chén và lưới xoắn ốc.
@@ -473,9 +612,11 @@ mặt phẳng 200×200, DFS đệ quy trên luồng stack 64 MB: 40000 ô
 - **Chỉ gieo một cạnh cho mỗi đại dương.** Thái Bình Dương là hàng trên **và** cột trái; Đại Tây Dương là hàng dưới **và** cột phải. Bản `wrongOneEdge` chỉ gieo hàng trên và hàng dưới, nên bỏ sót những ô chỉ chạm biển qua cột, như ô trũng ở góc trên phải của ca "góc trũng". Nó chỉ đúng 6/10 ca.
 - **Quên rằng hai góc thuộc cả hai bờ.** Góc trên phải `(0, n−1)` vừa ở hàng trên vừa ở cột phải, nên luôn nằm trong đáp án. Góc dưới trái cũng vậy. Lưới một hàng hoặc một cột thì mọi ô đều là đáp án.
 - **Một lượt duyệt chung cho cả bốn cạnh.** Như trên, bạn mất thông tin "đại dương nào". Cần hai mảng đánh dấu.
-- **Đệ quy trên lưới lớn.** Mặt phẳng `200 × 200` đẩy DFS đệ quy tới 40 000 tầng. Python dừng ở khoảng 1 000 tầng (`RecursionError`), Java tràn stack của luồng chính (`StackOverflowError`), Node ném `RangeError`. Go chạy được vì stack của goroutine tự nới tới giới hạn 1 GB. Dùng BFS hoặc DFS với ngăn xếp tự quản lý thì không có giới hạn này.
+- **Đệ quy trên lưới lớn.** Mặt phẳng `200 × 200` đẩy DFS đệ quy tới 40 000 tầng. Python dừng ở khoảng 1 000 tầng (`RecursionError`), Java tràn stack của luồng chính (`StackOverflowError`), Node ném `RangeError`. Go chạy được vì stack của goroutine tự nới tới giới hạn 1 GB. PHP chạy được vì lời gọi hàm nằm trên heap (trừ khi bật Xdebug, chặn ở 512 tầng), Rust chạy được nhờ stack 8 MB của luồng chính và khung gọi nhỏ. Dùng BFS hoặc DFS với ngăn xếp tự quản lý thì không có giới hạn này.
 - **Python: set các tuple thay cho mảng hai chiều.** `(r, c) in seen` phải tạo tuple và băm nó mỗi lần kiểm. Trên mặt phẳng `200 × 200`, bản set chạy 54,4 ms, bản mảng `[[False] * n for _ in range(m)]` chạy 28,7 ms. Cả hai đúng; mảng nhanh gần gấp đôi.
 - **JavaScript và TypeScript: `queue.shift()`.** Lấy đầu mảng bằng `shift()` có thể phải dời mọi phần tử còn lại. Các file ở đây giữ một chỉ số `head` và không xóa gì khỏi mảng.
+- **PHP: hàng đợi bằng `array_shift`.** `array_shift` đánh lại chỉ số cho cả mảng nên mỗi lần lấy ra tốn O(độ dài hàng đợi); trên lưới `200 × 200` gieo 800 ô bờ, BFS thành bậc hai. Bản PHP giữ chỉ số `$head` và chỉ nối thêm vào cuối, như bản TypeScript.
+- **Rust: tính hàng xóm bằng `usize`.** `r - 1` khi `r = 0` làm panic ở bản debug và quay vòng thành số rất lớn ở bản `-O`. Hàm `neighbors` trong bản Rust cộng hướng đi trên `i32`, lọc ô ra ngoài biên rồi mới đổi về `usize`.
 
 ## Câu hỏi tự kiểm tra
 

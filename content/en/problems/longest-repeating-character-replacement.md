@@ -21,7 +21,7 @@ sources:
 > - Trap: keeping the letter at the **left end** instead of the most frequent one (`"BAAAB"`, k = 2 gives 4 instead of 5).
 
 > [!info] Context
-> LeetCode problem 424, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. It reuses the 26-cell count table of [[en/posts/2026-11-22-neetcode-counting-keys|station 2]] inside a variable-size window like [[en/problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]]. The solutions come in TypeScript, Python, Go, Java and JavaScript. You need loops, strings and count arrays.
+> LeetCode problem 424, part of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. It reuses the 26-cell count table of [[en/posts/2026-11-22-neetcode-counting-keys|station 2]] inside a variable-size window like [[en/problems/longest-substring-without-repeating-characters|Longest Substring Without Repeating Characters]]. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. You need loops, strings and count arrays.
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Substring**: characters next to each other in a string.
@@ -122,7 +122,7 @@ TypeScript, random letters, k = 2, median:
 
 At 10⁶ characters, dropping the recount is about 60 times faster: `Math.max(...count)` scans 26 cells and spreads the array into 26 arguments on every call.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Counting | Language-specific trap |
 |---|---|---|
@@ -130,10 +130,12 @@ At 10⁶ characters, dropping the recount is about 60 times faster: `Math.max(..
 | Python | `count[ord(ch) − 65]` | `max(count)` scans 26 cells; `Counter` is handier but slower than a list |
 | Go | `var count [26]int`, `s[i] − 'A'` | `s[i]` is a byte: fine because the input is ASCII uppercase only |
 | Java | `int[26]`, `s.charAt(i) − 'A'` | `char − char` gives an `int`; there is no max for arrays, you write your own |
+| PHP | `array_fill(0, 26, 0)`, `ord($s[$i]) − 65` | `max($count)` works on arrays out of the box; `$s[$i]` is a byte, fine because the input is uppercase ASCII |
+| Rust | `[0usize; 26]`, `b[i] − b'A'` | `count.iter().max()` returns an `Option`; a `usize` subtraction that goes negative panics |
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.ts) · [Python](../code/neetcode-longest-repeating-character-replacement/character_replacement.py) · [Go](../code/neetcode-longest-repeating-character-replacement/character_replacement.go) · [Java](../code/neetcode-longest-repeating-character-replacement/character-replacement.java) · [JavaScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.js)
+[TypeScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.ts) · [Python](../code/neetcode-longest-repeating-character-replacement/character_replacement.py) · [Go](../code/neetcode-longest-repeating-character-replacement/character_replacement.go) · [Java](../code/neetcode-longest-repeating-character-replacement/character-replacement.java) · [JavaScript](../code/neetcode-longest-repeating-character-replacement/character-replacement.js) · [PHP](../code/neetcode-longest-repeating-character-replacement/character-replacement.php) · [Rust](../code/neetcode-longest-repeating-character-replacement/character_replacement.rs)
 
 Each file has the brute force, the recounting window and the non-shrinking window, and runs 8 cases. Below are the two window approaches.
 
@@ -268,6 +270,63 @@ function windowStaleMax(s, k) {
 }
 ```
 
+```php
+function windowRecount(string $s, int $k): int {
+    $count = array_fill(0, 26, 0);
+    $left = 0;
+    $best = 0;
+    for ($right = 0; $right < strlen($s); $right++) {
+        $count[ord($s[$right]) - 65]++;
+        while ($right - $left + 1 - max($count) > $k) $count[ord($s[$left++]) - 65]--;
+        $best = max($best, $right - $left + 1);
+    }
+    return $best;
+}
+
+function windowStaleMax(string $s, int $k): int {
+    $count = array_fill(0, 26, 0);
+    $left = 0;
+    $maxFreq = 0;
+    for ($right = 0; $right < strlen($s); $right++) {
+        $maxFreq = max($maxFreq, ++$count[ord($s[$right]) - 65]);
+        if ($right - $left + 1 - $maxFreq > $k) $count[ord($s[$left++]) - 65]--; // "if", not "while"
+    }
+    return strlen($s) - $left;
+}
+```
+
+```rust
+fn window_recount(s: &str, k: usize) -> usize {
+    let b = s.as_bytes();
+    let mut count = [0usize; 26];
+    let (mut left, mut best) = (0, 0);
+    for right in 0..b.len() {
+        count[idx(b[right])] += 1;
+        while right - left + 1 - count.iter().max().unwrap() > k {
+            count[idx(b[left])] -= 1;
+            left += 1;
+        }
+        best = best.max(right - left + 1);
+    }
+    best
+}
+
+fn window_stale_max(s: &str, k: usize) -> usize {
+    let b = s.as_bytes();
+    let mut count = [0usize; 26];
+    let (mut left, mut max_freq) = (0, 0);
+    for right in 0..b.len() {
+        count[idx(b[right])] += 1;
+        max_freq = max_freq.max(count[idx(b[right])]);
+        if right - left + 1 - max_freq > k { // "if", not "while": the window slides as a block
+            count[idx(b[left])] -= 1;
+            left += 1;
+        }
+    }
+    b.len() - left
+}
+```
+
 
 The TypeScript file also runs the wrong version that keeps the left-end letter, then counts the stale-maxFreq steps, checks against brute force and measures:
 
@@ -291,7 +350,7 @@ n          letters  brute   shrink + recount  non-shrinking  (ms, median)
 
 *(Output labels translated; the files themselves print Vietnamese.)*
 
-The left-end version breaks on `"BAAAB"`: the window starts with B, so it counts three A's to change, while keeping A only needs the two B's changed. Python, Go, Java and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all three approaches.
+The left-end version breaks on `"BAAAB"`: the window starts with B, so it counts three A's to change, while keeping A only needs the two B's changed. Python, Go, Java, JavaScript, PHP and Rust print `8/8 ca đúng` ("8/8 cases passed") for all three approaches.
 
 ## Misconceptions and common traps
 
@@ -300,6 +359,8 @@ The left-end version breaks on `"BAAAB"`: the window starts with B, so it counts
 - **"maxFreq must drop when a left character leaves."** Not needed, because only a record frequency can raise the answer. Lowering it correctly means rescanning 26 cells, 60 times slower in the measurement.
 - **Using `while` with a stale maxFreq and taking `best = max(best, length)`.** Still correct, but redundant: with a maxFreq that never drops, the window is never broken by more than one character, so `if` is enough and the answer is simply `n − left`.
 - **Counting with a Map when the input is uppercase only.** Correct but slower than a 26-cell array; a Map is only needed for a large or unknown alphabet.
+- **PHP: passing an array to a function copies it.** PHP arrays are values (copy-on-write): if you move the shrinking step into a helper that takes `$count`, the helper edits a copy, not your count table. Pass `&$count`.
+- **Rust: `right - left + 1 - max_freq` on `usize`.** If the order of operations makes an intermediate result negative (say `right - max_freq + 1 - left`), a debug build panics on underflow. Keep `right - left + 1` first, since the window length is always ≥ `max_freq`.
 
 ## Self-check questions
 

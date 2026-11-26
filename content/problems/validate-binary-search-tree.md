@@ -275,9 +275,9 @@ Python 3.12, trung vị 5 lần: vét cạn trên chuỗi phải 4 000 nút mấ
 
 ## Ví dụ chạy được
 
-[TypeScript](../code/neetcode-validate-binary-search-tree/validate-bst.ts) · [Python](../code/neetcode-validate-binary-search-tree/validate_bst.py) · [Go](../code/neetcode-validate-binary-search-tree/validate_bst.go) · [Java](../code/neetcode-validate-binary-search-tree/validate-bst.java) · [JavaScript](../code/neetcode-validate-binary-search-tree/validate-bst.js)
+[TypeScript](../code/neetcode-validate-binary-search-tree/validate-bst.ts) · [Python](../code/neetcode-validate-binary-search-tree/validate_bst.py) · [Go](../code/neetcode-validate-binary-search-tree/validate_bst.go) · [Java](../code/neetcode-validate-binary-search-tree/validate-bst.java) · [JavaScript](../code/neetcode-validate-binary-search-tree/validate-bst.js) · [PHP](../code/neetcode-validate-binary-search-tree/validate-bst.php) · [Rust](../code/neetcode-validate-binary-search-tree/validate_bst.rs)
 
-Mỗi file dựng cây từ mảng theo tầng kiểu LeetCode (`null` là chỗ trống) và chạy 13 ca chung: một nút, ba nút đúng, cháu phải nhỏ hơn ông (cây ở hình đầu trang), cháu trái lớn hơn ông (`[8, 3, 10, 1, 9]`), trùng bên trái, trùng bên phải, một nút INT_MIN, một nút INT_MAX, INT_MIN rồi INT_MAX làm con phải, hai nút cùng là INT_MAX, cây cân 10⁴ nút, chuỗi phải 10⁴ nút, và chuỗi 10⁴ nút có nút đáy mang giá trị 0. File TypeScript còn đối chiếu sáu cách đúng trên 5 000 cây ngẫu nhiên 1 tới 8 nút với giá trị 0 tới 5 (sinh bằng mulberry32, để hay có trùng và hay sai), và kiểm tra Morris có trả cây về nguyên vẹn không.
+Mỗi file trong năm bản đầu dựng cây từ mảng theo tầng kiểu LeetCode (`null` là chỗ trống) và chạy 13 ca chung: một nút, ba nút đúng, cháu phải nhỏ hơn ông (cây ở hình đầu trang), cháu trái lớn hơn ông (`[8, 3, 10, 1, 9]`), trùng bên trái, trùng bên phải, một nút INT_MIN, một nút INT_MAX, INT_MIN rồi INT_MAX làm con phải, hai nút cùng là INT_MAX, cây cân 10⁴ nút, chuỗi phải 10⁴ nút, và chuỗi 10⁴ nút có nút đáy mang giá trị 0. File TypeScript còn đối chiếu sáu cách đúng trên 5 000 cây ngẫu nhiên 1 tới 8 nút với giá trị 0 tới 5 (sinh bằng mulberry32, để hay có trùng và hay sai), và kiểm tra Morris có trả cây về nguyên vẹn không.
 
 Truyền khoảng, đệ quy:
 
@@ -342,6 +342,57 @@ function validBounds(root) {
     return go(node.left, lo, node.val) && go(node.right, node.val, hi);
   };
   return go(root, -Infinity, Infinity);
+}
+```
+
+```php
+<?php
+declare(strict_types=1);
+
+final class TreeNode {
+    public function __construct(
+        public int $val,
+        public ?TreeNode $left = null,
+        public ?TreeNode $right = null,
+    ) {}
+}
+
+function isValidBst(?TreeNode $node, ?int $lo = null, ?int $hi = null): bool {
+    if ($node === null) return true;
+    if (($lo !== null && $node->val <= $lo) || ($hi !== null && $node->val >= $hi)) {
+        return false;
+    }
+    return isValidBst($node->left, $lo, $node->val)
+        && isValidBst($node->right, $node->val, $hi);
+}
+```
+
+```rust
+use std::{cell::RefCell, rc::Rc};
+
+type Node = Option<Rc<RefCell<TreeNode>>>;
+
+struct TreeNode {
+    val: i32,
+    left: Node,
+    right: Node,
+}
+
+fn node(val: i32, left: Node, right: Node) -> Node {
+    Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+}
+
+fn is_valid_bst(root: &Node) -> bool {
+    fn check(root: &Node, lo: Option<i32>, hi: Option<i32>) -> bool {
+        let Some(root) = root else { return true };
+        let root = root.borrow();
+        let val = root.val;
+        if lo.is_some_and(|lo| val <= lo) || hi.is_some_and(|hi| val >= hi) {
+            return false;
+        }
+        check(&root.left, lo, Some(val)) && check(&root.right, Some(val), hi)
+    }
+    check(root, None, None)
 }
 ```
 
@@ -549,6 +600,8 @@ validMorris           13/13 ca đúng
 wrongParentChild      10/13 ca đúng; sai ở cháu phải nhỏ hơn ông → true, cháu trái lớn hơn ông → true, chuỗi 10^4 nút, đáy sai → true
 wrongAllowDuplicates  10/13 ca đúng; sai ở trùng bên trái → true, trùng bên phải → true, INT_MAX trùng → true
 ```
+
+Hai bản bổ sung dùng khoảng mở, với `null` trong PHP và `None` trong Rust cho cận chưa có. Giá trị nguyên nhỏ nhất và lớn nhất vẫn dùng được ở lá. PHP `5/5 ca đúng` · Rust `5/5 ca đúng`.
 
 ## Hiểu lầm và bẫy hay gặp
 

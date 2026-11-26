@@ -21,7 +21,7 @@ sources:
 > - Brute force here is O(n·k), with k the number of distinct characters, so with a small alphabet it is only a few times slower, not thousands of times.
 
 > [!info] Context
-> LeetCode problem 3, the anchor problem of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. The station post uses this problem to build the variable-size window template; this page digs into the two ways of shrinking and measures them. The solutions come in TypeScript, Python, Go, Java and JavaScript. You need loops, strings and Sets ([[en/problems/contains-duplicate|Contains Duplicate]]).
+> LeetCode problem 3, the anchor problem of [[en/posts/2026-11-23-neetcode-sliding-window|station 5: Sliding Window]] on **the NeetCode line: Arrays and Strings**. The station post uses this problem to build the variable-size window template; this page digs into the two ways of shrinking and measures them. The solutions come in TypeScript, Python, Go, Java, JavaScript, PHP and Rust. You need loops, strings and Sets ([[en/problems/contains-duplicate|Contains Duplicate]]).
 
 > [!abstract]- Quick glossary for this post (click to open)
 > - **Substring**: characters that sit **next to each other** in the string. `"wke"` is a substring of `"pwwkew"`; `"pwke"` is not (that is a subsequence).
@@ -121,7 +121,7 @@ TypeScript, random strings over an alphabet of 26 or 95 ASCII characters, median
 
 Brute force grows with k (26 → 95 doubles the time); the two window approaches don't. The last-seen book is about 3 times faster than the Set: one lookup and one write per character, instead of an add and then a delete.
 
-### Under the hood of the five languages
+### Under the hood of the seven languages
 
 | | Last-seen book | Language-specific trap |
 |---|---|---|
@@ -129,12 +129,14 @@ Brute force grows with k (26 → 95 doubles the time); the two window approaches
 | Python | `dict` | `str` iterates by code point, so emoji are handled correctly |
 | Go | array `[128]int` | `s[i]` is a **byte**; strings beyond ASCII must be walked with `range` to get runes |
 | Java | array `int[128]` | `charAt` is a UTF-16 unit too, like JS |
+| PHP | an `array` keyed by character | `$s[$i]` is a **byte**: `"a😀😀"` is 9 bytes long and gives 5 instead of 2 |
+| Rust | `HashMap<char, usize>` | no `s[i]` on `&str`; you choose `as_bytes()` (bytes) or `chars()` (Unicode characters) |
 
-The problem has only ASCII, so all five languages are correct on LeetCode. A 128-slot array instead of a Map is faster, but only correct when the input is guaranteed ASCII.
+The problem has only ASCII, so all seven languages are correct on LeetCode. A 128-slot array instead of a Map is faster, but only correct when the input is guaranteed ASCII.
 
 ## Runnable example
 
-[TypeScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.ts) · [Python](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.py) · [Go](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.go) · [Java](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.java) · [JavaScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.js)
+[TypeScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.ts) · [Python](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.py) · [Go](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.go) · [Java](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.java) · [JavaScript](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.js) · [PHP](../code/neetcode-longest-substring-without-repeating-characters/longest-substring.php) · [Rust](../code/neetcode-longest-substring-without-repeating-characters/longest_substring.rs)
 
 Each file has brute force and both window approaches, and runs 8 cases including `""`, `" "`, `"abba"` and `"tmmzuxt"`. Below are the two window approaches.
 
@@ -264,6 +266,63 @@ function windowLastSeen(s) {
 }
 ```
 
+```php
+function windowSet(string $s): int {
+    $inWindow = [];
+    $left = 0;
+    $best = 0;
+    for ($right = 0; $right < strlen($s); $right++) {
+        while (isset($inWindow[$s[$right]])) unset($inWindow[$s[$left++]]);
+        $inWindow[$s[$right]] = true;
+        $best = max($best, $right - $left + 1);
+    }
+    return $best;
+}
+
+function windowLastSeen(string $s): int {
+    $last = [];
+    $left = 0;
+    $best = 0;
+    for ($right = 0; $right < strlen($s); $right++) { // $s[$right] is one BYTE, not one character
+        $prev = $last[$s[$right]] ?? -1;
+        if ($prev >= $left) $left = $prev + 1;
+        $last[$s[$right]] = $right;
+        $best = max($best, $right - $left + 1);
+    }
+    return $best;
+}
+```
+
+```rust
+fn window_set(s: &str) -> usize {
+    let c: Vec<char> = s.chars().collect(); // Rust has no s[i] on &str: pick bytes or chars
+    let mut in_window = HashSet::new();
+    let (mut left, mut best) = (0, 0);
+    for right in 0..c.len() {
+        while in_window.contains(&c[right]) {
+            in_window.remove(&c[left]);
+            left += 1;
+        }
+        in_window.insert(c[right]);
+        best = best.max(right - left + 1);
+    }
+    best
+}
+
+fn window_last_seen(s: &str) -> usize {
+    let mut last: HashMap<char, usize> = HashMap::new();
+    let (mut left, mut best) = (0, 0);
+    for (right, ch) in s.chars().enumerate() {
+        if let Some(&prev) = last.get(&ch) {
+            if prev >= left { left = prev + 1; }
+        }
+        last.insert(ch, right);
+        best = best.max(right - left + 1);
+    }
+    best
+}
+```
+
 
 ```text
 $ node longest-substring.ts
@@ -294,7 +353,7 @@ window_last_seen 8/8 cases passed
 window_last_seen("a😀😀") = 2
 ```
 
-Go, Java and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all three approaches.
+Go, Java, JavaScript, PHP and Rust print `8/8 ca đúng` ("8/8 cases passed") for all three approaches. On the emoji string PHP counts bytes and gives 5; Rust walks `chars()` and gives 2, like Python.
 
 ## Misconceptions and common traps
 
@@ -303,6 +362,8 @@ Go, Java and JavaScript print `8/8 ca đúng` ("8/8 cases passed") for all three
 - **Resetting the window to empty on a repeat.** `"dvdf"`: at the second `d`, the correct window is `"vd"`, not `"d"`; the answer is 3 (`"vdf"`).
 - **"Two nested loops mean O(n²)."** The Set approach has a `while` inside a `for` but is O(n); brute force has two loops but is really O(n·k).
 - **Using `s[i]` on Unicode strings.** JS and Java split emoji in half, Go splits accented letters into several bytes. Iterate by code point (`for…of` in JS, `range` in Go) if the input is not just ASCII.
+- **PHP: `strlen` and `$s[$i]` count bytes.** An emoji is 4 bytes, an accented letter 2–3 bytes. The problem is ASCII-only so it's fine; for Unicode strings split with `mb_str_split($s)` first.
+- **Rust: `s[i]` doesn't compile.** `&str` is UTF-8, so Rust makes you choose: `s.as_bytes()` is fast and right for ASCII, `s.chars()` is right for every character but must be collected into a `Vec<char>` for indexed access.
 
 ## Self-check questions
 

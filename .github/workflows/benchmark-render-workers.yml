@@ -1,0 +1,61 @@
+name: Benchmark render workers
+
+on:
+  push:
+    branches: [bench/render-workers]
+    paths: [.github/workflows/benchmark-render-workers.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx quartz plugin install --from-config
+      - run: npx quartz build
+      - run: npm install --no-save playwright-core@1.49.1
+      - name: Compare 8 and 4 workers on the same build
+        shell: bash
+        run: |
+          echo "Commit $GITHUB_SHA"
+          echo "$(nproc) available CPUs"
+          node --version
+          /usr/bin/google-chrome --version
+
+          mkdir -p "$RUNNER_TEMP/render-benchmark"
+          sed 's/^const CONCURRENCY = 4;$/const CONCURRENCY = 8;/' scripts/check-render.mjs > scripts/check-render-8.mjs
+          test "$(diff scripts/check-render.mjs scripts/check-render-8.mjs)" = "$(printf '24c24\n< const CONCURRENCY = 4;\n---\n> const CONCURRENCY = 8;')"
+
+          summary="$RUNNER_TEMP/render-benchmark/summary.md"
+          printf '| Workers | Wall time (s) | Render errors | Exit code |\n| ---: | ---: | ---: | ---: |\n' > "$summary"
+          failed=0
+          for workers in 8 4; do
+            script=scripts/check-render.mjs
+            if [[ $workers == 8 ]]; then
+              script=scripts/check-render-8.mjs
+            fi
+
+            result="$RUNNER_TEMP/render-benchmark/$workers"
+            echo "Starting $workers workers"
+            status=0
+            /usr/bin/time -q -f '%e' -o "$result.time" timeout --kill-after=30s 25m node "$script" public |& tee "$result.log" || status=$?
+
+            errors=$(sed -n 's/^✗ Kiểm tra hiển thị: \([0-9]*\) lỗi.*/\1/p' "$result.log")
+            if [[ $status == 0 ]] && grep -q '^✓ Kiểm tra hiển thị:' "$result.log"; then
+              errors=0
+            else
+              failed=1
+            fi
+            printf '| %s | %s | %s | %s |\n' "$workers" "$(cat "$result.time")" "${errors:-incomplete}" "$status" | tee -a "$summary"
+          done
+          cat "$summary" >> "$GITHUB_STEP_SUMMARY"
+          exit "$failed"

@@ -40,11 +40,11 @@ Imagine a floor drawn as a grid. To find every cluster of connected rooms, I pic
 
 | Everyday life | Concept |
 |---|---|
-| Rooms are cells and doors join side neighbors | [[en/concepts/grid-graph|Grid graph]] |
-| Labels spread to reachable rooms | [[en/concepts/flood-fill|Flood fill]] |
-| Every room in a cluster can reach the rest | [[en/concepts/connected-component|Connected component]] |
-| Label a room when scheduling the visit | [[en/concepts/mark-on-enqueue|Mark on enqueue]] |
-| Every team leaves its gate at minute zero | [[en/concepts/multi-source-bfs|Multi-source BFS]] |
+| Rooms are cells and doors join side neighbors | [[en/concepts/grid-graph\|Grid graph]] |
+| Labels spread to reachable rooms | [[en/concepts/flood-fill\|Flood fill]] |
+| Every room in a cluster can reach the rest | [[en/concepts/connected-component\|Connected component]] |
+| Label a room when scheduling the visit | [[en/concepts/mark-on-enqueue\|Mark on enqueue]] |
+| Every team leaves its gate at minute zero | [[en/concepts/multi-source-bfs\|Multi-source BFS]] |
 
 ```mermaid
 flowchart TB
@@ -110,10 +110,10 @@ For R rows and C columns, scanning the board takes O(RC). Each eligible cell ent
 
 | Problem | What changes |
 |---|---|
-| [[en/problems/number-of-islands|LC-0200 · Number of Islands]] | Count each discovery of unseen land that starts a fill. |
-| [[en/problems/max-area-of-island|LC-0695 · Max Area of Island]] | Keep the largest cell count among all fills. |
-| [[en/problems/rotting-oranges|LC-0994 · Rotting Oranges]] | Read the last minute among fresh cells and detect unreachable ones. |
-| [[en/problems/walls-and-gates|LC-0286 · Walls and Gates]] | Record each room's shortest distance to any gate. |
+| [[en/problems/number-of-islands\|LC-0200 · Number of Islands]] | Count each discovery of unseen land that starts a fill. |
+| [[en/problems/max-area-of-island\|LC-0695 · Max Area of Island]] | Keep the largest cell count among all fills. |
+| [[en/problems/rotting-oranges\|LC-0994 · Rotting Oranges]] | Read the last minute among fresh cells and detect unreachable ones. |
+| [[en/problems/walls-and-gates\|LC-0286 · Walls and Gates]] | Record each room's shortest distance to any gate. |
 
 ## Runnable example
 

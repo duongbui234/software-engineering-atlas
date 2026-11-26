@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Word Ladder: BFS đi từng tầng từ cold tới warm",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-word-ladder/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Mở rộng một tầng"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hàng đợi và tập chưa thăm"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Tầng 1: bắt đầu ở cold, gạch cold",
+      "variant": "default",
+      "note": "hàng đợi: [cold]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Đổi từng chữ của cold, chỉ cord có",
+      "variant": "default",
+      "note": "tầng 2: [cord]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Từ cord tìm ra word, card, corm",
+      "variant": "default",
+      "note": "tầng 3: [word, card, corm]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Tầng 3 thêm ward, worm",
+      "variant": "default",
+      "note": "tầng 4: [ward, worm]"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "Từ ward đổi chữ cuối ra warm",
+      "variant": "default",
+      "note": "tầng 5: [warm]"
+    },
+    {
+      "id": "step-6",
+      "from": "state",
+      "to": "algorithm",
+      "y": 555,
+      "label": "Lấy warm ra: đích nằm ở tầng 5",
+      "variant": "return",
+      "note": "đáp án = 5 từ"
+    }
+  ]
+}

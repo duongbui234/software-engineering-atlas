@@ -37,11 +37,11 @@ Hình dung một tủ danh mục có ngăn theo từng chữ cái. Khi đi qua n
 
 | Đời thường | Khái niệm |
 |---|---|
-| Các thẻ bắt đầu giống nhau dùng chung ngăn đầu | [[concepts/trie|Trie]] dùng chung đường đi của tiền tố |
-| Tờ phiếu ghi “đã đăng ký” nằm ngay trong một ngăn | [[concepts/terminal-marker|Dấu hết từ]] tách truy vấn từ và truy vấn tiền tố |
-| Ký tự bị nhòe thì thử từng ngăn con đang có | [[concepts/wildcard-branching|Phân nhánh theo ký tự đại diện]] |
-| Không có ngăn cho chữ tiếp theo thì bỏ lối đang thử | [[concepts/trie-prefix-pruning|Cắt theo tiền tố]] |
-| Có thể đóng sẵn 26 ngăn hoặc chỉ lắp các ngăn đang dùng | [[concepts/sparse-trie-children|Lưu cạnh thưa]] và mảng con cố định |
+| Các thẻ bắt đầu giống nhau dùng chung ngăn đầu | [[concepts/trie\|Trie]] dùng chung đường đi của tiền tố |
+| Tờ phiếu ghi “đã đăng ký” nằm ngay trong một ngăn | [[concepts/terminal-marker\|Dấu hết từ]] tách truy vấn từ và truy vấn tiền tố |
+| Ký tự bị nhòe thì thử từng ngăn con đang có | [[concepts/wildcard-branching\|Phân nhánh theo ký tự đại diện]] |
+| Không có ngăn cho chữ tiếp theo thì bỏ lối đang thử | [[concepts/trie-prefix-pruning\|Cắt theo tiền tố]] |
+| Có thể đóng sẵn 26 ngăn hoặc chỉ lắp các ngăn đang dùng | [[concepts/sparse-trie-children\|Lưu cạnh thưa]] và mảng con cố định |
 
 ```mermaid
 flowchart TB
@@ -87,9 +87,9 @@ Xây trie cần O(S) lượt xử lý ký tự, với S là tổng độ dài t�
 
 | Bài | Điểm khác |
 |---|---|
-| [[problems/implement-trie-prefix-tree|LC-0208 · Implement Trie]] | Đi theo một chuỗi ký tự và chọn điều kiện hết từ hoặc còn đường. |
-| [[problems/design-add-and-search-words-data-structure|LC-0211 · Design Add and Search Words]] | Khi gặp dấu chấm, thử các con đang tồn tại và giữ vị trí trong mẫu. |
-| [[problems/word-search-ii|LC-0212 · Word Search II]] | Dò đường trên bảng, mang nút trie và khôi phục ô đã dùng lúc quay lui. |
+| [[problems/implement-trie-prefix-tree\|LC-0208 · Implement Trie]] | Đi theo một chuỗi ký tự và chọn điều kiện hết từ hoặc còn đường. |
+| [[problems/design-add-and-search-words-data-structure\|LC-0211 · Design Add and Search Words]] | Khi gặp dấu chấm, thử các con đang tồn tại và giữ vị trí trong mẫu. |
+| [[problems/word-search-ii\|LC-0212 · Word Search II]] | Dò đường trên bảng, mang nút trie và khôi phục ô đã dùng lúc quay lui. |
 
 ## Ví dụ chạy được
 

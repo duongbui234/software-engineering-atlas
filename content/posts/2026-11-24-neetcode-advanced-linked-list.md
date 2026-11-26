@@ -42,13 +42,13 @@ Ga 1 là một đoàn tàu ở sân ga. Ga 2 là **bãi dồn toa**, nơi ngư�
 
 | Đời thường | Khái niệm |
 |---|---|
-| Đường ray chờ chỉ đỗ được vài toa; toa vừa dùng đẩy lên đầu, hết chỗ thì kéo toa ở cuối đi | [[concepts/lru-va-lfu|LRU]] (LRU Cache) |
+| Đường ray chờ chỉ đỗ được vài toa; toa vừa dùng đẩy lên đầu, hết chỗ thì kéo toa ở cuối đi | [[concepts/lru-va-lfu\|LRU]] (LRU Cache) |
 | Sổ tra "toa số 7 đang đỗ ở chỗ nào" | bảng băm key → nút |
-| Mỗi toa móc cả toa trước lẫn toa sau, nên tháo một toa giữa đoàn không cần đi từ đầu | [[concepts/doubly-linked-list|danh sách hai chiều]] |
-| Chép một đoàn mà mỗi toa còn buộc dây sang một toa bất kỳ: móc toa chép ngay sau toa gốc, dây của toa chép buộc vào "toa ngay sau đích của dây gốc" | [[concepts/node-interleaving|đan bản sao xen kẽ]] (Copy List with Random Pointer) |
-| Hai đoàn chở chữ số, cộng từng cặp toa, phần nhớ chuyển sang cặp sau | [[concepts/carry-propagation|mang số nhớ]] (Add Two Numbers) |
+| Mỗi toa móc cả toa trước lẫn toa sau, nên tháo một toa giữa đoàn không cần đi từ đầu | [[concepts/doubly-linked-list\|danh sách hai chiều]] |
+| Chép một đoàn mà mỗi toa còn buộc dây sang một toa bất kỳ: móc toa chép ngay sau toa gốc, dây của toa chép buộc vào "toa ngay sau đích của dây gốc" | [[concepts/node-interleaving\|đan bản sao xen kẽ]] (Copy List with Random Pointer) |
+| Hai đoàn chở chữ số, cộng từng cặp toa, phần nhớ chuyển sang cặp sau | [[concepts/carry-propagation\|mang số nhớ]] (Add Two Numbers) |
 | Mỗi toa ghi "đi tiếp tới toa số X"; hai toa cùng chỉ một đích thì đi theo bảng sẽ quay vòng, và đích chung là chỗ vào vòng | con trỏ chậm và nhanh trên mảng (Find the Duplicate Number) |
-| Nhiều đoàn đã xếp số, ghép từng cặp như vòng đấu loại cho tới khi còn một | [[concepts/divide-and-conquer-merge|trộn chia để trị]] (Merge k Sorted Lists) |
+| Nhiều đoàn đã xếp số, ghép từng cặp như vòng đấu loại cho tới khi còn một | [[concepts/divide-and-conquer-merge\|trộn chia để trị]] (Merge k Sorted Lists) |
 | Quay đầu từng cụm k toa, cụm cuối thiếu toa để nguyên | lật từng khúc (Reverse Nodes in k-Group) |
 
 ```mermaid
@@ -139,8 +139,8 @@ Mẹo là coi mỗi chỉ số `i` là một nút và `nums[i]` là `next` của
 | Cách | Thời gian | Ghi chú |
 |---|---|---|
 | Trộn lần lượt vào một kết quả chung | O(N · k) | kết quả dài dần, các nút đầu bị đi qua lại k lần |
-| Heap k đầu danh sách ([[concepts/k-way-merge|trộn k đường]]) | O(N log k) | mỗi bước lấy nút nhỏ nhất trong k đầu |
-| [[concepts/divide-and-conquer-merge|Trộn từng cặp]] | O(N log k) | log k vòng, mỗi vòng đi qua mọi nút một lần; không cần heap |
+| Heap k đầu danh sách ([[concepts/k-way-merge\|trộn k đường]]) | O(N log k) | mỗi bước lấy nút nhỏ nhất trong k đầu |
+| [[concepts/divide-and-conquer-merge\|Trộn từng cặp]] | O(N log k) | log k vòng, mỗi vòng đi qua mọi nút một lần; không cần heap |
 
 Trộn từng cặp giống vòng đấu loại: vòng 1 trộn danh sách 0 với 1, 2 với 3, …; vòng sau trộn các kết quả với nhau. Mỗi nút đi qua log₂ k lần trộn. Đo với k danh sách, mỗi danh sách 100 nút ngẫu nhiên đã sắp (mulberry32, trung vị 5 lần):
 

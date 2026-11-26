@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Word Ladder: BFS walks level by level from cold to warm",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-word-ladder/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Expand one level"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Queue and unvisited set"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Level 1: start at cold, cross it out",
+      "variant": "default",
+      "note": "queue: [cold]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Change each letter of cold: only cord",
+      "variant": "default",
+      "note": "level 2: [cord]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "From cord: word, card, corm",
+      "variant": "default",
+      "note": "level 3: [word, card, corm]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Level 3 adds ward, worm",
+      "variant": "default",
+      "note": "level 4: [ward, worm]"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "From ward, the last letter gives warm",
+      "variant": "default",
+      "note": "level 5: [warm]"
+    },
+    {
+      "id": "step-6",
+      "from": "state",
+      "to": "algorithm",
+      "y": 555,
+      "label": "warm comes out: the target is on level 5",
+      "variant": "return",
+      "note": "answer = 5 words"
+    }
+  ]
+}

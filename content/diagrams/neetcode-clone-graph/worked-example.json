@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Sao đồ thị 4 nút bằng BFS và sổ cũ → mới",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-clone-graph/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": { "label": "Tạo bản sao hoặc nối cạnh" },
+        "return": { "label": "Kết quả" }
+      }
+    }
+  },
+  "participants": [
+    { "id": "algorithm", "type": "backend", "label": "Cách xử lý", "sublabel": "BFS từ nút 1" },
+    { "id": "book", "type": "database", "label": "Sổ cũ → mới", "sublabel": "Map: nút gốc → bản sao" }
+  ],
+  "messages": [
+    { "id": "step-1", "from": "algorithm", "to": "book", "y": 165, "label": "Sao nút 1, ghi sổ, xếp hàng", "variant": "default", "note": "sổ {1→1'}; hàng [1]" },
+    { "id": "step-2", "from": "algorithm", "to": "book", "y": 243, "label": "Lấy 1: gặp 2 và 3 lần đầu", "variant": "default", "note": "tạo 2', 3'; 1' = [2', 3']" },
+    { "id": "step-3", "from": "algorithm", "to": "book", "y": 321, "label": "Lấy 2: 1 và 3 đã có trong sổ", "variant": "default", "note": "không tạo mới; 2' = [1', 3']" },
+    { "id": "step-4", "from": "algorithm", "to": "book", "y": 399, "label": "Lấy 3: chỉ 4 là nút mới", "variant": "default", "note": "tạo 4'; 3' = [1', 2', 4']" },
+    { "id": "step-5", "from": "algorithm", "to": "book", "y": 477, "label": "Lấy 4: 3 đã có trong sổ", "variant": "default", "note": "4' = [3']" },
+    { "id": "step-6", "from": "book", "to": "algorithm", "y": 555, "label": "Hàng rỗng: trả 1', tạo đúng 4 nút", "variant": "return", "note": "sổ có 4 ô" }
+  ]
+}

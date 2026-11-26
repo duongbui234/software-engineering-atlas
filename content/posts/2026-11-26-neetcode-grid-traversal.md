@@ -39,11 +39,11 @@ Tưởng tượng một tầng nhà vẽ bằng ô vuông. Để tìm mỗi cụ
 
 | Đời thường | Khái niệm |
 |---|---|
-| Phòng là ô và cửa nối hai ô sát nhau | [[concepts/grid-graph|Đồ thị lưới]] |
-| Dán nhãn lan qua các phòng đi được | [[concepts/flood-fill|Tô vùng]] |
-| Một cụm phòng mà từ phòng nào cũng tới được các phòng còn lại | [[concepts/connected-component|Thành phần liên thông]] |
-| Dán nhãn khi hẹn ghé phòng, trước khi thật sự đến | [[concepts/mark-on-enqueue|Đánh dấu khi vào hàng đợi]] |
-| Mọi đội rời cổng ở phút 0 | [[concepts/multi-source-bfs|BFS đa nguồn]] |
+| Phòng là ô và cửa nối hai ô sát nhau | [[concepts/grid-graph\|Đồ thị lưới]] |
+| Dán nhãn lan qua các phòng đi được | [[concepts/flood-fill\|Tô vùng]] |
+| Một cụm phòng mà từ phòng nào cũng tới được các phòng còn lại | [[concepts/connected-component\|Thành phần liên thông]] |
+| Dán nhãn khi hẹn ghé phòng, trước khi thật sự đến | [[concepts/mark-on-enqueue\|Đánh dấu khi vào hàng đợi]] |
+| Mọi đội rời cổng ở phút 0 | [[concepts/multi-source-bfs\|BFS đa nguồn]] |
 
 ```mermaid
 flowchart TB
@@ -109,10 +109,10 @@ Với R hàng và C cột, quét toàn lưới tốn O(RC). Mỗi ô hợp lệ 
 
 | Bài | Điểm khác |
 |---|---|
-| [[problems/number-of-islands|LC-0200 · Number of Islands]] | Đếm lần gặp đất chưa thăm và bắt đầu tô. |
-| [[problems/max-area-of-island|LC-0695 · Max Area of Island]] | Giữ số ô lớn nhất của một lượt tô. |
-| [[problems/rotting-oranges|LC-0994 · Rotting Oranges]] | Lấy phút lớn nhất của cam tươi, kiểm tra ô còn kẹt. |
-| [[problems/walls-and-gates|LC-0286 · Walls and Gates]] | Ghi riêng khoảng cách ngắn nhất của từng phòng tới cổng. |
+| [[problems/number-of-islands\|LC-0200 · Number of Islands]] | Đếm lần gặp đất chưa thăm và bắt đầu tô. |
+| [[problems/max-area-of-island\|LC-0695 · Max Area of Island]] | Giữ số ô lớn nhất của một lượt tô. |
+| [[problems/rotting-oranges\|LC-0994 · Rotting Oranges]] | Lấy phút lớn nhất của cam tươi, kiểm tra ô còn kẹt. |
+| [[problems/walls-and-gates\|LC-0286 · Walls and Gates]] | Ghi riêng khoảng cách ngắn nhất của từng phòng tới cổng. |
 
 ## Ví dụ chạy được
 

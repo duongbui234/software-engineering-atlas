@@ -43,11 +43,11 @@ A train is a chain of coupled cars. The dispatcher knows only where the first ca
 | A car | a node |
 | The hook to the car behind | the `next` pointer |
 | Knowing where the first car stands | `head` |
-| Turning the train around: unhook each car and hook it back to the car in front | [[en/concepts/pointer-reversal|in-place pointer reversal]] (Reverse Linked List) |
+| Turning the train around: unhook each car and hook it back to the car in front | [[en/concepts/pointer-reversal\|in-place pointer reversal]] (Reverse Linked List) |
 | Before unhooking, remember which car was behind | `next = cur.next` |
-| An empty car parked at the start of the track, for the result to hook onto | [[en/concepts/dummy-node|dummy node]] (Merge Two Sorted Lists) |
+| An empty car parked at the start of the track, for the result to hook onto | [[en/concepts/dummy-node\|dummy node]] (Merge Two Sorted Lists) |
 | Two trains already ordered by car number, joined into one by taking the lower-numbered car at the front of either | merging two sorted lists |
-| Two people walk along the train, one twice as fast; if the track loops, the fast one catches the slow one | [[en/concepts/fast-slow-pointers|slow and fast pointers]] (Linked List Cycle) |
+| Two people walk along the train, one twice as fast; if the track loops, the fast one catches the slow one | [[en/concepts/fast-slow-pointers\|slow and fast pointers]] (Linked List Cycle) |
 | When the fast one reaches the end, the slow one stands at the middle car | finding the middle node (Reorder List) |
 | Two people walk exactly n cars apart; when the front one reaches the end, the back one stands before the nth car from the end | two pointers n steps apart (Remove Nth Node From End) |
 

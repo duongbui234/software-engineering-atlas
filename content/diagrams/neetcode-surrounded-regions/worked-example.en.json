@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Find captured regions by working inward from the border",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-surrounded-regions/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "Queue"
+    },
+    {
+      "id": "board",
+      "type": "database",
+      "label": "Board of X and O"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "board",
+      "y": 165,
+      "label": "Walk the border, find O on the edge",
+      "variant": "default",
+      "note": "(3,4), (4,1) → S"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "queue",
+      "y": 243,
+      "label": "Put both edge cells in the queue",
+      "variant": "default",
+      "note": "queue: (3,4), (4,1)"
+    },
+    {
+      "id": "step-3",
+      "from": "queue",
+      "to": "algorithm",
+      "y": 321,
+      "label": "Take (3,4), spread to the next O",
+      "variant": "default",
+      "note": "(3,3) → S"
+    },
+    {
+      "id": "step-4",
+      "from": "queue",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Take (4,1), spread to the next O",
+      "variant": "default",
+      "note": "(3,1) → S"
+    },
+    {
+      "id": "step-5",
+      "from": "queue",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Take (3,3), (3,1): no O left nearby",
+      "variant": "default",
+      "note": "queue empty"
+    },
+    {
+      "id": "step-6",
+      "from": "algorithm",
+      "to": "board",
+      "y": 555,
+      "label": "Final sweep: remaining O is captured",
+      "variant": "default",
+      "note": "(1,1), (1,2), (2,2) → X"
+    },
+    {
+      "id": "step-7",
+      "from": "board",
+      "to": "algorithm",
+      "y": 633,
+      "label": "Turn S back into O, done",
+      "variant": "return",
+      "note": "4 cells S → O"
+    }
+  ]
+}

@@ -42,11 +42,11 @@ Một đoàn tàu gồm nhiều toa móc nối nhau. Người điều độ ch�
 | Một toa | một nút |
 | Cái móc nối sang toa sau | con trỏ `next` |
 | Biết toa đầu đỗ ở đâu | `head` |
-| Đảo chiều đoàn tàu: tháo từng móc, móc ngược lại về toa trước | [[concepts/pointer-reversal|lật con trỏ tại chỗ]] (Reverse Linked List) |
+| Đảo chiều đoàn tàu: tháo từng móc, móc ngược lại về toa trước | [[concepts/pointer-reversal\|lật con trỏ tại chỗ]] (Reverse Linked List) |
 | Trước khi tháo móc, ghi nhớ toa sau là toa nào | `next = cur.next` |
-| Một toa trống đỗ sẵn đầu đường ray để móc kết quả vào | [[concepts/dummy-node|nút giả]] (Merge Two Sorted Lists) |
+| Một toa trống đỗ sẵn đầu đường ray để móc kết quả vào | [[concepts/dummy-node\|nút giả]] (Merge Two Sorted Lists) |
 | Hai đoàn đã xếp theo số hiệu, ghép thành một bằng cách lấy toa số nhỏ hơn ở đầu mỗi đoàn | trộn hai danh sách đã sắp |
-| Hai người đi dọc đoàn, một người đi gấp đôi; đường ray khép vòng thì người nhanh đuổi kịp người chậm | [[concepts/fast-slow-pointers|con trỏ chậm và nhanh]] (Linked List Cycle) |
+| Hai người đi dọc đoàn, một người đi gấp đôi; đường ray khép vòng thì người nhanh đuổi kịp người chậm | [[concepts/fast-slow-pointers\|con trỏ chậm và nhanh]] (Linked List Cycle) |
 | Người nhanh tới cuối thì người chậm đứng ở toa giữa | tìm nút giữa (Reorder List) |
 | Hai người đi cách nhau đúng n toa; người trước tới cuối thì người sau đứng trước toa thứ n tính từ cuối | hai con trỏ cách nhau n bước (Remove Nth Node From End) |
 

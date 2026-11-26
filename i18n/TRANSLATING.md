@@ -445,6 +445,30 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | vạch ngăn tầng | level marker |
 | duyệt theo chiều sâu | depth-first search (DFS) |
 | mang trạng thái xuống | carry state down |
+| danh sách kề | adjacency list |
+| bảng bản sao, sổ cũ → mới | clone map, old → new map |
+| đi ngược từ đích | reverse reachability, walk backward from the target |
+| đồ thị ẩn | implicit graph |
+| BFS hai đầu | bidirectional BFS |
+| xô theo mẫu | pattern buckets |
+| so từng cặp | compare every pair |
+| sổ đã thăm | visited log, visited set |
+| đồ thị vô hướng | undirected graph |
+| đỉnh, cạnh (đồ thị) | vertex, edge |
+| sao chép sâu, sao chép nông | deep copy, shallow copy |
+| danh tính đối tượng | object identity |
+| bị bao kín | surrounded |
+| leo dốc, ngược dòng | uphill, against the flow |
+| ô bờ, viền, biên | border cell, border |
+| gieo bờ | seed the border |
+| tập với tới | reached set |
+| vùng bị vây | surrounded region |
+| sửa tại chỗ | in place |
+| nút ảo | virtual node |
+| tô từng vùng | region fill, fill one region at a time |
+| gạch (một từ) | cross out (a word) |
+| từ ứng viên | candidate word |
+| từ điển dày, thưa | dense dictionary, sparse dictionary |
 | nút tốt | good node |
 | trạng thái đường đi | path state |
 | kỷ lục của đường đi | path maximum, the path's record |

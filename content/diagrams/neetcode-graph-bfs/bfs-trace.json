@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "BFS trên đồ thị sáu nhà, từng bước",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-graph-bfs/bfs-trace.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Đọc hoặc ghi"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "bfs",
+      "type": "backend",
+      "label": "Người đi phát tin",
+      "sublabel": "vòng lặp BFS"
+    },
+    {
+      "id": "adj",
+      "type": "frontend",
+      "label": "Bảng chỉ đường",
+      "sublabel": "danh sách kề"
+    },
+    {
+      "id": "seen",
+      "type": "database",
+      "label": "Sổ đã ghé",
+      "sublabel": "visited + khoảng cách, hàng đợi Q"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "bfs",
+      "to": "seen",
+      "y": 165,
+      "label": "Ghi A vào sổ rồi xếp A vào hàng",
+      "variant": "default",
+      "note": "dist A = 0; Q = [A]"
+    },
+    {
+      "id": "step-2",
+      "from": "bfs",
+      "to": "adj",
+      "y": 243,
+      "label": "Lấy A ra, hỏi bảng chỉ đường",
+      "variant": "default",
+      "note": "adj[A] = [B, C]"
+    },
+    {
+      "id": "step-3",
+      "from": "bfs",
+      "to": "seen",
+      "y": 321,
+      "label": "B, C chưa có trong sổ: ghi và xếp hàng",
+      "variant": "default",
+      "note": "dist B = C = 1; Q = [B, C]"
+    },
+    {
+      "id": "step-4",
+      "from": "bfs",
+      "to": "adj",
+      "y": 399,
+      "label": "Lấy B ra, hỏi bảng chỉ đường",
+      "variant": "default",
+      "note": "adj[B] = [A, D]"
+    },
+    {
+      "id": "step-5",
+      "from": "bfs",
+      "to": "seen",
+      "y": 477,
+      "label": "A đã có trong sổ; ghi D",
+      "variant": "default",
+      "note": "dist D = 2; Q = [C, D]"
+    },
+    {
+      "id": "step-6",
+      "from": "bfs",
+      "to": "adj",
+      "y": 555,
+      "label": "Lấy C ra, hỏi bảng chỉ đường",
+      "variant": "default",
+      "note": "adj[C] = [A, D, E]"
+    },
+    {
+      "id": "step-7",
+      "from": "bfs",
+      "to": "seen",
+      "y": 633,
+      "label": "D đã ghi từ lúc ở B nên bỏ qua; ghi E",
+      "variant": "default",
+      "note": "dist E = 2; Q = [D, E]"
+    },
+    {
+      "id": "step-8",
+      "from": "bfs",
+      "to": "seen",
+      "y": 711,
+      "label": "Lấy D ra: ghi F; E và F không mở nhà mới",
+      "variant": "default",
+      "note": "dist F = 3; Q = []"
+    },
+    {
+      "id": "step-9",
+      "from": "seen",
+      "to": "bfs",
+      "y": 789,
+      "label": "Hàng rỗng: mỗi nhà vào hàng đúng một lần",
+      "variant": "return",
+      "note": "A0 B1 C1 D2 E2 F3"
+    }
+  ]
+}

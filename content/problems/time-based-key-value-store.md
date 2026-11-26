@@ -42,7 +42,7 @@ Giá xăng không đổi mỗi ngày. Mỗi lần điều chỉnh, cửa hàng g
 | Các dòng ghi theo thứ tự ngày, dòng mới luôn ở cuối | timestamp tăng dần, `set` chỉ nối thêm |
 | "Ngày 7 giá bao nhiêu?" | `get(key, 7)` |
 | Lần điều chỉnh gần nhất không sau ngày 7 | mốc cuối cùng ≤ t, tức cận trên − 1 |
-| Lật giữa bảng, xem ngày đó trước hay sau ngày 7, bỏ nửa kia | [[concepts/binary-search|chia đôi]] |
+| Lật giữa bảng, xem ngày đó trước hay sau ngày 7, bỏ nửa kia | [[concepts/binary-search\|chia đôi]] |
 | Hỏi ngày 0, trước lần điều chỉnh đầu tiên | chưa có giá: trả `""` |
 | Nhìn nhầm sang lần điều chỉnh **sau** ngày 7 | cận dưới: giá trị từ tương lai |
 

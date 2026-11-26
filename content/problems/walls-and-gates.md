@@ -36,7 +36,7 @@ Mỗi cổng mở một đội treo biển. Các đội cùng xuất phát rồi
 | Cửa giữa hai phòng chung tường | Cạnh ngang hoặc dọc |
 | Bức tường kín | Ô bị chặn |
 | Các đội cùng xuất phát ở cổng | BFS đa nguồn, mọi nguồn ở tầng 0 |
-| Treo biển ngay khi nhận phòng | [[concepts/mark-on-enqueue|Đánh dấu khi đưa vào hàng đợi]] |
+| Treo biển ngay khi nhận phòng | [[concepts/mark-on-enqueue\|Đánh dấu khi đưa vào hàng đợi]] |
 | Phòng cô lập giữ biển trống | Phòng không tới được cổng giữ `INF` |
 
 ```mermaid

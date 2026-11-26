@@ -43,13 +43,13 @@ Station 1 was one train at a platform. Station 2 is a **rail yard**, where peopl
 
 | Everyday life | Concept |
 |---|---|
-| A holding track with room for a few cars; a car just used goes to the front, and when it is full the car at the back is hauled away | [[en/concepts/lru-va-lfu|LRU]] (LRU Cache) |
+| A holding track with room for a few cars; a car just used goes to the front, and when it is full the car at the back is hauled away | [[en/concepts/lru-va-lfu\|LRU]] (LRU Cache) |
 | A lookup sheet: "car 7 is parked here" | hash map from key to node |
-| Each car is coupled to both the car ahead and the car behind, so removing one from the middle does not mean walking from the front | [[en/concepts/doubly-linked-list|doubly linked list]] |
-| Copying a train where each car also has a rope tied to some other car: couple each copy right behind its original, and tie the copy's rope to "the car right behind the original rope's target" | [[en/concepts/node-interleaving|node interleaving]] (Copy List with Random Pointer) |
-| Two trains carrying digits, added car by car, the carry passed to the next pair | [[en/concepts/carry-propagation|carry propagation]] (Add Two Numbers) |
+| Each car is coupled to both the car ahead and the car behind, so removing one from the middle does not mean walking from the front | [[en/concepts/doubly-linked-list\|doubly linked list]] |
+| Copying a train where each car also has a rope tied to some other car: couple each copy right behind its original, and tie the copy's rope to "the car right behind the original rope's target" | [[en/concepts/node-interleaving\|node interleaving]] (Copy List with Random Pointer) |
+| Two trains carrying digits, added car by car, the carry passed to the next pair | [[en/concepts/carry-propagation\|carry propagation]] (Add Two Numbers) |
 | Each car says "go on to car X"; when two cars point to the same target, following the signs goes in circles, and the shared target is where the loop starts | fast and slow pointers on an array (Find the Duplicate Number) |
-| Several numbered trains, joined in pairs like a knockout tournament until one is left | [[en/concepts/divide-and-conquer-merge|divide-and-conquer merge]] (Merge k Sorted Lists) |
+| Several numbered trains, joined in pairs like a knockout tournament until one is left | [[en/concepts/divide-and-conquer-merge\|divide-and-conquer merge]] (Merge k Sorted Lists) |
 | Turning around every block of k cars, leaving a short last block as is | group reversal (Reverse Nodes in k-Group) |
 
 ```mermaid
@@ -140,8 +140,8 @@ That is exactly Linked List Cycle II: in phase 1, [[en/concepts/fast-slow-pointe
 | Approach | Time | Notes |
 |---|---|---|
 | Merge one by one into a single result | O(N · k) | the result keeps growing, the first nodes are walked over k times |
-| Heap of the k list heads ([[en/concepts/k-way-merge|k-way merge]]) | O(N log k) | each step takes the smallest of the k heads |
-| [[en/concepts/divide-and-conquer-merge|Merge in pairs]] | O(N log k) | log k rounds, each touching every node once; no heap needed |
+| Heap of the k list heads ([[en/concepts/k-way-merge\|k-way merge]]) | O(N log k) | each step takes the smallest of the k heads |
+| [[en/concepts/divide-and-conquer-merge\|Merge in pairs]] | O(N log k) | log k rounds, each touching every node once; no heap needed |
 
 Merging in pairs works like a knockout tournament: round 1 merges list 0 with 1, 2 with 3, …; the next round merges those results. Each node goes through log₂ k merges. Measured with k lists of 100 random sorted nodes each (mulberry32, median of 5):
 

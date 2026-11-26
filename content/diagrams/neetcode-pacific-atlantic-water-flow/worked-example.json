@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đi ngược từ hai bờ rồi lấy phần giao",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-pacific-atlantic-water-flow/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Lưới độ cao 3×3"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Gieo bờ Thái Bình Dương",
+      "variant": "default",
+      "note": "1 2 3 | 1 8 7"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Leo lên ô cao hơn hoặc bằng",
+      "variant": "default",
+      "note": "2→9, 3→4→5→6"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Thái Bình Dương với tới cả 9 ô",
+      "variant": "default",
+      "note": "pac = 9"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Gieo bờ Đại Tây Dương",
+      "variant": "default",
+      "note": "7 6 5 | 3 4 5"
+    },
+    {
+      "id": "step-5",
+      "from": "algorithm",
+      "to": "state",
+      "y": 477,
+      "label": "Leo tiếp từ 7 và 6",
+      "variant": "default",
+      "note": "7→8, 6→9; atl = 7"
+    },
+    {
+      "id": "step-6",
+      "from": "algorithm",
+      "to": "state",
+      "y": 555,
+      "label": "Ô 1 và 2 thấp hơn bờ đông",
+      "variant": "default",
+      "note": "3→2: 2 < 3, dừng"
+    },
+    {
+      "id": "step-7",
+      "from": "state",
+      "to": "algorithm",
+      "y": 633,
+      "label": "Giao hai tập: 7 ô",
+      "variant": "return",
+      "note": "mọi ô trừ (0,0), (0,1)"
+    }
+  ]
+}

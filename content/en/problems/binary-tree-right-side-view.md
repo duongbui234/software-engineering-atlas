@@ -48,10 +48,10 @@ A class lines up for a group photo. The teacher stands alone in the front row. E
 | A row of people | a level, the nodes of one depth |
 | The person at the far right of the row | the node seen from the right |
 | The person behind to the left, to the right | left child, right child |
-| Call this whole row before the next | [[en/concepts/breadth-first-search|BFS]] with a queue |
-| Count how many are in the current row before calling | [[en/concepts/level-size-snapshot|level size snapshot]] |
+| Call this whole row before the next | [[en/concepts/breadth-first-search\|BFS]] with a queue |
+| Count how many are in the current row before calling | [[en/concepts/level-size-snapshot\|level size snapshot]] |
 | A newcomer cuts into the row being shot | the trap of re-reading the queue length while it grows |
-| Walk down the right side first, record rows with nobody yet | right-first DFS, [[en/concepts/pre-order-traversal|pre-order]] node, right, left |
+| Walk down the right side first, record rows with nobody yet | right-first DFS, [[en/concepts/pre-order-traversal\|pre-order]] node, right, left |
 | The list "which rows already have someone seen" | `depth == res.length`: state carried on the way down |
 | Only follow the right shoulder | misconception: only follow right pointers |
 

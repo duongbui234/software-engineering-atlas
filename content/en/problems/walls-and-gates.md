@@ -37,7 +37,7 @@ A crew starts at each gate. All crews leave together and move one room per round
 | A door between rooms with a common wall | A horizontal or vertical edge |
 | A solid wall | A blocked cell |
 | All crews leave from their gates together | Multi-source BFS, with every source at layer 0 |
-| Hang a sign as soon as a room is assigned | [[en/concepts/mark-on-enqueue|Mark on enqueue]] |
+| Hang a sign as soon as a room is assigned | [[en/concepts/mark-on-enqueue\|Mark on enqueue]] |
 | A cut-off room keeps its empty sign | A room unreachable from every gate keeps `INF` |
 
 ```mermaid

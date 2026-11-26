@@ -47,10 +47,10 @@ Một lớp học xếp hàng chụp ảnh tập thể. Cô giáo đứng một 
 | Một hàng người | một tầng, các nút cùng độ sâu |
 | Người ngoài cùng bên phải của hàng | nút nhìn thấy từ bên phải |
 | Người phía sau bên trái, bên phải | con trái, con phải |
-| Gọi hết hàng này rồi mới tới hàng sau | [[concepts/breadth-first-search|BFS]] với hàng đợi |
-| Đếm hàng hiện tại có mấy người trước khi gọi | [[concepts/level-size-snapshot|chụp cỡ tầng]] |
+| Gọi hết hàng này rồi mới tới hàng sau | [[concepts/breadth-first-search\|BFS]] với hàng đợi |
+| Đếm hàng hiện tại có mấy người trước khi gọi | [[concepts/level-size-snapshot\|chụp cỡ tầng]] |
 | Người mới dẫn tới chen vào hàng đang chụp | bẫy đọc lại độ dài hàng đợi trong lúc nó lớn lên |
-| Đi dọc theo phía phải trước, ghi hàng chưa có ai | DFS phải trước, [[concepts/pre-order-traversal|tiền thứ tự]] nút, phải, trái |
+| Đi dọc theo phía phải trước, ghi hàng chưa có ai | DFS phải trước, [[concepts/pre-order-traversal\|tiền thứ tự]] nút, phải, trái |
 | Danh sách "hàng nào đã có người được thấy" | `depth == res.length`: trạng thái mang theo khi đi xuống |
 | Chỉ đi theo vai phải | hiểu sai: chỉ đi theo con trỏ phải |
 

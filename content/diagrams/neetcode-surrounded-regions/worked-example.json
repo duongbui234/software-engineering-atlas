@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tìm vùng bị vây bằng cách đi ngược từ viền",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-surrounded-regions/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "Hàng đợi"
+    },
+    {
+      "id": "board",
+      "type": "database",
+      "label": "Bàn cờ X và O"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "board",
+      "y": 165,
+      "label": "Đi vòng quanh viền, gặp O ở biên",
+      "variant": "default",
+      "note": "(3,4), (4,1) → S"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "queue",
+      "y": 243,
+      "label": "Đưa hai ô biên vào hàng đợi",
+      "variant": "default",
+      "note": "hàng đợi: (3,4), (4,1)"
+    },
+    {
+      "id": "step-3",
+      "from": "queue",
+      "to": "algorithm",
+      "y": 321,
+      "label": "Lấy (3,4), lan sang ô O kề",
+      "variant": "default",
+      "note": "(3,3) → S"
+    },
+    {
+      "id": "step-4",
+      "from": "queue",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Lấy (4,1), lan sang ô O kề",
+      "variant": "default",
+      "note": "(3,1) → S"
+    },
+    {
+      "id": "step-5",
+      "from": "queue",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Lấy (3,3), (3,1): hết ô O kề",
+      "variant": "default",
+      "note": "hàng đợi rỗng"
+    },
+    {
+      "id": "step-6",
+      "from": "algorithm",
+      "to": "board",
+      "y": 555,
+      "label": "Quét cuối: O còn lại bị vây",
+      "variant": "default",
+      "note": "(1,1), (1,2), (2,2) → X"
+    },
+    {
+      "id": "step-7",
+      "from": "board",
+      "to": "algorithm",
+      "y": 633,
+      "label": "Trả S về O, xong",
+      "variant": "return",
+      "note": "4 ô S → O"
+    }
+  ]
+}

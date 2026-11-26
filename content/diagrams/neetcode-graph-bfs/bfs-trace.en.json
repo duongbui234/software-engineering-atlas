@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "BFS on a six-house graph, step by step",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-graph-bfs/bfs-trace.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Read or write"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "bfs",
+      "type": "backend",
+      "label": "The messenger",
+      "sublabel": "the BFS loop"
+    },
+    {
+      "id": "adj",
+      "type": "frontend",
+      "label": "Signposts",
+      "sublabel": "adjacency list"
+    },
+    {
+      "id": "seen",
+      "type": "database",
+      "label": "Visit log",
+      "sublabel": "visited + distance, queue Q"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "bfs",
+      "to": "seen",
+      "y": 165,
+      "label": "Write A in the log, queue A",
+      "variant": "default",
+      "note": "dist A = 0; Q = [A]"
+    },
+    {
+      "id": "step-2",
+      "from": "bfs",
+      "to": "adj",
+      "y": 243,
+      "label": "Take A, read its signpost",
+      "variant": "default",
+      "note": "adj[A] = [B, C]"
+    },
+    {
+      "id": "step-3",
+      "from": "bfs",
+      "to": "seen",
+      "y": 321,
+      "label": "B, C not in the log: write and queue",
+      "variant": "default",
+      "note": "dist B = C = 1; Q = [B, C]"
+    },
+    {
+      "id": "step-4",
+      "from": "bfs",
+      "to": "adj",
+      "y": 399,
+      "label": "Take B, read its signpost",
+      "variant": "default",
+      "note": "adj[B] = [A, D]"
+    },
+    {
+      "id": "step-5",
+      "from": "bfs",
+      "to": "seen",
+      "y": 477,
+      "label": "A is in the log; write D",
+      "variant": "default",
+      "note": "dist D = 2; Q = [C, D]"
+    },
+    {
+      "id": "step-6",
+      "from": "bfs",
+      "to": "adj",
+      "y": 555,
+      "label": "Take C, read its signpost",
+      "variant": "default",
+      "note": "adj[C] = [A, D, E]"
+    },
+    {
+      "id": "step-7",
+      "from": "bfs",
+      "to": "seen",
+      "y": 633,
+      "label": "D was written from B, skip; write E",
+      "variant": "default",
+      "note": "dist E = 2; Q = [D, E]"
+    },
+    {
+      "id": "step-8",
+      "from": "bfs",
+      "to": "seen",
+      "y": 711,
+      "label": "Take D: write F; E and F add nothing",
+      "variant": "default",
+      "note": "dist F = 3; Q = []"
+    },
+    {
+      "id": "step-9",
+      "from": "seen",
+      "to": "bfs",
+      "y": 789,
+      "label": "Queue empty: each house queued once",
+      "variant": "return",
+      "note": "A0 B1 C1 D2 E2 F3"
+    }
+  ]
+}

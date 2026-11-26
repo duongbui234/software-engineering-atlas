@@ -39,11 +39,11 @@ Imagine each room has a number on its sign, two doors marked Left and Right lead
 
 | Everyday life | Concept |
 |---|---|
-| Ledger A records the room sign before its children, and ledger B records it between branches | [[en/concepts/tree-reconstruction|Tree reconstruction]] from preorder and inorder |
-| Mark the boundary at the room sign in ledger B | An [[en/concepts/inorder-interval|inorder interval]] for each subtree |
-| Draw a dash for a door with no room behind it | A [[en/concepts/null-marker|null marker]] preserves left and right |
-| Pack the ledger, including room numbers and dashes, into one line | [[en/concepts/tree-serialization|Tree serialization]] for reading it back |
-| A route can turn between two doors in a room, but a route that uses the staircase has room for only one door | The [[en/concepts/downward-path-gain|downward path gain]] sent up to the parent |
+| Ledger A records the room sign before its children, and ledger B records it between branches | [[en/concepts/tree-reconstruction\|Tree reconstruction]] from preorder and inorder |
+| Mark the boundary at the room sign in ledger B | An [[en/concepts/inorder-interval\|inorder interval]] for each subtree |
+| Draw a dash for a door with no room behind it | A [[en/concepts/null-marker\|null marker]] preserves left and right |
+| Pack the ledger, including room numbers and dashes, into one line | [[en/concepts/tree-serialization\|Tree serialization]] for reading it back |
+| A route can turn between two doors in a room, but a route that uses the staircase has room for only one door | The [[en/concepts/downward-path-gain\|downward path gain]] sent up to the parent |
 
 ```mermaid
 flowchart TB
@@ -91,9 +91,9 @@ At each node, use `max(0, gain(child))` so a child branch that reduces the sum c
 
 | Problem | What changes |
 |---|---|
-| [[en/problems/construct-binary-tree-from-preorder-and-inorder-traversal|LC-0105 · Construct Binary Tree]] | Read the root in preorder and use its inorder position to split the two calls. |
-| [[en/problems/binary-tree-maximum-path-sum|LC-0124 · Binary Tree Maximum Path Sum]] | Traverse in postorder, return one branch, and try combining both branches in the answer. |
-| [[en/problems/serialize-and-deserialize-binary-tree|LC-0297 · Serialize and Deserialize Binary Tree]] | Use a null marker so each reader call knows when a subtree ends. |
+| [[en/problems/construct-binary-tree-from-preorder-and-inorder-traversal\|LC-0105 · Construct Binary Tree]] | Read the root in preorder and use its inorder position to split the two calls. |
+| [[en/problems/binary-tree-maximum-path-sum\|LC-0124 · Binary Tree Maximum Path Sum]] | Traverse in postorder, return one branch, and try combining both branches in the answer. |
+| [[en/problems/serialize-and-deserialize-binary-tree\|LC-0297 · Serialize and Deserialize Binary Tree]] | Use a null marker so each reader call knows when a subtree ends. |
 
 ## Runnable example
 

@@ -43,7 +43,7 @@ Fuel prices do not change every day. Each time they change, the station writes a
 | Lines are written in date order; a new line always goes at the bottom | increasing timestamps, `set` only appends |
 | "What was the price on day 7?" | `get(key, 7)` |
 | The latest change no later than day 7 | the last entry ≤ t, i.e. upper bound − 1 |
-| Look in the middle of the board, see whether that date is before or after day 7, drop the other half | [[en/concepts/binary-search|binary search]] |
+| Look in the middle of the board, see whether that date is before or after day 7, drop the other half | [[en/concepts/binary-search\|binary search]] |
 | Asking about day 0, before the first change | no price yet: return `""` |
 | Reading the change **after** day 7 by mistake | lower bound: a value from the future |
 

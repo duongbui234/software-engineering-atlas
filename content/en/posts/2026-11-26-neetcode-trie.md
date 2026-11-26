@@ -38,11 +38,11 @@ Imagine a filing cabinet with a compartment for each letter. After opening compa
 
 | Everyday life | Concept |
 |---|---|
-| Cards with the same beginning use the same starting compartments | A [[en/concepts/trie|trie]] shares prefix paths |
-| A registration card sits inside a compartment | A [[en/concepts/terminal-marker|terminal marker]] distinguishes word and prefix queries |
-| For a smudged letter, try each available subcompartment | [[en/concepts/wildcard-branching|Wildcard branching]] |
-| If the next compartment is missing, abandon that route | [[en/concepts/trie-prefix-pruning|Prefix pruning]] |
-| Build 26 compartments up front or fit only the ones used | [[en/concepts/sparse-trie-children|Sparse child storage]] and fixed child arrays |
+| Cards with the same beginning use the same starting compartments | A [[en/concepts/trie\|trie]] shares prefix paths |
+| A registration card sits inside a compartment | A [[en/concepts/terminal-marker\|terminal marker]] distinguishes word and prefix queries |
+| For a smudged letter, try each available subcompartment | [[en/concepts/wildcard-branching\|Wildcard branching]] |
+| If the next compartment is missing, abandon that route | [[en/concepts/trie-prefix-pruning\|Prefix pruning]] |
+| Build 26 compartments up front or fit only the ones used | [[en/concepts/sparse-trie-children\|Sparse child storage]] and fixed child arrays |
 
 ```mermaid
 flowchart TB
@@ -88,9 +88,9 @@ Building the trie processes O(S) characters, where S is the total word length. F
 
 | Problem | What changes |
 |---|---|
-| [[en/problems/implement-trie-prefix-tree|LC-0208 · Implement Trie]] | Follow a string and choose between a terminal check and a path check. |
-| [[en/problems/design-add-and-search-words-data-structure|LC-0211 · Design Add and Search Words]] | At a dot, try the existing children and carry the pattern position. |
-| [[en/problems/word-search-ii|LC-0212 · Word Search II]] | Search board paths, carry a trie node, and restore cells during backtracking. |
+| [[en/problems/implement-trie-prefix-tree\|LC-0208 · Implement Trie]] | Follow a string and choose between a terminal check and a path check. |
+| [[en/problems/design-add-and-search-words-data-structure\|LC-0211 · Design Add and Search Words]] | At a dot, try the existing children and carry the pattern position. |
+| [[en/problems/word-search-ii\|LC-0212 · Word Search II]] | Search board paths, carry a trie node, and restore cells during backtracking. |
 
 ## Runnable example
 

@@ -38,11 +38,11 @@ Tưởng tượng mỗi phòng có biển số, hai cửa xuống phòng con ghi
 
 | Đời thường | Khái niệm |
 |---|---|
-| Sổ A luôn ghi biển phòng trước các phòng con, sổ B ghi biển ở giữa hai nhánh | [[concepts/tree-reconstruction|Dựng lại cây]] từ preorder và inorder |
-| Đánh dấu ranh giới trong sổ B ở đúng biển phòng | [[concepts/inorder-interval|Khoảng inorder]] cho mỗi cây con |
-| Ghi một dấu gạch ứng với cửa không có phòng | [[concepts/null-marker|Dấu con trống]] giữ bên trái và phải |
-| Gói cả sổ, gồm số phòng và dấu gạch, thành một dòng | [[concepts/tree-serialization|Mã hóa cây]] để đọc lại |
-| Hành trình có thể bẻ qua hai cửa ở một phòng, nhưng khi nối với cầu thang chỉ đi qua một cửa | [[concepts/downward-path-gain|Tổng nhánh đi xuống]] trả lên cha |
+| Sổ A luôn ghi biển phòng trước các phòng con, sổ B ghi biển ở giữa hai nhánh | [[concepts/tree-reconstruction\|Dựng lại cây]] từ preorder và inorder |
+| Đánh dấu ranh giới trong sổ B ở đúng biển phòng | [[concepts/inorder-interval\|Khoảng inorder]] cho mỗi cây con |
+| Ghi một dấu gạch ứng với cửa không có phòng | [[concepts/null-marker\|Dấu con trống]] giữ bên trái và phải |
+| Gói cả sổ, gồm số phòng và dấu gạch, thành một dòng | [[concepts/tree-serialization\|Mã hóa cây]] để đọc lại |
+| Hành trình có thể bẻ qua hai cửa ở một phòng, nhưng khi nối với cầu thang chỉ đi qua một cửa | [[concepts/downward-path-gain\|Tổng nhánh đi xuống]] trả lên cha |
 
 ```mermaid
 flowchart TB
@@ -90,9 +90,9 @@ Tại mỗi nút, dùng `max(0, gain(con))` để có quyền bỏ nhánh làm g
 
 | Bài | Điểm khác |
 |---|---|
-| [[problems/construct-binary-tree-from-preorder-and-inorder-traversal|LC-0105 · Construct Binary Tree]] | Đọc gốc theo preorder và dùng vị trí trong inorder để chia hai lời gọi. |
-| [[problems/binary-tree-maximum-path-sum|LC-0124 · Binary Tree Maximum Path Sum]] | Đi theo hậu thứ tự, trả một nhánh và thử ghép hai nhánh vào đáp án. |
-| [[problems/serialize-and-deserialize-binary-tree|LC-0297 · Serialize and Deserialize Binary Tree]] | Dùng dấu con trống để mỗi lời gọi bộ đọc biết lúc nào cây con kết thúc. |
+| [[problems/construct-binary-tree-from-preorder-and-inorder-traversal\|LC-0105 · Construct Binary Tree]] | Đọc gốc theo preorder và dùng vị trí trong inorder để chia hai lời gọi. |
+| [[problems/binary-tree-maximum-path-sum\|LC-0124 · Binary Tree Maximum Path Sum]] | Đi theo hậu thứ tự, trả một nhánh và thử ghép hai nhánh vào đáp án. |
+| [[problems/serialize-and-deserialize-binary-tree\|LC-0297 · Serialize and Deserialize Binary Tree]] | Dùng dấu con trống để mỗi lời gọi bộ đọc biết lúc nào cây con kết thúc. |
 
 ## Ví dụ chạy được
 

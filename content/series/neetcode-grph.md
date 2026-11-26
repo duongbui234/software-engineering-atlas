@@ -9,6 +9,7 @@ stations:
   - name: "Duyệt lưới"
     concepts: [Grid Graph, Flood Fill, Connected Component, Multi-source BFS, Mark on Enqueue]
   - name: "Duyệt đồ thị và BFS"
+    concepts: [Adjacency List, Clone Map, Reverse Reachability, Implicit Graph, Bidirectional BFS]
   - name: "Sắp xếp topo"
   - name: "Union-Find"
   - name: "Đường đi ngắn nhất"

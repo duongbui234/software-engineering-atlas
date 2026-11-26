@@ -8,7 +8,9 @@ draft: false
 lang: en
 stations:
   - name: "One-Dimensional Recurrences"
+    concepts: ["DP State", "Recurrence Relation", "Memoization", "Rolling State"]
   - name: "Expanding Palindromes"
+    concepts: ["Palindrome Center", "Palindrome Radius"]
   - name: "Knapsack and Coin Change"
   - name: "Word Break and Increasing Subsequences"
   - name: "Grids and Two Strings"

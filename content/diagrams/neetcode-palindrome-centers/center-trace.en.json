@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Expand from the gap between two b's",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-palindrome-centers/center-trace.en.html"
+  },
+  "participants": [
+    {
+      "id": "trace",
+      "type": "backend",
+      "label": "Pair of probes",
+      "sublabel": "left, right"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Results",
+      "sublabel": "length and count"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "trace",
+      "to": "state",
+      "y": 164,
+      "label": "Compare b and b",
+      "variant": "default",
+      "note": "s[2] = s[3]"
+    },
+    {
+      "id": "step-2",
+      "from": "state",
+      "to": "trace",
+      "y": 241,
+      "label": "Record bb",
+      "variant": "return",
+      "note": "length = 2, count = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "trace",
+      "to": "state",
+      "y": 318,
+      "label": "Expand to a and a",
+      "variant": "default",
+      "note": "s[1] = s[4]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "trace",
+      "y": 395,
+      "label": "Record abba",
+      "variant": "return",
+      "note": "length = 4, count = 2"
+    },
+    {
+      "id": "step-5",
+      "from": "trace",
+      "to": "state",
+      "y": 472,
+      "label": "Stop at x and q",
+      "variant": "default",
+      "note": "s[0] ≠ s[5]"
+    }
+  ]
+}

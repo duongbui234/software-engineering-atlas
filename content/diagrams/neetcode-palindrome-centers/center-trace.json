@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Mở từ khe giữa hai chữ b",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-palindrome-centers/center-trace.html"
+  },
+  "participants": [
+    {
+      "id": "trace",
+      "type": "backend",
+      "label": "Cặp đầu dò",
+      "sublabel": "left, right"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Sổ kết quả",
+      "sublabel": "độ dài và số đoạn"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "trace",
+      "to": "state",
+      "y": 164,
+      "label": "So hai chữ b",
+      "variant": "default",
+      "note": "s[2] = s[3]"
+    },
+    {
+      "id": "step-2",
+      "from": "state",
+      "to": "trace",
+      "y": 241,
+      "label": "Ghi nhận bb",
+      "variant": "return",
+      "note": "length = 2, count = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "trace",
+      "to": "state",
+      "y": 318,
+      "label": "Mở thêm, thấy a và a",
+      "variant": "default",
+      "note": "s[1] = s[4]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "trace",
+      "y": 395,
+      "label": "Ghi nhận abba",
+      "variant": "return",
+      "note": "length = 4, count = 2"
+    },
+    {
+      "id": "step-5",
+      "from": "trace",
+      "to": "state",
+      "y": 472,
+      "label": "Gặp x và q rồi dừng",
+      "variant": "default",
+      "note": "s[0] ≠ s[5]"
+    }
+  ]
+}

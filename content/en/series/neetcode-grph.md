@@ -14,8 +14,11 @@ stations:
   - name: "Topological Sort"
     concepts: [Directed Acyclic Graph, Topological Sort, In-degree, Three-Color DFS, Precedence Constraint]
   - name: "Union-Find"
+    concepts: ["Disjoint Set Union", "Path Compression", "Union by Size"]
   - name: "Shortest Paths"
+    concepts: ["Dijkstra", "Minimax Path", "Edge-Layer Relaxation"]
   - name: "Spanning Trees and Itineraries"
+    concepts: ["Minimum Spanning Tree", "Cut Property", "Eulerian Trail", "Hierholzer's Algorithm"]
 ---
 
 ## If you are just starting

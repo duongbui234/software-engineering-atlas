@@ -135,7 +135,7 @@ Mention another line as "the Caching line", "the RabbitMQ line" and so on in run
 
 ## Concept titles
 
-A concept note's English `title` equals its Vietnamese `title` when that title is already English (`ACID`, `Cache Stampede`, `Quorum Queue`…). The 12 Vietnamese titles map to these, and hubs must list the same strings:
+A concept note's English `title` equals its Vietnamese `title` when that title is already English (`ACID`, `Cache Stampede`, `Quorum Queue`…). Vietnamese titles map to these, and hubs must list the same strings:
 
 | Vietnamese title | English title |
 |---|---|
@@ -151,6 +151,8 @@ A concept note's English `title` equals its Vietnamese `title` when that title i
 | Queue và Log | Queue and Log |
 | SCAN và KEYS | SCAN and KEYS |
 | Hàng chờ ảo | Virtual Queue |
+| Đường đi minimax | Minimax Path |
+| Relaxation theo lớp cạnh | Edge-Layer Relaxation |
 
 ## Technical terms
 
@@ -220,6 +222,10 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | đồng bộ lại | resynchronize |
 | khung (RFC 6455) / gói (Engine.IO, Socket.IO) | frame / packet |
 | bộ nhớ phụ | auxiliary space |
+| trạng thái DP | DP state |
+| công thức truy hồi | recurrence relation |
+| trạng thái cuộn | rolling state |
+| điền bảng từ dưới lên | bottom-up tabulation |
 | vun lên / vun xuống (heap) | sift up / sift down |
 | phân hoạch ba nhánh | three-way partition |
 | dạng dựng sẵn / dạng tách (Unicode) | precomposed / decomposed form |

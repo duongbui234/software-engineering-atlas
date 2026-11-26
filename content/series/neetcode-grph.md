@@ -13,8 +13,11 @@ stations:
   - name: "Sắp xếp topo"
     concepts: [Directed Acyclic Graph, Topological Sort, In-degree, Three-Color DFS, Precedence Constraint]
   - name: "Union-Find"
+    concepts: ["Disjoint Set Union", "Path Compression", "Union by Size"]
   - name: "Đường đi ngắn nhất"
+    concepts: ["Dijkstra", "Đường đi minimax", "Relaxation theo lớp cạnh"]
   - name: "Cây khung và hành trình"
+    concepts: ["Minimum Spanning Tree", "Cut Property", "Eulerian Trail", "Hierholzer's Algorithm"]
 ---
 
 ## Nếu bạn mới bắt đầu

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Prim nối bốn điểm",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-spanning-tree-itinerary/prim-trace.html"
+  },
+  "participants": [
+    {
+      "id": "trace",
+      "type": "backend",
+      "label": "Người nối dây",
+      "sublabel": "Prim"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Sổ giá nối",
+      "sublabel": "best"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "trace",
+      "to": "state",
+      "y": 164,
+      "label": "Bắt đầu ở A",
+      "variant": "default",
+      "note": "A(0,0), B(4,0), C(5,0), D(5,2)"
+    },
+    {
+      "id": "step-2",
+      "from": "state",
+      "to": "trace",
+      "y": 241,
+      "label": "Chọn B với giá 4",
+      "variant": "return",
+      "note": "best: B=4, C=5, D=7"
+    },
+    {
+      "id": "step-3",
+      "from": "trace",
+      "to": "state",
+      "y": 318,
+      "label": "Thử nối từ B",
+      "variant": "default",
+      "note": "best: C=1, D=3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "trace",
+      "y": 395,
+      "label": "Chọn C với giá 1",
+      "variant": "return",
+      "note": "A, B, C đã nối"
+    },
+    {
+      "id": "step-5",
+      "from": "trace",
+      "to": "state",
+      "y": 472,
+      "label": "Thử nối từ C",
+      "variant": "default",
+      "note": "best: D=2"
+    },
+    {
+      "id": "step-6",
+      "from": "state",
+      "to": "trace",
+      "y": 549,
+      "label": "Chọn D với giá 2",
+      "variant": "return",
+      "note": "4 + 1 + 2 = 7"
+    }
+  ]
+}

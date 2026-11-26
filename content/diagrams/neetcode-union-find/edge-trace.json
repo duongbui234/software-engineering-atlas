@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Hai đường trong cùng một nhóm",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-union-find/edge-trace.html",
+    "legend": {
+      "entries": {
+        "default": {
+          "label": "Cạnh mới"
+        },
+        "return": {
+          "label": "Kết quả tra sổ"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "reader",
+      "type": "backend",
+      "label": "Người đọc cạnh",
+      "sublabel": "redundantByDsu"
+    },
+    {
+      "id": "registry",
+      "type": "database",
+      "label": "Sổ nhóm",
+      "sublabel": "DisjointSet"
+    }
+  ],
+  "messages": [
+    {
+      "id": "edge-trace-1",
+      "from": "reader",
+      "to": "registry",
+      "y": 165,
+      "label": "Gửi cạnh thứ nhất",
+      "note": "union(1, 4)",
+      "variant": "default"
+    },
+    {
+      "id": "edge-trace-2",
+      "from": "registry",
+      "to": "reader",
+      "y": 240,
+      "label": "Gộp hai nhóm đơn",
+      "note": "root(1) = root(4) = 1",
+      "variant": "return"
+    },
+    {
+      "id": "edge-trace-3",
+      "from": "reader",
+      "to": "registry",
+      "y": 315,
+      "label": "Gửi cạnh thứ hai",
+      "note": "union(2, 4)",
+      "variant": "default"
+    },
+    {
+      "id": "edge-trace-4",
+      "from": "registry",
+      "to": "reader",
+      "y": 390,
+      "label": "Gắn nhóm nhỏ vào nhóm lớn",
+      "note": "parent[2] = 1, size[1] = 3",
+      "variant": "return"
+    },
+    {
+      "id": "edge-trace-5",
+      "from": "reader",
+      "to": "registry",
+      "y": 465,
+      "label": "Thử thêm đường giữa 1 và 2",
+      "note": "union(1, 2)",
+      "variant": "default"
+    },
+    {
+      "id": "edge-trace-6",
+      "from": "registry",
+      "to": "reader",
+      "y": 540,
+      "label": "Cùng gốc, cạnh này khép vòng",
+      "note": "root(1) = root(2) = 1 → false",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Cạnh thứ ba khép vòng",
+      "items": [
+        "Các cạnh đến sau có thể nối thêm đỉnh. Cạnh khép vòng đầu tiên đã là đáp án vì đề bảo đảm chỉ có một chu trình."
+      ]
+    }
+  ]
+}

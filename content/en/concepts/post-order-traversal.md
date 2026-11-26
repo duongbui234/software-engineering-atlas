@@ -14,3 +14,5 @@ A common pattern is a recursive function that **returns one quantity** to the pa
 Without recursion, post-order needs an explicit [[en/concepts/stack|stack]], and each node is pushed twice: the first time to push its two children, the second time (with a "children done" flag) to compute the node itself.
 
 Read more in [[en/posts/2026-11-25-neetcode-tree-recursion|station 3: Tree Recursion]].
+
+Read more in [[en/posts/2026-11-26-neetcode-tree-reconstruction|station 6: Building and Serializing Trees]].

@@ -13,3 +13,5 @@ Chiều ngược lại cũng đúng: một cây nhị phân là BST (không có 
 Bản không đệ quy dùng một [[concepts/stack|ngăn xếp]]: đi trái hết mức và đẩy từng nút, lấy nút trên cùng ra xử lý, rồi sang cây con phải của nó và lặp lại. Bản này **dừng được giữa chừng**, nên tìm phần tử nhỏ thứ k chỉ tốn O(h + k) chứ không phải O(n). Khác với [[concepts/post-order-traversal|hậu thứ tự]], nút được xử lý trước khi cây con phải được thăm.
 
 Đọc thêm trong bài [[posts/2026-11-25-neetcode-binary-search-tree|ga 4: Cây nhị phân tìm kiếm]].
+
+Đọc thêm trong bài [[posts/2026-11-26-neetcode-tree-reconstruction|ga 6: Dựng và mã hóa cây]].

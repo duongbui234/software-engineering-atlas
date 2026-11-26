@@ -14,3 +14,5 @@ The converse holds too: a binary tree is a BST (with no duplicate values) if and
 The non-recursive version uses a [[en/concepts/stack|stack]]: go left as far as possible pushing each node, pop the top node and handle it, then move to its right subtree and repeat. This version **can stop midway**, so finding the k-th smallest element costs only O(h + k) instead of O(n). Unlike [[en/concepts/post-order-traversal|post-order]], the node is handled before its right subtree is visited.
 
 Read more in [[en/posts/2026-11-25-neetcode-binary-search-tree|station 4: Binary Search Trees]].
+
+Read more in [[en/posts/2026-11-26-neetcode-tree-reconstruction|station 6: Building and Serializing Trees]].

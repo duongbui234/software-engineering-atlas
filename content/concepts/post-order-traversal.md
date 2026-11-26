@@ -13,3 +13,5 @@ Mẫu hay gặp là hàm đệ quy **trả về một đại lượng** cho cha 
 Không đệ quy thì hậu thứ tự cần một [[concepts/stack|ngăn xếp]] tự quản lý, mỗi nút được đẩy hai lần: lần đầu để đẩy hai con, lần sau (có cờ "đã thăm con") để tính chính nó.
 
 Đọc thêm trong bài [[posts/2026-11-25-neetcode-tree-recursion|ga 3: Đệ quy trên cây]].
+
+Đọc thêm trong bài [[posts/2026-11-26-neetcode-tree-reconstruction|ga 6: Dựng và mã hóa cây]].

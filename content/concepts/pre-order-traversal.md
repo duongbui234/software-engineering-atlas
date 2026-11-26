@@ -13,3 +13,5 @@ Kèm thêm độ sâu làm tham số, tiền thứ tự cũng dựng lại đư�
 Không đệ quy, tiền thứ tự dùng một [[concepts/stack|ngăn xếp]]: lấy nút ra, xử lý, đẩy con phải rồi con trái (để con trái ra trước). Thông tin mang xuống được đẩy kèm nút thành một cặp. Bản này chịu được cây lệch sâu mà đệ quy không chịu nổi (xem [[concepts/recursion-depth-limit|Recursion Depth Limit]]).
 
 Đọc thêm trong bài [[posts/2026-11-25-neetcode-level-order|ga 5: Duyệt theo tầng và mang trạng thái]].
+
+Đọc thêm trong bài [[posts/2026-11-26-neetcode-tree-reconstruction|ga 6: Dựng và mã hóa cây]].

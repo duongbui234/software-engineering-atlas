@@ -451,6 +451,18 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | khôi phục khi quay về | restore on return |
 | chuỗi không giảm, không tăng | non-decreasing chain, non-increasing chain |
 | truyền theo giá trị | pass by value |
+| dựng lại cây | tree reconstruction |
+| khoảng trung thứ tự | inorder interval |
+| bảng vị trí, chỉ mục vị trí | position index |
+| dấu con trống, dấu rỗng | null marker |
+| mã hóa cây | tree serialization |
+| chỗ chờ | pending slot |
+| bộ mã hóa/giải mã | codec |
+| phép thử đi-về | round-trip test |
+| tổng nhánh đi xuống, tổng tốt nhất trả lên | downward path gain |
+| nút cao nhất trên đường đi | highest node on the path |
+| khung ngăn xếp | stack frame |
+| tổng đường hoàn chỉnh | complete path score |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

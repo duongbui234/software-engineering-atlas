@@ -17,6 +17,7 @@ stations:
   - name: "Duyệt theo tầng và mang trạng thái"
     concepts: [Breadth-First Search, Level Size Snapshot, Pre-order Traversal, Path State]
   - name: "Dựng và mã hóa cây"
+    concepts: [Tree Reconstruction, Inorder Interval, Null Marker, Tree Serialization, Downward Path Gain]
   - name: "Trie"
 ---
 

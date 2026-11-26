@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Dựng cây bằng cách tách tại gốc",
+    "output": "content/diagrams/neetcode-tree-reconstruction/split-at-root.html",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    {
+      "id": "pre",
+      "type": "database",
+      "label": "Danh sách nút",
+      "sublabel": "preorder"
+    },
+    {
+      "id": "build",
+      "type": "backend",
+      "label": "Bộ dựng cây",
+      "sublabel": "visit(lo, hi)"
+    },
+    {
+      "id": "pos",
+      "type": "database",
+      "label": "Bảng vị trí",
+      "sublabel": "inorder index"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 424,
+      "label": "Tìm gốc và vị trí tách"
+    },
+    {
+      "from": 430,
+      "to": 598,
+      "label": "Đọc hết nhánh trái trước"
+    }
+  ],
+  "messages": [
+    {
+      "id": "next-root",
+      "from": "build",
+      "to": "pre",
+      "y": 180,
+      "variant": "default",
+      "label": "Đọc nút kế tiếp",
+      "note": "next = 0"
+    },
+    {
+      "id": "root",
+      "from": "pre",
+      "to": "build",
+      "y": 245,
+      "variant": "return",
+      "label": "Chọn gốc 8",
+      "note": "preorder = [8, 3, 6, 11, −2]"
+    },
+    {
+      "id": "locate",
+      "from": "build",
+      "to": "pos",
+      "y": 310,
+      "variant": "default",
+      "label": "Tìm vị trí của 8",
+      "note": "inorder = [3, 6, 8, −2, 11]"
+    },
+    {
+      "id": "split",
+      "from": "pos",
+      "to": "build",
+      "y": 375,
+      "variant": "emphasis",
+      "label": "Tách tại chỉ số 2",
+      "note": "trái [0, 2), phải [3, 5)"
+    },
+    {
+      "id": "left",
+      "from": "build",
+      "to": "pre",
+      "y": 460,
+      "variant": "default",
+      "label": "Dựng nhánh trái",
+      "note": "visit(0, 2) đọc 3 rồi 6"
+    },
+    {
+      "id": "right",
+      "from": "build",
+      "to": "pre",
+      "y": 535,
+      "variant": "default",
+      "label": "Dựng nhánh phải",
+      "note": "visit(3, 5) đọc 11 rồi −2"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Vì sao tách được",
+      "items": [
+        "Tiền thứ tự đọc gốc trước khi đọc hai con.",
+        "Trung thứ tự đặt cây con trái trước gốc và cây con phải sau gốc.",
+        "Khoảng rỗng trả về null và giữ nguyên vị trí đọc tiền thứ tự."
+      ]
+    }
+  ]
+}

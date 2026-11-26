@@ -7,7 +7,9 @@ region: Vùng Thuật toán
 draft: false
 stations:
   - name: "Truy hồi một chiều"
+    concepts: ["DP State", "Recurrence Relation", "Memoization", "Rolling State"]
   - name: "Palindrome mở từ tâm"
+    concepts: ["Palindrome Center", "Palindrome Radius"]
   - name: "Ba lô và đổi tiền"
   - name: "Cắt chuỗi và dãy con tăng"
   - name: "Lưới và hai chuỗi"

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Prim connects four points",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-spanning-tree-itinerary/prim-trace.en.html"
+  },
+  "participants": [
+    {
+      "id": "trace",
+      "type": "backend",
+      "label": "Cable planner",
+      "sublabel": "Prim"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Connection costs",
+      "sublabel": "best"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "trace",
+      "to": "state",
+      "y": 164,
+      "label": "Start at A",
+      "variant": "default",
+      "note": "A(0,0), B(4,0), C(5,0), D(5,2)"
+    },
+    {
+      "id": "step-2",
+      "from": "state",
+      "to": "trace",
+      "y": 241,
+      "label": "Take B at cost 4",
+      "variant": "return",
+      "note": "best: B=4, C=5, D=7"
+    },
+    {
+      "id": "step-3",
+      "from": "trace",
+      "to": "state",
+      "y": 318,
+      "label": "Try edges from B",
+      "variant": "default",
+      "note": "best: C=1, D=3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "trace",
+      "y": 395,
+      "label": "Take C at cost 1",
+      "variant": "return",
+      "note": "{A, B, C}"
+    },
+    {
+      "id": "step-5",
+      "from": "trace",
+      "to": "state",
+      "y": 472,
+      "label": "Try edges from C",
+      "variant": "default",
+      "note": "best: D=2"
+    },
+    {
+      "id": "step-6",
+      "from": "state",
+      "to": "trace",
+      "y": 549,
+      "label": "Take D at cost 2",
+      "variant": "return",
+      "note": "4 + 1 + 2 = 7"
+    }
+  ]
+}

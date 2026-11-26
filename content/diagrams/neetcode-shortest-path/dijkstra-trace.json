@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Dijkstra cập nhật bốn trạm tín hiệu",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-shortest-path/dijkstra-trace.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Lấy chi phí nhỏ nhất"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "operator",
+      "type": "backend",
+      "label": "Người dò tuyến",
+      "sublabel": "vòng lặp Dijkstra"
+    },
+    {
+      "id": "ledger",
+      "type": "database",
+      "label": "Sổ khoảng cách",
+      "sublabel": "best + min-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "visit-1",
+      "from": "operator",
+      "to": "ledger",
+      "y": 168,
+      "label": "Khởi tạo tại trạm 1",
+      "variant": "default",
+      "note": "best[1] = 0"
+    },
+    {
+      "id": "visit-2",
+      "from": "ledger",
+      "to": "operator",
+      "y": 246,
+      "label": "Lấy trạm 1 với giá 0",
+      "variant": "return",
+      "note": "1: 0"
+    },
+    {
+      "id": "visit-3",
+      "from": "operator",
+      "to": "ledger",
+      "y": 324,
+      "label": "Ghi hai đường mới",
+      "variant": "default",
+      "note": "best[2] = 9, best[3] = 2"
+    },
+    {
+      "id": "visit-4",
+      "from": "ledger",
+      "to": "operator",
+      "y": 402,
+      "label": "Lấy trạm 3 với giá 2",
+      "variant": "return",
+      "note": "3: 2"
+    },
+    {
+      "id": "visit-5",
+      "from": "operator",
+      "to": "ledger",
+      "y": 480,
+      "label": "Giảm giá tới trạm 2",
+      "variant": "default",
+      "note": "best[2] = 2 + 1 = 3"
+    },
+    {
+      "id": "visit-6",
+      "from": "ledger",
+      "to": "operator",
+      "y": 558,
+      "label": "Lấy trạm 2 với giá 3",
+      "variant": "return",
+      "note": "2: 3"
+    },
+    {
+      "id": "visit-7",
+      "from": "operator",
+      "to": "ledger",
+      "y": 636,
+      "label": "Ghi đường tới trạm 4",
+      "variant": "default",
+      "note": "best[4] = 3 + 4 = 7"
+    },
+    {
+      "id": "visit-8",
+      "from": "ledger",
+      "to": "operator",
+      "y": 714,
+      "label": "Lấy trạm 4 với giá 7",
+      "variant": "return",
+      "note": "4: 7"
+    },
+    {
+      "id": "visit-9",
+      "from": "operator",
+      "to": "ledger",
+      "y": 792,
+      "label": "Bỏ bản ghi cũ của trạm 2",
+      "variant": "default",
+      "note": "9 > best[2] = 3"
+    }
+  ]
+}

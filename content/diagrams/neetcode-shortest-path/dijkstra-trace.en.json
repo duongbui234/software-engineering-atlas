@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Dijkstra updates four signal stations",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-shortest-path/dijkstra-trace.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Extract the minimum"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "operator",
+      "type": "backend",
+      "label": "Route planner",
+      "sublabel": "Dijkstra loop"
+    },
+    {
+      "id": "ledger",
+      "type": "database",
+      "label": "Distance ledger",
+      "sublabel": "best + min-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "visit-1",
+      "from": "operator",
+      "to": "ledger",
+      "y": 168,
+      "label": "Start at station 1",
+      "variant": "default",
+      "note": "best[1] = 0"
+    },
+    {
+      "id": "visit-2",
+      "from": "ledger",
+      "to": "operator",
+      "y": 246,
+      "label": "Pop station 1 at cost 0",
+      "variant": "return",
+      "note": "1: 0"
+    },
+    {
+      "id": "visit-3",
+      "from": "operator",
+      "to": "ledger",
+      "y": 324,
+      "label": "Record two new routes",
+      "variant": "default",
+      "note": "best[2] = 9, best[3] = 2"
+    },
+    {
+      "id": "visit-4",
+      "from": "ledger",
+      "to": "operator",
+      "y": 402,
+      "label": "Pop station 3 at cost 2",
+      "variant": "return",
+      "note": "3: 2"
+    },
+    {
+      "id": "visit-5",
+      "from": "operator",
+      "to": "ledger",
+      "y": 480,
+      "label": "Lower the cost to station 2",
+      "variant": "default",
+      "note": "best[2] = 2 + 1 = 3"
+    },
+    {
+      "id": "visit-6",
+      "from": "ledger",
+      "to": "operator",
+      "y": 558,
+      "label": "Pop station 2 at cost 3",
+      "variant": "return",
+      "note": "2: 3"
+    },
+    {
+      "id": "visit-7",
+      "from": "operator",
+      "to": "ledger",
+      "y": 636,
+      "label": "Record the route to station 4",
+      "variant": "default",
+      "note": "best[4] = 3 + 4 = 7"
+    },
+    {
+      "id": "visit-8",
+      "from": "ledger",
+      "to": "operator",
+      "y": 714,
+      "label": "Pop station 4 at cost 7",
+      "variant": "return",
+      "note": "4: 7"
+    },
+    {
+      "id": "visit-9",
+      "from": "operator",
+      "to": "ledger",
+      "y": 792,
+      "label": "Skip the old entry for station 2",
+      "variant": "default",
+      "note": "9 > best[2] = 3"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Carry the trie node across the board",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-word-search-ii/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Cells and prefixes"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Visit c and then a on the board",
+      "variant": "default",
+      "note": "board = [[c,a],[r,t]]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The c cell is already in use",
+      "variant": "default",
+      "note": "path = c → a"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Move down to t and find cat",
+      "variant": "default",
+      "note": "dict = {cat, car}; terminal = \"cat\""
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Restore cells so another path can use them",
+      "variant": "return",
+      "note": "found = [\"cat\"]; board = [[c,a],[r,t]]"
+    }
+  ]
+}

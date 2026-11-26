@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tìm phiên bản cuối không vượt t",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-time-based-key-value-store/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Phiên bản"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Các lần ghi đã tăng theo thời gian",
+      "variant": "default",
+      "note": "1 → red, 4 → blue, 8 → green"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Hỏi ở thời điểm 6",
+      "variant": "default",
+      "note": "t = 6"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Mốc 4 hợp lệ, thử sang phải",
+      "variant": "default",
+      "note": "4 ≤ 6"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Mốc 8 chưa xuất hiện ở thời điểm hỏi",
+      "variant": "default",
+      "note": "8 > 6"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Lấy giá trị tại mốc 4",
+      "variant": "return",
+      "note": "blue"
+    }
+  ]
+}

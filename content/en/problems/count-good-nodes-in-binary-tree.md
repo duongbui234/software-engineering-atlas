@@ -81,6 +81,21 @@ I first read "no node greater than it" as "greater than every node above", a str
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-count-good-nodes-in-binary-tree/worked-example.en.html" title="Carry the maximum along the path" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Carry the maximum along the path.</span><a href="../diagrams/neetcode-count-good-nodes-in-binary-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Count the root 5. <code>previous max = -∞; max = 5</code></li>
+<li>Reach child 2 and keep threshold 5. <code>2 &lt; 5 → skip</code></li>
+<li>Reach grandchild 4 and still compare with 5. <code>4 &lt; 5 → skip</code></li>
+<li>The other branch has 7, so count it. <code>7 ≥ 5; total = 2</code></li>
+</ol>
+</details>
+
 ### Approach 1: brute force, each node climbs back to the root
 
 Write the definition down directly: record each node's parent, then for each node walk up to the root and stop at the first ancestor that is larger.

@@ -83,6 +83,21 @@ At first I thought I had to "flip" the whole tree in some complicated way, like 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-invert-binary-tree/worked-example.en.html" title="Swap left and right children at every node" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Swap left and right children at every node.</span><a href="../diagrams/neetcode-invert-binary-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Read the root&#x27;s two children. <code>8: left = 3; right = 9</code></li>
+<li>Exchange the child positions. <code>8: left = 9; right = 3</code></li>
+<li>At 3, move its left child 1 to the right. <code>3: left = null; right = 1</code></li>
+<li>Keep every node value. <code>[8, 9, 3, null, null, null, 1]</code></li>
+</ol>
+</details>
+
 ### Approach 1: recursion
 
 An empty tree stays empty after inverting. A non-empty tree: invert the right subtree, invert the left subtree, then attach them crosswise, the inverted right one on the left and the other way around.

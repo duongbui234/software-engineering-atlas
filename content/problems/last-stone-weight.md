@@ -65,6 +65,21 @@ Cách đầu tiên ai cũng nghĩ: mỗi lượt sắp xếp mảng rồi lấy 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-last-stone-weight/worked-example.html" title="Luôn lấy hai viên nặng nhất" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Luôn lấy hai viên nặng nhất.</span><a href="../diagrams/neetcode-last-stone-weight/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Nạp trọng lượng bốn viên. <code>{10, 7, 4, 3}</code></li>
+<li>Đập 10 với 7 và đưa 3 trở lại. <code>{4, 3, 3}</code></li>
+<li>Đập 4 với 3 và đưa 1 trở lại. <code>{3, 1}</code></li>
+<li>Viên cuối nặng 2. <code>3 - 1 = 2</code></li>
+</ol>
+</details>
+
 ### Max-heap trong một mảng
 
 Heap là cây nhị phân gần đầy, cất trong mảng không cần con trỏ: phần tử ở chỉ số i có cha ở `(i − 1) / 2` (chia nguyên) và hai con ở `2i + 1`, `2i + 2`. Luật duy nhất: **cha không nhỏ hơn con**. Từ luật đó suy ra phần tử lớn nhất nằm ở gốc `a[0]`, nhưng phần còn lại của mảng **không** sắp xếp. `[8, 7, 4, 1, 2, 1]` là một max-heap hợp lệ; nó không tăng, không giảm.

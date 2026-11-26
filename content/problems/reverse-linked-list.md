@@ -66,6 +66,21 @@ Nhưng ta không cần đổi chỗ giá trị. Đảo chiều danh sách nghĩa
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-reverse-linked-list/worked-example.html" title="Cất next trước khi quay con trỏ" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Cất next trước khi quay con trỏ.</span><a href="../diagrams/neetcode-reverse-linked-list/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Bắt đầu ở A, phía sau có B rồi C. <code>prev = null; A → B → C</code></li>
+<li>Cất B rồi quay cạnh của A. <code>next = B; A → null</code></li>
+<li>Tiến sang B và nối về A. <code>next = C; B → A → null</code></li>
+<li>Nối C vào đầu mới rồi trả C. <code>C → B → A → null</code></li>
+</ol>
+</details>
+
 ### Ba con trỏ, bốn phép gán
 
 Giữ ba biến: `prev` là đầu của khúc đã lật (ban đầu rỗng), `cur` là nút đang xử lý (ban đầu `head`), `next` là chỗ giữ phần còn lại. Mỗi vòng lặp:

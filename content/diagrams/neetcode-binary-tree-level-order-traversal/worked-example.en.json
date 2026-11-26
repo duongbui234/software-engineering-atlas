@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Snapshot queue length to separate levels",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-binary-tree-level-order-traversal/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Queue"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Snapshot the length before removing the root",
+      "variant": "default",
+      "note": "queue = [8]; size = 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Record the first level and enqueue both children",
+      "variant": "default",
+      "note": "level = [8]; queue = [3, 9]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Process exactly two nodes before visiting grandchildren",
+      "variant": "default",
+      "note": "level = [3, 9]; queue = [1]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Node 1 belongs to the next level",
+      "variant": "return",
+      "note": "[[8], [3, 9], [1]]"
+    }
+  ]
+}

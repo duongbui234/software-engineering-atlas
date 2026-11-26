@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Lượt truy cập đổi thứ tự bị đẩy",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-lru-cache/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Danh sách LRU"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Thêm A rồi B vào cache hai chỗ",
+      "variant": "default",
+      "note": "recent → B → A"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Đọc A và đưa nó lên đầu",
+      "variant": "default",
+      "note": "recent → A → B"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Thêm C và kiểm tra dung lượng",
+      "variant": "default",
+      "note": "recent → C → A → B"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Loại B ở cuối danh sách",
+      "variant": "return",
+      "note": "recent → C → A"
+    }
+  ]
+}

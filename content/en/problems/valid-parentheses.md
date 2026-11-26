@@ -73,6 +73,21 @@ I used to think counting was enough: add on an opener, subtract on a closer, end
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-valid-parentheses/worked-example.en.html" title="Match each closing bracket to the stack top" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Match each closing bracket to the stack top.</span><a href="../diagrams/neetcode-valid-parentheses/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Push the two opening brackets. <code>&quot;{[&quot; → [&#x27;{&#x27;, &#x27;[&#x27;]</code></li>
+<li>Read ] and pop its matching [. <code>[&#x27;{&#x27;]</code></li>
+<li>Read } and pop its matching {. <code>[]</code></li>
+<li>The input ends with an empty stack. <code>&quot;{[]}&quot; → true</code></li>
+</ol>
+</details>
+
 ### Approach 1, one counter: wrong
 
 Add 1 on an opener, subtract 1 on a closer, negative means invalid, and it must end at 0. Correct when there is only one kind of bracket. With three kinds, `"(]"` goes 1 then 0: it slips through.

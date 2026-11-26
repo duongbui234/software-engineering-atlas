@@ -75,6 +75,21 @@ Bài này dễ tới mức lời giải đệ quy chỉ một dòng. Chỗ đán
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-maximum-depth-of-binary-tree/worked-example.html" title="Chiều sâu lấy nhánh dài hơn" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chiều sâu lấy nhánh dài hơn.</span><a href="../diagrams/neetcode-maximum-depth-of-binary-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Cây rỗng có chiều sâu 0. <code>null → 0</code></li>
+<li>Lá có hai nhánh rỗng. <code>leaf → 1 + max(0, 0) = 1</code></li>
+<li>Tại gốc nhận chiều sâu 2 và 1. <code>left = 2; right = 1</code></li>
+<li>Tính thêm nút gốc. <code>1 + max(2, 1) = 3</code></li>
+</ol>
+</details>
+
 ### Cách 1: đệ quy hậu thứ tự
 
 ```ts

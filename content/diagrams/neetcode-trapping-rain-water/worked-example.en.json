@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Settle water from the lower side",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-trapping-rain-water/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Water levels"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Start with left wall 3 and right wall 4",
+      "variant": "default",
+      "note": "[3, 0, 2, 4]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The zero-height cell holds 3 units",
+      "variant": "default",
+      "note": "3 - 0 = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The height-2 cell holds one more unit",
+      "variant": "default",
+      "note": "3 - 2 = 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Add water from the settled cells",
+      "variant": "return",
+      "note": "3 + 1 = 4"
+    }
+  ]
+}

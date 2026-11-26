@@ -62,6 +62,21 @@ Mình từng nghĩ phải dời cột nào "hứa hẹn" hơn, tức cột cao. 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-container-with-most-water/worked-example.html" title="Dịch cột thấp để thử tăng diện tích" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Dịch cột thấp để thử tăng diện tích.</span><a href="../diagrams/neetcode-container-with-most-water/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Tính diện tích của hai đầu. <code>[2, 7, 4, 6]: 3 × 2 = 6</code></li>
+<li>Dịch cột 2 vì nó giới hạn chiều cao. <code>i = 1, j = 3</code></li>
+<li>Hai đầu mới cao 7 và 6. <code>2 × 6 = 12</code></li>
+<li>Các cặp còn lại cho diện tích nhỏ hơn. <code>best = 12</code></li>
+</ol>
+</details>
+
 ### Lập luận cắt bỏ
 
 Giả sử `h[i] ≤ h[j]` và ta vừa tính diện tích `(j − i) · h[i]`. Xét mọi cặp `(i, k)` với `i < k < j`:

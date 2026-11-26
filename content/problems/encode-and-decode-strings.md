@@ -68,6 +68,22 @@ Mình từng nghĩ chỉ cần chọn một ký tự "hiếm" làm dấu phân c
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-encode-and-decode-strings/worked-example.html" title="Đọc đúng số ký tự đã ghi" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đọc đúng số ký tự đã ghi.</span><a href="../diagrams/neetcode-encode-and-decode-strings/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Ghi độ dài rồi tới nội dung. <code>[&quot;a#b&quot;, &quot;&quot;] → 3#a#b0#</code></li>
+<li>Đọc số 3 trước dấu phân cách. <code>3#</code></li>
+<li>Lấy đúng ba ký tự a#b. <code>a#b</code></li>
+<li>Đọc 0 rồi lấy chuỗi rỗng. <code>0# → &quot;&quot;</code></li>
+<li>Khôi phục đúng hai chuỗi. <code>[&quot;a#b&quot;, &quot;&quot;]</code></li>
+</ol>
+</details>
+
 ### Cách 1, nối bằng dấu phẩy: sai ở ba kiểu ca
 
 `["a,b", "c"]` mã hóa thành `a,b,c`, và giải mã ra ba chuỗi. Còn `[]` và `[""]` cùng mã hóa thành chuỗi rỗng, nên giải mã không biết nên trả cái nào. Đổi sang ký tự lạ hơn (`\x00`, `π`) chỉ làm lỗi hiếm hơn, không làm nó biến mất.

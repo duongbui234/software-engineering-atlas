@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Take the smaller head at each step",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-merge-two-sorted-lists/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Output tail"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Compare the heads 1 and 2",
+      "variant": "default",
+      "note": "[1, 5], [2, 4]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Append 1 and advance the first list",
+      "variant": "default",
+      "note": "[1]; heads = 5, 2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Append 2 and then 4",
+      "variant": "default",
+      "note": "[1, 2, 4]; right = null"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Attach the remainder in one step",
+      "variant": "return",
+      "note": "[1, 2, 4, 5]"
+    }
+  ]
+}

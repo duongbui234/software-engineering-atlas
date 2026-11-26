@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Reuse height to check balance",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-balanced-binary-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Subtree results"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "The children of X return heights 0 and 1",
+      "variant": "default",
+      "note": "difference = 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "X is balanced and returns height 2",
+      "variant": "default",
+      "note": "height = 1 + max(0, 1)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The other child of X's parent is empty",
+      "variant": "default",
+      "note": "left = 2; right = 0"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "A difference of 2 breaks balance",
+      "variant": "return",
+      "note": "2 > 1 → false"
+    }
+  ]
+}

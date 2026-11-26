@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Giữ khoảng cách để xóa từ cuối",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-remove-nth-node-from-end-of-list/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hai con trỏ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đặt hai con trỏ ở nút giả",
+      "variant": "default",
+      "note": "dummy → A → B → C → D; n = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Cho fast đi trước hai nút",
+      "variant": "default",
+      "note": "fast = B; slow = dummy"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Cùng tiến tới khi fast ở nút cuối",
+      "variant": "default",
+      "note": "fast = D; slow = B"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nối B thẳng tới D để bỏ C",
+      "variant": "return",
+      "note": "A → B → D"
+    }
+  ]
+}

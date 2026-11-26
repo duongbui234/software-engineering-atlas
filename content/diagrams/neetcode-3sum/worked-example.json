@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cố định một số rồi tìm cặp",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-3sum/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Mảng đã sắp"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Cố định số âm đầu tiên",
+      "variant": "default",
+      "note": "[-4, -2, 0, 2, 4], anchor = -4"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Cặp hai đầu cho tổng âm",
+      "variant": "default",
+      "note": "-4 - 2 + 4 = -2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Dịch trái tới 0 rồi ghi bộ ba",
+      "variant": "default",
+      "note": "-4 + 0 + 4 = 0"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Đổi mốc sang -2",
+      "variant": "default",
+      "note": "-2 + 0 + 2 = 0"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Giữ hai bộ ba khác nhau",
+      "variant": "return",
+      "note": "[-4, 0, 4], [-2, 0, 2]"
+    }
+  ]
+}

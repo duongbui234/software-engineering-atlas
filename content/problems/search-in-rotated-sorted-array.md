@@ -75,6 +75,21 @@ Mình từng nghĩ phải biết chỗ gãy trước rồi mới tìm được. 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-search-in-rotated-sorted-array/worked-example.html" title="Chọn nửa đã sắp có chứa đích" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chọn nửa đã sắp có chứa đích.</span><a href="../diagrams/neetcode-search-in-rotated-sorted-array/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Xét phần tử ở giữa. <code>[9, 12, 17, 2, 5, 7], target = 5</code></li>
+<li>Nửa trái từ 9 tới 17 đã sắp. <code>mid = 2, value = 17</code></li>
+<li>Đích 5 nằm ngoài nửa trái. <code>lo = 3, hi = 5</code></li>
+<li>Giữa mới là đúng đích. <code>mid = 4</code></li>
+</ol>
+</details>
+
 ### Cách 1, quét: O(n)
 
 `indexOf`, `slices.Index`, hay một vòng `for`. Đúng, nhưng không dùng gì của việc mảng gần như đã sắp xếp.

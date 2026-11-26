@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Null markers preserve each child position",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-serialize-and-deserialize-binary-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Token stream"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Start with root 7 and right child 2",
+      "variant": "default",
+      "note": "root = 7; left = null; right = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Write the root and its empty left slot",
+      "variant": "default",
+      "note": "7,#"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Write right child 2 and its two empty slots",
+      "variant": "default",
+      "note": "7,#,2,#,#"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Read back in left-before-right order",
+      "variant": "return",
+      "note": "7: left = null; right = 2"
+    }
+  ]
+}

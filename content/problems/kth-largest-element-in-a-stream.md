@@ -67,6 +67,21 @@ Cách thẳng nhất là giữ mọi số đã thấy trong một mảng, mỗi 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-kth-largest-element-in-a-stream/worked-example.html" title="Giữ đúng k số lớn nhất" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Giữ đúng k số lớn nhất.</span><a href="../diagrams/neetcode-kth-largest-element-in-a-stream/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Khởi tạo heap chứa ba số. <code>k = 3; {4, 7, 9}</code></li>
+<li>Thêm 6 và lấy số nhỏ nhất ra. <code>evict 4; {6, 7, 9}</code></li>
+<li>Thêm 2 thì nó bị loại ngay. <code>evict 2; {6, 7, 9}</code></li>
+<li>Gốc heap là số lớn thứ ba. <code>6</code></li>
+</ol>
+</details>
+
 ### Min-heap k chỗ
 
 Heap giữ k số lớn nhất đã thấy. Mỗi số mới chỉ cần so với **số yếu nhất** trong k số đó: lớn hơn thì nó vào top k và đẩy số yếu nhất ra; không lớn hơn thì nó không vào. Muốn số yếu nhất nằm ngay ở đỉnh để so trong O(1) thì heap phải là **min**-heap. Và vì heap có đúng k số lớn nhất, số nhỏ nhất của nó là số lớn thứ k: đáp án luôn là đỉnh.

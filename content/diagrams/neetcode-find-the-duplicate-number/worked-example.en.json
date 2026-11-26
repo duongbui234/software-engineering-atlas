@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "The cycle entry is the duplicate",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-find-the-duplicate-number/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Index graph"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Use each value as the next index",
+      "variant": "default",
+      "note": "[2, 1, 3, 4, 3]; 0 → 2 → 3 → 4 → 3"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Find a meeting point inside the cycle",
+      "variant": "default",
+      "note": "slow = fast = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Reset one pointer to the start",
+      "variant": "default",
+      "note": "first = 0; second = 3"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Move both two steps to reach the entry",
+      "variant": "default",
+      "note": "0 → 2 → 3; 3 → 4 → 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Both paths meet at the duplicate",
+      "variant": "return",
+      "note": "duplicate = 3"
+    }
+  ]
+}

@@ -68,6 +68,21 @@ I used to think you had to try each letter A..Z as "the letter to keep". It turn
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-longest-repeating-character-replacement/worked-example.en.html" title="Count the replacements a window needs" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Count the replacements a window needs.</span><a href="../diagrams/neetcode-longest-repeating-character-replacement/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Grow the window to ABBA. <code>A = 2, B = 2, k = 1</code></li>
+<li>Two replacements exceed one, so shrink. <code>4 - 2 = 2</code></li>
+<li>BBA needs one replacement. <code>3 - 2 = 1</code></li>
+<li>Keep the valid length of 3. <code>&quot;BBA&quot; → &quot;BBB&quot;</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n²)
 
 From each start i, extend j and update the count table; the substring `[i, j]` works when `j − i + 1 − maxFreq ≤ k`. Two nested loops; the measurement below follows the n² shape.

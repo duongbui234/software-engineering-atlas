@@ -63,6 +63,21 @@ I used to think you should move whichever wall looks more "promising", that is, 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-container-with-most-water/worked-example.en.html" title="Move the shorter wall to seek more area" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Move the shorter wall to seek more area.</span><a href="../diagrams/neetcode-container-with-most-water/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Compute the area at both ends. <code>[2, 7, 4, 6]: 3 × 2 = 6</code></li>
+<li>Move 2 because it caps the height. <code>i = 1, j = 3</code></li>
+<li>New endpoint heights are 7 and 6. <code>2 × 6 = 12</code></li>
+<li>Remaining pairs give less area. <code>best = 12</code></li>
+</ol>
+</details>
+
 ### The pruning argument
 
 Suppose `h[i] ≤ h[j]` and we just computed the area `(j − i) · h[i]`. Consider every pair `(i, k)` with `i < k < j`:

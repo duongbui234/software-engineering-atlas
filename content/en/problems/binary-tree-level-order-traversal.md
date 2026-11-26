@@ -81,6 +81,21 @@ I used to think BFS was enough: take a node out, push its two children to the ba
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-binary-tree-level-order-traversal/worked-example.en.html" title="Snapshot queue length to separate levels" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Snapshot queue length to separate levels.</span><a href="../diagrams/neetcode-binary-tree-level-order-traversal/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Snapshot the length before removing the root. <code>queue = [8]; size = 1</code></li>
+<li>Record the first level and enqueue both children. <code>level = [8]; queue = [3, 9]</code></li>
+<li>Process exactly two nodes before visiting grandchildren. <code>level = [3, 9]; queue = [1]</code></li>
+<li>Node 1 belongs to the next level. <code>&#91;[8], [3, 9], [1]]</code></li>
+</ol>
+</details>
+
 ### Approach 1: snapshot the level size
 
 The invariant behind the whole problem: **at the start of every outer round, the queue holds exactly the nodes of one level, in left-to-right order.** At first it holds the root, the whole of level 0. If at the start of a round the queue holds all of level d, then taking out exactly those `size` nodes, each pushing its children to the back, leaves exactly the nodes of level d + 1 in the queue: none missing (every node on level d + 1 is a child of a node on level d), none extra, and in left-to-right order because the left parent is taken out first.

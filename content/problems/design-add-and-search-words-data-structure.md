@@ -58,6 +58,21 @@ Với danh sách `ape`, `ash`, `cape`, `caper`, `cave`, `dawn`, `dusk`, mẫu `a
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-design-add-and-search-words-data-structure/worked-example.html" title="Dấu chấm thử đúng một cạnh đang có" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Dấu chấm thử đúng một cạnh đang có.</span><a href="../diagrams/neetcode-design-add-and-search-words-data-structure/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Lưu hai từ có chung chữ đầu. <code>&quot;cap&quot;, &quot;cot&quot;</code></li>
+<li>Chữ c đầu tiên chọn đúng một nhánh. <code>pattern = &quot;c.t&quot;</code></li>
+<li>Dấu chấm thử a rồi o. <code>ca has no t; co → t</code></li>
+<li>Nút cot có dấu hết từ. <code>true</code></li>
+</ol>
+</details>
+
 ### Quét nhóm có cùng độ dài
 
 Mình gom từ vào các tập theo độ dài. Khi nhận mẫu dài `L`, mình mở đúng nhóm `L`, rồi so từng từ với mẫu từ đầu tới cuối. Một dấu chấm luôn cho phép đi tiếp một vị trí. Một chữ cụ thể khác chữ trong từ làm dừng lần so đó. Nếu đã so đủ `L` vị trí, kết quả là `true`. Nhóm thiếu hoặc mọi từ đều không khớp thì trả `false`.

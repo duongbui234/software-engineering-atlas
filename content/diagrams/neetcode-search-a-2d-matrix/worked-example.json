@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đổi chỉ số ảo thành hàng và cột",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-search-a-2d-matrix/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Ma trận"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Xem ma trận như dãy có thứ tự",
+      "variant": "default",
+      "note": "[[1, 4, 8], [11, 15, 20]]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Chỉ số 2 ứng với hàng 0 cột 2",
+      "variant": "default",
+      "note": "2 / 3 → (0, 2), value = 8"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Giá trị 8 nhỏ hơn đích 15",
+      "variant": "default",
+      "note": "lo = 3, hi = 5"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Chỉ số 4 đưa tới 15",
+      "variant": "return",
+      "note": "(1, 1) → true"
+    }
+  ]
+}

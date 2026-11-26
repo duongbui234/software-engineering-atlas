@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Lấy toán hạng phải trước",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-evaluate-reverse-polish-notation/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Ngăn xếp"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đẩy 9 rồi đẩy 4",
+      "variant": "default",
+      "note": "[9, 4]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Gặp dấu trừ thì lấy 4 trước",
+      "variant": "default",
+      "note": "right = 4, left = 9"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Đẩy hiệu 9 trừ 4",
+      "variant": "default",
+      "note": "[5]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Thêm 3 rồi nhân với 5",
+      "variant": "return",
+      "note": "[5, 3] → [15]"
+    }
+  ]
+}

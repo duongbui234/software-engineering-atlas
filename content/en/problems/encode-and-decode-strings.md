@@ -69,6 +69,22 @@ I used to think you just pick a "rare" character as the delimiter. It turns out 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-encode-and-decode-strings/worked-example.en.html" title="Read the stated number of characters" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Read the stated number of characters.</span><a href="../diagrams/neetcode-encode-and-decode-strings/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Write the length before each payload. <code>[&quot;a#b&quot;, &quot;&quot;] → 3#a#b0#</code></li>
+<li>Read 3 before the delimiter. <code>3#</code></li>
+<li>Take the next three characters. <code>a#b</code></li>
+<li>Read 0 and take an empty string. <code>0# → &quot;&quot;</code></li>
+<li>Recover the two original strings. <code>[&quot;a#b&quot;, &quot;&quot;]</code></li>
+</ol>
+</details>
+
 ### Approach 1, joining with a comma: wrong in three kinds of case
 
 `["a,b", "c"]` encodes to `a,b,c` and decodes into three strings. And `[]` and `[""]` both encode to the empty string, so the decoder cannot know which to return. Switching to a stranger character (`\x00`, `π`) only makes the bug rarer; it doesn't make it go away.

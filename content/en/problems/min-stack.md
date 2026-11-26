@@ -69,6 +69,21 @@ I used to think one `min` variable was enough: update it when a smaller number i
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-min-stack/worked-example.en.html" title="Recover the old minimum after a pop" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Recover the old minimum after a pop.</span><a href="../diagrams/neetcode-min-stack/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Push 5 and store its minimum. <code>(5, 5)</code></li>
+<li>Push 2 and then 4. <code>(2, 2), (4, 2)</code></li>
+<li>Pop 4 and keep minimum 2. <code>(2, 2)</code></li>
+<li>Pop 2 and recover minimum 5. <code>(5, 5)</code></li>
+</ol>
+</details>
+
 ### Approach 1, scanning: getMin in O(n)
 
 A plain array, and `getMin` scans everything. Correct, but it breaks the O(1) requirement.

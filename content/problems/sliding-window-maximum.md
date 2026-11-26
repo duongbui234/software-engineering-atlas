@@ -72,6 +72,21 @@ Mình từng nghĩ chỉ cần giữ một biến max như [[problems/best-time-
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-sliding-window-maximum/worked-example.html" title="Giữ ứng viên lớn nhất ở đầu deque" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Giữ ứng viên lớn nhất ở đầu deque.</span><a href="../diagrams/neetcode-sliding-window-maximum/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Thêm 4 rồi thêm 1. <code>[4, 1, 3, 2], k = 2</code></li>
+<li>Khi có 3 thì 1 mất cơ hội. <code>pop(1), push(2)</code></li>
+<li>Bỏ chỉ số 0 khi đã ra cửa sổ. <code>[1, 2] → max 3</code></li>
+<li>Đầu deque cho cực đại từng cửa sổ. <code>[4, 3, 3]</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n·k)
 
 Mỗi cửa sổ tìm max lại từ đầu. Với k nhỏ thì đủ nhanh; với k cỡ n/2 thì O(n²).

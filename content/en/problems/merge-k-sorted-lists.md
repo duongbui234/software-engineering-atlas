@@ -80,6 +80,21 @@ With two lists, problem 21 already solved it: two pointers, each step attaches t
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-merge-k-sorted-lists/worked-example.en.html" title="The heap holds one head per list" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> The heap holds one head per list.</span><a href="../diagrams/neetcode-merge-k-sorted-lists/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Load the first item of three lists. <code>[1, 6], [3, 4], [2, 9]</code></li>
+<li>Pop 1 and push 6. <code>heap = {2, 3, 6}</code></li>
+<li>Pop 2 and push 9. <code>heap = {3, 6, 9}</code></li>
+<li>Keep popping the root to merge. <code>[1, 2, 3, 4, 6, 9]</code></li>
+</ol>
+</details>
+
 ### Approach 1: collect and sort
 
 Read every value into an array, sort it, build a new list. O(N log N) time, O(N) extra memory, and it creates N new nodes instead of relinking the old ones. It ignores that the lists are already sorted, but it is short and hard to get wrong, and as the measurements show, not as slow as one might think.

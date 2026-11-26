@@ -80,6 +80,21 @@ Two small details in these limits deserve attention. A value can be **0**, which
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-kth-smallest-element-in-a-bst/worked-example.en.html" title="Stop at the kth node in inorder" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Stop at the kth node in inorder.</span><a href="../diagrams/neetcode-kth-smallest-element-in-a-bst/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Find the leftmost node. <code>BST: root 7; left 3 → right 5; right 9</code></li>
+<li>Visit 3 first. <code>count = 1</code></li>
+<li>Then visit 5. <code>count = 2</code></li>
+<li>For k equal to 2, return 5 immediately. <code>5</code></li>
+</ol>
+</details>
+
 ### Approach 1: collect everything and sort
 
 This uses nothing about the search tree: collect every value (in any order), sort, and take element k − 1.

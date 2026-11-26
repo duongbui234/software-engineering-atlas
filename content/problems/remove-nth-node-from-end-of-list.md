@@ -62,6 +62,21 @@ flowchart TB
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-remove-nth-node-from-end-of-list/worked-example.html" title="Giữ khoảng cách để xóa từ cuối" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Giữ khoảng cách để xóa từ cuối.</span><a href="../diagrams/neetcode-remove-nth-node-from-end-of-list/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đặt hai con trỏ ở nút giả. <code>dummy → A → B → C → D; n = 2</code></li>
+<li>Cho fast đi trước hai nút. <code>fast = B; slow = dummy</code></li>
+<li>Cùng tiến tới khi fast ở nút cuối. <code>fast = D; slow = B</code></li>
+<li>Nối B thẳng tới D để bỏ C. <code>A → B → D</code></li>
+</ol>
+</details>
+
 ### Hai lượt: đếm rồi đi
 
 ```ts

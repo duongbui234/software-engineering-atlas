@@ -68,6 +68,21 @@ Mình từng nghĩ chỉ cần một biến `min`: push số nhỏ hơn thì c�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-min-stack/worked-example.html" title="Lấy lại min cũ khi bỏ đỉnh" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Lấy lại min cũ khi bỏ đỉnh.</span><a href="../diagrams/neetcode-min-stack/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đẩy 5 và lưu min là 5. <code>(5, 5)</code></li>
+<li>Đẩy 2 rồi đẩy 4. <code>(2, 2), (4, 2)</code></li>
+<li>Bỏ 4 thì min vẫn là 2. <code>(2, 2)</code></li>
+<li>Bỏ 2 thì min quay về 5. <code>(5, 5)</code></li>
+</ol>
+</details>
+
 ### Cách 1, duyệt: getMin O(n)
 
 Một mảng thường, `getMin` duyệt hết. Đúng, nhưng vi phạm yêu cầu O(1).

@@ -71,6 +71,21 @@ Mình từng nghĩ ma trận cần một kiểu chia đôi "hai chiều" riêng.
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-search-a-2d-matrix/worked-example.html" title="Đổi chỉ số ảo thành hàng và cột" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đổi chỉ số ảo thành hàng và cột.</span><a href="../diagrams/neetcode-search-a-2d-matrix/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Xem ma trận như dãy có thứ tự. <code>&#91;[1, 4, 8], [11, 15, 20]]</code></li>
+<li>Chỉ số 2 ứng với hàng 0 cột 2. <code>2 / 3 → (0, 2), value = 8</code></li>
+<li>Giá trị 8 nhỏ hơn đích 15. <code>lo = 3, hi = 5</code></li>
+<li>Chỉ số 4 đưa tới 15. <code>(1, 1) → true</code></li>
+</ol>
+</details>
+
 ### Cách 1, quét hết: O(m·n)
 
 Duyệt mọi ô. Không dùng tới thứ tự nào cả. Với m·n ≤ 10⁴ thì vẫn qua, nhưng đề đòi O(log(m·n)).

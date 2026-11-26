@@ -69,6 +69,22 @@ Mình từng nghĩ chia đôi chỉ dùng được khi mảng tăng dần trọn
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-find-minimum-in-rotated-sorted-array/worked-example.html" title="So phần tử giữa với đầu phải" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> So phần tử giữa với đầu phải.</span><a href="../diagrams/neetcode-find-minimum-in-rotated-sorted-array/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Bắt đầu với mảng đã xoay. <code>[8, 12, 1, 3, 5]</code></li>
+<li>Giữa là 1 và đầu phải là 5. <code>mid = 2, hi = 4</code></li>
+<li>Giữ cả vị trí giữa bên trái. <code>hi = 2</code></li>
+<li>Giữa mới là 12, bỏ nửa trái. <code>lo = 2</code></li>
+<li>Hai đầu gặp ngay số nhỏ nhất. <code>nums[2] = 1</code></li>
+</ol>
+</details>
+
 ### Cách 1, quét: O(n)
 
 Đi hết mảng, giữ số nhỏ nhất. Đúng, nhưng đề đòi O(log n). Quét cũng không dùng gì của cấu trúc "hai đoạn tăng dần".

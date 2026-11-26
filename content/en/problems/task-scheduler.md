@@ -71,6 +71,21 @@ Without a cooldown (n = 0) the answer is simply the task count. The cooldown cre
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-task-scheduler/worked-example.en.html" title="Reserve space between identical tasks" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Reserve space between identical tasks.</span><a href="../diagrams/neetcode-task-scheduler/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Task A appears most often. <code>A × 3, B × 2, cooldown = 2</code></li>
+<li>Build two blocks before the final A. <code>A _ _ / A _ _ / A</code></li>
+<li>Place B in two different blocks. <code>A B _ / A B _ / A</code></li>
+<li>The schedule takes seven slots. <code>7 = (3 - 1) × 3 + 1</code></li>
+</ol>
+</details>
+
 ### Approach 1: simulate with a max-heap and a cooldown queue
 
 The greedy rule: **each interval, run the ready task with the most runs left**. We do not need task names, only the remaining counts, so the heap holds at most 26 numbers. A task just run cannot run again yet, so instead of going straight back to the heap it enters the queue with interval `t + n`; at the end of that interval it returns to the heap and can run again from interval `t + n + 1`.

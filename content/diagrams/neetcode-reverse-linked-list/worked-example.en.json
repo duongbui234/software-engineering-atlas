@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Save next before reversing a pointer",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-reverse-linked-list/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Pointers"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Start at A, followed by B and C",
+      "variant": "default",
+      "note": "prev = null; A → B → C"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Save B, then reverse A's edge",
+      "variant": "default",
+      "note": "next = B; A → null"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Advance to B and link it back to A",
+      "variant": "default",
+      "note": "next = C; B → A → null"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Link C to the new front and return it",
+      "variant": "return",
+      "note": "C → B → A → null"
+    }
+  ]
+}

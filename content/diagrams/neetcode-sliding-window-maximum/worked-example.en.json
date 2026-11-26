@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Keep the maximum candidate at the deque front",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-sliding-window-maximum/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Index deque"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Insert 4 and then 1",
+      "variant": "default",
+      "note": "[4, 1, 3, 2], k = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "When 3 arrives, 1 is dominated",
+      "variant": "default",
+      "note": "pop(1), push(2)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Expire index 0 once it leaves the window",
+      "variant": "default",
+      "note": "[1, 2] → max 3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Read each maximum from the front",
+      "variant": "return",
+      "note": "[4, 3, 3]"
+    }
+  ]
+}

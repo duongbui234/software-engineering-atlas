@@ -71,6 +71,21 @@ Mình từng nghĩ đây là bài về ngăn xếp theo nghĩa "đẩy ngoặc v
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-generate-parentheses/worked-example.html" title="Chỉ đóng khi còn dấu mở chưa ghép" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chỉ đóng khi còn dấu mở chưa ghép.</span><a href="../diagrams/neetcode-generate-parentheses/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Bắt đầu với dấu mở. <code>n = 2, &quot;(&quot;</code></li>
+<li>Đóng ngay là một lựa chọn hợp lệ. <code>&quot;()&quot; → &quot;()()&quot;</code></li>
+<li>Mở thêm cũng là một lựa chọn. <code>&quot;((&quot; → &quot;(())&quot;</code></li>
+<li>Hai nhánh đều dùng đủ hai cặp. <code>[&quot;(())&quot;, &quot;()()&quot;]</code></li>
+</ol>
+</details>
+
 ### Có bao nhiêu đáp án
 
 Số chuỗi n cặp ngoặc hợp lệ là số Catalan `C(n) = (2n)! / ((n+1)! · n!)`, dãy [A000108](https://oeis.org/A000108) trong OEIS. File TypeScript in mười giá trị đầu cạnh số chuỗi bất kỳ dài 2n:

@@ -63,6 +63,21 @@ Chép một danh sách chỉ có `next` thì dễ: đi từ đầu, tạo nút m
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-copy-list-with-random-pointer/worked-example.html" title="Đan bản sao để tìm đích random" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đan bản sao để tìm đích random.</span><a href="../diagrams/neetcode-copy-list-with-random-pointer/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Sao mỗi nút ngay sau nút gốc. <code>A → A&#x27; → B → B&#x27;</code></li>
+<li>Đọc random của A trỏ tới B. <code>A.random = B</code></li>
+<li>Bản sao của đích ở ngay sau B. <code>A&#x27;.random = B.next = B&#x27;</code></li>
+<li>Tách hai danh sách. <code>A → B; A&#x27; → B&#x27;</code></li>
+</ol>
+</details>
+
 ### Cách 1: bảng nút cũ → nút mới, hai lượt
 
 Lượt 1 đi hết danh sách, tạo mỗi nút mới (chưa nối gì) và ghi vào bảng `map[cũ] = mới`. Lượt 2 đi lại, nối `mới.next = map[cũ.next]` và `mới.random = map[cũ.random]`. Lúc này mọi nút mới đã tồn tại nên tra bảng không bao giờ hụt.

@@ -80,6 +80,21 @@ I used to think "the right side view" meant "follow right children until they ru
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-binary-tree-right-side-view/worked-example.en.html" title="Keep the last visible node at each level" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Keep the last visible node at each level.</span><a href="../diagrams/neetcode-binary-tree-right-side-view/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Read the root level. <code>[8] → 8</code></li>
+<li>The next level has two nodes. <code>[3, 9] → 9</code></li>
+<li>The final level has only a left-branch descendant. <code>[1] → 1</code></li>
+<li>Collect one node per level. <code>[8, 9, 1]</code></li>
+</ol>
+</details>
+
 ### Wrong: follow the right pointers
 
 ```ts

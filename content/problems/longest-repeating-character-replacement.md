@@ -67,6 +67,21 @@ Mình từng nghĩ phải thử từng chữ A..Z làm "chữ giữ lại". Hóa
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-longest-repeating-character-replacement/worked-example.html" title="Số ký tự cần thay trong cửa sổ" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Số ký tự cần thay trong cửa sổ.</span><a href="../diagrams/neetcode-longest-repeating-character-replacement/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Mở rộng tới cửa sổ ABBA. <code>A = 2, B = 2, k = 1</code></li>
+<li>Cần hai lần thay nên co trái. <code>4 - 2 = 2</code></li>
+<li>Cửa sổ BBA chỉ cần thay một. <code>3 - 2 = 1</code></li>
+<li>Giữ độ dài hợp lệ là 3. <code>&quot;BBA&quot; → &quot;BBB&quot;</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n²)
 
 Từ mỗi điểm đầu i, kéo dài j và cập nhật bảng đếm; đoạn `[i, j]` làm được khi `j − i + 1 − maxFreq ≤ k`. Hai vòng lồng nhau, đo ở dưới đúng dáng n².

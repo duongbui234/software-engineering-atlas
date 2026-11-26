@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Giữ đúng k số lớn nhất",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-kth-largest-element-in-a-stream/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Min-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Khởi tạo heap chứa ba số",
+      "variant": "default",
+      "note": "k = 3; {4, 7, 9}"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Thêm 6 và lấy số nhỏ nhất ra",
+      "variant": "default",
+      "note": "evict 4; {6, 7, 9}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Thêm 2 thì nó bị loại ngay",
+      "variant": "default",
+      "note": "evict 2; {6, 7, 9}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Gốc heap là số lớn thứ ba",
+      "variant": "return",
+      "note": "6"
+    }
+  ]
+}

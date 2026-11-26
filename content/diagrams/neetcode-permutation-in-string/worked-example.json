@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "So bộ đếm trong cửa sổ cố định",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-permutation-in-string/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Cửa sổ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đếm ký tự của mẫu ab",
+      "variant": "default",
+      "note": "a: 1, b: 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Cửa sổ đầu zz thiếu a và b",
+      "variant": "default",
+      "note": "\"zzba\", length = 2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Bỏ z và thêm b",
+      "variant": "default",
+      "note": "\"zb\""
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Bỏ z còn lại rồi thêm a",
+      "variant": "default",
+      "note": "\"ba\""
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Bộ đếm trùng với mẫu",
+      "variant": "return",
+      "note": "\"ba\" → true"
+    }
+  ]
+}

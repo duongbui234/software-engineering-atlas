@@ -66,6 +66,21 @@ Chỗ dễ hiểu sai là chữ "cây con". Mình từng nghĩ chỉ cần tìm 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-subtree-of-another-tree/worked-example.html" title="Tìm gốc ứng viên rồi so cả cấu trúc" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Tìm gốc ứng viên rồi so cả cấu trúc.</span><a href="../diagrams/neetcode-subtree-of-another-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Tìm nút có cùng giá trị gốc mẫu. <code>pattern = 4 → left 2</code></li>
+<li>Nút 4 đầu tiên có con phải 2. <code>left = null, right = 2</code></li>
+<li>Nút 4 thứ hai có con trái 2. <code>left = 2, right = null</code></li>
+<li>Ứng viên thứ hai khớp cả hình dạng. <code>true</code></li>
+</ol>
+</details>
+
 ### Cách 1: so ở mọi nút
 
 Cây con giống `subRoot` thì hoặc bắt đầu ngay ở gốc, hoặc nằm trong nhánh trái, hoặc nằm trong nhánh phải. Ba khả năng đó viết thẳng thành đệ quy, dùng lại hàm so của bài 100:

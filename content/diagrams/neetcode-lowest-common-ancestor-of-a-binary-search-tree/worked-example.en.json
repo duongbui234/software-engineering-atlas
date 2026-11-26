@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Descend until the two targets split",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-lowest-common-ancestor-of-a-binary-search-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "BST node"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Compare both targets with root 12",
+      "variant": "default",
+      "note": "targets = 3, 8"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Both are below 12, so go left",
+      "variant": "default",
+      "note": "current = 6"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The targets lie on opposite sides of 6",
+      "variant": "default",
+      "note": "3 < 6 < 8"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Node 6 is the lowest common ancestor",
+      "variant": "return",
+      "note": "LCA = 6"
+    }
+  ]
+}

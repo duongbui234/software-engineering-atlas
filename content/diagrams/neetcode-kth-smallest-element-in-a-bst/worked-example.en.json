@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Stop at the kth node in inorder",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-kth-smallest-element-in-a-bst/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Visits"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Find the leftmost node",
+      "variant": "default",
+      "note": "BST: root 7; left 3 → right 5; right 9"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Visit 3 first",
+      "variant": "default",
+      "note": "count = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Then visit 5",
+      "variant": "default",
+      "note": "count = 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "For k equal to 2, return 5 immediately",
+      "variant": "return",
+      "note": "5"
+    }
+  ]
+}

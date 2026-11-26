@@ -64,6 +64,21 @@ Mình từng nghĩ chỉ cần tìm giá cao nhất và thấp nhất. Ví dụ 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-best-time-to-buy-and-sell-stock/worked-example.html" title="Giữ giá mua thấp nhất trước hôm nay" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Giữ giá mua thấp nhất trước hôm nay.</span><a href="../diagrams/neetcode-best-time-to-buy-and-sell-stock/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Ghi giá mua ngày đầu. <code>[8, 3, 6, 2, 7], min = 8</code></li>
+<li>Hạ giá mua xuống 3 rồi thử bán 6. <code>min = 3, best = 3</code></li>
+<li>Gặp giá 2 thì cập nhật giá mua. <code>min = 2</code></li>
+<li>Bán ở 7 cho lãi lớn nhất. <code>7 - 2 = 5</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n²)
 
 Hai vòng lặp, mọi cặp `(i, j)` với `j > i`. Khoảng n²/2 phép trừ.

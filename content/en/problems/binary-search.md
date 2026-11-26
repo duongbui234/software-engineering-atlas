@@ -69,6 +69,21 @@ The idea is easy; getting it right is not. Jon Bentley reports in *Programming P
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-binary-search/worked-example.en.html" title="Discard the half that cannot hold the target" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Discard the half that cannot hold the target.</span><a href="../diagrams/neetcode-binary-search/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Choose midpoint index 2. <code>[1, 4, 6, 9, 13], target = 9</code></li>
+<li>Since 6 is below 9, discard the left half. <code>[lo, hi] = [3, 4]</code></li>
+<li>The new midpoint holds 9. <code>mid = 3</code></li>
+<li>Return the matching index. <code>3</code></li>
+</ol>
+</details>
+
 ### Invariant first, code second
 
 I used to write binary search by flipping `<` to `<=` until the tests passed. The surer way is to write the invariant down first:

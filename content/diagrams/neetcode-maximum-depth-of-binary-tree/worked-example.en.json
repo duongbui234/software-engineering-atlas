@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Depth comes from the longer branch",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-maximum-depth-of-binary-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Branch heights"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "An empty tree has depth 0",
+      "variant": "default",
+      "note": "null → 0"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "A leaf has two empty branches",
+      "variant": "default",
+      "note": "leaf → 1 + max(0, 0) = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The root receives subtree depths 2 and 1",
+      "variant": "default",
+      "note": "left = 2; right = 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Count the root as one more level",
+      "variant": "return",
+      "note": "1 + max(2, 1) = 3"
+    }
+  ]
+}

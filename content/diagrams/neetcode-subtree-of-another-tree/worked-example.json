@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tìm gốc ứng viên rồi so cả cấu trúc",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-subtree-of-another-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Nút ứng viên"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Tìm nút có cùng giá trị gốc mẫu",
+      "variant": "default",
+      "note": "pattern = 4 → left 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Nút 4 đầu tiên có con phải 2",
+      "variant": "default",
+      "note": "left = null, right = 2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Nút 4 thứ hai có con trái 2",
+      "variant": "default",
+      "note": "left = 2, right = null"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Ứng viên thứ hai khớp cả hình dạng",
+      "variant": "return",
+      "note": "true"
+    }
+  ]
+}

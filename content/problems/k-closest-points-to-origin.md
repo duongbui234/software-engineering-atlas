@@ -68,6 +68,21 @@ Có hai hướng bớt việc. Heap k chỗ chỉ giữ thứ tự của k ứng
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-k-closest-points-to-origin/worked-example.html" title="So khoảng cách bình phương" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> So khoảng cách bình phương.</span><a href="../diagrams/neetcode-k-closest-points-to-origin/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Tính điểm cho ba tọa độ. <code>[3, 0] → 9; [1, 1] → 2; [2, 1] → 5</code></li>
+<li>Giữ hai tọa độ đầu. <code>k = 2; {9, 2}</code></li>
+<li>Gặp điểm 5 thì loại điểm 9. <code>{5, 2}</code></li>
+<li>Trả hai điểm gần nhất. <code>[1, 1], [2, 1]</code></li>
+</ol>
+</details>
+
 ### Bỏ căn bậc hai
 
 Khoảng cách thật là `√(x² + y²)`. Vì căn bậc hai đồng biến trên số không âm, `√a < √b` khi và chỉ khi `a < b`. So `x² + y²` cho đúng cùng thứ tự, toàn số nguyên, và không tốn phép căn. Không chỉ nhanh hơn: tránh số thực thì tránh luôn câu hỏi "hai khoảng cách bằng nhau thật hay chỉ bằng nhau sau khi làm tròn". Đo trong TypeScript trên 10⁶ điểm: sắp xếp bằng `x² + y²` mất 527 ms, bằng `Math.hypot` mất 967 ms.

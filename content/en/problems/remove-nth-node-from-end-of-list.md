@@ -63,6 +63,21 @@ flowchart TB
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-remove-nth-node-from-end-of-list/worked-example.en.html" title="Keep a gap to remove from the end" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Keep a gap to remove from the end.</span><a href="../diagrams/neetcode-remove-nth-node-from-end-of-list/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Put both pointers at the dummy node. <code>dummy → A → B → C → D; n = 2</code></li>
+<li>Move fast two nodes ahead. <code>fast = B; slow = dummy</code></li>
+<li>Advance both until fast reaches the tail. <code>fast = D; slow = B</code></li>
+<li>Link B directly to D to remove C. <code>A → B → D</code></li>
+</ol>
+</details>
+
 ### Two passes: count, then walk
 
 ```ts

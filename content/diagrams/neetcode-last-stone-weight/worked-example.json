@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Luôn lấy hai viên nặng nhất",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-last-stone-weight/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Max-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Nạp trọng lượng bốn viên",
+      "variant": "default",
+      "note": "{10, 7, 4, 3}"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Đập 10 với 7 và đưa 3 trở lại",
+      "variant": "default",
+      "note": "{4, 3, 3}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Đập 4 với 3 và đưa 1 trở lại",
+      "variant": "default",
+      "note": "{3, 1}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Viên cuối nặng 2",
+      "variant": "return",
+      "note": "3 - 1 = 2"
+    }
+  ]
+}

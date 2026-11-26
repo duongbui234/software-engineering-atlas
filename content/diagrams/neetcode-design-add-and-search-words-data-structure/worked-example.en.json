@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A dot explores exactly one existing edge",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-design-add-and-search-words-data-structure/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Trie branches"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Store two words with the same first letter",
+      "variant": "default",
+      "note": "\"cap\", \"cot\""
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The literal c selects one branch",
+      "variant": "default",
+      "note": "pattern = \"c.t\""
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The dot tries a and o",
+      "variant": "default",
+      "note": "ca has no t; co → t"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The cot node has a terminal marker",
+      "variant": "return",
+      "note": "true"
+    }
+  ]
+}

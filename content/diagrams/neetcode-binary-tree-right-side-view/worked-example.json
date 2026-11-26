@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Mỗi tầng chỉ ghi nút nhìn thấy cuối",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-binary-tree-right-side-view/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Các tầng"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đọc tầng gốc",
+      "variant": "default",
+      "note": "[8] → 8"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Tầng tiếp theo có hai nút",
+      "variant": "default",
+      "note": "[3, 9] → 9"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Tầng cuối chỉ có con của nhánh trái",
+      "variant": "default",
+      "note": "[1] → 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Gom một nút từ mỗi tầng",
+      "variant": "return",
+      "note": "[8, 9, 1]"
+    }
+  ]
+}

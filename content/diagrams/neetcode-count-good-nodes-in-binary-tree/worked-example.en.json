@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Carry the maximum along the path",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-count-good-nodes-in-binary-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Path maximum"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Count the root 5",
+      "variant": "default",
+      "note": "previous max = -∞; max = 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Reach child 2 and keep threshold 5",
+      "variant": "default",
+      "note": "2 < 5 → skip"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Reach grandchild 4 and still compare with 5",
+      "variant": "default",
+      "note": "4 < 5 → skip"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The other branch has 7, so count it",
+      "variant": "return",
+      "note": "7 ≥ 5; total = 2"
+    }
+  ]
+}

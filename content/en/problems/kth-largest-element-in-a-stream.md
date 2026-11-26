@@ -68,6 +68,21 @@ The thing to notice: the k-th largest depends only on the **k largest numbers**.
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-kth-largest-element-in-a-stream/worked-example.en.html" title="Retain exactly the k largest values" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Retain exactly the k largest values.</span><a href="../diagrams/neetcode-kth-largest-element-in-a-stream/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Start with three values in the heap. <code>k = 3; {4, 7, 9}</code></li>
+<li>Insert 6 and remove the smallest value. <code>evict 4; {6, 7, 9}</code></li>
+<li>Insert 2 and immediately evict it. <code>evict 2; {6, 7, 9}</code></li>
+<li>The heap root is the third largest. <code>6</code></li>
+</ol>
+</details>
+
 ### A k-slot min-heap
 
 The heap keeps the k largest numbers seen so far. Each new number only needs to be compared with the **weakest** of those k: if it is larger, it enters the top k and pushes the weakest out; if not, it stays out. For the weakest to sit right at the top, comparable in O(1), the heap has to be a **min**-heap. And since the heap holds exactly the k largest numbers, its smallest is the k-th largest: the answer is always the top.

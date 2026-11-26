@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Move the correct endpoint based on the sum",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-two-sum-ii-input-array-is-sorted/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Sorted array"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Compare the outer sum with 11",
+      "variant": "default",
+      "note": "[1, 4, 7, 9], 1 + 9 = 10"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The sum is too small, move left up",
+      "variant": "default",
+      "note": "4 + 9 = 13"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The sum is too large, move right down",
+      "variant": "default",
+      "note": "4 + 7 = 11"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Return one-based positions",
+      "variant": "return",
+      "note": "[2, 3]"
+    }
+  ]
+}

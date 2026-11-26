@@ -80,6 +80,22 @@ I used to think `get` had to find a timestamp **equal** to t, as in [[en/problem
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-time-based-key-value-store/worked-example.en.html" title="Find the last version at or before t" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Find the last version at or before t.</span><a href="../diagrams/neetcode-time-based-key-value-store/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Writes are ordered by timestamp. <code>1 → red, 4 → blue, 8 → green</code></li>
+<li>Query at timestamp 6. <code>t = 6</code></li>
+<li>Timestamp 4 qualifies, search farther right. <code>4 ≤ 6</code></li>
+<li>Timestamp 8 is beyond the query. <code>8 &gt; 6</code></li>
+<li>Return the value at timestamp 4. <code>blue</code></li>
+</ol>
+</details>
+
 ### The data: one hash map, one sorted history per key
 
 Each key keeps two parallel arrays, `times` and `values`, sharing the index. Because the problem promises strictly increasing timestamps **across all sets** (so also within each key), `set` only appends to the end of both arrays and `times` stays sorted by itself. No re-sorting, no inserting in the middle.

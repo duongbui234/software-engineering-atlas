@@ -75,6 +75,21 @@ I used to think "find shortest" had to be the exact opposite of "find longest". 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-minimum-window-substring/worked-example.en.html" title="Shrink the window once all required letters fit" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Shrink the window once all required letters fit.</span><a href="../diagrams/neetcode-minimum-window-substring/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Expand until both a and c are present. <code>&quot;baacb&quot;, target = &quot;ac&quot;</code></li>
+<li>The window baac covers the target. <code>&quot;baac&quot;, length = 4</code></li>
+<li>Remove b and one extra a. <code>&quot;baac&quot; → &quot;aac&quot; → &quot;ac&quot;</code></li>
+<li>Removing another a breaks coverage. <code>&quot;ac&quot;, length = 2</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force
 
 From each left end l, extend r until `s[l..r]` is complete, then stop (extending further only makes it longer). On random data each extension stops early, so it looks fast. But when **there is no answer**, no extension ever stops: n extensions of up to n steps each, O(n²).

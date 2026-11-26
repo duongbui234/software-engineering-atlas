@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Pop the right operand first",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-evaluate-reverse-polish-notation/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Stack"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Push 9 and then 4",
+      "variant": "default",
+      "note": "[9, 4]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "For subtraction, pop 4 first",
+      "variant": "default",
+      "note": "right = 4, left = 9"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Push the result of 9 minus 4",
+      "variant": "default",
+      "note": "[5]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Push 3 and multiply it by 5",
+      "variant": "return",
+      "note": "[5, 3] → [15]"
+    }
+  ]
+}

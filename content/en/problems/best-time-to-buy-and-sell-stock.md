@@ -65,6 +65,21 @@ I used to think you just find the highest and the lowest price. The third exampl
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-best-time-to-buy-and-sell-stock/worked-example.en.html" title="Keep the lowest price before selling" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Keep the lowest price before selling.</span><a href="../diagrams/neetcode-best-time-to-buy-and-sell-stock/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Record the first buy price. <code>[8, 3, 6, 2, 7], min = 8</code></li>
+<li>Lower the buy to 3, then try selling at 6. <code>min = 3, best = 3</code></li>
+<li>Update the buy price when 2 appears. <code>min = 2</code></li>
+<li>Selling at 7 gives the best profit. <code>7 - 2 = 5</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n²)
 
 Two loops over every pair `(i, j)` with `j > i`. About n²/2 subtractions.

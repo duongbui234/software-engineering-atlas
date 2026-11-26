@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Carry into the next digit",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-add-two-numbers/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Digits"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Read the ones place first",
+      "variant": "default",
+      "note": "[8, 1] + [7, 2]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Add 8 and 7 and write digit 5",
+      "variant": "default",
+      "note": "15 → digit 5, carry 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Add 1, 2, and the carry",
+      "variant": "default",
+      "note": "4 → digit 4, carry 0"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Return digits in reverse order",
+      "variant": "return",
+      "note": "[5, 4] → 45"
+    }
+  ]
+}

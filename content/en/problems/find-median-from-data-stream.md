@@ -77,6 +77,21 @@ What to notice: the median only needs the two numbers in the **middle**, not the
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-find-median-from-data-stream/worked-example.en.html" title="Balance both halves to read the median" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Balance both halves to read the median.</span><a href="../diagrams/neetcode-find-median-from-data-stream/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Maintain lower and upper halves. <code>low = {1, 3}; high = {8}</code></li>
+<li>The odd median is the top of the lower half. <code>median = 3</code></li>
+<li>Insert 5 into the upper half. <code>low = {1, 3}; high = {5, 8}</code></li>
+<li>Equal halves use the average of both tops. <code>(3 + 5) / 2 = 4</code></li>
+</ol>
+</details>
+
 ### Two heaps, two invariants
 
 The lower half is a max-heap: its top is the largest number below the boundary. The upper half is a min-heap: its top is the smallest number above it. If we keep:

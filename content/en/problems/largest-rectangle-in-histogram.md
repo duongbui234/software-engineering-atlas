@@ -72,6 +72,22 @@ I used to think you had to try every (left, right) pair. It turns out you only n
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-largest-rectangle-in-histogram/worked-example.en.html" title="A shorter bar fixes the width" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> A shorter bar fixes the width.</span><a href="../diagrams/neetcode-largest-rectangle-in-histogram/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Keep indices of increasing bars. <code>[2, 4, 3, 1]</code></li>
+<li>At 3, settle height 4. <code>4 × 1 = 4</code></li>
+<li>At 1, settle height 3. <code>3 × 2 = 6</code></li>
+<li>Height 2 spans three positions. <code>2 × 3 = 6</code></li>
+<li>The largest area is 6. <code>max(4, 6, 6) = 6</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n²)
 
 Fix the left bar i, move the right bar j from i to the right, and keep the minimum height of the range: the area is `min · (j − i + 1)`. Keeping a running minimum makes each pair O(1), O(n²) in total.

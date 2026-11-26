@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A reachable prefix can be an unmarked word",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-implement-trie-prefix-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Trie node"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Insert the longer word first",
+      "variant": "default",
+      "note": "\"dove\": d → o → v → e"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Follow d and o to a reachable node",
+      "variant": "default",
+      "note": "startsWith(\"do\") = true"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The final node lacks a terminal marker",
+      "variant": "default",
+      "note": "search(\"do\") = false"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Inserting do just marks the existing node",
+      "variant": "return",
+      "note": "search(\"do\") = true"
+    }
+  ]
+}

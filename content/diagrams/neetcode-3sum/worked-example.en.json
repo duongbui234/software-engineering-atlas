@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Fix one value and find a pair",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-3sum/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Sorted array"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Fix the first negative value",
+      "variant": "default",
+      "note": "[-4, -2, 0, 2, 4], anchor = -4"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The endpoint pair gives a negative total",
+      "variant": "default",
+      "note": "-4 - 2 + 4 = -2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Advance left to 0 and record the triple",
+      "variant": "default",
+      "note": "-4 + 0 + 4 = 0"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Move the anchor to -2",
+      "variant": "default",
+      "note": "-2 + 0 + 2 = 0"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Keep the two distinct triples",
+      "variant": "return",
+      "note": "[-4, 0, 4], [-2, 0, 2]"
+    }
+  ]
+}

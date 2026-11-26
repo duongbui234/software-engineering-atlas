@@ -62,6 +62,22 @@ Mình từng nghĩ "không cho chia" chỉ là luật để làm khó. Hóa ra p
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-product-of-array-except-self/worked-example.html" title="Tích bên trái nhân tích bên phải" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Tích bên trái nhân tích bên phải.</span><a href="../diagrams/neetcode-product-of-array-except-self/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Ghi tích trước mỗi vị trí. <code>[2, 3, 5] → [1, 2, 6]</code></li>
+<li>Đến vị trí 2 với tích phải 1. <code>6 × 1 = 6</code></li>
+<li>Đến vị trí 1 với tích phải 5. <code>2 × 5 = 10</code></li>
+<li>Đến vị trí 0 với tích phải 15. <code>1 × 15 = 15</code></li>
+<li>Trả tích bỏ từng phần tử. <code>[15, 10, 6]</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n²)
 
 Với mỗi i, nhân mọi `nums[j]` với `j ≠ i`. Đo ở dưới: n gấp đôi thì thời gian gấp khoảng 4 lần.

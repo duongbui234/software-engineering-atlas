@@ -66,6 +66,22 @@ Mình từng định sinh mọi hoán vị của s1 rồi tìm từng cái trong
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-permutation-in-string/worked-example.html" title="So bộ đếm trong cửa sổ cố định" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> So bộ đếm trong cửa sổ cố định.</span><a href="../diagrams/neetcode-permutation-in-string/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đếm ký tự của mẫu ab. <code>a: 1, b: 1</code></li>
+<li>Cửa sổ đầu zz thiếu a và b. <code>&quot;zzba&quot;, length = 2</code></li>
+<li>Bỏ z và thêm b. <code>&quot;zb&quot;</code></li>
+<li>Bỏ z còn lại rồi thêm a. <code>&quot;ba&quot;</code></li>
+<li>Bộ đếm trùng với mẫu. <code>&quot;ba&quot; → true</code></li>
+</ol>
+</details>
+
 ### Cách 1, sắp xếp mỗi cửa sổ: O(n · m log m)
 
 Sắp xếp s1 một lần thành khóa. Với mỗi đoạn dài m của s2, sắp xếp rồi so với khóa. Đây là khóa sắp xếp của [[problems/group-anagrams|Group Anagrams]], áp lên n − m + 1 cửa sổ.

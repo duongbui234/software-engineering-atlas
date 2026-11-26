@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Move the left edge past the last repeat",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-longest-substring-without-repeating-characters/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Window"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "The first two characters differ",
+      "variant": "default",
+      "note": "\"pqpra\" → \"pq\""
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "See p again at index 2",
+      "variant": "default",
+      "note": "last[p] = 0"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Move left past the old p",
+      "variant": "default",
+      "note": "left = 1, window = \"qp\""
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Add r and a without another repeat",
+      "variant": "return",
+      "note": "\"qpra\" → 4"
+    }
+  ]
+}

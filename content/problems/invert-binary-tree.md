@@ -82,6 +82,21 @@ Lần đầu mình nghĩ phải "lật" cả cây theo một cách phức tạp 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-invert-binary-tree/worked-example.html" title="Đổi con trái và con phải tại mỗi nút" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đổi con trái và con phải tại mỗi nút.</span><a href="../diagrams/neetcode-invert-binary-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đọc hai con của gốc. <code>8: left = 3; right = 9</code></li>
+<li>Đổi vị trí của hai con. <code>8: left = 9; right = 3</code></li>
+<li>Tại 3, con trái 1 chuyển sang phải. <code>3: left = null; right = 1</code></li>
+<li>Giữ nguyên giá trị từng nút. <code>[8, 9, 3, null, null, null, 1]</code></li>
+</ol>
+</details>
+
 ### Cách 1: đệ quy
 
 Một cây rỗng đảo xong vẫn rỗng. Một cây khác rỗng thì: đảo cây con phải, đảo cây con trái, rồi gắn chéo, cái đã đảo từ bên phải về bên trái và ngược lại.

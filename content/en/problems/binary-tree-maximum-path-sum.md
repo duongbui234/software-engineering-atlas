@@ -61,6 +61,21 @@ I first wanted to ask each node one question: “How much is your best path wort
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-binary-tree-maximum-path-sum/worked-example.en.html" title="Score both branches and return one branch" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Score both branches and return one branch.</span><a href="../diagrams/neetcode-binary-tree-maximum-path-sum/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>The child branches contribute 3 and 6. <code>node = 4; left = 3; right = 6</code></li>
+<li>Score the path through both branches. <code>3 + 4 + 6 = 13</code></li>
+<li>The parent can extend just one branch. <code>4 + max(3, 6) = 10</code></li>
+<li>Keep the best path and returned gain separate. <code>best = 13; gain = 10</code></li>
+</ol>
+</details>
+
 ### Brute force by endpoint
 
 Build a parent map so each edge can be followed in either direction. Start from each node and visit every other node, accumulating the sum along the way. A tree has one simple path between any pair of nodes, so in a traversal from one endpoint it suffices to skip the edge just taken. The initial node is already a valid endpoint. The search can visit a path in both directions, which is harmless when taking the maximum.

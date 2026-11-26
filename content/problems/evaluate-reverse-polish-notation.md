@@ -71,6 +71,21 @@ Mình từng nghĩ khó nhất là phân tích biểu thức. Hóa ra RPN đư�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-evaluate-reverse-polish-notation/worked-example.html" title="Lấy toán hạng phải trước" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Lấy toán hạng phải trước.</span><a href="../diagrams/neetcode-evaluate-reverse-polish-notation/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đẩy 9 rồi đẩy 4. <code>[9, 4]</code></li>
+<li>Gặp dấu trừ thì lấy 4 trước. <code>right = 4, left = 9</code></li>
+<li>Đẩy hiệu 9 trừ 4. <code>[5]</code></li>
+<li>Thêm 3 rồi nhân với 5. <code>[5, 3] → [15]</code></li>
+</ol>
+</details>
+
 ### Cách 1, ngăn xếp
 
 Duyệt token từ trái sang. Số thì đẩy vào. Toán tử thì `b = pop()`, `a = pop()`, đẩy `a op b`. Cuối cùng ngăn xếp còn đúng một số. Mỗi token vào và ra ngăn xếp tối đa một lần: O(n) thời gian, O(n) bộ nhớ ở ca tệ nhất (`1 2 3 … + + +`).

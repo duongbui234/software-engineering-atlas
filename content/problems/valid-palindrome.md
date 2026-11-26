@@ -70,6 +70,21 @@ Mình từng nghĩ bài này chỉ là "đảo chuỗi rồi so". Hóa ra phần
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-valid-palindrome/worked-example.html" title="So hai đầu sau khi bỏ dấu" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> So hai đầu sau khi bỏ dấu.</span><a href="../diagrams/neetcode-valid-palindrome/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đặt hai chỉ số ở hai đầu. <code>&quot;N-o:n&quot;</code></li>
+<li>So N với n sau khi hạ chữ. <code>n = n</code></li>
+<li>Bỏ dấu gạch và dấu hai chấm. <code>&#x27;-&#x27;, &#x27;:&#x27;</code></li>
+<li>Hai chỉ số gặp nhau ở o. <code>&quot;non&quot; → true</code></li>
+</ol>
+</details>
+
 ### Cách 1, lọc rồi đảo
 
 Tạo chuỗi sạch (chữ thường, chỉ `a–z0–9`), đảo nó, so với chính nó. Ba lượt qua dữ liệu và hai chuỗi phụ dài tới n. Cách này luôn đọc **hết** chuỗi, kể cả khi ký tự đầu và cuối đã khác nhau.

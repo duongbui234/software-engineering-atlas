@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Dấu chấm thử đúng một cạnh đang có",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-design-add-and-search-words-data-structure/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Nhánh Trie"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Lưu hai từ có chung chữ đầu",
+      "variant": "default",
+      "note": "\"cap\", \"cot\""
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Chữ c đầu tiên chọn đúng một nhánh",
+      "variant": "default",
+      "note": "pattern = \"c.t\""
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Dấu chấm thử a rồi o",
+      "variant": "default",
+      "note": "ca has no t; co → t"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nút cot có dấu hết từ",
+      "variant": "return",
+      "note": "true"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Chiều sâu lấy nhánh dài hơn",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-maximum-depth-of-binary-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Chiều cao nhánh"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Cây rỗng có chiều sâu 0",
+      "variant": "default",
+      "note": "null → 0"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Lá có hai nhánh rỗng",
+      "variant": "default",
+      "note": "leaf → 1 + max(0, 0) = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Tại gốc nhận chiều sâu 2 và 1",
+      "variant": "default",
+      "note": "left = 2; right = 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Tính thêm nút gốc",
+      "variant": "return",
+      "note": "1 + max(2, 1) = 3"
+    }
+  ]
+}

@@ -74,6 +74,21 @@ Cần một cấu trúc vừa tìm theo key trong O(1), vừa chuyển một ph�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-lru-cache/worked-example.html" title="Lượt truy cập đổi thứ tự bị đẩy" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Lượt truy cập đổi thứ tự bị đẩy.</span><a href="../diagrams/neetcode-lru-cache/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Thêm A rồi B vào cache hai chỗ. <code>recent → B → A</code></li>
+<li>Đọc A và đưa nó lên đầu. <code>recent → A → B</code></li>
+<li>Thêm C và kiểm tra dung lượng. <code>recent → C → A → B</code></li>
+<li>Loại B ở cuối danh sách. <code>recent → C → A</code></li>
+</ol>
+</details>
+
 ### Cách 1: hash map + danh sách hai chiều có hai nút canh
 
 Ghép hai cấu trúc, mỗi cái che chỗ yếu của cái kia:

@@ -79,6 +79,21 @@ Với hai danh sách, bài 21 đã giải: hai con trỏ, mỗi bước nối n�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-merge-k-sorted-lists/worked-example.html" title="Heap giữ đầu của từng danh sách" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Heap giữ đầu của từng danh sách.</span><a href="../diagrams/neetcode-merge-k-sorted-lists/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Nạp phần tử đầu của ba danh sách. <code>[1, 6], [3, 4], [2, 9]</code></li>
+<li>Lấy 1 rồi đưa 6 vào heap. <code>heap = {2, 3, 6}</code></li>
+<li>Lấy 2 rồi đưa 9 vào heap. <code>heap = {3, 6, 9}</code></li>
+<li>Tiếp tục lấy gốc để trộn. <code>[1, 2, 3, 4, 6, 9]</code></li>
+</ol>
+</details>
+
 ### Cách 1: gom rồi sắp
 
 Đọc mọi giá trị ra một mảng, sắp, dựng danh sách mới. O(N log N) thời gian, O(N) bộ nhớ thêm, và tạo N nút mới thay vì nối lại nút cũ. Không tận dụng chuyện các danh sách đã sắp sẵn, nhưng ngắn và khó sai, và như phần đo sẽ cho thấy, không chậm như ta tưởng.

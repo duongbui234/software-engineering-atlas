@@ -65,6 +65,21 @@ Với mảng, bài này là trò chơi chỉ số: phần tử thứ hai của k
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-reorder-list/worked-example.html" title="Tách đôi, đảo nửa sau rồi đan" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Tách đôi, đảo nửa sau rồi đan.</span><a href="../diagrams/neetcode-reorder-list/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Cắt sau nút 3. <code>[1, 2, 3], [4, 5]</code></li>
+<li>Đảo nửa thứ hai. <code>[5, 4]</code></li>
+<li>Đan cặp 1 với 5 và 2 với 4. <code>1 → 5 → 2 → 4</code></li>
+<li>Nút giữa đứng cuối. <code>1 → 5 → 2 → 4 → 3</code></li>
+</ol>
+</details>
+
 ### Cách 1: ba bước tại chỗ
 
 ```ts

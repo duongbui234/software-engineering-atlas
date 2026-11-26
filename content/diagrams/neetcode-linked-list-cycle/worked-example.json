@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Hai con trỏ gặp nhau trong vòng",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-linked-list-cycle/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Con trỏ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Tạo vòng từ D quay về B",
+      "variant": "default",
+      "note": "A → B → C → D → B"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Đi một bước và hai bước",
+      "variant": "default",
+      "note": "slow = B; fast = C"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Con trỏ nhanh vòng về B",
+      "variant": "default",
+      "note": "slow = C; fast = B"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Hai con trỏ gặp ở D",
+      "variant": "return",
+      "note": "slow = fast = D → true"
+    }
+  ]
+}

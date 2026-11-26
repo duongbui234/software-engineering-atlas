@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A trailing car joins if it catches the fleet",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-car-fleet/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Arrival times"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Process the car closest to the target first",
+      "variant": "default",
+      "note": "target = 12; (10, 1) → 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The car at 6 could arrive in one hour",
+      "variant": "default",
+      "note": "(6, 6) → 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "That car catches the fleet ahead",
+      "variant": "default",
+      "note": "1 ≤ 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The car at 0 needs four hours and stays separate",
+      "variant": "return",
+      "note": "(0, 3) → 4; total = 2"
+    }
+  ]
+}

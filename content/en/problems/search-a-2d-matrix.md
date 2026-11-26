@@ -72,6 +72,21 @@ I used to think a matrix needed its own "two-dimensional" binary search. It turn
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-search-a-2d-matrix/worked-example.en.html" title="Map a virtual index to row and column" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Map a virtual index to row and column.</span><a href="../diagrams/neetcode-search-a-2d-matrix/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>View the matrix as one sorted sequence. <code>&#91;[1, 4, 8], [11, 15, 20]]</code></li>
+<li>Index 2 maps to row 0 column 2. <code>2 / 3 → (0, 2), value = 8</code></li>
+<li>Value 8 is below target 15. <code>lo = 3, hi = 5</code></li>
+<li>Index 4 reaches value 15. <code>(1, 1) → true</code></li>
+</ol>
+</details>
+
 ### Approach 1, full scan: O(m·n)
 
 Visit every cell. It uses no ordering at all. With m·n ≤ 10⁴ it still passes, but the problem asks for O(log(m·n)).

@@ -63,6 +63,22 @@ I used to think "no division" was just a rule to make things harder. It turns ou
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-product-of-array-except-self/worked-example.en.html" title="Multiply left and right products" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Multiply left and right products.</span><a href="../diagrams/neetcode-product-of-array-except-self/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Store the product before each index. <code>[2, 3, 5] → [1, 2, 6]</code></li>
+<li>Reach index 2 with right product 1. <code>6 × 1 = 6</code></li>
+<li>Reach index 1 with right product 5. <code>2 × 5 = 10</code></li>
+<li>Reach index 0 with right product 15. <code>1 × 15 = 15</code></li>
+<li>Return products excluding each item. <code>[15, 10, 6]</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n²)
 
 For each i, multiply every `nums[j]` with `j ≠ i`. Measured below: doubling n multiplies the time by about 4.

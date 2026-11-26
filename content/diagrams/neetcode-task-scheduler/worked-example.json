@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Chừa chỗ giữa các việc giống nhau",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-task-scheduler/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Lịch CPU"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Việc A xuất hiện nhiều nhất",
+      "variant": "default",
+      "note": "A × 3, B × 2, cooldown = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Xếp hai nhóm trước lần A cuối",
+      "variant": "default",
+      "note": "A _ _ / A _ _ / A"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Chèn B vào hai khoảng khác nhau",
+      "variant": "default",
+      "note": "A B _ / A B _ / A"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Tổng lịch là bảy nhịp",
+      "variant": "return",
+      "note": "7 = (3 - 1) × 3 + 1"
+    }
+  ]
+}

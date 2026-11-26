@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Compare squared distances",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-k-closest-points-to-origin/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Candidate heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Score three points",
+      "variant": "default",
+      "note": "[3, 0] → 9; [1, 1] → 2; [2, 1] → 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Keep the first two points",
+      "variant": "default",
+      "note": "k = 2; {9, 2}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "When score 5 arrives, evict score 9",
+      "variant": "default",
+      "note": "{5, 2}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Return the two closest points",
+      "variant": "return",
+      "note": "[1, 1], [2, 1]"
+    }
+  ]
+}

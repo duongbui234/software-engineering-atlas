@@ -58,6 +58,21 @@ Sau khi thêm `cart`, `startsWith("car")` trả `true` và `search("car")` trả
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-implement-trie-prefix-tree/worked-example.html" title="Một nút có thể là tiền tố chưa thành từ" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Một nút có thể là tiền tố chưa thành từ.</span><a href="../diagrams/neetcode-implement-trie-prefix-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Thêm từ dài trước. <code>&quot;dove&quot;: d → o → v → e</code></li>
+<li>Đi theo d rồi o thì tới được nút. <code>startsWith(&quot;do&quot;) = true</code></li>
+<li>Nút o chưa có dấu hết từ. <code>search(&quot;do&quot;) = false</code></li>
+<li>Thêm do chỉ bật dấu tại o. <code>search(&quot;do&quot;) = true</code></li>
+</ol>
+</details>
+
 ### Tập từ và phép quét
 
 Lưu các từ nguyên vẹn trong một tập băm. Chèn và tra chính xác đều sử dụng một khóa chuỗi. Với tiền tố, duyệt các khóa và dừng khi gặp từ có phần đầu khớp. Cách này nhỏ gọn khi phần lớn lệnh tra chính xác. Nếu mọi từ đều trượt, một truy vấn tiền tố phải xem đủ N từ.

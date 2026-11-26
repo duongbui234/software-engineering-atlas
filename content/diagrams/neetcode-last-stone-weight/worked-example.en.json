@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Always remove the two heaviest stones",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-last-stone-weight/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Max-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Load four stone weights",
+      "variant": "default",
+      "note": "{10, 7, 4, 3}"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Smash 10 against 7 and return 3",
+      "variant": "default",
+      "note": "{4, 3, 3}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Smash 4 against 3 and return 1",
+      "variant": "default",
+      "note": "{3, 1}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The last stone weighs 2",
+      "variant": "return",
+      "note": "3 - 1 = 2"
+    }
+  ]
+}

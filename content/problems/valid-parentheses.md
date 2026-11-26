@@ -72,6 +72,21 @@ Mình từng nghĩ chỉ cần đếm: mở thì cộng, đóng thì trừ, cu�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-valid-parentheses/worked-example.html" title="Ghép dấu đóng với đỉnh ngăn xếp" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Ghép dấu đóng với đỉnh ngăn xếp.</span><a href="../diagrams/neetcode-valid-parentheses/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đẩy hai dấu mở. <code>&quot;{[&quot; → [&#x27;{&#x27;, &#x27;[&#x27;]</code></li>
+<li>Đọc dấu ] và lấy [ ra. <code>[&#x27;{&#x27;]</code></li>
+<li>Đọc dấu } và lấy { ra. <code>[]</code></li>
+<li>Hết chuỗi và ngăn xếp rỗng. <code>&quot;{[]}&quot; → true</code></li>
+</ol>
+</details>
+
 ### Cách 1, một bộ đếm: sai
 
 Cộng 1 khi gặp ngoặc mở, trừ 1 khi gặp ngoặc đóng, âm thì sai, cuối cùng phải về 0. Đúng với đề chỉ có một loại ngoặc. Với ba loại, `"(]"` cho 1 rồi 0: lọt.

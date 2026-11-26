@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "The two pointers meet inside the cycle",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-linked-list-cycle/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Pointers"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Close the cycle from D to B",
+      "variant": "default",
+      "note": "A → B → C → D → B"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Move one and two steps",
+      "variant": "default",
+      "note": "slow = B; fast = C"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The fast pointer wraps back to B",
+      "variant": "default",
+      "note": "slow = C; fast = B"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Both pointers meet at D",
+      "variant": "return",
+      "note": "slow = fast = D → true"
+    }
+  ]
+}

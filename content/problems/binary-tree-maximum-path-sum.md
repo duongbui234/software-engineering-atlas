@@ -60,6 +60,21 @@ Mình từng muốn hỏi mỗi nút một câu duy nhất: “Đường tốt n
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-binary-tree-maximum-path-sum/worked-example.html" title="Thử hai nhánh nhưng chỉ trả một nhánh" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Thử hai nhánh nhưng chỉ trả một nhánh.</span><a href="../diagrams/neetcode-binary-tree-maximum-path-sum/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Hai nhánh con đóng góp 3 và 6. <code>node = 4; left = 3; right = 6</code></li>
+<li>Thử đường đi qua cả hai nhánh. <code>3 + 4 + 6 = 13</code></li>
+<li>Cha chỉ có thể nối vào một nhánh. <code>4 + max(3, 6) = 10</code></li>
+<li>Ghi riêng đáp án và giá trị trả lên. <code>best = 13; gain = 10</code></li>
+</ol>
+</details>
+
 ### Vét cạn theo đầu mút
 
 Lập bảng cha để coi mỗi cạnh là hai chiều. Từ từng nút xuất phát, duyệt mọi nút và cộng điểm dọc đường. Cây có đúng một đường đơn giữa mỗi cặp nút, nên trong lần duyệt từ một đầu mút chỉ cần tránh cạnh vừa đi qua. Vị trí đang đứng là một đầu mút hợp lệ ngay khi bắt đầu. Hai hướng của cùng một đường có thể được xét hai lần, nhưng chỉ lấy giá trị lớn nhất nên không cần loại trùng.

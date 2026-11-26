@@ -70,6 +70,22 @@ I used to think binary search only works on a fully increasing array. It turns o
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-find-minimum-in-rotated-sorted-array/worked-example.en.html" title="Compare the midpoint with the right end" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Compare the midpoint with the right end.</span><a href="../diagrams/neetcode-find-minimum-in-rotated-sorted-array/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Start with the rotated array. <code>[8, 12, 1, 3, 5]</code></li>
+<li>The midpoint is 1 and right end is 5. <code>mid = 2, hi = 4</code></li>
+<li>Keep the midpoint in the left interval. <code>hi = 2</code></li>
+<li>The new midpoint is 12, discard the left half. <code>lo = 2</code></li>
+<li>Both bounds meet at the minimum. <code>nums[2] = 1</code></li>
+</ol>
+</details>
+
 ### Approach 1, scan: O(n)
 
 Walk the whole array keeping the smallest. Correct, but the problem asks for O(log n). A scan also uses nothing of the "two increasing runs" structure.

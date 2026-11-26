@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "So hai đầu sau khi bỏ dấu",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-valid-palindrome/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hai chỉ số"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đặt hai chỉ số ở hai đầu",
+      "variant": "default",
+      "note": "\"N-o:n\""
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "So N với n sau khi hạ chữ",
+      "variant": "default",
+      "note": "n = n"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Bỏ dấu gạch và dấu hai chấm",
+      "variant": "default",
+      "note": "'-', ':'"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Hai chỉ số gặp nhau ở o",
+      "variant": "return",
+      "note": "\"non\" → true"
+    }
+  ]
+}

@@ -76,6 +76,22 @@ Mình từng nghĩ chia đôi chỉ dùng để tìm **một giá trị** trong 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-median-of-two-sorted-arrays/worked-example.html" title="Cắt sao cho mọi số trái đều nhỏ hơn" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Cắt sao cho mọi số trái đều nhỏ hơn.</span><a href="../diagrams/neetcode-median-of-two-sorted-arrays/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Chọn số phần tử cần bên trái. <code>A = [2, 8], B = [1, 4, 9, 12]; left = 3</code></li>
+<li>Lấy hai số A và một số B. <code>left max = 8, right min = 4</code></li>
+<li>Dời vết cắt A sang trái. <code>left = [2] + [1, 4]</code></li>
+<li>Hai biên đều đúng thứ tự. <code>left max = 4, right min = 8</code></li>
+<li>Lấy trung bình hai số giữa. <code>(4 + 8) / 2 = 6</code></li>
+</ol>
+</details>
+
 ### Trung vị qua một vết cắt
 
 Gọi `t = m + n` và `half = ⌈t / 2⌉ = (t + 1) / 2` (chia nguyên). Nếu ta biết "nửa trái" của mảng gộp, gồm `half` phần tử nhỏ nhất, thì:

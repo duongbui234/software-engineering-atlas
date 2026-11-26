@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Split, reverse the second half, then weave",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-reorder-list/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Two lists"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Cut after node 3",
+      "variant": "default",
+      "note": "[1, 2, 3], [4, 5]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Reverse the second half",
+      "variant": "default",
+      "note": "[5, 4]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Weave 1 with 5 and 2 with 4",
+      "variant": "default",
+      "note": "1 → 5 → 2 → 4"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The middle node remains at the end",
+      "variant": "return",
+      "note": "1 → 5 → 2 → 4 → 3"
+    }
+  ]
+}

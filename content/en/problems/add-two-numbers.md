@@ -65,6 +65,21 @@ The numbers have up to 100 digits, larger than any built-in 64-bit integer type.
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-add-two-numbers/worked-example.en.html" title="Carry into the next digit" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Carry into the next digit.</span><a href="../diagrams/neetcode-add-two-numbers/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Read the ones place first. <code>[8, 1] + [7, 2]</code></li>
+<li>Add 8 and 7 and write digit 5. <code>15 → digit 5, carry 1</code></li>
+<li>Add 1, 2, and the carry. <code>4 → digit 4, carry 0</code></li>
+<li>Return digits in reverse order. <code>[5, 4] → 45</code></li>
+</ol>
+</details>
+
 ```ts
 // Standard approach: add each pair of digits from the ones place, carry over to the next node. A dummy node holds the result's head.
 function addDigits(l1: ListNode | null, l2: ListNode | null): ListNode | null {

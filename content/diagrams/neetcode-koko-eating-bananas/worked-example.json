@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tìm tốc độ nhỏ nhất đủ nhanh",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-koko-eating-bananas/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Số giờ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Thử tốc độ 3 với giới hạn 5 giờ",
+      "variant": "default",
+      "note": "piles = [4, 8], 2 + 3 = 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Tốc độ 3 đủ, thử nhỏ hơn",
+      "variant": "default",
+      "note": "hi = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Tốc độ 2 cần sáu giờ",
+      "variant": "default",
+      "note": "2 + 4 = 6, lo = 3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Ranh giới đầu tiên là 3",
+      "variant": "return",
+      "note": "lo = hi = 3"
+    }
+  ]
+}

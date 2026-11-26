@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Dấu rỗng giữ bên của từng con",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-serialize-and-deserialize-binary-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Dãy token"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Bắt đầu với gốc 7, chỉ có con phải 2",
+      "variant": "default",
+      "note": "root = 7; left = null; right = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Ghi giá trị gốc và chỗ trái trống",
+      "variant": "default",
+      "note": "7,#"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Ghi con phải 2 và hai chỗ trống của nó",
+      "variant": "default",
+      "note": "7,#,2,#,#"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Đọc lại theo đúng thứ tự trái rồi phải",
+      "variant": "return",
+      "note": "7: left = null; right = 2"
+    }
+  ]
+}

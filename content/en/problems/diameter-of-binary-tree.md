@@ -81,6 +81,21 @@ I used to think the longest path had to go from the deepest leaf on the left, th
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-diameter-of-binary-tree/worked-example.en.html" title="A path through a node uses both branches" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> A path through a node uses both branches.</span><a href="../diagrams/neetcode-diameter-of-binary-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>The child heights are 2 and 1. <code>left = 2; right = 1</code></li>
+<li>Join both branches through this node. <code>candidate = 2 + 1 = 3 edges</code></li>
+<li>Return a one-branch height to the parent. <code>height = 1 + max(2, 1) = 3</code></li>
+<li>Keep the best path seen so far. <code>best = max(best, 3)</code></li>
+</ol>
+</details>
+
 ### Why the two heights are enough
 
 Take any longest path and call v its highest node (the one closest to the root). From v the path goes down at most two branches: one into the left subtree, one into the right subtree (it cannot go up, because v is the highest node). The longest each branch can be is straight down to the deepest leaf of that subtree, which is exactly `height(child)` edges counted from v (one edge from v to the child, plus the child's height minus 1). So the longest path turning at v has `height(left) + height(right)` edges, and the answer is the maximum of that quantity over every v.

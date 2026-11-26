@@ -67,6 +67,21 @@ The easy part to misread is the word "subtree". I used to think it was enough to
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-subtree-of-another-tree/worked-example.en.html" title="Find a candidate root and compare the whole shape" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Find a candidate root and compare the whole shape.</span><a href="../diagrams/neetcode-subtree-of-another-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Look for nodes with the pattern root&#x27;s value. <code>pattern = 4 → left 2</code></li>
+<li>The first 4 has a right child 2. <code>left = null, right = 2</code></li>
+<li>The second 4 has a left child 2. <code>left = 2, right = null</code></li>
+<li>The second candidate matches the shape. <code>true</code></li>
+</ol>
+</details>
+
 ### Approach 1: compare at every node
 
 A subtree identical to `subRoot` either starts right at the root, or lies in the left branch, or lies in the right branch. Those three possibilities turn straight into recursion, reusing the comparison from problem 100:

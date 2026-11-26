@@ -74,6 +74,21 @@ Thêm một điều kiện: trước khi đảo phải biết chắc nhóm có �
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-reverse-nodes-in-k-group/worked-example.html" title="Đảo nhóm đủ k rồi nối lại" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đảo nhóm đủ k rồi nối lại.</span><a href="../diagrams/neetcode-reverse-nodes-in-k-group/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đếm đủ hai nút trong nhóm đầu. <code>1 → 2 → 3 → 4 → 5; k = 2</code></li>
+<li>Đảo nhóm đầu và giữ đầu nhóm sau. <code>2 → 1; next = 3</code></li>
+<li>Đảo nhóm 3 và 4. <code>4 → 3</code></li>
+<li>Nhóm cuối chỉ có 5 nên giữ nguyên. <code>2 → 1 → 4 → 3 → 5</code></li>
+</ol>
+</details>
+
 ### Cách 1: lặp, O(1) bộ nhớ thêm
 
 ```ts

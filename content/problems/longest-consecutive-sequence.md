@@ -71,6 +71,22 @@ Mình từng nghĩ "đòi O(n) mà dãy liên tiếp thì phải sắp xếp, v�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-longest-consecutive-sequence/worked-example.html" title="Đếm từ đầu dãy liên tiếp" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đếm từ đầu dãy liên tiếp.</span><a href="../diagrams/neetcode-longest-consecutive-sequence/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đưa các số vào tập. <code>{8, 4, 6, 5, 9}</code></li>
+<li>Kiểm tra xem 8 có số đứng trước. <code>7 ∉ set</code></li>
+<li>Từ 8 đếm tới 9. <code>[8, 9] → 2</code></li>
+<li>Từ 4 đếm tới 6. <code>[4, 5, 6] → 3</code></li>
+<li>Dãy dài nhất có 3 số. <code>max(2, 3) = 3</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n³) ở ca tệ nhất
 
 Với mỗi x, hỏi "`x + 1` có trong mảng không?" bằng cách duyệt cả mảng (`includes`, `in` trên list, `slices.Contains`), rồi `x + 2`, … Mỗi câu hỏi O(n), một dãy dài tới n bước, và có n điểm xuất phát: O(n³). Đo trên một dãy `0..n−1` đã xáo trộn:

@@ -59,6 +59,21 @@ After inserting `cart`, `startsWith("car")` returns `true` and `search("car")` r
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-implement-trie-prefix-tree/worked-example.en.html" title="A reachable prefix can be an unmarked word" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> A reachable prefix can be an unmarked word.</span><a href="../diagrams/neetcode-implement-trie-prefix-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Insert the longer word first. <code>&quot;dove&quot;: d → o → v → e</code></li>
+<li>Follow d and o to a reachable node. <code>startsWith(&quot;do&quot;) = true</code></li>
+<li>The final node lacks a terminal marker. <code>search(&quot;do&quot;) = false</code></li>
+<li>Inserting do just marks the existing node. <code>search(&quot;do&quot;) = true</code></li>
+</ol>
+</details>
+
 ### Word set with a scan
 
 Keep full words in a hash set. Inserting or looking up an exact word uses one string key. For prefixes, scan the keys and stop when a word starts with the prefix. This is compact when most requests concern exact words. If every word misses, a prefix query has to check all N words.

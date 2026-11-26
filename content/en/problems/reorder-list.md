@@ -66,6 +66,21 @@ With an array this is an index game: the second element of the result is `a[n �
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-reorder-list/worked-example.en.html" title="Split, reverse the second half, then weave" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Split, reverse the second half, then weave.</span><a href="../diagrams/neetcode-reorder-list/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Cut after node 3. <code>[1, 2, 3], [4, 5]</code></li>
+<li>Reverse the second half. <code>[5, 4]</code></li>
+<li>Weave 1 with 5 and 2 with 4. <code>1 → 5 → 2 → 4</code></li>
+<li>The middle node remains at the end. <code>1 → 5 → 2 → 4 → 3</code></li>
+</ol>
+</details>
+
 ### Approach 1: three steps in place
 
 ```ts

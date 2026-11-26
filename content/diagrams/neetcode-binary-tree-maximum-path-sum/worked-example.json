@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Thử hai nhánh nhưng chỉ trả một nhánh",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-binary-tree-maximum-path-sum/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Tổng đường đi"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Hai nhánh con đóng góp 3 và 6",
+      "variant": "default",
+      "note": "node = 4; left = 3; right = 6"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Thử đường đi qua cả hai nhánh",
+      "variant": "default",
+      "note": "3 + 4 + 6 = 13"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Cha chỉ có thể nối vào một nhánh",
+      "variant": "default",
+      "note": "4 + max(3, 6) = 10"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Ghi riêng đáp án và giá trị trả lên",
+      "variant": "return",
+      "note": "best = 13; gain = 10"
+    }
+  ]
+}

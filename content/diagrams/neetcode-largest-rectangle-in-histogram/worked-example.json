@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cột thấp chốt chiều rộng",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-largest-rectangle-in-histogram/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Ngăn xếp cột"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Giữ chỉ số của các cột đang tăng",
+      "variant": "default",
+      "note": "[2, 4, 3, 1]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Gặp 3 thì chốt cột cao 4",
+      "variant": "default",
+      "note": "4 × 1 = 4"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Gặp 1 thì chốt cột cao 3",
+      "variant": "default",
+      "note": "3 × 2 = 6"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Cột cao 2 trải qua ba vị trí",
+      "variant": "default",
+      "note": "2 × 3 = 6"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Diện tích lớn nhất là 6",
+      "variant": "return",
+      "note": "max(4, 6, 6) = 6"
+    }
+  ]
+}

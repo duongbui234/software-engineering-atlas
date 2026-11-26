@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Count the replacements a window needs",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-longest-repeating-character-replacement/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Counts"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Grow the window to ABBA",
+      "variant": "default",
+      "note": "A = 2, B = 2, k = 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Two replacements exceed one, so shrink",
+      "variant": "default",
+      "note": "4 - 2 = 2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "BBA needs one replacement",
+      "variant": "default",
+      "note": "3 - 2 = 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Keep the valid length of 3",
+      "variant": "return",
+      "note": "\"BBA\" → \"BBB\""
+    }
+  ]
+}

@@ -68,6 +68,22 @@ I used to think the hard part was finding the triplets. It turns out finding the
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-3sum/worked-example.en.html" title="Fix one value and find a pair" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Fix one value and find a pair.</span><a href="../diagrams/neetcode-3sum/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Fix the first negative value. <code>[-4, -2, 0, 2, 4], anchor = -4</code></li>
+<li>The endpoint pair gives a negative total. <code>-4 - 2 + 4 = -2</code></li>
+<li>Advance left to 0 and record the triple. <code>-4 + 0 + 4 = 0</code></li>
+<li>Move the anchor to -2. <code>-2 + 0 + 2 = 0</code></li>
+<li>Keep the two distinct triples. <code>[-4, 0, 4], [-2, 0, 2]</code></li>
+</ol>
+</details>
+
 ### Three approaches
 
 | Approach | Time | Duplicates removed by |

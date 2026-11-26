@@ -76,6 +76,21 @@ Trung vị 5 lần, Node 24. Cột mảng đếm dùng cùng dãy số nhưng đ
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-find-median-from-data-stream/worked-example.html" title="Cân bằng hai nửa để lấy trung vị" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Cân bằng hai nửa để lấy trung vị.</span><a href="../diagrams/neetcode-find-median-from-data-stream/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Giữ nửa thấp và nửa cao. <code>low = {1, 3}; high = {8}</code></li>
+<li>Trung vị lẻ là đỉnh nửa thấp. <code>median = 3</code></li>
+<li>Đưa số 5 vào nửa cao. <code>low = {1, 3}; high = {5, 8}</code></li>
+<li>Hai nửa bằng nhau nên lấy trung bình. <code>(3 + 5) / 2 = 4</code></li>
+</ol>
+</details>
+
 ### Hai heap, hai bất biến
 
 Nửa nhỏ là max-heap, đỉnh là số lớn nhất bên dưới ranh giới. Nửa lớn là min-heap, đỉnh là số nhỏ nhất bên trên. Nếu giữ được:

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Chọn nửa đã sắp có chứa đích",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-search-in-rotated-sorted-array/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Khoảng tìm"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Xét phần tử ở giữa",
+      "variant": "default",
+      "note": "[9, 12, 17, 2, 5, 7], target = 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Nửa trái từ 9 tới 17 đã sắp",
+      "variant": "default",
+      "note": "mid = 2, value = 17"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Đích 5 nằm ngoài nửa trái",
+      "variant": "default",
+      "note": "lo = 3, hi = 5"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Giữa mới là đúng đích",
+      "variant": "return",
+      "note": "mid = 4"
+    }
+  ]
+}

@@ -70,6 +70,21 @@ Nếu không có thời gian nguội (n = 0), đáp án đơn giản là số vi
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-task-scheduler/worked-example.html" title="Chừa chỗ giữa các việc giống nhau" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chừa chỗ giữa các việc giống nhau.</span><a href="../diagrams/neetcode-task-scheduler/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Việc A xuất hiện nhiều nhất. <code>A × 3, B × 2, cooldown = 2</code></li>
+<li>Xếp hai nhóm trước lần A cuối. <code>A _ _ / A _ _ / A</code></li>
+<li>Chèn B vào hai khoảng khác nhau. <code>A B _ / A B _ / A</code></li>
+<li>Tổng lịch là bảy nhịp. <code>7 = (3 - 1) × 3 + 1</code></li>
+</ol>
+</details>
+
 ### Cách 1: mô phỏng bằng max-heap và hàng chờ nguội
 
 Quy tắc tham lam: **mỗi nhịp, chạy việc sẵn sàng còn nhiều lần nhất**. Ta không cần biết tên việc, chỉ cần số lần còn lại, nên heap chỉ giữ tối đa 26 con số. Việc vừa chạy chưa thể chạy lại, nên nó không quay về heap ngay mà vào hàng chờ kèm nhịp `t + n`; hết nhịp đó, nó được đưa về heap và chạy lại được từ nhịp `t + n + 1`.

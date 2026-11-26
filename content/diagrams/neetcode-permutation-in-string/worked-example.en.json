@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Compare counts in a fixed-size window",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-permutation-in-string/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Window"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Count the pattern ab",
+      "variant": "default",
+      "note": "a: 1, b: 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The initial window zz lacks a and b",
+      "variant": "default",
+      "note": "\"zzba\", length = 2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Remove z and add b",
+      "variant": "default",
+      "note": "\"zb\""
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Remove the other z and add a",
+      "variant": "default",
+      "note": "\"ba\""
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "The counts match the pattern",
+      "variant": "return",
+      "note": "\"ba\" → true"
+    }
+  ]
+}

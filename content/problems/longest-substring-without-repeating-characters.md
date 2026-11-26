@@ -69,6 +69,21 @@ Mình từng nghĩ phải thử mọi đoạn con. Hóa ra khi một đoạn đ�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-longest-substring-without-repeating-characters/worked-example.html" title="Dời mép trái qua lần lặp gần nhất" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Dời mép trái qua lần lặp gần nhất.</span><a href="../diagrams/neetcode-longest-substring-without-repeating-characters/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Hai ký tự đầu đều khác nhau. <code>&quot;pqpra&quot; → &quot;pq&quot;</code></li>
+<li>Gặp lại p ở chỉ số 2. <code>last[p] = 0</code></li>
+<li>Dời trái qua p cũ. <code>left = 1, window = &quot;qp&quot;</code></li>
+<li>Thêm r và a không gặp ký tự lặp. <code>&quot;qpra&quot; → 4</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn
 
 Từ mỗi vị trí đầu i, kéo dài tới khi gặp ký tự lặp. Lần kéo dài dừng sau tối đa k + 1 bước (k là số ký tự khác nhau, ở đây ≤ 95), nên tổng là O(n·k), không phải O(n²) như nhìn hai vòng lặp. Với bảng chữ lớn (Unicode) thì k có thể bằng n.

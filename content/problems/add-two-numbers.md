@@ -64,6 +64,21 @@ Số có tới 100 chữ số, lớn hơn mọi kiểu số nguyên có sẵn 64
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-add-two-numbers/worked-example.html" title="Chuyển số nhớ sang chữ số kế tiếp" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chuyển số nhớ sang chữ số kế tiếp.</span><a href="../diagrams/neetcode-add-two-numbers/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đọc từ hàng đơn vị. <code>[8, 1] + [7, 2]</code></li>
+<li>Cộng 8 và 7 rồi lấy chữ số 5. <code>15 → digit 5, carry 1</code></li>
+<li>Cộng 1, 2 và số nhớ. <code>4 → digit 4, carry 0</code></li>
+<li>Trả danh sách theo thứ tự đảo. <code>[5, 4] → 45</code></li>
+</ol>
+</details>
+
 ```ts
 // Cách chuẩn: cộng từng cặp chữ số từ hàng đơn vị, mang số nhớ sang nút sau. Nút giả giữ đầu kết quả.
 function addDigits(l1: ListNode | null, l2: ListNode | null): ListNode | null {

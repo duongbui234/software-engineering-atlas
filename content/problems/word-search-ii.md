@@ -66,6 +66,21 @@ x e x
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-word-search-ii/worked-example.html" title="Mang nút Trie theo đường dò bảng" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Mang nút Trie theo đường dò bảng.</span><a href="../diagrams/neetcode-word-search-ii/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đi qua c rồi a trên bảng. <code>board = &#91;[c,a],[r,t]]</code></li>
+<li>Thử sang trái nhưng ô c đã dùng. <code>path = c → a</code></li>
+<li>Đi xuống t và tìm thấy cat. <code>dict = {cat, car}; terminal = &quot;cat&quot;</code></li>
+<li>Khôi phục các ô để thử đường khác. <code>found = [&quot;cat&quot;]; board = &#91;[c,a],[r,t]]</code></li>
+</ol>
+</details>
+
 ### Cách 1 — Tìm mỗi từ bằng một lượt quay lui
 
 Với mỗi từ, lần lượt thử xuất phát tại mọi ô. Lời gọi giữ vị trí ký tự đang cần. Nếu ô sai chữ hoặc vượt biên thì dừng. Khi ô khớp, đánh dấu nó rồi thử bốn hàng xóm với vị trí ký tự kế tiếp. Trước khi trả kết quả cho lời gọi cha, khôi phục chữ cũ. Khi đã khớp hết từ thì dừng lượt tìm của từ đó, vì bài chỉ cần biết có ít nhất một đường.

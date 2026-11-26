@@ -76,6 +76,21 @@ I used to think you had to know the break before you could search. It turns out 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-search-in-rotated-sorted-array/worked-example.en.html" title="Use the sorted half to locate the target" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Use the sorted half to locate the target.</span><a href="../diagrams/neetcode-search-in-rotated-sorted-array/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Examine the midpoint. <code>[9, 12, 17, 2, 5, 7], target = 5</code></li>
+<li>The left half from 9 to 17 is sorted. <code>mid = 2, value = 17</code></li>
+<li>Target 5 lies outside that half. <code>lo = 3, hi = 5</code></li>
+<li>The new midpoint is the target. <code>mid = 4</code></li>
+</ol>
+</details>
+
 ### Approach 1, scan: O(n)
 
 `indexOf`, `slices.Index`, or a `for` loop. Correct, but it uses nothing of the array being almost sorted.

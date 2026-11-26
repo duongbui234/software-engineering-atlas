@@ -66,6 +66,21 @@ The waste: after each round only two stones vanish and at most one new stone app
 
 ## The mechanism
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-last-stone-weight/worked-example.en.html" title="Always remove the two heaviest stones" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Always remove the two heaviest stones.</span><a href="../diagrams/neetcode-last-stone-weight/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Load four stone weights. <code>{10, 7, 4, 3}</code></li>
+<li>Smash 10 against 7 and return 3. <code>{4, 3, 3}</code></li>
+<li>Smash 4 against 3 and return 1. <code>{3, 1}</code></li>
+<li>The last stone weighs 2. <code>3 - 1 = 2</code></li>
+</ol>
+</details>
+
 ### A max-heap in an array
 
 A heap is an almost-complete binary tree stored in an array with no pointers: the element at index i has its parent at `(i − 1) / 2` (integer division) and its two children at `2i + 1`, `2i + 2`. The only rule: **a parent is not smaller than its children**. From that rule the largest element sits at the root `a[0]`, but the rest of the array is **not** sorted. `[8, 7, 4, 1, 2, 1]` is a valid max-heap; it is neither increasing nor decreasing.

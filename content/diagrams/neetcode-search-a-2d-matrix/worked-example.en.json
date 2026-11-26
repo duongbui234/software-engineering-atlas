@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Map a virtual index to row and column",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-search-a-2d-matrix/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Matrix"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "View the matrix as one sorted sequence",
+      "variant": "default",
+      "note": "[[1, 4, 8], [11, 15, 20]]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Index 2 maps to row 0 column 2",
+      "variant": "default",
+      "note": "2 / 3 → (0, 2), value = 8"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Value 8 is below target 15",
+      "variant": "default",
+      "note": "lo = 3, hi = 5"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Index 4 reaches value 15",
+      "variant": "return",
+      "note": "(1, 1) → true"
+    }
+  ]
+}

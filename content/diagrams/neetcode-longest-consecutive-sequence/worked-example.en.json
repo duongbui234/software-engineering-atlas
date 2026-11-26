@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Count from the start of a run",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-longest-consecutive-sequence/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Number set"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Add the numbers to a set",
+      "variant": "default",
+      "note": "{8, 4, 6, 5, 9}"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Check whether 8 has a predecessor",
+      "variant": "default",
+      "note": "7 ∉ set"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Count from 8 through 9",
+      "variant": "default",
+      "note": "[8, 9] → 2"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Count from 4 through 6",
+      "variant": "default",
+      "note": "[4, 5, 6] → 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "The longest run has 3 values",
+      "variant": "return",
+      "note": "max(2, 3) = 3"
+    }
+  ]
+}

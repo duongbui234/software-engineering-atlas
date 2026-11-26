@@ -69,6 +69,21 @@ There are two ways to do less. A size-k heap keeps order only among k candidates
 
 ## The mechanism
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-k-closest-points-to-origin/worked-example.en.html" title="Compare squared distances" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Compare squared distances.</span><a href="../diagrams/neetcode-k-closest-points-to-origin/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Score three points. <code>[3, 0] → 9; [1, 1] → 2; [2, 1] → 5</code></li>
+<li>Keep the first two points. <code>k = 2; {9, 2}</code></li>
+<li>When score 5 arrives, evict score 9. <code>{5, 2}</code></li>
+<li>Return the two closest points. <code>[1, 1], [2, 1]</code></li>
+</ol>
+</details>
+
 ### Dropping the square root
 
 The real distance is `√(x² + y²)`. Since the square root is increasing on non-negative numbers, `√a < √b` exactly when `a < b`. Comparing `x² + y²` gives exactly the same order, all in integers, with no square root to pay for. It is not only faster: avoiding floating point avoids the question "are these two distances really equal, or only equal after rounding". Measured in TypeScript on 10⁶ points: sorting by `x² + y²` takes 527 ms, by `Math.hypot` 967 ms.

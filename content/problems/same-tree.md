@@ -70,6 +70,21 @@ Mình từng nghĩ chỉ cần đi cả hai cây theo cùng một thứ tự, go
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-same-tree/worked-example.html" title="So từng cặp nút ở cùng vị trí" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> So từng cặp nút ở cùng vị trí.</span><a href="../diagrams/neetcode-same-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Hai gốc có cùng giá trị 6. <code>6 = 6</code></li>
+<li>So hai con trái và thấy đều là 4. <code>4 = 4</code></li>
+<li>Một cây có con phải 8, cây kia trống. <code>8 vs null</code></li>
+<li>Hình dạng khác nên kết quả sai. <code>false</code></li>
+</ol>
+</details>
+
 ### Cách 1: đệ quy song song
 
 Hai cây giống nhau khi và chỉ khi: hai gốc cùng giá trị, hai cây con trái giống nhau, và hai cây con phải giống nhau. Định nghĩa này gọi lại chính nó trên hai cặp nhỏ hơn, nên viết thành đệ quy là xong. Điểm dừng là khi ít nhất một bên rỗng: cả hai rỗng thì giống, một bên rỗng thì khác. Dòng `return p === q` gộp cả hai: khi một trong hai là `null`, chúng bằng nhau chỉ khi cả hai cùng `null`.

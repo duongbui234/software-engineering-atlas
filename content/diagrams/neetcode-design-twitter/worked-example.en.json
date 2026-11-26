@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Merge the heads of post streams",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-design-twitter/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Feed heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Take the latest post from each user",
+      "variant": "default",
+      "note": "A: [9, 4]; B: [8, 6]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Pop 9, then queue A’s next post 4",
+      "variant": "default",
+      "note": "heap = {8, 4}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Pop 8, then queue B’s next post 6",
+      "variant": "default",
+      "note": "heap = {6, 4}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The newest-first order emerges",
+      "variant": "return",
+      "note": "[9, 8, 6, 4]"
+    }
+  ]
+}

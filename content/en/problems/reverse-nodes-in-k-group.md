@@ -75,6 +75,21 @@ One more condition: before reversing you must be sure the group has k nodes, bec
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-reverse-nodes-in-k-group/worked-example.en.html" title="Reverse each full group and reconnect" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Reverse each full group and reconnect.</span><a href="../diagrams/neetcode-reverse-nodes-in-k-group/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Count two nodes in the first group. <code>1 → 2 → 3 → 4 → 5; k = 2</code></li>
+<li>Reverse the first group and retain the next head. <code>2 → 1; next = 3</code></li>
+<li>Reverse the group containing 3 and 4. <code>4 → 3</code></li>
+<li>The final group contains only 5, so keep it. <code>2 → 1 → 4 → 3 → 5</code></li>
+</ol>
+</details>
+
 ### Approach 1: iterative, O(1) extra memory
 
 ```ts

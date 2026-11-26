@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Find the last version at or before t",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-time-based-key-value-store/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Versions"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Writes are ordered by timestamp",
+      "variant": "default",
+      "note": "1 → red, 4 → blue, 8 → green"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Query at timestamp 6",
+      "variant": "default",
+      "note": "t = 6"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Timestamp 4 qualifies, search farther right",
+      "variant": "default",
+      "note": "4 ≤ 6"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Timestamp 8 is beyond the query",
+      "variant": "default",
+      "note": "8 > 6"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Return the value at timestamp 4",
+      "variant": "return",
+      "note": "blue"
+    }
+  ]
+}

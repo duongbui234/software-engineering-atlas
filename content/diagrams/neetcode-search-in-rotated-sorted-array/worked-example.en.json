@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Use the sorted half to locate the target",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-search-in-rotated-sorted-array/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Search interval"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Examine the midpoint",
+      "variant": "default",
+      "note": "[9, 12, 17, 2, 5, 7], target = 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The left half from 9 to 17 is sorted",
+      "variant": "default",
+      "note": "mid = 2, value = 17"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Target 5 lies outside that half",
+      "variant": "default",
+      "note": "lo = 3, hi = 5"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The new midpoint is the target",
+      "variant": "return",
+      "note": "mid = 4"
+    }
+  ]
+}

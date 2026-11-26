@@ -75,6 +75,21 @@ You need a structure that finds by key in O(1), moves any element to the front i
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-lru-cache/worked-example.en.html" title="Access changes which key gets evicted" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Access changes which key gets evicted.</span><a href="../diagrams/neetcode-lru-cache/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Insert A and then B into a two-entry cache. <code>recent → B → A</code></li>
+<li>Read A and move it to the front. <code>recent → A → B</code></li>
+<li>Insert C and check the capacity. <code>recent → C → A → B</code></li>
+<li>Evict B from the tail. <code>recent → C → A</code></li>
+</ol>
+</details>
+
 ### Approach 1: hash map + doubly linked list with two sentinels
 
 Pair two structures, each covering the other's weak spot:

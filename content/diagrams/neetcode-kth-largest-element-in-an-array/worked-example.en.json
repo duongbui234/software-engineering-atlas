@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Keep the partition with the desired rank",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-kth-largest-element-in-an-array/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Partitions"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Convert second largest to index 3",
+      "variant": "default",
+      "note": "[9, 2, 6, 6, 4], n - k = 3"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Partition around pivot 6",
+      "variant": "default",
+      "note": "[2, 4] / [6, 6] / [9]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Index 3 is in the equal partition",
+      "variant": "default",
+      "note": "equal range = [2, 3]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Return pivot 6",
+      "variant": "return",
+      "note": "6"
+    }
+  ]
+}

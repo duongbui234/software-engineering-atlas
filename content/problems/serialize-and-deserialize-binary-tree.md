@@ -59,6 +59,21 @@ Mình từng nghĩ ghi tiền thứ tự là đủ. Thử cây gốc 5 có **con
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-serialize-and-deserialize-binary-tree/worked-example.html" title="Dấu rỗng giữ bên của từng con" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Dấu rỗng giữ bên của từng con.</span><a href="../diagrams/neetcode-serialize-and-deserialize-binary-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Bắt đầu với gốc 7, chỉ có con phải 2. <code>root = 7; left = null; right = 2</code></li>
+<li>Ghi giá trị gốc và chỗ trái trống. <code>7,#</code></li>
+<li>Ghi con phải 2 và hai chỗ trống của nó. <code>7,#,2,#,#</code></li>
+<li>Đọc lại theo đúng thứ tự trái rồi phải. <code>7: left = null; right = 2</code></li>
+</ol>
+</details>
+
 ### Một quy tắc điền ô cho hai thứ tự
 
 Bắt đầu với một chỗ chờ dành cho gốc. Lấy một chỗ theo thứ tự đã chọn, đọc đúng một token, rồi xử lý theo bảng sau.

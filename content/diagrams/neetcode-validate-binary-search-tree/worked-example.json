@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Mỗi nút giữ mọi ràng buộc từ tổ tiên",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-validate-binary-search-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Khoảng hợp lệ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Gốc 10 đặt cận trên cho nhánh trái",
+      "variant": "default",
+      "note": "left range = (-∞, 10)"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Nút 5 thêm cận dưới cho con phải",
+      "variant": "default",
+      "note": "right range = (5, 10)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Con phải của 5 có giá trị 12",
+      "variant": "default",
+      "note": "12 > 10"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nút 12 vi phạm cận từ gốc",
+      "variant": "return",
+      "note": "false"
+    }
+  ]
+}

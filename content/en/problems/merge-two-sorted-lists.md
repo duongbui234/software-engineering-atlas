@@ -67,6 +67,21 @@ Merging two sorted **arrays** is familiar: two indexes, and each step copies the
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-merge-two-sorted-lists/worked-example.en.html" title="Take the smaller head at each step" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Take the smaller head at each step.</span><a href="../diagrams/neetcode-merge-two-sorted-lists/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Compare the heads 1 and 2. <code>[1, 5], [2, 4]</code></li>
+<li>Append 1 and advance the first list. <code>[1]; heads = 5, 2</code></li>
+<li>Append 2 and then 4. <code>[1, 2, 4]; right = null</code></li>
+<li>Attach the remainder in one step. <code>[1, 2, 4, 5]</code></li>
+</ol>
+</details>
+
 ### A dummy node removes the special case for the head
 
 Without a dummy node, the first node of the result must be chosen **before** the loop, which means checking for both empty lists first:

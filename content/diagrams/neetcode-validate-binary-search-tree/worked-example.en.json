@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Each node inherits all ancestor bounds",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-validate-binary-search-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Valid interval"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Root 10 bounds its left subtree",
+      "variant": "default",
+      "note": "left range = (-∞, 10)"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Node 5 adds a lower bound for its right child",
+      "variant": "default",
+      "note": "right range = (5, 10)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The right child of 5 has value 12",
+      "variant": "default",
+      "note": "12 > 10"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Node 12 violates the root's bound",
+      "variant": "return",
+      "note": "false"
+    }
+  ]
+}

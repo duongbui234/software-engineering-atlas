@@ -75,6 +75,21 @@ Chữ "cân" ở đây có nghĩa hẹp và cụ thể: chênh lệch chiều ca
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-balanced-binary-tree/worked-example.html" title="Dùng lại chiều cao để kiểm cân bằng" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Dùng lại chiều cao để kiểm cân bằng.</span><a href="../diagrams/neetcode-balanced-binary-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Hai con của nút X trả 0 và 1. <code>difference = 1</code></li>
+<li>Nút X cân bằng và trả 2. <code>height = 1 + max(0, 1)</code></li>
+<li>Cha của X có nhánh còn lại rỗng. <code>left = 2; right = 0</code></li>
+<li>Hiệu bằng 2 nên cây mất cân bằng. <code>2 &gt; 1 → false</code></li>
+</ol>
+</details>
+
 ### Cách 1: từ trên xuống
 
 Viết đúng theo định nghĩa: gốc cân, và cây con trái cân, và cây con phải cân.

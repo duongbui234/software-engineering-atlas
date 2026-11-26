@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đan bản sao để tìm đích random",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-copy-list-with-random-pointer/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Danh sách đan"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Sao mỗi nút ngay sau nút gốc",
+      "variant": "default",
+      "note": "A → A' → B → B'"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Đọc random của A trỏ tới B",
+      "variant": "default",
+      "note": "A.random = B"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Bản sao của đích ở ngay sau B",
+      "variant": "default",
+      "note": "A'.random = B.next = B'"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Tách hai danh sách",
+      "variant": "return",
+      "note": "A → B; A' → B'"
+    }
+  ]
+}

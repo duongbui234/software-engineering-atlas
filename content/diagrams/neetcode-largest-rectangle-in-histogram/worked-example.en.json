@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A shorter bar fixes the width",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-largest-rectangle-in-histogram/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Bar stack"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Keep indices of increasing bars",
+      "variant": "default",
+      "note": "[2, 4, 3, 1]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "At 3, settle height 4",
+      "variant": "default",
+      "note": "4 × 1 = 4"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "At 1, settle height 3",
+      "variant": "default",
+      "note": "3 × 2 = 6"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Height 2 spans three positions",
+      "variant": "default",
+      "note": "2 × 3 = 6"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "The largest area is 6",
+      "variant": "return",
+      "note": "max(4, 6, 6) = 6"
+    }
+  ]
+}

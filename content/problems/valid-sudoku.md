@@ -73,6 +73,22 @@ Thiếu phép nhân 3 (`⌊r/3⌋ + ⌊c/3⌋`) thì khối (0, 1) và khối (1
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-valid-sudoku/worked-example.html" title="Một chữ số thuộc ba nhóm Sudoku" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Một chữ số thuộc ba nhóm Sudoku.</span><a href="../diagrams/neetcode-valid-sudoku/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đọc chữ số 7 ở hàng 1 cột 4. <code>r = 1, c = 4, d = 7</code></li>
+<li>Tính ô 3 × 3 số 1. <code>floor(1/3) × 3 + floor(4/3) = 1</code></li>
+<li>Ghi 7 vào cả ba nhóm. <code>row[1], col[4], box[1]</code></li>
+<li>Gặp 7 tại hàng 2 cột 3. <code>r = 2, c = 3, box = 1</code></li>
+<li>Trùng trong cùng khối. <code>box[1] → false</code></li>
+</ol>
+</details>
+
 ### Cách 1, ba lượt
 
 Lượt i lấy hàng i, cột i và khối i, mỗi nhóm kiểm bằng một Set mới. Khối i có góc trên trái ở `(⌊i/3⌋·3, (i mod 3)·3)`. Mỗi ô được đọc ba lần.

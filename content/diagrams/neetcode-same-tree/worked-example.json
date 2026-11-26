@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "So từng cặp nút ở cùng vị trí",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-same-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hai cây"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Hai gốc có cùng giá trị 6",
+      "variant": "default",
+      "note": "6 = 6"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "So hai con trái và thấy đều là 4",
+      "variant": "default",
+      "note": "4 = 4"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Một cây có con phải 8, cây kia trống",
+      "variant": "default",
+      "note": "8 vs null"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Hình dạng khác nên kết quả sai",
+      "variant": "return",
+      "note": "false"
+    }
+  ]
+}

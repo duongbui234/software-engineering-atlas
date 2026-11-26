@@ -72,6 +72,21 @@ I used to think this was a stack problem in the "push brackets, pop them" sense.
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-generate-parentheses/worked-example.en.html" title="Close only when an opening bracket is unmatched" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Close only when an opening bracket is unmatched.</span><a href="../diagrams/neetcode-generate-parentheses/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Start with an opening bracket. <code>n = 2, &quot;(&quot;</code></li>
+<li>Closing now is one valid choice. <code>&quot;()&quot; → &quot;()()&quot;</code></li>
+<li>Opening again is another choice. <code>&quot;((&quot; → &quot;(())&quot;</code></li>
+<li>Both branches use exactly two pairs. <code>[&quot;(())&quot;, &quot;()()&quot;]</code></li>
+</ol>
+</details>
+
 ### How many answers are there
 
 The number of valid strings of n pairs is the Catalan number `C(n) = (2n)! / ((n+1)! · n!)`, sequence [A000108](https://oeis.org/A000108) in the OEIS. The TypeScript file prints the first ten values next to the number of arbitrary strings of length 2n:

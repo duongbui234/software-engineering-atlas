@@ -85,6 +85,21 @@ I used to think the hard part was the data structure for who follows whom. It tu
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-design-twitter/worked-example.en.html" title="Merge the heads of post streams" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Merge the heads of post streams.</span><a href="../diagrams/neetcode-design-twitter/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Take the latest post from each user. <code>A: [9, 4]; B: [8, 6]</code></li>
+<li>Pop 9, then queue A’s next post 4. <code>heap = {8, 4}</code></li>
+<li>Pop 8, then queue B’s next post 6. <code>heap = {6, 4}</code></li>
+<li>The newest-first order emerges. <code>[9, 8, 6, 4]</code></li>
+</ol>
+</details>
+
 ### The data
 
 - An integer `time` that goes up by 1 after each post. A later tweet has a larger number, never a repeated one.

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Dừng đúng nút thứ k khi duyệt inorder",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-kth-smallest-element-in-a-bst/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Lượt thăm"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Tìm nút trái nhất",
+      "variant": "default",
+      "note": "BST: root 7; left 3 → right 5; right 9"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Thăm 3 trước",
+      "variant": "default",
+      "note": "count = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Sau đó thăm 5",
+      "variant": "default",
+      "note": "count = 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Với k bằng 2, trả ngay 5",
+      "variant": "return",
+      "note": "5"
+    }
+  ]
+}

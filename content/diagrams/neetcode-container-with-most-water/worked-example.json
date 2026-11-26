@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Dịch cột thấp để thử tăng diện tích",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-container-with-most-water/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hai cột"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Tính diện tích của hai đầu",
+      "variant": "default",
+      "note": "[2, 7, 4, 6]: 3 × 2 = 6"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Dịch cột 2 vì nó giới hạn chiều cao",
+      "variant": "default",
+      "note": "i = 1, j = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Hai đầu mới cao 7 và 6",
+      "variant": "default",
+      "note": "2 × 6 = 12"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Các cặp còn lại cho diện tích nhỏ hơn",
+      "variant": "return",
+      "note": "best = 12"
+    }
+  ]
+}

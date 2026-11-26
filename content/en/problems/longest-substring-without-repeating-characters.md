@@ -70,6 +70,21 @@ I used to think you have to try every substring. It turns out that once a substr
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-longest-substring-without-repeating-characters/worked-example.en.html" title="Move the left edge past the last repeat" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Move the left edge past the last repeat.</span><a href="../diagrams/neetcode-longest-substring-without-repeating-characters/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>The first two characters differ. <code>&quot;pqpra&quot; → &quot;pq&quot;</code></li>
+<li>See p again at index 2. <code>last[p] = 0</code></li>
+<li>Move left past the old p. <code>left = 1, window = &quot;qp&quot;</code></li>
+<li>Add r and a without another repeat. <code>&quot;qpra&quot; → 4</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force
 
 From each start i, extend until a repeated character appears. Each extension stops after at most k + 1 steps (k is the number of distinct characters, here ≤ 95), so the total is O(n·k), not O(n²) as the two loops suggest. With a large alphabet (Unicode), k can equal n.

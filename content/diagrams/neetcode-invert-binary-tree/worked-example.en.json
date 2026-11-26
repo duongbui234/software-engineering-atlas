@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Swap left and right children at every node",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-invert-binary-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Binary tree"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Read the root's two children",
+      "variant": "default",
+      "note": "8: left = 3; right = 9"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Exchange the child positions",
+      "variant": "default",
+      "note": "8: left = 9; right = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "At 3, move its left child 1 to the right",
+      "variant": "default",
+      "note": "3: left = null; right = 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Keep every node value",
+      "variant": "return",
+      "note": "[8, 9, 3, null, null, null, 1]"
+    }
+  ]
+}

@@ -73,6 +73,22 @@ Watch out: "exactly one repeated value" does **not** mean it appears exactly twi
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-find-the-duplicate-number/worked-example.en.html" title="The cycle entry is the duplicate" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> The cycle entry is the duplicate.</span><a href="../diagrams/neetcode-find-the-duplicate-number/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Use each value as the next index. <code>[2, 1, 3, 4, 3]; 0 → 2 → 3 → 4 → 3</code></li>
+<li>Find a meeting point inside the cycle. <code>slow = fast = 3</code></li>
+<li>Reset one pointer to the start. <code>first = 0; second = 3</code></li>
+<li>Move both two steps to reach the entry. <code>0 → 2 → 3; 3 → 4 → 3</code></li>
+<li>Both paths meet at the duplicate. <code>duplicate = 3</code></li>
+</ol>
+</details>
+
 ### Three approaches that break the rules
 
 Before the correct ones, three familiar approaches give the right answer but break the rules. Sorting a copy and a Set cost O(n) memory. Mark-negative uses O(1) memory, but uses the array itself as the notebook:

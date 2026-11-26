@@ -59,6 +59,21 @@ With `ape`, `ash`, `cape`, `caper`, `cave`, `dawn`, and `dusk`, the pattern `a.h
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-design-add-and-search-words-data-structure/worked-example.en.html" title="A dot explores exactly one existing edge" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> A dot explores exactly one existing edge.</span><a href="../diagrams/neetcode-design-add-and-search-words-data-structure/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Store two words with the same first letter. <code>&quot;cap&quot;, &quot;cot&quot;</code></li>
+<li>The literal c selects one branch. <code>pattern = &quot;c.t&quot;</code></li>
+<li>The dot tries a and o. <code>ca has no t; co → t</code></li>
+<li>The cot node has a terminal marker. <code>true</code></li>
+</ol>
+</details>
+
 ### Scan the bucket of the same length
 
 I put words in sets by length. When a pattern of length `L` arrives, I open the bucket for `L` and compare each word with the pattern from start to finish. A dot always advances one position. A literal that differs from the word's letter ends that comparison. After checking all `L` positions, I can return `true`. A missing bucket or a bucket whose words all fail gives `false`.

@@ -71,6 +71,22 @@ Mình từng nghĩ phải thử mọi cặp (trái, phải). Hóa ra chỉ cần
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-largest-rectangle-in-histogram/worked-example.html" title="Cột thấp chốt chiều rộng" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Cột thấp chốt chiều rộng.</span><a href="../diagrams/neetcode-largest-rectangle-in-histogram/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Giữ chỉ số của các cột đang tăng. <code>[2, 4, 3, 1]</code></li>
+<li>Gặp 3 thì chốt cột cao 4. <code>4 × 1 = 4</code></li>
+<li>Gặp 1 thì chốt cột cao 3. <code>3 × 2 = 6</code></li>
+<li>Cột cao 2 trải qua ba vị trí. <code>2 × 3 = 6</code></li>
+<li>Diện tích lớn nhất là 6. <code>max(4, 6, 6) = 6</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n²)
 
 Cố định cột trái i, kéo cột phải j từ i sang phải, giữ chiều cao nhỏ nhất của đoạn: diện tích là `min · (j − i + 1)`. Nhờ giữ min chạy, mỗi cặp chỉ tốn O(1), tổng O(n²).

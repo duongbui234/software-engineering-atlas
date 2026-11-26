@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Giữ giá mua thấp nhất trước hôm nay",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-best-time-to-buy-and-sell-stock/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Giá và lãi"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Ghi giá mua ngày đầu",
+      "variant": "default",
+      "note": "[8, 3, 6, 2, 7], min = 8"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Hạ giá mua xuống 3 rồi thử bán 6",
+      "variant": "default",
+      "note": "min = 3, best = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Gặp giá 2 thì cập nhật giá mua",
+      "variant": "default",
+      "note": "min = 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Bán ở 7 cho lãi lớn nhất",
+      "variant": "return",
+      "note": "7 - 2 = 5"
+    }
+  ]
+}

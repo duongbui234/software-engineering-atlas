@@ -80,6 +80,21 @@ Mình từng nghĩ đường dài nhất phải đi từ lá sâu nhất bên tr
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-diameter-of-binary-tree/worked-example.html" title="Đường kính tại nút dùng cả hai nhánh" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đường kính tại nút dùng cả hai nhánh.</span><a href="../diagrams/neetcode-diameter-of-binary-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Hai con trả chiều cao 2 và 1. <code>left = 2; right = 1</code></li>
+<li>Ghép hai nhánh qua nút hiện tại. <code>candidate = 2 + 1 = 3 edges</code></li>
+<li>Trả cho cha chiều cao của một nhánh. <code>height = 1 + max(2, 1) = 3</code></li>
+<li>Giữ đường kính tốt nhất từng thấy. <code>best = max(best, 3)</code></li>
+</ol>
+</details>
+
 ### Vì sao chỉ cần chiều cao hai bên
 
 Lấy đường dài nhất bất kỳ, và gọi v là nút cao nhất (gần gốc nhất) trên đường đó. Từ v, đường đi xuống tối đa hai nhánh: một vào cây con trái, một vào cây con phải (không thể đi lên, vì v là nút cao nhất). Mỗi nhánh dài nhất có thể là đi thẳng xuống lá sâu nhất của cây con đó, tức là đúng `cao(con)` cạnh tính từ v (một cạnh từ v xuống con, cộng chiều cao của con trừ 1). Nên đường dài nhất rẽ ở v có `cao(trái) + cao(phải)` cạnh, và đáp án là max của đại lượng này trên mọi v.

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Score both branches and return one branch",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-binary-tree-maximum-path-sum/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Path sums"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "The child branches contribute 3 and 6",
+      "variant": "default",
+      "note": "node = 4; left = 3; right = 6"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Score the path through both branches",
+      "variant": "default",
+      "note": "3 + 4 + 6 = 13"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The parent can extend just one branch",
+      "variant": "default",
+      "note": "4 + max(3, 6) = 10"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Keep the best path and returned gain separate",
+      "variant": "return",
+      "note": "best = 13; gain = 10"
+    }
+  ]
+}

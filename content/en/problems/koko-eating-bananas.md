@@ -67,6 +67,21 @@ There is no sorted array here, but there is an order: if speed k is in time, so 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-koko-eating-bananas/worked-example.en.html" title="Find the slowest speed that still works" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Find the slowest speed that still works.</span><a href="../diagrams/neetcode-koko-eating-bananas/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Test speed 3 against a five-hour limit. <code>piles = [4, 8], 2 + 3 = 5</code></li>
+<li>Speed 3 works, test a smaller speed. <code>hi = 3</code></li>
+<li>Speed 2 needs six hours. <code>2 + 4 = 6, lo = 3</code></li>
+<li>The first feasible speed is 3. <code>lo = hi = 3</code></li>
+</ol>
+</details>
+
 ### From lower bound to search on the answer
 
 The invariant, written before the code:

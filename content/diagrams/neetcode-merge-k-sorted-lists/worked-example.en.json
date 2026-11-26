@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "The heap holds one head per list",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-merge-k-sorted-lists/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Min-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Load the first item of three lists",
+      "variant": "default",
+      "note": "[1, 6], [3, 4], [2, 9]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Pop 1 and push 6",
+      "variant": "default",
+      "note": "heap = {2, 3, 6}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Pop 2 and push 9",
+      "variant": "default",
+      "note": "heap = {3, 6, 9}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Keep popping the root to merge",
+      "variant": "return",
+      "note": "[1, 2, 3, 4, 6, 9]"
+    }
+  ]
+}

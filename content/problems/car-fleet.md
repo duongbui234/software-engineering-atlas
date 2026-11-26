@@ -71,6 +71,21 @@ Mình từng nghĩ phải mô phỏng xe chạy từng giây. Hóa ra không c�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-car-fleet/worked-example.html" title="Xe sau nhập đoàn nếu đuổi kịp" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Xe sau nhập đoàn nếu đuổi kịp.</span><a href="../diagrams/neetcode-car-fleet/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Xét xe gần đích nhất trước. <code>target = 12; (10, 1) → 2</code></li>
+<li>Xe ở 6 có thể tới đích sau 1 giờ. <code>(6, 6) → 1</code></li>
+<li>Xe này đuổi kịp đoàn phía trước. <code>1 ≤ 2</code></li>
+<li>Xe ở 0 cần 4 giờ nên là đoàn mới. <code>(0, 3) → 4; total = 2</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n²)
 
 Xe i dẫn một đoàn khi nó tới đích **muộn hơn mọi xe đứng trước nó**: nếu có xe phía trước tới muộn hơn hoặc bằng, xe i sẽ đuổi kịp và bị chặn. Kiểm điều đó cho từng xe bằng cách duyệt cả mảng.

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Close only when an opening bracket is unmatched",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-generate-parentheses/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Prefix"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Start with an opening bracket",
+      "variant": "default",
+      "note": "n = 2, \"(\""
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Closing now is one valid choice",
+      "variant": "default",
+      "note": "\"()\" → \"()()\""
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Opening again is another choice",
+      "variant": "default",
+      "note": "\"((\" → \"(())\""
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Both branches use exactly two pairs",
+      "variant": "return",
+      "note": "[\"(())\", \"()()\"]"
+    }
+  ]
+}

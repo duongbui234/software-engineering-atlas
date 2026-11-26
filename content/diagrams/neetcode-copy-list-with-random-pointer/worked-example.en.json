@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Interleave copies to locate random targets",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-copy-list-with-random-pointer/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Interleaved list"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Copy each node directly after its original",
+      "variant": "default",
+      "note": "A → A' → B → B'"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Read the random pointer from A to B",
+      "variant": "default",
+      "note": "A.random = B"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The target copy sits right after B",
+      "variant": "default",
+      "note": "A'.random = B.next = B'"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Separate the two lists",
+      "variant": "return",
+      "note": "A → B; A' → B'"
+    }
+  ]
+}

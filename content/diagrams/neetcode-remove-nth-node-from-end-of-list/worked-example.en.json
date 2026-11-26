@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Keep a gap to remove from the end",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-remove-nth-node-from-end-of-list/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Two pointers"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Put both pointers at the dummy node",
+      "variant": "default",
+      "note": "dummy → A → B → C → D; n = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Move fast two nodes ahead",
+      "variant": "default",
+      "note": "fast = B; slow = dummy"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Advance both until fast reaches the tail",
+      "variant": "default",
+      "note": "fast = D; slow = B"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Link B directly to D to remove C",
+      "variant": "return",
+      "note": "A → B → D"
+    }
+  ]
+}

@@ -66,6 +66,21 @@ Mình từng nghĩ "đã có Two Sum với hash map rồi, dùng lại là xong"
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-two-sum-ii-input-array-is-sorted/worked-example.html" title="Dịch đúng đầu mút theo tổng" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Dịch đúng đầu mút theo tổng.</span><a href="../diagrams/neetcode-two-sum-ii-input-array-is-sorted/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>So tổng hai đầu với 11. <code>[1, 4, 7, 9], 1 + 9 = 10</code></li>
+<li>Tổng thiếu nên tăng đầu trái. <code>4 + 9 = 13</code></li>
+<li>Tổng dư nên giảm đầu phải. <code>4 + 7 = 11</code></li>
+<li>Trả vị trí đánh số từ 1. <code>[2, 3]</code></li>
+</ol>
+</details>
+
 ### Bốn cách, xếp theo bộ nhớ và thời gian
 
 | Cách | Thời gian | Bộ nhớ phụ | Dùng thứ tự? |

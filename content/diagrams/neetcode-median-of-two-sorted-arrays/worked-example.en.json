@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Partition so left values precede right values",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-median-of-two-sorted-arrays/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Two arrays"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Choose the required size of the left half",
+      "variant": "default",
+      "note": "A = [2, 8], B = [1, 4, 9, 12]; left = 3"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Take two from A and one from B",
+      "variant": "default",
+      "note": "left max = 8, right min = 4"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Move the cut in A to the left",
+      "variant": "default",
+      "note": "left = [2] + [1, 4]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "The boundaries are now ordered",
+      "variant": "default",
+      "note": "left max = 4, right min = 8"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Average the middle two values",
+      "variant": "return",
+      "note": "(4 + 8) / 2 = 6"
+    }
+  ]
+}

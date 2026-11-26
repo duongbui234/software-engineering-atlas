@@ -67,6 +67,22 @@ Mình từng nghĩ phần khó là tìm bộ ba. Hóa ra tìm thì dễ (Two Sum
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-3sum/worked-example.html" title="Cố định một số rồi tìm cặp" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Cố định một số rồi tìm cặp.</span><a href="../diagrams/neetcode-3sum/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Cố định số âm đầu tiên. <code>[-4, -2, 0, 2, 4], anchor = -4</code></li>
+<li>Cặp hai đầu cho tổng âm. <code>-4 - 2 + 4 = -2</code></li>
+<li>Dịch trái tới 0 rồi ghi bộ ba. <code>-4 + 0 + 4 = 0</code></li>
+<li>Đổi mốc sang -2. <code>-2 + 0 + 2 = 0</code></li>
+<li>Giữ hai bộ ba khác nhau. <code>[-4, 0, 4], [-2, 0, 2]</code></li>
+</ol>
+</details>
+
 ### Ba cách
 
 | Cách | Thời gian | Bỏ trùng bằng |

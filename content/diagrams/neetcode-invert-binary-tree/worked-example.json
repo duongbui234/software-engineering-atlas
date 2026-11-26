@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đổi con trái và con phải tại mỗi nút",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-invert-binary-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Cây nhị phân"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đọc hai con của gốc",
+      "variant": "default",
+      "note": "8: left = 3; right = 9"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Đổi vị trí của hai con",
+      "variant": "default",
+      "note": "8: left = 9; right = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Tại 3, con trái 1 chuyển sang phải",
+      "variant": "default",
+      "note": "3: left = null; right = 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Giữ nguyên giá trị từng nút",
+      "variant": "return",
+      "note": "[8, 9, 3, null, null, null, 1]"
+    }
+  ]
+}

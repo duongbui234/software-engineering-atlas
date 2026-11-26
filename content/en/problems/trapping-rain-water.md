@@ -66,6 +66,21 @@ I used to think you had to find each "pool" (from a left bank to a right bank) a
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-trapping-rain-water/worked-example.en.html" title="Settle water from the lower side" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Settle water from the lower side.</span><a href="../diagrams/neetcode-trapping-rain-water/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Start with left wall 3 and right wall 4. <code>[3, 0, 2, 4]</code></li>
+<li>The zero-height cell holds 3 units. <code>3 - 0 = 3</code></li>
+<li>The height-2 cell holds one more unit. <code>3 - 2 = 1</code></li>
+<li>Add water from the settled cells. <code>3 + 1 = 4</code></li>
+</ol>
+</details>
+
 ### The per-wall formula
 
 Water above wall i is held in by the highest bank to the left and the highest bank to the right; the surface sits at the lower of those two. Including wall i itself in both maxima gives `min(L[i], R[i]) ≥ h[i]`, so the water is never negative and no `max(0, …)` is needed.

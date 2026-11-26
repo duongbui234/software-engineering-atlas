@@ -66,6 +66,21 @@ Trộn hai **mảng** đã sắp thì quen: hai chỉ số, mỗi bước chép 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-merge-two-sorted-lists/worked-example.html" title="Mỗi lần chỉ lấy đầu nhỏ hơn" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Mỗi lần chỉ lấy đầu nhỏ hơn.</span><a href="../diagrams/neetcode-merge-two-sorted-lists/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>So hai đầu 1 và 2. <code>[1, 5], [2, 4]</code></li>
+<li>Nối 1 và tiến danh sách thứ nhất. <code>[1]; heads = 5, 2</code></li>
+<li>Nối 2 rồi nối 4. <code>[1, 2, 4]; right = null</code></li>
+<li>Nối phần còn lại một lần. <code>[1, 2, 4, 5]</code></li>
+</ol>
+</details>
+
 ### Nút giả bỏ trường hợp riêng cho đầu
 
 Không có nút giả, nút đầu của kết quả phải được chọn **trước** vòng lặp, và vì vậy phải kiểm tra trước cả hai danh sách rỗng:

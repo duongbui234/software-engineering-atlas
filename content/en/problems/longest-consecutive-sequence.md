@@ -72,6 +72,22 @@ I used to think "demanding O(n) for consecutive runs makes no sense, you have to
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-longest-consecutive-sequence/worked-example.en.html" title="Count from the start of a run" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Count from the start of a run.</span><a href="../diagrams/neetcode-longest-consecutive-sequence/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Add the numbers to a set. <code>{8, 4, 6, 5, 9}</code></li>
+<li>Check whether 8 has a predecessor. <code>7 ∉ set</code></li>
+<li>Count from 8 through 9. <code>[8, 9] → 2</code></li>
+<li>Count from 4 through 6. <code>[4, 5, 6] → 3</code></li>
+<li>The longest run has 3 values. <code>max(2, 3) = 3</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n³) in the worst case
 
 For each x, ask "is `x + 1` in the array?" by scanning the whole array (`includes`, `in` on a list, `slices.Contains`), then `x + 2`, … Each question is O(n), a run can be up to n steps long, and there are n starting points: O(n³). Measured on a shuffled run `0..n−1`:

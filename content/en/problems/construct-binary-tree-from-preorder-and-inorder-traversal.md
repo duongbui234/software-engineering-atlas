@@ -62,6 +62,21 @@ My example uses `preorder = [8, 14, 5, -2, 4, 0]` and `inorder = [14, 5, 8, 4, -
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/worked-example.en.html" title="Split inorder at the next root" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Split inorder at the next root.</span><a href="../diagrams/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Read root 6 from preorder. <code>pre = [6, 2, 4, 9]</code></li>
+<li>Look up 6 in inorder. <code>in = [2, 4, 6, 9]</code></li>
+<li>The left interval takes 2, then 4. <code>[2, 4] → 2 with right child 4</code></li>
+<li>The right interval contains only 9. <code>6: left = 2, right = 9</code></li>
+</ol>
+</details>
+
 ### Scan for the root and keep both bounds
 
 `build(lo, hi)` builds exactly the nodes in `inorder[lo:hi]`. An empty interval returns an empty tree and leaves the preorder cursor in place. Otherwise, take the next preorder value as the root. Scan from `lo` to find its position `mid`. Build `[lo, mid)` first, then `[mid + 1, hi)`.

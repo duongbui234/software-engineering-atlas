@@ -65,6 +65,21 @@ Mình từng nghĩ phải tìm từng "vũng" (từ bờ trái tới bờ phải
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-trapping-rain-water/worked-example.html" title="Chốt lượng nước từ phía thấp hơn" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chốt lượng nước từ phía thấp hơn.</span><a href="../diagrams/neetcode-trapping-rain-water/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Bắt đầu với biên trái 3 và phải 4. <code>[3, 0, 2, 4]</code></li>
+<li>Ô 0 giữ 3 đơn vị. <code>3 - 0 = 3</code></li>
+<li>Ô 2 giữ thêm 1 đơn vị. <code>3 - 2 = 1</code></li>
+<li>Cộng nước ở từng ô đã chốt. <code>3 + 1 = 4</code></li>
+</ol>
+</details>
+
 ### Công thức theo từng cột
 
 Nước trên cột i bị chặn bởi bờ cao nhất bên trái và bờ cao nhất bên phải; mặt nước cao bằng bờ thấp hơn trong hai bờ đó. Tính cả chính cột i vào hai max thì `min(L[i], R[i]) ≥ h[i]`, nên nước không bao giờ âm và không cần `max(0, …)`.

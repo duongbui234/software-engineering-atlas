@@ -68,6 +68,21 @@ Mình từng nghĩ phải "nhìn về phía trước" cho từng ngày. Hóa ra 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-daily-temperatures/worked-example.html" title="Ngày ấm hơn giải quyết ngày chờ" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Ngày ấm hơn giải quyết ngày chờ.</span><a href="../diagrams/neetcode-daily-temperatures/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Ngày 0 và 1 chưa có ngày ấm hơn. <code>[72, 68, 74, 73]</code></li>
+<li>Ngày 2 giải quyết ngày 1. <code>74 &gt; 68, wait = 1</code></li>
+<li>Ngày 2 cũng giải quyết ngày 0. <code>74 &gt; 72, wait = 2</code></li>
+<li>Hai ngày cuối giữ giá trị 0. <code>[2, 1, 0, 0]</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn: O(n²) ở ca tệ nhất
 
 Với mỗi i, đi `j = i + 1, i + 2, …` tới khi gặp `t[j] > t[i]`. Dữ liệu ngẫu nhiên thì thường gặp sớm, nên nhanh. Dữ liệu **giảm dần** thì không ngày nào gặp, mỗi ngày quét tới cuối: n²/2 phép so sánh.

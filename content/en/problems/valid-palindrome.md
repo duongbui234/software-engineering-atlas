@@ -71,6 +71,21 @@ I used to think this problem was just "reverse the string and compare". It turns
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-valid-palindrome/worked-example.en.html" title="Compare both ends after skipping punctuation" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Compare both ends after skipping punctuation.</span><a href="../diagrams/neetcode-valid-palindrome/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Start at both ends. <code>&quot;N-o:n&quot;</code></li>
+<li>Compare lowercased N and n. <code>n = n</code></li>
+<li>Skip the dash and colon. <code>&#x27;-&#x27;, &#x27;:&#x27;</code></li>
+<li>The pointers meet at o. <code>&quot;non&quot; → true</code></li>
+</ol>
+</details>
+
 ### Approach 1, filter then reverse
 
 Build the clean string (lowercase, only `a–z0–9`), reverse it, compare it with itself. Three passes over the data and two extra strings up to n long. This approach always reads the **whole** string, even when the first and last characters already differ.

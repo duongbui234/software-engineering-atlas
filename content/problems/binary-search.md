@@ -68,6 +68,21 @@ Tìm tuyến tính đọc từng phần tử: n lần nhìn ở ca tệ nhất, 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-binary-search/worked-example.html" title="Loại nửa không thể chứa đích" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Loại nửa không thể chứa đích.</span><a href="../diagrams/neetcode-binary-search/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Chọn chỉ số giữa là 2. <code>[1, 4, 6, 9, 13], target = 9</code></li>
+<li>Số 6 nhỏ hơn 9, bỏ cả nửa trái. <code>[lo, hi] = [3, 4]</code></li>
+<li>Chọn giữa mới và gặp 9. <code>mid = 3</code></li>
+<li>Trả chỉ số tìm được. <code>3</code></li>
+</ol>
+</details>
+
 ### Bất biến trước, code sau
 
 Mình từng viết tìm kiếm nhị phân bằng cách thử đổi `<` thành `<=` cho tới khi test qua. Cách chắc hơn là viết ra câu bất biến trước:

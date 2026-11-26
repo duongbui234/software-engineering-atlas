@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tách trung thứ tự tại gốc kế tiếp",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hai dãy duyệt"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đọc gốc 6 từ tiền thứ tự",
+      "variant": "default",
+      "note": "pre = [6, 2, 4, 9]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Tra vị trí 6 trong trung thứ tự",
+      "variant": "default",
+      "note": "in = [2, 4, 6, 9]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Khoảng trái lấy 2 trước rồi tới 4",
+      "variant": "default",
+      "note": "[2, 4] → 2 with right child 4"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Khoảng phải còn lại đúng 9",
+      "variant": "return",
+      "note": "6: left = 2, right = 9"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Find the slowest speed that still works",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-koko-eating-bananas/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hours"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Test speed 3 against a five-hour limit",
+      "variant": "default",
+      "note": "piles = [4, 8], 2 + 3 = 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Speed 3 works, test a smaller speed",
+      "variant": "default",
+      "note": "hi = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Speed 2 needs six hours",
+      "variant": "default",
+      "note": "2 + 4 = 6, lo = 3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The first feasible speed is 3",
+      "variant": "return",
+      "note": "lo = hi = 3"
+    }
+  ]
+}

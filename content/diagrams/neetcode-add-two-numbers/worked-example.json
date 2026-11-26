@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Chuyển số nhớ sang chữ số kế tiếp",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-add-two-numbers/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Chữ số"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đọc từ hàng đơn vị",
+      "variant": "default",
+      "note": "[8, 1] + [7, 2]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Cộng 8 và 7 rồi lấy chữ số 5",
+      "variant": "default",
+      "note": "15 → digit 5, carry 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Cộng 1, 2 và số nhớ",
+      "variant": "default",
+      "note": "4 → digit 4, carry 0"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Trả danh sách theo thứ tự đảo",
+      "variant": "return",
+      "note": "[5, 4] → 45"
+    }
+  ]
+}

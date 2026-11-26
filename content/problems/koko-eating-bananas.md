@@ -66,6 +66,21 @@ Không có mảng nào đã sắp ở đây, nhưng có một thứ tự: nếu 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-koko-eating-bananas/worked-example.html" title="Tìm tốc độ nhỏ nhất đủ nhanh" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Tìm tốc độ nhỏ nhất đủ nhanh.</span><a href="../diagrams/neetcode-koko-eating-bananas/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Thử tốc độ 3 với giới hạn 5 giờ. <code>piles = [4, 8], 2 + 3 = 5</code></li>
+<li>Tốc độ 3 đủ, thử nhỏ hơn. <code>hi = 3</code></li>
+<li>Tốc độ 2 cần sáu giờ. <code>2 + 4 = 6, lo = 3</code></li>
+<li>Ranh giới đầu tiên là 3. <code>lo = hi = 3</code></li>
+</ol>
+</details>
+
 ### Từ cận dưới sang tìm trên đáp án
 
 Bất biến, viết trước khi code:

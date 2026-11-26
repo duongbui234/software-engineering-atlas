@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Trộn đầu các luồng bài viết",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-design-twitter/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Heap bài mới"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Lấy bài mới nhất của mỗi người",
+      "variant": "default",
+      "note": "A: [9, 4]; B: [8, 6]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Lấy bài 9 rồi đưa bài 4 của A vào",
+      "variant": "default",
+      "note": "heap = {8, 4}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Lấy bài 8 rồi đưa bài 6 của B vào",
+      "variant": "default",
+      "note": "heap = {6, 4}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Thứ tự mới nhất xuất hiện dần",
+      "variant": "return",
+      "note": "[9, 8, 6, 4]"
+    }
+  ]
+}

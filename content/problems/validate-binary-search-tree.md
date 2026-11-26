@@ -75,6 +75,21 @@ Mình từng nghĩ "cây tìm kiếm" là "con trái nhỏ hơn cha, con phải 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-validate-binary-search-tree/worked-example.html" title="Mỗi nút giữ mọi ràng buộc từ tổ tiên" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Mỗi nút giữ mọi ràng buộc từ tổ tiên.</span><a href="../diagrams/neetcode-validate-binary-search-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Gốc 10 đặt cận trên cho nhánh trái. <code>left range = (-∞, 10)</code></li>
+<li>Nút 5 thêm cận dưới cho con phải. <code>right range = (5, 10)</code></li>
+<li>Con phải của 5 có giá trị 12. <code>12 &gt; 10</code></li>
+<li>Nút 12 vi phạm cận từ gốc. <code>false</code></li>
+</ol>
+</details>
+
 ### Cách sai: chỉ so cha với con
 
 ```ts

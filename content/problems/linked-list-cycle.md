@@ -64,6 +64,21 @@ Danh sách không vòng thì đi theo `next` sẽ gặp `null` sau n bước. Da
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-linked-list-cycle/worked-example.html" title="Hai con trỏ gặp nhau trong vòng" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Hai con trỏ gặp nhau trong vòng.</span><a href="../diagrams/neetcode-linked-list-cycle/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Tạo vòng từ D quay về B. <code>A → B → C → D → B</code></li>
+<li>Đi một bước và hai bước. <code>slow = B; fast = C</code></li>
+<li>Con trỏ nhanh vòng về B. <code>slow = C; fast = B</code></li>
+<li>Hai con trỏ gặp ở D. <code>slow = fast = D → true</code></li>
+</ol>
+</details>
+
 ### Cách 1: nhớ các nút đã thăm
 
 Đi từ đầu, mỗi nút kiểm tra đã có trong Set chưa. Có rồi thì danh sách có vòng; gặp `null` thì không. Mỗi nút vào Set đúng một lần, nên O(n) thời gian và O(n) bộ nhớ.

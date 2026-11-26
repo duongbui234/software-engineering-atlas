@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Match each closing bracket to the stack top",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-valid-parentheses/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Stack"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Push the two opening brackets",
+      "variant": "default",
+      "note": "\"{[\" → ['{', '[']"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Read ] and pop its matching [",
+      "variant": "default",
+      "note": "['{']"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Read } and pop its matching {",
+      "variant": "default",
+      "note": "[]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The input ends with an empty stack",
+      "variant": "return",
+      "note": "\"{[]}\" → true"
+    }
+  ]
+}

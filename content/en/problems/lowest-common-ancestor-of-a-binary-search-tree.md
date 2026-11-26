@@ -85,6 +85,21 @@ Three details of the problem shape the code:
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-lowest-common-ancestor-of-a-binary-search-tree/worked-example.en.html" title="Descend until the two targets split" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Descend until the two targets split.</span><a href="../diagrams/neetcode-lowest-common-ancestor-of-a-binary-search-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Compare both targets with root 12. <code>targets = 3, 8</code></li>
+<li>Both are below 12, so go left. <code>current = 6</code></li>
+<li>The targets lie on opposite sides of 6. <code>3 &lt; 6 &lt; 8</code></li>
+<li>Node 6 is the lowest common ancestor. <code>LCA = 6</code></li>
+</ol>
+</details>
+
 ### Why the split point is the answer
 
 Stand at a node x on the path down from the root:

@@ -84,6 +84,21 @@ Ba chi tiết của đề quyết định cách viết:
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-lowest-common-ancestor-of-a-binary-search-tree/worked-example.html" title="Đi xuống tới khi hai đích tách nhánh" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Đi xuống tới khi hai đích tách nhánh.</span><a href="../diagrams/neetcode-lowest-common-ancestor-of-a-binary-search-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>So cả hai đích với gốc 12. <code>targets = 3, 8</code></li>
+<li>Cả hai nhỏ hơn 12 nên sang trái. <code>current = 6</code></li>
+<li>Hai đích nằm hai phía của 6. <code>3 &lt; 6 &lt; 8</code></li>
+<li>Nút 6 là tổ tiên chung thấp nhất. <code>LCA = 6</code></li>
+</ol>
+</details>
+
 ### Vì sao điểm tách là đáp án
 
 Đứng ở một nút x trên đường từ gốc xuống:

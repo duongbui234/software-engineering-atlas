@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Keep the lowest price before selling",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-best-time-to-buy-and-sell-stock/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Price and profit"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Record the first buy price",
+      "variant": "default",
+      "note": "[8, 3, 6, 2, 7], min = 8"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Lower the buy to 3, then try selling at 6",
+      "variant": "default",
+      "note": "min = 3, best = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Update the buy price when 2 appears",
+      "variant": "default",
+      "note": "min = 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Selling at 7 gives the best profit",
+      "variant": "return",
+      "note": "7 - 2 = 5"
+    }
+  ]
+}

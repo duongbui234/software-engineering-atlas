@@ -72,6 +72,21 @@ Ví dụ thứ hai của đề cho thấy một chi tiết: `[3, 2, 3, 1, 2, 4, 
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-kth-largest-element-in-an-array/worked-example.html" title="Giữ phân đoạn chứa hạng cần tìm" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Giữ phân đoạn chứa hạng cần tìm.</span><a href="../diagrams/neetcode-kth-largest-element-in-an-array/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đổi lớn thứ hai sang chỉ số 3. <code>[9, 2, 6, 6, 4], n - k = 3</code></li>
+<li>Chia quanh chốt 6. <code>[2, 4] / [6, 6] / [9]</code></li>
+<li>Chỉ số 3 nằm trong vùng bằng chốt. <code>equal range = [2, 3]</code></li>
+<li>Trả chốt 6. <code>6</code></li>
+</ol>
+</details>
+
 ### Cách 1: min-heap giữ k phần tử lớn nhất
 
 Bất biến: sau khi đọc i phần tử, heap chứa đúng k phần tử lớn nhất trong i phần tử đó (hoặc tất cả, nếu i < k). Đỉnh là phần tử **nhỏ nhất** trong nhóm đó, tức người yếu nhất trong top k. Phần tử mới lớn hơn đỉnh thì thay đỉnh; không lớn hơn thì không thể lọt top k. Đọc hết mảng, đỉnh là phần tử lớn thứ k.

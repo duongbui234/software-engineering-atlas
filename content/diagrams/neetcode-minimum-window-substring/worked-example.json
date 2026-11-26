@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Co cửa sổ sau khi đủ ký tự",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-minimum-window-substring/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Cửa sổ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Mở cửa sổ đến khi gặp cả a và c",
+      "variant": "default",
+      "note": "\"baacb\", target = \"ac\""
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Cửa sổ baac đã đủ",
+      "variant": "default",
+      "note": "\"baac\", length = 4"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Bỏ b rồi bỏ một a dư",
+      "variant": "default",
+      "note": "\"baac\" → \"aac\" → \"ac\""
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Bỏ thêm a sẽ thiếu nên giữ ac",
+      "variant": "return",
+      "note": "\"ac\", length = 2"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Ghép dấu đóng với đỉnh ngăn xếp",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-valid-parentheses/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Ngăn xếp"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đẩy hai dấu mở",
+      "variant": "default",
+      "note": "\"{[\" → ['{', '[']"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Đọc dấu ] và lấy [ ra",
+      "variant": "default",
+      "note": "['{']"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Đọc dấu } và lấy { ra",
+      "variant": "default",
+      "note": "[]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Hết chuỗi và ngăn xếp rỗng",
+      "variant": "return",
+      "note": "\"{[]}\" → true"
+    }
+  ]
+}

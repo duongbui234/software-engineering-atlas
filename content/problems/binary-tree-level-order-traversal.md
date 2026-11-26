@@ -80,6 +80,21 @@ Mình từng nghĩ BFS là đủ: lấy một nút ra, đẩy hai con vào cuố
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-binary-tree-level-order-traversal/worked-example.html" title="Chụp độ dài hàng đợi để tách tầng" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chụp độ dài hàng đợi để tách tầng.</span><a href="../diagrams/neetcode-binary-tree-level-order-traversal/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Chụp độ dài trước khi lấy gốc. <code>queue = [8]; size = 1</code></li>
+<li>Ghi tầng đầu và thêm hai con. <code>level = [8]; queue = [3, 9]</code></li>
+<li>Chụp hai nút rồi mới thêm cháu. <code>level = [3, 9]; queue = [1]</code></li>
+<li>Nút 1 thuộc tầng kế tiếp. <code>&#91;[8], [3, 9], [1]]</code></li>
+</ol>
+</details>
+
 ### Cách 1: chụp kích thước tầng
 
 Bất biến giữ cả bài: **đầu mỗi vòng ngoài, hàng đợi chứa đúng mọi nút của một tầng, theo thứ tự trái sang phải.** Lúc đầu nó chứa gốc, tức trọn tầng 0. Nếu đầu vòng hàng đợi chứa trọn tầng d, thì lấy ra đúng `size` nút đó, mỗi nút đẩy con của nó vào cuối, sẽ để lại trong hàng đúng mọi nút của tầng d + 1: không thiếu (mọi nút tầng d + 1 là con của một nút tầng d), không thừa, và theo thứ tự trái sang phải vì cha bên trái được lấy ra trước.

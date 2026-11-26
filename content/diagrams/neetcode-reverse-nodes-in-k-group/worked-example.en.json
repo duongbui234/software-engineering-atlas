@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Reverse each full group and reconnect",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-reverse-nodes-in-k-group/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Node groups"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Count two nodes in the first group",
+      "variant": "default",
+      "note": "1 → 2 → 3 → 4 → 5; k = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Reverse the first group and retain the next head",
+      "variant": "default",
+      "note": "2 → 1; next = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Reverse the group containing 3 and 4",
+      "variant": "default",
+      "note": "4 → 3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The final group contains only 5, so keep it",
+      "variant": "return",
+      "note": "2 → 1 → 4 → 3 → 5"
+    }
+  ]
+}

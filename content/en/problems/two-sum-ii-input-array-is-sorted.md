@@ -67,6 +67,21 @@ I used to think "Two Sum already has a hash map solution, just reuse it". It doe
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-two-sum-ii-input-array-is-sorted/worked-example.en.html" title="Move the correct endpoint based on the sum" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Move the correct endpoint based on the sum.</span><a href="../diagrams/neetcode-two-sum-ii-input-array-is-sorted/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Compare the outer sum with 11. <code>[1, 4, 7, 9], 1 + 9 = 10</code></li>
+<li>The sum is too small, move left up. <code>4 + 9 = 13</code></li>
+<li>The sum is too large, move right down. <code>4 + 7 = 11</code></li>
+<li>Return one-based positions. <code>[2, 3]</code></li>
+</ol>
+</details>
+
 ### Four approaches, by memory and time
 
 | Approach | Time | Extra memory | Uses the order? |

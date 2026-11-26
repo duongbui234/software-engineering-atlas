@@ -73,6 +73,21 @@ I used to think you just keep one max variable, the way [[en/problems/best-time-
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-sliding-window-maximum/worked-example.en.html" title="Keep the maximum candidate at the deque front" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Keep the maximum candidate at the deque front.</span><a href="../diagrams/neetcode-sliding-window-maximum/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Insert 4 and then 1. <code>[4, 1, 3, 2], k = 2</code></li>
+<li>When 3 arrives, 1 is dominated. <code>pop(1), push(2)</code></li>
+<li>Expire index 0 once it leaves the window. <code>[1, 2] → max 3</code></li>
+<li>Read each maximum from the front. <code>[4, 3, 3]</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n·k)
 
 Find the max of each window from scratch. Fast enough for small k; O(n²) for k around n/2.

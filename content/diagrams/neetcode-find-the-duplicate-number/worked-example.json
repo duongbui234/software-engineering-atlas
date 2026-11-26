@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Chỗ vào vòng là số bị lặp",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-find-the-duplicate-number/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Đồ thị chỉ số"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Dùng mỗi giá trị làm chỉ số kế",
+      "variant": "default",
+      "note": "[2, 1, 3, 4, 3]; 0 → 2 → 3 → 4 → 3"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Tìm một điểm gặp trong vòng",
+      "variant": "default",
+      "note": "slow = fast = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Đặt một con trỏ về điểm bắt đầu",
+      "variant": "default",
+      "note": "first = 0; second = 3"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Cùng đi hai bước tới cửa vòng",
+      "variant": "default",
+      "note": "0 → 2 → 3; 3 → 4 → 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Hai đường gặp tại giá trị lặp",
+      "variant": "return",
+      "note": "duplicate = 3"
+    }
+  ]
+}

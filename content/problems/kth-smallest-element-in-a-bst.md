@@ -79,6 +79,21 @@ Hai chi tiết nhỏ trong giới hạn này đáng để ý. Giá trị có th�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-kth-smallest-element-in-a-bst/worked-example.html" title="Dừng đúng nút thứ k khi duyệt inorder" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Dừng đúng nút thứ k khi duyệt inorder.</span><a href="../diagrams/neetcode-kth-smallest-element-in-a-bst/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Tìm nút trái nhất. <code>BST: root 7; left 3 → right 5; right 9</code></li>
+<li>Thăm 3 trước. <code>count = 1</code></li>
+<li>Sau đó thăm 5. <code>count = 2</code></li>
+<li>Với k bằng 2, trả ngay 5. <code>5</code></li>
+</ol>
+</details>
+
 ### Cách 1: gom hết rồi sắp xếp
 
 Không dùng gì của cây tìm kiếm: gom mọi giá trị (theo thứ tự nào cũng được), sắp xếp, lấy phần tử thứ k − 1.

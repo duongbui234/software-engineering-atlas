@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đi xuống tới khi hai đích tách nhánh",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-lowest-common-ancestor-of-a-binary-search-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Nút BST"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "So cả hai đích với gốc 12",
+      "variant": "default",
+      "note": "targets = 3, 8"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Cả hai nhỏ hơn 12 nên sang trái",
+      "variant": "default",
+      "note": "current = 6"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Hai đích nằm hai phía của 6",
+      "variant": "default",
+      "note": "3 < 6 < 8"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nút 6 là tổ tiên chung thấp nhất",
+      "variant": "return",
+      "note": "LCA = 6"
+    }
+  ]
+}

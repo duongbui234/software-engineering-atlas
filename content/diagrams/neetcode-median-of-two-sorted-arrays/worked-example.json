@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cắt sao cho mọi số trái đều nhỏ hơn",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-median-of-two-sorted-arrays/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hai mảng"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Chọn số phần tử cần bên trái",
+      "variant": "default",
+      "note": "A = [2, 8], B = [1, 4, 9, 12]; left = 3"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Lấy hai số A và một số B",
+      "variant": "default",
+      "note": "left max = 8, right min = 4"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Dời vết cắt A sang trái",
+      "variant": "default",
+      "note": "left = [2] + [1, 4]"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Hai biên đều đúng thứ tự",
+      "variant": "default",
+      "note": "left max = 4, right min = 8"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Lấy trung bình hai số giữa",
+      "variant": "return",
+      "note": "(4 + 8) / 2 = 6"
+    }
+  ]
+}

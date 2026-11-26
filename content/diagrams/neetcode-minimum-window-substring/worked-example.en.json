@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Shrink the window once all required letters fit",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-minimum-window-substring/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Window"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Expand until both a and c are present",
+      "variant": "default",
+      "note": "\"baacb\", target = \"ac\""
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The window baac covers the target",
+      "variant": "default",
+      "note": "\"baac\", length = 4"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Remove b and one extra a",
+      "variant": "default",
+      "note": "\"baac\" → \"aac\" → \"ac\""
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Removing another a breaks coverage",
+      "variant": "return",
+      "note": "\"ac\", length = 2"
+    }
+  ]
+}

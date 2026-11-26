@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Cất next trước khi quay con trỏ",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-reverse-linked-list/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Con trỏ"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Bắt đầu ở A, phía sau có B rồi C",
+      "variant": "default",
+      "note": "prev = null; A → B → C"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Cất B rồi quay cạnh của A",
+      "variant": "default",
+      "note": "next = B; A → null"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Tiến sang B và nối về A",
+      "variant": "default",
+      "note": "next = C; B → A → null"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nối C vào đầu mới rồi trả C",
+      "variant": "return",
+      "note": "C → B → A → null"
+    }
+  ]
+}

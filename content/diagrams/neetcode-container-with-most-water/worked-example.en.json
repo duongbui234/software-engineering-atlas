@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Move the shorter wall to seek more area",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-container-with-most-water/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Two walls"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Compute the area at both ends",
+      "variant": "default",
+      "note": "[2, 7, 4, 6]: 3 × 2 = 6"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Move 2 because it caps the height",
+      "variant": "default",
+      "note": "i = 1, j = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "New endpoint heights are 7 and 6",
+      "variant": "default",
+      "note": "2 × 6 = 12"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Remaining pairs give less area",
+      "variant": "return",
+      "note": "best = 12"
+    }
+  ]
+}

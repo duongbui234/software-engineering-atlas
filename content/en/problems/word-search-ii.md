@@ -67,6 +67,21 @@ The path `c → a → p` spells `cap`, and continuing down from `p` to `e` spell
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-word-search-ii/worked-example.en.html" title="Carry the trie node across the board" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Carry the trie node across the board.</span><a href="../diagrams/neetcode-word-search-ii/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Visit c and then a on the board. <code>board = &#91;[c,a],[r,t]]</code></li>
+<li>The c cell is already in use. <code>path = c → a</code></li>
+<li>Move down to t and find cat. <code>dict = {cat, car}; terminal = &quot;cat&quot;</code></li>
+<li>Restore cells so another path can use them. <code>found = [&quot;cat&quot;]; board = &#91;[c,a],[r,t]]</code></li>
+</ol>
+</details>
+
 ### Approach 1 — Backtrack for each word
 
 For every word, try all cells as starting points. The current call holds the index of its next required character. Stop at a mismatched letter or an out-of-bounds cell. On a match, mark the cell and try the four neighbors with the next character index. Restore the original letter before returning to the caller. Once every character matches, stop searching for this word, because one valid path is enough.

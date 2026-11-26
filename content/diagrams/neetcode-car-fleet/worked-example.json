@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Xe sau nhập đoàn nếu đuổi kịp",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-car-fleet/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Thời gian tới"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Xét xe gần đích nhất trước",
+      "variant": "default",
+      "note": "target = 12; (10, 1) → 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Xe ở 6 có thể tới đích sau 1 giờ",
+      "variant": "default",
+      "note": "(6, 6) → 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Xe này đuổi kịp đoàn phía trước",
+      "variant": "default",
+      "note": "1 ≤ 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Xe ở 0 cần 4 giờ nên là đoàn mới",
+      "variant": "return",
+      "note": "(0, 3) → 4; total = 2"
+    }
+  ]
+}

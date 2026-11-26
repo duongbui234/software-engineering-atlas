@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Retain exactly the k largest values",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-kth-largest-element-in-a-stream/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Min-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Start with three values in the heap",
+      "variant": "default",
+      "note": "k = 3; {4, 7, 9}"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Insert 6 and remove the smallest value",
+      "variant": "default",
+      "note": "evict 4; {6, 7, 9}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Insert 2 and immediately evict it",
+      "variant": "default",
+      "note": "evict 2; {6, 7, 9}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The heap root is the third largest",
+      "variant": "return",
+      "note": "6"
+    }
+  ]
+}

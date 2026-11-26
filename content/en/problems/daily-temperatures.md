@@ -69,6 +69,21 @@ I used to think each day had to "look ahead". It turns out flipping the question
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-daily-temperatures/worked-example.en.html" title="A warmer day resolves waiting days" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> A warmer day resolves waiting days.</span><a href="../diagrams/neetcode-daily-temperatures/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Days 0 and 1 still await a warmer day. <code>[72, 68, 74, 73]</code></li>
+<li>Day 2 resolves day 1. <code>74 &gt; 68, wait = 1</code></li>
+<li>Day 2 also resolves day 0. <code>74 &gt; 72, wait = 2</code></li>
+<li>The last two days retain zero. <code>[2, 1, 0, 0]</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n²) in the worst case
 
 For each i, walk `j = i + 1, i + 2, …` until `t[j] > t[i]`. On random data you usually hit one early, so it's fast. On **decreasing** data no day ever finds one, and each day scans to the end: n²/2 comparisons.

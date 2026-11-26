@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Reserve space between identical tasks",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-task-scheduler/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "CPU schedule"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Task A appears most often",
+      "variant": "default",
+      "note": "A × 3, B × 2, cooldown = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Build two blocks before the final A",
+      "variant": "default",
+      "note": "A _ _ / A _ _ / A"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Place B in two different blocks",
+      "variant": "default",
+      "note": "A B _ / A B _ / A"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The schedule takes seven slots",
+      "variant": "return",
+      "note": "7 = (3 - 1) × 3 + 1"
+    }
+  ]
+}

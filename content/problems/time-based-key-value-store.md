@@ -79,6 +79,22 @@ Mình từng nghĩ `get` cần tìm timestamp **bằng** t, giống [[problems/b
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-time-based-key-value-store/worked-example.html" title="Tìm phiên bản cuối không vượt t" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Tìm phiên bản cuối không vượt t.</span><a href="../diagrams/neetcode-time-based-key-value-store/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Các lần ghi đã tăng theo thời gian. <code>1 → red, 4 → blue, 8 → green</code></li>
+<li>Hỏi ở thời điểm 6. <code>t = 6</code></li>
+<li>Mốc 4 hợp lệ, thử sang phải. <code>4 ≤ 6</code></li>
+<li>Mốc 8 chưa xuất hiện ở thời điểm hỏi. <code>8 &gt; 6</code></li>
+<li>Lấy giá trị tại mốc 4. <code>blue</code></li>
+</ol>
+</details>
+
 ### Dữ liệu: một bảng băm, mỗi key một lịch sử đã sắp
 
 Mỗi key giữ hai mảng song song: `times` và `values`, cùng chỉ số. Vì đề hứa timestamp tăng ngặt **trên mọi lần set** (nên cũng tăng ngặt trong từng key), `set` chỉ cần nối vào cuối hai mảng và mảng `times` tự sắp. Không cần sắp lại, không cần chèn giữa.

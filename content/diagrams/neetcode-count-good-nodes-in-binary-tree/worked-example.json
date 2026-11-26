@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Mang giá trị lớn nhất trên đường đi",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-count-good-nodes-in-binary-tree/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Giá trị lớn nhất"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Gặp gốc 5 và ghi nhận nó",
+      "variant": "default",
+      "note": "previous max = -∞; max = 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Tới con 2 và giữ mốc 5",
+      "variant": "default",
+      "note": "2 < 5 → skip"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Tới cháu 4, vẫn so với 5",
+      "variant": "default",
+      "note": "4 < 5 → skip"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nhánh còn lại có 7 nên ghi nhận",
+      "variant": "return",
+      "note": "7 ≥ 5; total = 2"
+    }
+  ]
+}

@@ -72,6 +72,21 @@ I used to think you had to simulate the cars second by second. It turns out you 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-car-fleet/worked-example.en.html" title="A trailing car joins if it catches the fleet" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> A trailing car joins if it catches the fleet.</span><a href="../diagrams/neetcode-car-fleet/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Process the car closest to the target first. <code>target = 12; (10, 1) → 2</code></li>
+<li>The car at 6 could arrive in one hour. <code>(6, 6) → 1</code></li>
+<li>That car catches the fleet ahead. <code>1 ≤ 2</code></li>
+<li>The car at 0 needs four hours and stays separate. <code>(0, 3) → 4; total = 2</code></li>
+</ol>
+</details>
+
 ### Approach 1, brute force: O(n²)
 
 Car i leads a fleet when it arrives **later than every car ahead of it**: if some car ahead arrives later or at the same time, car i catches up and gets blocked. Check that for each car by scanning the whole array.

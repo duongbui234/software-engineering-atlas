@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Mỗi lần chỉ lấy đầu nhỏ hơn",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-merge-two-sorted-lists/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Đuôi kết quả"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "So hai đầu 1 và 2",
+      "variant": "default",
+      "note": "[1, 5], [2, 4]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Nối 1 và tiến danh sách thứ nhất",
+      "variant": "default",
+      "note": "[1]; heads = 5, 2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Nối 2 rồi nối 4",
+      "variant": "default",
+      "note": "[1, 2, 4]; right = null"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nối phần còn lại một lần",
+      "variant": "return",
+      "note": "[1, 2, 4, 5]"
+    }
+  ]
+}

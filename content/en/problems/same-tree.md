@@ -71,6 +71,21 @@ I used to think it was enough to walk both trees in the same order, collect the 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-same-tree/worked-example.en.html" title="Compare nodes at matching positions" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Compare nodes at matching positions.</span><a href="../diagrams/neetcode-same-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Both roots have value 6. <code>6 = 6</code></li>
+<li>Both left children are 4. <code>4 = 4</code></li>
+<li>One right child is 8 and the other is empty. <code>8 vs null</code></li>
+<li>The shape differs, so return false. <code>false</code></li>
+</ol>
+</details>
+
 ### Approach 1: parallel recursion
 
 Two trees are identical if and only if: both roots have the same value, both left subtrees are identical, and both right subtrees are identical. That definition calls itself on two smaller pairs, so writing it as recursion is all there is. The base case is when at least one side is empty: both empty means equal, one empty means different. The line `return p === q` covers both: when one of them is `null`, they are equal only if both are `null`.

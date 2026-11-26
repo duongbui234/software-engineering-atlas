@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Multiply left and right products",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-product-of-array-except-self/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Output array"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Store the product before each index",
+      "variant": "default",
+      "note": "[2, 3, 5] → [1, 2, 6]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Reach index 2 with right product 1",
+      "variant": "default",
+      "note": "6 × 1 = 6"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Reach index 1 with right product 5",
+      "variant": "default",
+      "note": "2 × 5 = 10"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Reach index 0 with right product 15",
+      "variant": "default",
+      "note": "1 × 15 = 15"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Return products excluding each item",
+      "variant": "return",
+      "note": "[15, 10, 6]"
+    }
+  ]
+}

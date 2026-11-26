@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A warmer day resolves waiting days",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-daily-temperatures/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Day stack"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Days 0 and 1 still await a warmer day",
+      "variant": "default",
+      "note": "[72, 68, 74, 73]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Day 2 resolves day 1",
+      "variant": "default",
+      "note": "74 > 68, wait = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Day 2 also resolves day 0",
+      "variant": "default",
+      "note": "74 > 72, wait = 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The last two days retain zero",
+      "variant": "return",
+      "note": "[2, 1, 0, 0]"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Split inorder at the next root",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Two traversals"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Read root 6 from preorder",
+      "variant": "default",
+      "note": "pre = [6, 2, 4, 9]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Look up 6 in inorder",
+      "variant": "default",
+      "note": "in = [2, 4, 6, 9]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The left interval takes 2, then 4",
+      "variant": "default",
+      "note": "[2, 4] → 2 with right child 4"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The right interval contains only 9",
+      "variant": "return",
+      "note": "6: left = 2, right = 9"
+    }
+  ]
+}

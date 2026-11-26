@@ -84,6 +84,21 @@ Mình từng nghĩ khó nhất là cấu trúc dữ liệu cho quan hệ theo d�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-design-twitter/worked-example.html" title="Trộn đầu các luồng bài viết" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Trộn đầu các luồng bài viết.</span><a href="../diagrams/neetcode-design-twitter/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Lấy bài mới nhất của mỗi người. <code>A: [9, 4]; B: [8, 6]</code></li>
+<li>Lấy bài 9 rồi đưa bài 4 của A vào. <code>heap = {8, 4}</code></li>
+<li>Lấy bài 8 rồi đưa bài 6 của B vào. <code>heap = {6, 4}</code></li>
+<li>Thứ tự mới nhất xuất hiện dần. <code>[9, 8, 6, 4]</code></li>
+</ol>
+</details>
+
 ### Dữ liệu
 
 - Một số nguyên `time` tăng 1 sau mỗi lần đăng. Tweet nào đăng sau có số lớn hơn, không bao giờ trùng.

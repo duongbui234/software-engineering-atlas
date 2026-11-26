@@ -73,6 +73,21 @@ The problem's second example shows a detail: `[3, 2, 3, 1, 2, 4, 5, 5, 6]`, k = 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-kth-largest-element-in-an-array/worked-example.en.html" title="Keep the partition with the desired rank" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Keep the partition with the desired rank.</span><a href="../diagrams/neetcode-kth-largest-element-in-an-array/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Convert second largest to index 3. <code>[9, 2, 6, 6, 4], n - k = 3</code></li>
+<li>Partition around pivot 6. <code>[2, 4] / [6, 6] / [9]</code></li>
+<li>Index 3 is in the equal partition. <code>equal range = [2, 3]</code></li>
+<li>Return pivot 6. <code>6</code></li>
+</ol>
+</details>
+
 ### Approach 1: a min-heap holding the k largest
 
 Invariant: after reading i elements, the heap holds exactly the k largest of those i elements (or all of them, if i < k). The top is the **smallest** element of that group, the weakest member of the top k. A new element larger than the top replaces it; one that is not larger cannot make the top k. After the whole array, the top is the k-th largest.

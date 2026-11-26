@@ -76,6 +76,21 @@ I used to think "search tree" meant "the left child is smaller than the parent, 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-validate-binary-search-tree/worked-example.en.html" title="Each node inherits all ancestor bounds" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Each node inherits all ancestor bounds.</span><a href="../diagrams/neetcode-validate-binary-search-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Root 10 bounds its left subtree. <code>left range = (-∞, 10)</code></li>
+<li>Node 5 adds a lower bound for its right child. <code>right range = (5, 10)</code></li>
+<li>The right child of 5 has value 12. <code>12 &gt; 10</code></li>
+<li>Node 12 violates the root&#x27;s bound. <code>false</code></li>
+</ol>
+</details>
+
 ### The wrong way: comparing parent and child
 
 ```ts

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "So khoảng cách bình phương",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-k-closest-points-to-origin/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Heap ứng viên"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Tính điểm cho ba tọa độ",
+      "variant": "default",
+      "note": "[3, 0] → 9; [1, 1] → 2; [2, 1] → 5"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Giữ hai tọa độ đầu",
+      "variant": "default",
+      "note": "k = 2; {9, 2}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Gặp điểm 5 thì loại điểm 9",
+      "variant": "default",
+      "note": "{5, 2}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Trả hai điểm gần nhất",
+      "variant": "return",
+      "note": "[1, 1], [2, 1]"
+    }
+  ]
+}

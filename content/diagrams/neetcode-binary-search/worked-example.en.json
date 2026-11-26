@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Discard the half that cannot hold the target",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-binary-search/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Search interval"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Choose midpoint index 2",
+      "variant": "default",
+      "note": "[1, 4, 6, 9, 13], target = 9"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Since 6 is below 9, discard the left half",
+      "variant": "default",
+      "note": "[lo, hi] = [3, 4]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The new midpoint holds 9",
+      "variant": "default",
+      "note": "mid = 3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Return the matching index",
+      "variant": "return",
+      "note": "3"
+    }
+  ]
+}

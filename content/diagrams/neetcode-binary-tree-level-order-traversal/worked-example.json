@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Chụp độ dài hàng đợi để tách tầng",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-binary-tree-level-order-traversal/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Hàng đợi"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Chụp độ dài trước khi lấy gốc",
+      "variant": "default",
+      "note": "queue = [8]; size = 1"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Ghi tầng đầu và thêm hai con",
+      "variant": "default",
+      "note": "level = [8]; queue = [3, 9]"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Chụp hai nút rồi mới thêm cháu",
+      "variant": "default",
+      "note": "level = [3, 9]; queue = [1]"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Nút 1 thuộc tầng kế tiếp",
+      "variant": "return",
+      "note": "[[8], [3, 9], [1]]"
+    }
+  ]
+}

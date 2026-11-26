@@ -67,6 +67,21 @@ But we do not need to swap values. Reversing a list means every `next` arrow tur
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-reverse-linked-list/worked-example.en.html" title="Save next before reversing a pointer" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Save next before reversing a pointer.</span><a href="../diagrams/neetcode-reverse-linked-list/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Start at A, followed by B and C. <code>prev = null; A → B → C</code></li>
+<li>Save B, then reverse A&#x27;s edge. <code>next = B; A → null</code></li>
+<li>Advance to B and link it back to A. <code>next = C; B → A → null</code></li>
+<li>Link C to the new front and return it. <code>C → B → A → null</code></li>
+</ol>
+</details>
+
 ### Three pointers, four assignments
 
 Keep three variables: `prev` heads the reversed segment (empty at first), `cur` is the node being handled (`head` at first), `next` holds the rest. Each iteration:

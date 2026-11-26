@@ -80,6 +80,21 @@ Mình từng đọc "không có nút nào lớn hơn" thành "lớn hơn mọi n
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-count-good-nodes-in-binary-tree/worked-example.html" title="Mang giá trị lớn nhất trên đường đi" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Mang giá trị lớn nhất trên đường đi.</span><a href="../diagrams/neetcode-count-good-nodes-in-binary-tree/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Gặp gốc 5 và ghi nhận nó. <code>previous max = -∞; max = 5</code></li>
+<li>Tới con 2 và giữ mốc 5. <code>2 &lt; 5 → skip</code></li>
+<li>Tới cháu 4, vẫn so với 5. <code>4 &lt; 5 → skip</code></li>
+<li>Nhánh còn lại có 7 nên ghi nhận. <code>7 ≥ 5; total = 2</code></li>
+</ol>
+</details>
+
 ### Cách 1: vét cạn, mỗi nút leo ngược về gốc
 
 Viết đúng theo định nghĩa: ghi lại cha của từng nút, rồi với mỗi nút đi ngược lên gốc, gặp tổ tiên nào lớn hơn thì dừng.

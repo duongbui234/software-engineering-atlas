@@ -79,6 +79,21 @@ Mình từng nghĩ "góc nhìn bên phải" là "đi theo con phải cho tới k
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-binary-tree-right-side-view/worked-example.html" title="Mỗi tầng chỉ ghi nút nhìn thấy cuối" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Mỗi tầng chỉ ghi nút nhìn thấy cuối.</span><a href="../diagrams/neetcode-binary-tree-right-side-view/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đọc tầng gốc. <code>[8] → 8</code></li>
+<li>Tầng tiếp theo có hai nút. <code>[3, 9] → 9</code></li>
+<li>Tầng cuối chỉ có con của nhánh trái. <code>[1] → 1</code></li>
+<li>Gom một nút từ mỗi tầng. <code>[8, 9, 1]</code></li>
+</ol>
+</details>
+
 ### Cách sai: đi theo con trỏ phải
 
 ```ts

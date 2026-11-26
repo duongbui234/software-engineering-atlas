@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Đếm từ đầu dãy liên tiếp",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-longest-consecutive-sequence/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Tập số"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Đưa các số vào tập",
+      "variant": "default",
+      "note": "{8, 4, 6, 5, 9}"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Kiểm tra xem 8 có số đứng trước",
+      "variant": "default",
+      "note": "7 ∉ set"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Từ 8 đếm tới 9",
+      "variant": "default",
+      "note": "[8, 9] → 2"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Từ 4 đếm tới 6",
+      "variant": "default",
+      "note": "[4, 5, 6] → 3"
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Dãy dài nhất có 3 số",
+      "variant": "return",
+      "note": "max(2, 3) = 3"
+    }
+  ]
+}

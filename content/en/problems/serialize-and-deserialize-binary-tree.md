@@ -60,6 +60,21 @@ I used to think writing preorder was enough. Try a root 5 with a **left child** 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-serialize-and-deserialize-binary-tree/worked-example.en.html" title="Null markers preserve each child position" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Null markers preserve each child position.</span><a href="../diagrams/neetcode-serialize-and-deserialize-binary-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Start with root 7 and right child 2. <code>root = 7; left = null; right = 2</code></li>
+<li>Write the root and its empty left slot. <code>7,#</code></li>
+<li>Write right child 2 and its two empty slots. <code>7,#,2,#,#</code></li>
+<li>Read back in left-before-right order. <code>7: left = null; right = 2</code></li>
+</ol>
+</details>
+
 ### One slot rule for both orders
 
 Start with a pending slot for the root. Take a slot in the chosen order, read one token, and apply the corresponding rule.

@@ -76,6 +76,21 @@ This problem is so easy that the recursive solution is a single line. What is wo
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-maximum-depth-of-binary-tree/worked-example.en.html" title="Depth comes from the longer branch" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Depth comes from the longer branch.</span><a href="../diagrams/neetcode-maximum-depth-of-binary-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>An empty tree has depth 0. <code>null → 0</code></li>
+<li>A leaf has two empty branches. <code>leaf → 1 + max(0, 0) = 1</code></li>
+<li>The root receives subtree depths 2 and 1. <code>left = 2; right = 1</code></li>
+<li>Count the root as one more level. <code>1 + max(2, 1) = 3</code></li>
+</ol>
+</details>
+
 ### Approach 1: post-order recursion
 
 ```ts

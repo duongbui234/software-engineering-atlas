@@ -74,6 +74,21 @@ Mình từng nghĩ "tìm ngắn nhất" phải ngược hẳn với "tìm dài n
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-minimum-window-substring/worked-example.html" title="Co cửa sổ sau khi đủ ký tự" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Co cửa sổ sau khi đủ ký tự.</span><a href="../diagrams/neetcode-minimum-window-substring/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Mở cửa sổ đến khi gặp cả a và c. <code>&quot;baacb&quot;, target = &quot;ac&quot;</code></li>
+<li>Cửa sổ baac đã đủ. <code>&quot;baac&quot;, length = 4</code></li>
+<li>Bỏ b rồi bỏ một a dư. <code>&quot;baac&quot; → &quot;aac&quot; → &quot;ac&quot;</code></li>
+<li>Bỏ thêm a sẽ thiếu nên giữ ac. <code>&quot;ac&quot;, length = 2</code></li>
+</ol>
+</details>
+
 ### Cách 1, vét cạn
 
 Từ mỗi đầu trái l, kéo r tới khi đoạn `s[l..r]` đủ, rồi dừng (kéo tiếp chỉ làm đoạn dài hơn). Trên dữ liệu ngẫu nhiên mỗi lần kéo dừng sớm, nên trông nhanh. Nhưng khi **không có đáp án**, không lần kéo nào dừng: n lần kéo, mỗi lần tới n bước, O(n²).

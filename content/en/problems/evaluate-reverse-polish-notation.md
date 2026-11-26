@@ -72,6 +72,21 @@ I used to think the hard part was parsing the expression. It turns out RPN is de
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-evaluate-reverse-polish-notation/worked-example.en.html" title="Pop the right operand first" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Pop the right operand first.</span><a href="../diagrams/neetcode-evaluate-reverse-polish-notation/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Push 9 and then 4. <code>[9, 4]</code></li>
+<li>For subtraction, pop 4 first. <code>right = 4, left = 9</code></li>
+<li>Push the result of 9 minus 4. <code>[5]</code></li>
+<li>Push 3 and multiply it by 5. <code>[5, 3] → [15]</code></li>
+</ol>
+</details>
+
 ### Approach 1, a stack
 
 Walk the tokens left to right. Push numbers. On an operator, `b = pop()`, `a = pop()`, push `a op b`. At the end exactly one number remains. Each token enters and leaves the stack at most once: O(n) time, O(n) memory in the worst case (`1 2 3 … + + +`).

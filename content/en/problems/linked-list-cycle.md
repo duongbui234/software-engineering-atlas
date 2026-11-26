@@ -65,6 +65,21 @@ Without a cycle, following `next` reaches `null` after n steps. With a cycle it 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-linked-list-cycle/worked-example.en.html" title="The two pointers meet inside the cycle" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> The two pointers meet inside the cycle.</span><a href="../diagrams/neetcode-linked-list-cycle/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Close the cycle from D to B. <code>A → B → C → D → B</code></li>
+<li>Move one and two steps. <code>slow = B; fast = C</code></li>
+<li>The fast pointer wraps back to B. <code>slow = C; fast = B</code></li>
+<li>Both pointers meet at D. <code>slow = fast = D → true</code></li>
+</ol>
+</details>
+
 ### Approach 1: remember the visited nodes
 
 Walk from the head and check each node against a Set. Already there means a cycle; reaching `null` means none. Each node enters the Set once, so O(n) time and O(n) memory.

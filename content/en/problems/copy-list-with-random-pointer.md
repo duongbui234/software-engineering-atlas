@@ -64,6 +64,21 @@ Copying a list with only `next` is easy: walk from the head, create a new node, 
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-copy-list-with-random-pointer/worked-example.en.html" title="Interleave copies to locate random targets" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Interleave copies to locate random targets.</span><a href="../diagrams/neetcode-copy-list-with-random-pointer/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Copy each node directly after its original. <code>A → A&#x27; → B → B&#x27;</code></li>
+<li>Read the random pointer from A to B. <code>A.random = B</code></li>
+<li>The target copy sits right after B. <code>A&#x27;.random = B.next = B&#x27;</code></li>
+<li>Separate the two lists. <code>A → B; A&#x27; → B&#x27;</code></li>
+</ol>
+</details>
+
 ### Approach 1: an old → new table, two passes
 
 Pass 1 walks the list, creates each new node (unwired) and records `map[old] = new`. Pass 2 walks again and wires `new.next = map[old.next]` and `new.random = map[old.random]`. By now every new node exists, so a lookup never misses.

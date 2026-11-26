@@ -77,6 +77,22 @@ I used to think binary search only finds **one value** in **one array**. In this
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-median-of-two-sorted-arrays/worked-example.en.html" title="Partition so left values precede right values" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Partition so left values precede right values.</span><a href="../diagrams/neetcode-median-of-two-sorted-arrays/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Choose the required size of the left half. <code>A = [2, 8], B = [1, 4, 9, 12]; left = 3</code></li>
+<li>Take two from A and one from B. <code>left max = 8, right min = 4</code></li>
+<li>Move the cut in A to the left. <code>left = [2] + [1, 4]</code></li>
+<li>The boundaries are now ordered. <code>left max = 4, right min = 8</code></li>
+<li>Average the middle two values. <code>(4 + 8) / 2 = 6</code></li>
+</ol>
+</details>
+
 ### The median through one cut
 
 Let `t = m + n` and `half = ⌈t / 2⌉ = (t + 1) / 2` (integer division). If we know the "left half" of the merged array, made of the `half` smallest elements, then:

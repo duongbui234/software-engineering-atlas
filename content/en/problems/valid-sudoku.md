@@ -74,6 +74,22 @@ Without the times 3 (`⌊r/3⌋ + ⌊c/3⌋`), block (0, 1) and block (1, 0) bot
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-valid-sudoku/worked-example.en.html" title="One digit belongs to three Sudoku groups" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> One digit belongs to three Sudoku groups.</span><a href="../diagrams/neetcode-valid-sudoku/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Read 7 at row 1 column 4. <code>r = 1, c = 4, d = 7</code></li>
+<li>Compute box number 1. <code>floor(1/3) × 3 + floor(4/3) = 1</code></li>
+<li>Record 7 in all three groups. <code>row[1], col[4], box[1]</code></li>
+<li>Read another 7 at row 2 column 3. <code>r = 2, c = 3, box = 1</code></li>
+<li>The box contains a duplicate. <code>box[1] → false</code></li>
+</ol>
+</details>
+
 ### Approach 1, three passes
 
 Pass i takes row i, column i and block i, each checked with a new Set. Block i has its top-left corner at `(⌊i/3⌋·3, (i mod 3)·3)`. Each cell is read three times.

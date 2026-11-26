@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Giữ ứng viên lớn nhất ở đầu deque",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-sliding-window-maximum/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Deque chỉ số"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Thêm 4 rồi thêm 1",
+      "variant": "default",
+      "note": "[4, 1, 3, 2], k = 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Khi có 3 thì 1 mất cơ hội",
+      "variant": "default",
+      "note": "pop(1), push(2)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Bỏ chỉ số 0 khi đã ra cửa sổ",
+      "variant": "default",
+      "note": "[1, 2] → max 3"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Đầu deque cho cực đại từng cửa sổ",
+      "variant": "return",
+      "note": "[4, 3, 3]"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Recover the old minimum after a pop",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-min-stack/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Stack"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Push 5 and store its minimum",
+      "variant": "default",
+      "note": "(5, 5)"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Push 2 and then 4",
+      "variant": "default",
+      "note": "(2, 2), (4, 2)"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Pop 4 and keep minimum 2",
+      "variant": "default",
+      "note": "(2, 2)"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Pop 2 and recover minimum 5",
+      "variant": "return",
+      "note": "(5, 5)"
+    }
+  ]
+}

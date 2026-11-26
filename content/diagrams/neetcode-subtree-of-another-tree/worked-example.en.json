@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Find a candidate root and compare the whole shape",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-subtree-of-another-tree/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Candidate nodes"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Look for nodes with the pattern root's value",
+      "variant": "default",
+      "note": "pattern = 4 → left 2"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "The first 4 has a right child 2",
+      "variant": "default",
+      "note": "left = null, right = 2"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "The second 4 has a left child 2",
+      "variant": "default",
+      "note": "left = 2, right = null"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "The second candidate matches the shape",
+      "variant": "return",
+      "note": "true"
+    }
+  ]
+}

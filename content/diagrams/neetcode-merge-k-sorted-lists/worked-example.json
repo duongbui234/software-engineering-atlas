@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Heap giữ đầu của từng danh sách",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-merge-k-sorted-lists/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Min-heap"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Nạp phần tử đầu của ba danh sách",
+      "variant": "default",
+      "note": "[1, 6], [3, 4], [2, 9]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Lấy 1 rồi đưa 6 vào heap",
+      "variant": "default",
+      "note": "heap = {2, 3, 6}"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Lấy 2 rồi đưa 9 vào heap",
+      "variant": "default",
+      "note": "heap = {3, 6, 9}"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Tiếp tục lấy gốc để trộn",
+      "variant": "return",
+      "note": "[1, 2, 3, 4, 6, 9]"
+    }
+  ]
+}

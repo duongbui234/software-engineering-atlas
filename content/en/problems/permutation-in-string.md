@@ -67,6 +67,22 @@ I first planned to generate every permutation of s1 and search for each one in s
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-permutation-in-string/worked-example.en.html" title="Compare counts in a fixed-size window" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Compare counts in a fixed-size window.</span><a href="../diagrams/neetcode-permutation-in-string/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>Count the pattern ab. <code>a: 1, b: 1</code></li>
+<li>The initial window zz lacks a and b. <code>&quot;zzba&quot;, length = 2</code></li>
+<li>Remove z and add b. <code>&quot;zb&quot;</code></li>
+<li>Remove the other z and add a. <code>&quot;ba&quot;</code></li>
+<li>The counts match the pattern. <code>&quot;ba&quot; → true</code></li>
+</ol>
+</details>
+
 ### Approach 1, sorting each window: O(n · m log m)
 
 Sort s1 once into a key. For each substring of length m of s2, sort it and compare with the key. This is the sorted key of [[en/problems/group-anagrams|Group Anagrams]], applied to n − m + 1 windows.

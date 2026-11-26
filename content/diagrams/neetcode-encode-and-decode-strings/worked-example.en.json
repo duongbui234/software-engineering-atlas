@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Read the stated number of characters",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-encode-and-decode-strings/worked-example.en.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Update or check"
+        },
+        "return": {
+          "label": "Result"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Algorithm"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Encoded string"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Write the length before each payload",
+      "variant": "default",
+      "note": "[\"a#b\", \"\"] → 3#a#b0#"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Read 3 before the delimiter",
+      "variant": "default",
+      "note": "3#"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Take the next three characters",
+      "variant": "default",
+      "note": "a#b"
+    },
+    {
+      "id": "step-4",
+      "from": "algorithm",
+      "to": "state",
+      "y": 399,
+      "label": "Read 0 and take an empty string",
+      "variant": "default",
+      "note": "0# → \"\""
+    },
+    {
+      "id": "step-5",
+      "from": "state",
+      "to": "algorithm",
+      "y": 477,
+      "label": "Recover the two original strings",
+      "variant": "return",
+      "note": "[\"a#b\", \"\"]"
+    }
+  ]
+}

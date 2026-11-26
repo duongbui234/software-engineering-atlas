@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Chốt lượng nước từ phía thấp hơn",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-trapping-rain-water/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Mực nước"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Bắt đầu với biên trái 3 và phải 4",
+      "variant": "default",
+      "note": "[3, 0, 2, 4]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Ô 0 giữ 3 đơn vị",
+      "variant": "default",
+      "note": "3 - 0 = 3"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Ô 2 giữ thêm 1 đơn vị",
+      "variant": "default",
+      "note": "3 - 2 = 1"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Cộng nước ở từng ô đã chốt",
+      "variant": "return",
+      "note": "3 + 1 = 4"
+    }
+  ]
+}

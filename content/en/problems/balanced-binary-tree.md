@@ -76,6 +76,21 @@ The input is the root of a binary tree with 0 to 5,000 nodes, values in [−10�
 
 ## How it works
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../../diagrams/neetcode-balanced-binary-tree/worked-example.en.html" title="Reuse height to check balance" loading="lazy"></iframe></div>
+<figcaption><span><b>Figure 1.</b> Reuse height to check balance.</span><a href="../diagrams/neetcode-balanced-binary-tree/worked-example.en.html" target="_blank" rel="noopener">Open full screen</a></figcaption>
+</figure>
+
+<details>
+<summary>Read the steps</summary>
+<ol>
+<li>The children of X return heights 0 and 1. <code>difference = 1</code></li>
+<li>X is balanced and returns height 2. <code>height = 1 + max(0, 1)</code></li>
+<li>The other child of X&#x27;s parent is empty. <code>left = 2; right = 0</code></li>
+<li>A difference of 2 breaks balance. <code>2 &gt; 1 → false</code></li>
+</ol>
+</details>
+
 ### Approach 1: top-down
 
 Write it straight from the definition: the root is balanced, and the left subtree is balanced, and the right subtree is balanced.

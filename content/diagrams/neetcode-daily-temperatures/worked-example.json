@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Ngày ấm hơn giải quyết ngày chờ",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-daily-temperatures/worked-example.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Cập nhật hoặc kiểm tra"
+        },
+        "return": {
+          "label": "Kết quả"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "algorithm",
+      "type": "backend",
+      "label": "Cách xử lý"
+    },
+    {
+      "id": "state",
+      "type": "database",
+      "label": "Ngăn xếp ngày"
+    }
+  ],
+  "messages": [
+    {
+      "id": "step-1",
+      "from": "algorithm",
+      "to": "state",
+      "y": 165,
+      "label": "Ngày 0 và 1 chưa có ngày ấm hơn",
+      "variant": "default",
+      "note": "[72, 68, 74, 73]"
+    },
+    {
+      "id": "step-2",
+      "from": "algorithm",
+      "to": "state",
+      "y": 243,
+      "label": "Ngày 2 giải quyết ngày 1",
+      "variant": "default",
+      "note": "74 > 68, wait = 1"
+    },
+    {
+      "id": "step-3",
+      "from": "algorithm",
+      "to": "state",
+      "y": 321,
+      "label": "Ngày 2 cũng giải quyết ngày 0",
+      "variant": "default",
+      "note": "74 > 72, wait = 2"
+    },
+    {
+      "id": "step-4",
+      "from": "state",
+      "to": "algorithm",
+      "y": 399,
+      "label": "Hai ngày cuối giữ giá trị 0",
+      "variant": "return",
+      "note": "[2, 1, 0, 0]"
+    }
+  ]
+}

@@ -61,6 +61,21 @@ Ví dụ mình dùng `preorder = [8, 14, 5, -2, 4, 0]` và `inorder = [14, 5, 8,
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/worked-example.html" title="Tách trung thứ tự tại gốc kế tiếp" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Tách trung thứ tự tại gốc kế tiếp.</span><a href="../diagrams/neetcode-construct-binary-tree-from-preorder-and-inorder-traversal/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Đọc gốc 6 từ tiền thứ tự. <code>pre = [6, 2, 4, 9]</code></li>
+<li>Tra vị trí 6 trong trung thứ tự. <code>in = [2, 4, 6, 9]</code></li>
+<li>Khoảng trái lấy 2 trước rồi tới 4. <code>[2, 4] → 2 with right child 4</code></li>
+<li>Khoảng phải còn lại đúng 9. <code>6: left = 2, right = 9</code></li>
+</ol>
+</details>
+
 ### Quét tìm gốc và giữ hai cận
 
 `build(lo, hi)` dựng đúng các nút trong `inorder[lo:hi]`. Khi khoảng rỗng, hàm trả về cây rỗng và giữ nguyên con trỏ tiền thứ tự. Khi khoảng còn nút, lấy giá trị kế tiếp của tiền thứ tự làm gốc. Tìm vị trí `mid` của giá trị đó bằng cách quét từ `lo`. Dựng `[lo, mid)` trước, rồi mới dựng `[mid + 1, hi)`.

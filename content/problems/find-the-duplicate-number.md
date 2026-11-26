@@ -72,6 +72,22 @@ Không có ràng buộc thì bài này dễ: sắp xếp rồi tìm hai số c�
 
 ## Cơ chế
 
+<figure class="figure-map" style="--ar: 3 / 4">
+<div class="frame"><iframe data-archify="../diagrams/neetcode-find-the-duplicate-number/worked-example.html" title="Chỗ vào vòng là số bị lặp" loading="lazy"></iframe></div>
+<figcaption><span><b>Hình 1.</b> Chỗ vào vòng là số bị lặp.</span><a href="../diagrams/neetcode-find-the-duplicate-number/worked-example.html" target="_blank" rel="noopener">Mở toàn màn hình</a></figcaption>
+</figure>
+
+<details>
+<summary>Đọc từng bước</summary>
+<ol>
+<li>Dùng mỗi giá trị làm chỉ số kế. <code>[2, 1, 3, 4, 3]; 0 → 2 → 3 → 4 → 3</code></li>
+<li>Tìm một điểm gặp trong vòng. <code>slow = fast = 3</code></li>
+<li>Đặt một con trỏ về điểm bắt đầu. <code>first = 0; second = 3</code></li>
+<li>Cùng đi hai bước tới cửa vòng. <code>0 → 2 → 3; 3 → 4 → 3</code></li>
+<li>Hai đường gặp tại giá trị lặp. <code>duplicate = 3</code></li>
+</ol>
+</details>
+
 ### Ba cách vi phạm ràng buộc
 
 Trước khi tới cách đúng, ba cách quen thuộc cho đáp án đúng nhưng phạm luật. Sắp xếp một bản sao và Set tốn O(n) bộ nhớ. Đánh dấu âm thì O(1) bộ nhớ, nhưng dùng chính mảng làm sổ ghi:

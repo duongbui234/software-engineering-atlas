@@ -1,0 +1,89 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Three end-of-day states of trading with a cooldown",
+    "output": "content/diagrams/neetcode-state-machine-dp/cooldown-states.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "day",
+      "label": "One round of buy, sell, rest"
+    }
+  ],
+  "mainPath": [
+    "rest",
+    "hold",
+    "sold",
+    "cool",
+    "answer"
+  ],
+  "nodes": [
+    {
+      "id": "rest",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Empty-handed",
+      "sublabel": "rest: may buy next day"
+    },
+    {
+      "id": "hold",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Holding",
+      "sublabel": "hold = max(hold, rest − price)"
+    },
+    {
+      "id": "sold",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Just sold",
+      "sublabel": "sold = hold + price"
+    },
+    {
+      "id": "cool",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Next day: forced rest",
+      "sublabel": "rest = max(rest, yesterday's sold)"
+    },
+    {
+      "id": "answer",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Answer: max(rest, sold)",
+      "sublabel": "never end the last day holding"
+    }
+  ],
+  "edges": [
+    {
+      "from": "rest",
+      "to": "hold",
+      "label": "buy: subtract today's price"
+    },
+    {
+      "from": "hold",
+      "to": "sold",
+      "label": "sell: add today's price"
+    },
+    {
+      "from": "sold",
+      "to": "cool",
+      "label": "no buying right away"
+    },
+    {
+      "from": "cool",
+      "to": "answer",
+      "label": "after the last day"
+    }
+  ]
+}

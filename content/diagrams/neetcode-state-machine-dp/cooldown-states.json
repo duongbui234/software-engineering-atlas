@@ -1,0 +1,89 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Ba trạng thái cuối mỗi ngày của bài mua bán có ngày nghỉ",
+    "output": "content/diagrams/neetcode-state-machine-dp/cooldown-states.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "day",
+      "label": "Một vòng mua, bán, nghỉ"
+    }
+  ],
+  "mainPath": [
+    "rest",
+    "hold",
+    "sold",
+    "cool",
+    "answer"
+  ],
+  "nodes": [
+    {
+      "id": "rest",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Tay không",
+      "sublabel": "rest: hôm sau được mua"
+    },
+    {
+      "id": "hold",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Đang giữ",
+      "sublabel": "hold = max(hold, rest − giá)"
+    },
+    {
+      "id": "sold",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Vừa bán",
+      "sublabel": "sold = hold + giá"
+    },
+    {
+      "id": "cool",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Hôm sau: bắt buộc nghỉ",
+      "sublabel": "rest = max(rest, sold hôm qua)"
+    },
+    {
+      "id": "answer",
+      "lane": "day",
+      "col": 0,
+      "type": "backend",
+      "label": "Đáp án: max(rest, sold)",
+      "sublabel": "ngày cuối không nên còn giữ"
+    }
+  ],
+  "edges": [
+    {
+      "from": "rest",
+      "to": "hold",
+      "label": "mua: trừ giá hôm nay"
+    },
+    {
+      "from": "hold",
+      "to": "sold",
+      "label": "bán: cộng giá hôm nay"
+    },
+    {
+      "from": "sold",
+      "to": "cool",
+      "label": "không được mua ngay"
+    },
+    {
+      "from": "cool",
+      "to": "answer",
+      "label": "hết ngày cuối"
+    }
+  ]
+}

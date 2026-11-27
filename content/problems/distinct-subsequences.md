@@ -251,5 +251,5 @@ Chạy bằng `node ways.ts`, `python3 ways.py`, `go run ways.go`, `java ways.ja
 
 - [LeetCode 115](https://leetcode.com/problems/distinct-subsequences/)
 - [Jeff Erickson, Algorithms, chương quy hoạch động](https://jeffe.cs.illinois.edu/teaching/algorithms/book/03-dynprog.pdf)
-- [MIT 6.006 (2020), bài giảng 16: DP trên hai dãy](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_lec16/)
+- [MIT 6.006 (2020), bài giảng 16: chọn bài toán con, có LCS trên hai chuỗi](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_lec16/)
 - [Go spec, tràn số nguyên](https://go.dev/ref/spec#Integer_overflow) · [Java JLS 15.18.2](https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.18.2) · [PHP integer overflow](https://www.php.net/manual/en/language.types.integer.php) · [Rust Book, integer overflow](https://doc.rust-lang.org/book/ch03-02-data-types.html#integer-overflow)

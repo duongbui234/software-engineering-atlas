@@ -19,6 +19,7 @@ stations:
   - name: "DP có trạng thái"
     concepts: ["State Machine DP", "Memoized DFS"]
   - name: "DP khoảng và khớp mẫu"
+    concepts: ["Interval DP", "Last Split Choice", "Pattern Matching DP"]
 ---
 
 ## Nếu bạn mới bắt đầu

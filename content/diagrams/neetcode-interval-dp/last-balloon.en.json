@@ -1,0 +1,89 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Pick the last balloon to burst in each interval",
+    "output": "content/diagrams/neetcode-interval-dp/last-balloon.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "fill",
+      "label": "Fill the table by interval length"
+    }
+  ],
+  "mainPath": [
+    "pad",
+    "one",
+    "two",
+    "whole",
+    "answer"
+  ],
+  "nodes": [
+    {
+      "id": "pad",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Pad both ends with a 1",
+      "sublabel": "[2, 4, 3] becomes [1, 2, 4, 3, 1]"
+    },
+    {
+      "id": "one",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Intervals holding one balloon",
+      "sublabel": "(0,2) = 8 · (1,3) = 24 · (2,4) = 12"
+    },
+    {
+      "id": "two",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Two balloons: try the last one",
+      "sublabel": "(0,3): keep 2 for last, 1·2·3 + 24 = 30"
+    },
+    {
+      "id": "whole",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Whole row (0, 4): try every k",
+      "sublabel": "keep 3 for last: 1·3·1 + 30 + 0 = 33"
+    },
+    {
+      "id": "answer",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Answer: 33 coins",
+      "sublabel": "burst 4, then 2, then 3 last"
+    }
+  ],
+  "edges": [
+    {
+      "from": "pad",
+      "to": "one",
+      "label": "length 2 first"
+    },
+    {
+      "from": "one",
+      "to": "two",
+      "label": "length 3 reads both sides"
+    },
+    {
+      "from": "two",
+      "to": "whole",
+      "label": "length 4, sides independent"
+    },
+    {
+      "from": "whole",
+      "to": "answer",
+      "label": "read cell (0, 4)"
+    }
+  ]
+}

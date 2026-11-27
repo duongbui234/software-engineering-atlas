@@ -1,0 +1,89 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Chọn quả bóng nổ cuối cùng trong mỗi khoảng",
+    "output": "content/diagrams/neetcode-interval-dp/last-balloon.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "fill",
+      "label": "Điền bảng theo độ dài khoảng"
+    }
+  ],
+  "mainPath": [
+    "pad",
+    "one",
+    "two",
+    "whole",
+    "answer"
+  ],
+  "nodes": [
+    {
+      "id": "pad",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Đệm hai quả giá 1 ở hai đầu",
+      "sublabel": "[2, 4, 3] thành [1, 2, 4, 3, 1]"
+    },
+    {
+      "id": "one",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Khoảng chứa một quả",
+      "sublabel": "(0,2) = 8 · (1,3) = 24 · (2,4) = 12"
+    },
+    {
+      "id": "two",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Hai quả: thử quả nổ cuối",
+      "sublabel": "(0,3): giữ 2 tới cuối, 1·2·3 + 24 = 30"
+    },
+    {
+      "id": "whole",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Cả dãy (0, 4): thử từng k",
+      "sublabel": "giữ 3 tới cuối: 1·3·1 + 30 + 0 = 33"
+    },
+    {
+      "id": "answer",
+      "lane": "fill",
+      "col": 0,
+      "type": "backend",
+      "label": "Đáp án: 33 xu",
+      "sublabel": "nổ 4, rồi 2, cuối cùng 3"
+    }
+  ],
+  "edges": [
+    {
+      "from": "pad",
+      "to": "one",
+      "label": "khoảng dài 2"
+    },
+    {
+      "from": "one",
+      "to": "two",
+      "label": "dài 3 đọc hai bên"
+    },
+    {
+      "from": "two",
+      "to": "whole",
+      "label": "dài 4, hai bên độc lập"
+    },
+    {
+      "from": "whole",
+      "to": "answer",
+      "label": "đọc ô (0, 4)"
+    }
+  ]
+}

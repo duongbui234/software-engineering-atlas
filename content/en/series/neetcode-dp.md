@@ -20,6 +20,7 @@ stations:
   - name: "State Machines and Memoized Search"
     concepts: ["State Machine DP", "Memoized DFS"]
   - name: "Interval DP and Pattern Matching"
+    concepts: ["Interval DP", "Last Split Choice", "Pattern Matching DP"]
 ---
 
 ## If you are just starting

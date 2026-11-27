@@ -296,6 +296,13 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | bậc ra | out-degree |
 | tràn ngăn xếp, độ sâu đệ quy | stack overflow, recursion depth |
 | tập đã thăm, tập "đang thăm" | visited set, "visiting" set |
+| DP khoảng, khoảng mở (l, r) | interval DP, open interval (l, r) |
+| điểm chia, độ dài khoảng | split point, interval length |
+| nổ (bóng), quả nổ cuối cùng | burst, the balloon that bursts last |
+| lính canh | sentinel |
+| khớp trọn, khớp một đoạn | full match, partial match |
+| neo (^, $) | anchor |
+| quay lui | backtracking |
 | vế trái, vế phải (toán hạng) | left, right operand |
 | máy ngăn xếp | stack machine |
 | ngăn xếp đơn điệu (tăng, giảm) | monotonic stack (increasing, decreasing) |
@@ -560,6 +567,13 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | bậc ra | out-degree |
 | tràn ngăn xếp, độ sâu đệ quy | stack overflow, recursion depth |
 | tập đã thăm, tập "đang thăm" | visited set, "visiting" set |
+| DP khoảng, khoảng mở (l, r) | interval DP, open interval (l, r) |
+| điểm chia, độ dài khoảng | split point, interval length |
+| nổ (bóng), quả nổ cuối cùng | burst, the balloon that bursts last |
+| lính canh | sentinel |
+| khớp trọn, khớp một đoạn | full match, partial match |
+| neo (^, $) | anchor |
+| quay lui | backtracking |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

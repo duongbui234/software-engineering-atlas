@@ -15,6 +15,7 @@ stations:
   - name: "Cắt chuỗi và dãy con tăng"
     concepts: ["Prefix Reachability", "Increasing Subsequence", "LIS Minimum Tail", "Lower Bound"]
   - name: "Lưới và hai chuỗi"
+    concepts: ["Grid Path DP", "Two-Sequence DP", "LCS Table", "Edit Operations"]
   - name: "DP có trạng thái"
   - name: "DP khoảng và khớp mẫu"
 ---

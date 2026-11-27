@@ -16,6 +16,7 @@ stations:
   - name: "Word Break and Increasing Subsequences"
     concepts: ["Prefix Reachability", "Increasing Subsequence", "LIS Minimum Tail", "Lower Bound"]
   - name: "Grids and Two Strings"
+    concepts: ["Grid Path DP", "Two-Sequence DP", "LCS Table", "Edit Operations"]
   - name: "State Machines and Memoized Search"
   - name: "Interval DP and Pattern Matching"
 ---

@@ -18,6 +18,7 @@ stations:
   - name: "Grids and Two Strings"
     concepts: ["Grid Path DP", "Two-Sequence DP", "LCS Table", "Edit Operations"]
   - name: "State Machines and Memoized Search"
+    concepts: ["State Machine DP", "Memoized DFS"]
   - name: "Interval DP and Pattern Matching"
 ---
 

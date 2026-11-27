@@ -17,6 +17,7 @@ stations:
   - name: "Lưới và hai chuỗi"
     concepts: ["Grid Path DP", "Two-Sequence DP", "LCS Table", "Edit Operations"]
   - name: "DP có trạng thái"
+    concepts: ["State Machine DP", "Memoized DFS"]
   - name: "DP khoảng và khớp mẫu"
 ---
 

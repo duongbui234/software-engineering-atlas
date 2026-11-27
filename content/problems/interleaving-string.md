@@ -281,5 +281,5 @@ Chạy bằng `node weave.ts`, `python3 weave.py`, `go run weave.go`, `java weav
 
 - [LeetCode 97](https://leetcode.com/problems/interleaving-string/)
 - [Jeff Erickson, Algorithms, chương quy hoạch động](https://jeffe.cs.illinois.edu/teaching/algorithms/book/03-dynprog.pdf)
-- [MIT 6.006 (2020), bài giảng 16: DP trên hai dãy](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_lec16/)
+- [MIT 6.006 (2020), bài giảng 16: chọn bài toán con, có LCS trên hai chuỗi](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/mit6_006s20_lec16/)
 - [Go spec, truy cập chỉ số ngoài phạm vi](https://go.dev/ref/spec#Index_expressions) · [PHP isset](https://www.php.net/manual/en/function.isset.php)

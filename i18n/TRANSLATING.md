@@ -289,6 +289,13 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | bài thiết kế | design problem |
 | lưu hiệu | storing differences |
 | tràn số | overflow |
+| máy trạng thái, luật chuyển | state machine, transitions |
+| đang giữ, vừa bán, tay không | holding, just sold, empty-handed |
+| ngày nghỉ (bắt buộc) | rest day (cooldown) |
+| bóc lớp (topo) | peel layers (topological peeling) |
+| bậc ra | out-degree |
+| tràn ngăn xếp, độ sâu đệ quy | stack overflow, recursion depth |
+| tập đã thăm, tập "đang thăm" | visited set, "visiting" set |
 | vế trái, vế phải (toán hạng) | left, right operand |
 | máy ngăn xếp | stack machine |
 | ngăn xếp đơn điệu (tăng, giảm) | monotonic stack (increasing, decreasing) |
@@ -546,6 +553,13 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | đan xen | interleave |
 | trần (mức chặn) | ceiling (clamp) |
 | tràn số | overflow |
+| máy trạng thái, luật chuyển | state machine, transitions |
+| đang giữ, vừa bán, tay không | holding, just sold, empty-handed |
+| ngày nghỉ (bắt buộc) | rest day (cooldown) |
+| bóc lớp (topo) | peel layers (topological peeling) |
+| bậc ra | out-degree |
+| tràn ngăn xếp, độ sâu đệ quy | stack overflow, recursion depth |
+| tập đã thăm, tập "đang thăm" | visited set, "visiting" set |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

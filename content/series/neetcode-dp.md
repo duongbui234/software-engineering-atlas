@@ -13,6 +13,7 @@ stations:
   - name: "Ba lô và đổi tiền"
     concepts: ["Knapsack State", "Knapsack Update Order", "0/1 Knapsack", "Unbounded Knapsack", "Coin Combinations", "Signed Subset-Sum Reduction"]
   - name: "Cắt chuỗi và dãy con tăng"
+    concepts: ["Prefix Reachability", "Increasing Subsequence", "LIS Minimum Tail", "Lower Bound"]
   - name: "Lưới và hai chuỗi"
   - name: "DP có trạng thái"
   - name: "DP khoảng và khớp mẫu"

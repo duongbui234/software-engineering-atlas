@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Keep both possible cuts",
+    "output": "content/diagrams/neetcode-word-break-lis/prefix-cuts.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "cuts",
+      "label": "Cut sunrise"
+    }
+  ],
+  "mainPath": [
+    "start",
+    "choices",
+    "dead",
+    "finish"
+  ],
+  "nodes": [
+    {
+      "id": "start",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "Start at boundary 0",
+      "sublabel": "reachable[0] = true"
+    },
+    {
+      "id": "choices",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "Record both cuts",
+      "sublabel": "sun: 0 → 3; sunr: 0 → 4"
+    },
+    {
+      "id": "dead",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "No word matches at 4",
+      "sublabel": "s[4:] = \"ise\""
+    },
+    {
+      "id": "finish",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "Reach the end from 3",
+      "sublabel": "rise: 3 → 7; reachable[7] = true"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "choices"
+    },
+    {
+      "from": "choices",
+      "to": "dead"
+    },
+    {
+      "from": "dead",
+      "to": "finish"
+    }
+  ]
+}

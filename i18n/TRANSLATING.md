@@ -224,6 +224,9 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | bộ nhớ phụ | auxiliary space |
 | trạng thái DP | DP state |
 | công thức truy hồi | recurrence relation |
+| mốc cắt | cut boundary |
+| đuôi nhỏ nhất | minimum tail |
+| tăng nghiêm ngặt | strictly increasing |
 | quét tổng giảm dần / tăng dần | descending / ascending sum sweep |
 | thời gian giả đa thức | pseudopolynomial time |
 | phép cộng bão hòa | saturating addition |

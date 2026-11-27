@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Giữ lại cả hai điểm cắt có thể tới",
+    "output": "content/diagrams/neetcode-word-break-lis/prefix-cuts.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "cuts",
+      "label": "Cắt chuỗi sunrise"
+    }
+  ],
+  "mainPath": [
+    "start",
+    "choices",
+    "dead",
+    "finish"
+  ],
+  "nodes": [
+    {
+      "id": "start",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "Bắt đầu ở vạch 0",
+      "sublabel": "reachable[0] = true"
+    },
+    {
+      "id": "choices",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "Ghi cả hai điểm cắt",
+      "sublabel": "sun: 0 → 3; sunr: 0 → 4"
+    },
+    {
+      "id": "dead",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "Vạch 4 không có từ khớp",
+      "sublabel": "s[4:] = \"ise\""
+    },
+    {
+      "id": "finish",
+      "lane": "cuts",
+      "col": 0,
+      "type": "backend",
+      "label": "Từ vạch 3 đi đến đích",
+      "sublabel": "rise: 3 → 7; reachable[7] = true"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "choices"
+    },
+    {
+      "from": "choices",
+      "to": "dead"
+    },
+    {
+      "from": "dead",
+      "to": "finish"
+    }
+  ]
+}

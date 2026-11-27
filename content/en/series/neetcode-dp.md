@@ -12,6 +12,7 @@ stations:
   - name: "Expanding Palindromes"
     concepts: ["Palindrome Center", "Palindrome Radius"]
   - name: "Knapsack and Coin Change"
+    concepts: ["Knapsack State", "Knapsack Update Order", "0/1 Knapsack", "Unbounded Knapsack", "Coin Combinations", "Signed Subset-Sum Reduction"]
   - name: "Word Break and Increasing Subsequences"
   - name: "Grids and Two Strings"
   - name: "State Machines and Memoized Search"

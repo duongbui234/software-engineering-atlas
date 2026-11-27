@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "How one value 2 changes the row",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-knapsack/sweep-order.en.html",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "sums",
+      "label": "Compare two sweeps"
+    }
+  ],
+  "mainPath": [
+    "base",
+    "down",
+    "reset",
+    "up"
+  ],
+  "nodes": [
+    {
+      "id": "base",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "Write the initial cells",
+      "sublabel": "dp[0] = 1, dp[2] = dp[4] = 0"
+    },
+    {
+      "id": "down",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "One copy: read sum 4 first",
+      "sublabel": "j = 4 → 2; dp[4] = 0"
+    },
+    {
+      "id": "reset",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "Return to the initial row",
+      "sublabel": "dp[0] = 1, dp[2] = dp[4] = 0"
+    },
+    {
+      "id": "up",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "Reuse: write sum 2 first",
+      "sublabel": "j = 2 → 4; dp[4] = 1"
+    }
+  ],
+  "edges": [
+    {
+      "from": "base",
+      "to": "down"
+    },
+    {
+      "from": "down",
+      "to": "reset"
+    },
+    {
+      "from": "reset",
+      "to": "up"
+    }
+  ]
+}

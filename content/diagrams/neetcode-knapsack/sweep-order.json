@@ -1,0 +1,72 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Một giá trị 2 làm hàng thay đổi thế nào",
+    "quality_profile": "showcase",
+    "output": "content/diagrams/neetcode-knapsack/sweep-order.html",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "sums",
+      "label": "So hai lượt quét"
+    }
+  ],
+  "mainPath": [
+    "base",
+    "down",
+    "reset",
+    "up"
+  ],
+  "nodes": [
+    {
+      "id": "base",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "Ghi ô ban đầu",
+      "sublabel": "dp[0] = 1, dp[2] = dp[4] = 0"
+    },
+    {
+      "id": "down",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "Một bản: đọc tổng 4 trước",
+      "sublabel": "j = 4 → 2; dp[4] = 0"
+    },
+    {
+      "id": "reset",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "Quay lại hàng ban đầu",
+      "sublabel": "dp[0] = 1, dp[2] = dp[4] = 0"
+    },
+    {
+      "id": "up",
+      "lane": "sums",
+      "col": 0,
+      "type": "backend",
+      "label": "Dùng lại: ghi tổng 2 trước",
+      "sublabel": "j = 2 → 4; dp[4] = 1"
+    }
+  ],
+  "edges": [
+    {
+      "from": "base",
+      "to": "down"
+    },
+    {
+      "from": "down",
+      "to": "reset"
+    },
+    {
+      "from": "reset",
+      "to": "up"
+    }
+  ]
+}

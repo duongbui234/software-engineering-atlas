@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Điền bảng LCS cho map và mop",
+    "output": "content/diagrams/neetcode-grid-two-strings/lcs-table.html",
+    "quality_profile": "showcase",
+    "legend": { "mode": "hidden" }
+  },
+  "lanes": [ { "id": "table", "label": "Bảng dp[i][j] của map và mop" } ],
+  "mainPath": ["base", "match1", "miss", "match2", "answer"],
+  "nodes": [
+    { "id": "base", "lane": "table", "col": 0, "type": "backend", "label": "Hàng 0 và cột 0 bằng 0", "sublabel": "tiền tố rỗng không chung gì" },
+    { "id": "match1", "lane": "table", "col": 0, "type": "backend", "label": "m gặp m: lấy ô chéo cộng 1", "sublabel": "dp[1][1] = dp[0][0] + 1 = 1" },
+    { "id": "miss", "lane": "table", "col": 0, "type": "backend", "label": "a gặp o: lấy ô lớn hơn", "sublabel": "dp[2][2] = max(trên 1, trái 1) = 1" },
+    { "id": "match2", "lane": "table", "col": 0, "type": "backend", "label": "p gặp p: lại đi chéo", "sublabel": "dp[3][3] = dp[2][2] + 1 = 2" },
+    { "id": "answer", "lane": "table", "col": 0, "type": "backend", "label": "Ô góc dưới phải là đáp án", "sublabel": "LCS dài 2, ví dụ mp" }
+  ],
+  "edges": [
+    { "from": "base", "to": "match1" },
+    { "from": "match1", "to": "miss" },
+    { "from": "miss", "to": "match2" },
+    { "from": "match2", "to": "answer" }
+  ]
+}

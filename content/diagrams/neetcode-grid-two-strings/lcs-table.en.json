@@ -1,0 +1,25 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Filling the LCS table for map and mop",
+    "output": "content/diagrams/neetcode-grid-two-strings/lcs-table.en.html",
+    "quality_profile": "showcase",
+    "legend": { "mode": "hidden" }
+  },
+  "lanes": [ { "id": "table", "label": "Table dp[i][j] for map and mop" } ],
+  "mainPath": ["base", "match1", "miss", "match2", "answer"],
+  "nodes": [
+    { "id": "base", "lane": "table", "col": 0, "type": "backend", "label": "Row 0 and column 0 are 0", "sublabel": "an empty prefix shares nothing" },
+    { "id": "match1", "lane": "table", "col": 0, "type": "backend", "label": "m meets m: diagonal plus 1", "sublabel": "dp[1][1] = dp[0][0] + 1 = 1" },
+    { "id": "miss", "lane": "table", "col": 0, "type": "backend", "label": "a meets o: take the larger", "sublabel": "dp[2][2] = max(top 1, left 1) = 1" },
+    { "id": "match2", "lane": "table", "col": 0, "type": "backend", "label": "p meets p: diagonal again", "sublabel": "dp[3][3] = dp[2][2] + 1 = 2" },
+    { "id": "answer", "lane": "table", "col": 0, "type": "backend", "label": "Bottom-right cell answers", "sublabel": "LCS length 2, e.g. mp" }
+  ],
+  "edges": [
+    { "from": "base", "to": "match1" },
+    { "from": "match1", "to": "miss" },
+    { "from": "miss", "to": "match2" },
+    { "from": "match2", "to": "answer" }
+  ]
+}

@@ -537,6 +537,15 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | thứ tự từ điển | lexicographic order |
 | manh mối | clue |
 | danh bạ | phone book |
+| ô trên, ô trái, ô chéo | cell above, cell to the left, diagonal cell |
+| tiền tố rỗng | empty prefix |
+| lần ngược (bảng) | trace back |
+| phép sửa, kịch bản sửa | edit operation, edit script |
+| giữ, thay, xóa, chèn (ký tự) | keep, replace, delete, insert |
+| dãy con, chuỗi con | subsequence, substring |
+| đan xen | interleave |
+| trần (mức chặn) | ceiling (clamp) |
+| tràn số | overflow |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

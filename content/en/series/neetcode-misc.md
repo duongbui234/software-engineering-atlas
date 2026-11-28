@@ -14,6 +14,7 @@ stations:
   - name: "Greedy on Arrays"
     concepts: ["Greedy Choice", "Kadane's Algorithm", "Farthest Reach", "Jump Layers", "Restart Argument"]
   - name: "Greedy Grouping"
+    concepts: ["Smallest-First Grouping", "Last Occurrence Boundary", "Safe Candidate Filter", "Open Count Range"]
   - name: "Intervals"
   - name: "Matrices"
   - name: "Arithmetic"

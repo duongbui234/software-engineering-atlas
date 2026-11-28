@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Hand of Straights on [3, 1, 5, 8, 2, 6, 4, 5, 3], k = 3: always open a group at the smallest card",
+    "output": "content/diagrams/neetcode-greedy-grouping/straights.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "walk",
+      "label": "Walk the values in increasing order"
+    }
+  ],
+  "mainPath": [
+    "size",
+    "count",
+    "g1",
+    "skip",
+    "g2",
+    "g3",
+    "fail"
+  ],
+  "nodes": [
+    {
+      "id": "size",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Enough cards for groups of 3?",
+      "sublabel": "9 cards, 9 % 3 = 0: go on"
+    },
+    {
+      "id": "count",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Count values, sort them",
+      "sublabel": "1:1 2:1 3:2 4:1 5:2 6:1 8:1"
+    },
+    {
+      "id": "g1",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Smallest is 1: open a group",
+      "sublabel": "take 1, 2, 3 → left 3:1 4:1 5:2 6:1 8:1"
+    },
+    {
+      "id": "skip",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Value 2 is used up: skip it",
+      "sublabel": "count is 0, no group opens"
+    },
+    {
+      "id": "g2",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Smallest is now 3: open",
+      "sublabel": "take 3, 4, 5 → left 5:1 6:1 8:1"
+    },
+    {
+      "id": "g3",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Smallest is 5: needs 5, 6, 7",
+      "sublabel": "take 5, 6; look for a 7"
+    },
+    {
+      "id": "fail",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "No 7: return false",
+      "sublabel": "the 5 cannot sit in any other group"
+    }
+  ],
+  "edges": [
+    {
+      "from": "size",
+      "to": "count",
+      "label": "divisible"
+    },
+    {
+      "from": "count",
+      "to": "g1",
+      "label": "first value"
+    },
+    {
+      "from": "g1",
+      "to": "skip",
+      "label": "next value"
+    },
+    {
+      "from": "skip",
+      "to": "g2",
+      "label": "next value"
+    },
+    {
+      "from": "g2",
+      "to": "g3",
+      "label": "skip 4 (used up)"
+    },
+    {
+      "from": "g3",
+      "to": "fail",
+      "label": "gap at 7"
+    }
+  ]
+}

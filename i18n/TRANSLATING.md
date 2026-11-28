@@ -622,6 +622,18 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | chéo chính, chéo phụ | main diagonal, anti-diagonal |
 | tập xung đột | conflict set |
 | đường đi đơn, ô kề cạnh | simple path, edge-adjacent cell |
+| tham lam, lựa chọn tham lam | greedy, greedy choice |
+| luật cục bộ | local rule |
+| tổng chạy | running sum |
+| bỏ tiền tố âm | drop the negative prefix |
+| kỷ lục (best so far) | record, best so far |
+| chỗ xa nhất | farthest reach |
+| lớp bước nhảy, cuối lớp | jump layer, layer end |
+| lý lẽ khởi động lại, bắt đầu lại | restart argument, restart |
+| bình xăng, trạm xuất phát | tank, starting station |
+| chứng minh đổi chỗ | exchange argument |
+| luôn dẫn trước | stays ahead |
+| đổi tiền | making change |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

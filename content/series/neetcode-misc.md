@@ -11,6 +11,7 @@ stations:
   - name: "Quay lui: hoán vị và tìm kiếm"
     concepts: ["Used Marker", "Visit-and-Restore", "Conflict Sets"]
   - name: "Tham lam trên mảng"
+    concepts: ["Greedy Choice", "Kadane's Algorithm", "Farthest Reach", "Jump Layers", "Restart Argument"]
   - name: "Tham lam theo nhóm"
   - name: "Khoảng"
   - name: "Ma trận"

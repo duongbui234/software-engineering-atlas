@@ -48,11 +48,11 @@ Mình có các phiếu giảm giá 1, 1, 2 nghìn và muốn giảm đúng 3 ngh
 ```mermaid
 flowchart TB
   R["Cần giảm 3<br/>phiếu: 1, 1, 2"]
-  A["phiếu 1 đầu, còn 2"]
-  S["phiếu 1 thứ hai<br/>cùng tầng: bỏ qua"]
-  B["phiếu 2, còn 1<br/>hết phiếu: kẹt"]
-  A1["thêm phiếu 1 thứ hai, còn 1<br/>phiếu 2 lớn hơn: kẹt"]
-  A2["thêm phiếu 2, còn 0<br/>cách 1 + 2"]
+  A["phiếu 1 đầu,<br/>còn 2"]
+  S["phiếu 1<br/>thứ hai<br/>cùng tầng:<br/>bỏ qua"]
+  B["phiếu 2,<br/>còn 1<br/>hết phiếu:<br/>kẹt"]
+  A1["thêm phiếu 1<br/>thứ hai, còn 1<br/>phiếu 2 lớn<br/>hơn: kẹt"]
+  A2["thêm phiếu 2,<br/>còn 0<br/>cách 1 + 2"]
   R --> A
   R -.-> S
   R --> B
@@ -89,10 +89,10 @@ Chỗ tốn: mỗi bản trùng mở một nhánh riêng. Với 20 số 1 và đ
 ```mermaid
 flowchart TB
   Q1["i > start và nums[i]<br/>bằng nums[i - 1]?"]
-  Y1["có: bỏ qua i<br/>cùng tầng đã thử giá trị này"]
-  Q2["không: nums[i] lớn hơn<br/>phần còn lại?"]
+  Y1["có: bỏ qua i<br/>cùng tầng đã thử<br/>giá trị này"]
+  Q2["không: nums[i]<br/>lớn hơn<br/>phần còn lại?"]
   Y2["có: dừng vòng lặp"]
-  N2["không: thêm vào path,<br/>gọi dfs(i + 1, ...)"]
+  N2["không: thêm<br/>vào path, gọi<br/>dfs(i + 1, ...)"]
   Q1 --> Y1
   Q1 --> Q2
   Q2 --> Y2

@@ -50,6 +50,8 @@ flowchart TB
   D["pop()"] --> E["bỏ tầng trên cùng:<br/>min của nó đi theo"]
   E --> F["tầng bên dưới đã có<br/>sẵn min đúng"]
   G["getMin()"] --> H["đọc min của tầng<br/>trên cùng: O(1)"]
+  C ~~~ D
+  F ~~~ G
 ```
 
 ## Vấn đề

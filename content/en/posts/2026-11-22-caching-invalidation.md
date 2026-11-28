@@ -51,19 +51,20 @@ In the library, every book on the desk shelf has a **due-date slip**: when it ru
 | A card saying "the library doesn't have this book" so nobody searches the stacks again | [[en/concepts/negative-caching\|Negative caching]] |
 
 ```mermaid
+%%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
     participant R as Clerk A<br/>(reader)
     participant G as Shelf<br/>(cache)
     participant K as Stacks<br/>(database)
     participant W as Clerk B<br/>(writer)
-    R->>G: look for book X
+    R->>G: look for<br/>book X
     G-->>R: not here
-    R->>K: fetch printing 1
-    Note over R: called away to another task
-    W->>K: add printing 2
-    W->>G: pull book X off the shelf
-    R->>G: put printing 1 on the shelf
-    Note over G: shelf keeps the old copy<br/>until the slip runs out
+    R->>K: fetch<br/>printing 1
+    Note over R: called away<br/>to another<br/>task
+    W->>K: add<br/>printing 2
+    W->>G: pull book X<br/>off the shelf
+    R->>G: put printing<br/>1 on the<br/>shelf
+    Note over G: shelf keeps<br/>the old copy<br/>until the slip<br/>runs out
 ```
 
 ## The problem: deleting in the right place and still being wrong

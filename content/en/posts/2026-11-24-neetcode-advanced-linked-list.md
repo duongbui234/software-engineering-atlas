@@ -54,17 +54,17 @@ Station 1 was one train at a platform. Station 2 is a **rail yard**, where peopl
 
 ```mermaid
 flowchart TB
-  A["advanced linked<br/>list problem"] --> B["look up by key and<br/>keep usage order?"]
-  B -->|"yes"| C["hash map + doubly linked list<br/>LRU Cache"]
+  A["advanced linked<br/>list problem"] --> B["look up by key<br/>and keep<br/>usage order?"]
+  B -->|"yes"| C["hash map +<br/>doubly linked list<br/>LRU Cache"]
   B -->|"no"| D["copy nodes with<br/>a second pointer?"]
-  D -->|"yes"| E["copies interleaved after originals<br/>Copy List with Random Pointer"]
   D -->|"no"| F["add two numbers<br/>digit by digit?"]
+  D -->|"yes"| E["copies interleaved<br/>after originals<br/>Copy List with<br/>Random Pointer"]
   F -->|"yes"| G["dummy node + carry<br/>Add Two Numbers"]
-  F -->|"no"| H["array whose values<br/>work as indices?"]
-  H -->|"yes"| I["fast and slow on i → nums[i]<br/>Find the Duplicate Number"]
+  F -->|"no"| H["array whose<br/>values work<br/>as indices?"]
   H -->|"no"| J["merge k<br/>sorted lists?"]
-  J -->|"yes"| K["heap, or merge in pairs<br/>Merge k Sorted Lists"]
-  J -->|"no"| L["reverse k nodes at a time<br/>Reverse Nodes in k-Group"]
+  H -->|"yes"| I["fast and slow<br/>on i → nums[i]<br/>Find the<br/>Duplicate Number"]
+  J -->|"yes"| K["heap, or<br/>merge in pairs<br/>Merge k<br/>Sorted Lists"]
+  J -->|"no"| L["reverse k nodes<br/>at a time<br/>Reverse Nodes<br/>in k-Group"]
 ```
 
 ## The problem: one structure is not enough

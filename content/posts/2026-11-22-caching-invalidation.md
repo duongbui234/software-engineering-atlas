@@ -50,6 +50,7 @@ sources:
 | Tấm thẻ "thư viện không có cuốn này" để khỏi xuống kho tìm lại | [[concepts/negative-caching\|Negative caching]] |
 
 ```mermaid
+%%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
     participant R as Nhân viên A<br/>(người đọc)
     participant G as Giá sách<br/>(cache)
@@ -57,12 +58,12 @@ sequenceDiagram
     participant W as Nhân viên B<br/>(người ghi)
     R->>G: tìm cuốn X
     G-->>R: không có
-    R->>K: lấy bản in 1
-    Note over R: bị gọi đi việc khác
-    W->>K: nhập bản in 2
-    W->>G: rút cuốn X khỏi giá
-    R->>G: đặt bản in 1 lên giá
-    Note over G: giá giữ bản cũ<br/>tới khi hết phiếu hẹn
+    R->>K: lấy<br/>bản in 1
+    Note over R: bị gọi đi<br/>việc khác
+    W->>K: nhập<br/>bản in 2
+    W->>G: rút cuốn X<br/>khỏi giá
+    R->>G: đặt bản in 1<br/>lên giá
+    Note over G: giá giữ bản cũ<br/>tới khi hết<br/>phiếu hẹn
 ```
 
 ## Vấn đề: xóa đúng chỗ mà vẫn sai

@@ -170,14 +170,14 @@ Mỗi môn vào hàng nhiều nhất một lần, mỗi cạnh bị trừ nhiề
 
 ```mermaid
 flowchart TB
-  A["Đếm bậc vào mọi môn"] --> B["Cho mọi môn bậc vào 0<br/>vào hàng đợi"]
+  A["Đếm bậc vào mọi môn"] --> B["Cho mọi môn<br/>bậc vào 0<br/>vào hàng đợi"]
   B --> C["Hàng đợi còn môn?"]
-  C -- "có" --> D["Lấy một môn, ghi vào thứ tự"]
-  D --> E["Trừ bậc vào các môn nó mở khóa;<br/>môn nào về 0 thì vào hàng"]
+  C -- "có" --> D["Lấy một môn,<br/>ghi vào thứ tự"]
+  D --> E["Trừ bậc vào<br/>các môn nó mở khóa;<br/>môn nào về 0<br/>thì vào hàng"]
   E --> C
-  C -- "không" --> F["Đã ghi đủ numCourses môn?"]
-  F -- "có" --> G["Trả thứ tự"]
-  F -- "không" --> H["Có vòng: trả mảng rỗng"]
+  C -- "không" --> F["Đã ghi đủ<br/>numCourses môn?"]
+  F -- "có" --> G["Trả<br/>thứ tự"]
+  F -- "không" --> H["Có vòng:<br/>trả mảng<br/>rỗng"]
 ```
 
 ### Cách 3: DFS ba màu, đảo thứ tự "xong", O(V+E)

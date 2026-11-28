@@ -49,14 +49,14 @@ Hai lớp đã xếp hàng từ thấp tới cao. Cô giáo muốn nhập thành
 
 ```mermaid
 flowchart TB
-  A["dummy → (rỗng)<br/>tail = dummy"] --> B["a và b đều còn nút?"]
+  A["dummy → (rỗng)<br/>tail = dummy"] --> B["a và b<br/>đều còn nút?"]
   B -->|"có"| C["a.val ≤ b.val?"]
   C -->|"có"| D["tail.next = a<br/>a = a.next"]
   C -->|"không"| E["tail.next = b<br/>b = b.next"]
   D --> F["tail = tail.next"]
   E --> F
   F --> B
-  B -->|"không"| G["tail.next = phần còn lại<br/>(a hoặc b, có thể rỗng)"]
+  B -->|"không"| G["tail.next =<br/>phần còn lại<br/>(a hoặc b,<br/>có thể rỗng)"]
   G --> H["trả dummy.next"]
 ```
 

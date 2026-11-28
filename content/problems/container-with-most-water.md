@@ -40,12 +40,12 @@ Một con mương có các tấm ván cao thấp khác nhau cắm dọc theo chi
 
 ```mermaid
 flowchart TB
-  A["i = 0, j = n − 1, best = 0"] --> B["i < j?"]
+  A["i = 0, j = n − 1,<br/>best = 0"] --> B["i < j?"]
   B -->|"không"| R["trả best"]
-  B -->|"có"| C["best = max(best,<br/>(j − i) · min(h[i], h[j]))"]
+  B -->|"có"| C["best = max(best,<br/>(j − i) ·<br/>min(h[i], h[j]))"]
   C --> D["h[i] < h[j]?"]
-  D -->|"có: cột trái thấp"| E["i++"] --> B
-  D -->|"không: cột phải thấp<br/>hoặc bằng"| F["j−−"] --> B
+  D -->|"có: cột<br/>trái thấp"| E["i++"] --> B
+  D -->|"không: cột<br/>phải thấp<br/>hoặc bằng"| F["j−−"] --> B
 ```
 
 ## Vấn đề

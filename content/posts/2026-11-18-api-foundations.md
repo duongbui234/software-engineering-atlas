@@ -52,16 +52,16 @@ Và trước khi bếp nấu, phiếu gọi món đi qua vài người, mỗi ng
 
 ```mermaid
 flowchart TB
-    K(["Khách đưa phiếu gọi món<br/>(trình duyệt gửi request)"]) --> A["Lễ tân: ghi số phiếu"]
-    A --> B["Bảo vệ: có thẻ thành viên không?"]
-    B -- có --> C["Thu ngân: phiếu điền đúng mẫu không?"]
+    K(["Khách đưa phiếu gọi món<br/>(trình duyệt<br/>gửi request)"]) --> A["Lễ tân:<br/>ghi số phiếu"]
+    A --> B["Bảo vệ: có thẻ<br/>thành viên không?"]
+    B -- có --> C["Thu ngân: phiếu<br/>điền đúng mẫu không?"]
     C -- đúng --> D["Bếp: còn món không?"]
-    D -- còn --> E["Phục vụ: bày ra đĩa chuẩn"]
-    E --> OK(["Món ra bàn<br/>(response thành công)"])
-    B -- không --> X["Quản lý: xin lỗi kèm lý do"]
+    D -- còn --> E["Phục vụ:<br/>bày ra đĩa chuẩn"]
+    E --> OK(["Món ra bàn<br/>(response<br/>thành công)"])
+    B -- không --> X["Quản lý: xin lỗi<br/>kèm lý do"]
     C -- sai --> X
     D -- hết --> X
-    X --> ERR(["Khách nhận lời giải thích<br/>(response lỗi)"])
+    X --> ERR(["Khách nhận<br/>lời giải thích<br/>(response lỗi)"])
 ```
 
 Phần còn lại của bài là phiên bản "kỹ thuật" của đúng câu chuyện này.
@@ -267,16 +267,19 @@ return err.message // "Request failed with status code 409"
 Backend gửi `msg`, frontend đọc `message`. Không khớp. Vẽ ra thì thấy rõ chỗ thông tin bị rơi:
 
 ```mermaid
+%%{init: {"sequence": {"width": 70, "actorMargin": 10}}}%%
 sequenceDiagram
     participant FE as Frontend
-    participant F as Bộ xử lý lỗi<br/>(filter)
-    participant S as Phần đặt hàng
+    participant F as Bộ xử<br/>lý lỗi<br/>(filter)
+    participant S as Phần<br/>đặt hàng
     FE->>S: POST /checkout
-    S-->>F: lỗi { code: "FLASH_SALE_<br/>OUT_OF_STOCK", message:<br/>"Rất tiếc, sản phẩm<br/>đã hết hàng" }
-    Note over F: chỉ giữ message,<br/>đổi tên thành msg,<br/>bỏ mất code
-    F-->>FE: 409 { success: false,<br/>msg: "Rất tiếc..." }
-    Note over FE: tìm data.message → không có<br/>tìm data.code → không có
-    FE->>FE: hiện "Request failed<br/>with status code 409"
+    S-->>F: lỗi kèm<br/>code, message
+    Note over F: code:<br/>"FLASH_SALE_<br/>OUT_OF_STOCK"<br/>message:<br/>"Rất tiếc, sản<br/>phẩm đã hết hàng"
+    Note over F: chỉ giữ message,<br/>đổi tên thành<br/>msg, bỏ mất code
+    F-->>FE: 409
+    Note over FE: { success:<br/>false, msg:<br/>"Rất tiếc..." }
+    Note over FE: tìm<br/>data.message<br/>→ không có<br/>tìm data.code<br/>→ không có
+    FE->>FE: hiện "Request<br/>failed with<br/>status code 409"
 ```
 
 Giống nhà hàng mà bếp báo "hết món số 12", quản lý ra bàn chỉ nói "có lỗi", còn khách thì đang chờ nghe chữ "món" nên không hiểu gì. Mình dựng lại đúng tình huống này trong ví dụ dưới đây và kết quả đúng như dự đoán: mọi lỗi đều hiện ra thành câu mặc định của axios.

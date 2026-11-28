@@ -50,18 +50,16 @@ The switchboard from station 3 now serves an office building.
 | The receptionist records the last 2 minutes; call back in time and you can hear it again | [[en/concepts/connection-state-recovery\|Connection state recovery]] |
 
 ```mermaid
+%%{init: {"flowchart": {"rankSpacing": 50}}}%%
 flowchart TB
     subgraph CONN["One shared connection"]
-        direction LR
-        NS1["Namespace /flash-sale"]
-        NS2["Namespace /notifications"]
+        NS1["Namespace<br/>/flash-sale"]
+        NS2["Namespace<br/>/notifications"]
     end
     subgraph ROOMS["Rooms (held by the server)"]
-        direction LR
         R1["user:u1<br/>every tab of u1"]
         R2["campaign:c-21h<br/>who is watching"]
     end
-    CONN ~~~ ROOMS
     NS1 --> R1
     NS1 --> R2
 ```

@@ -59,12 +59,12 @@ flowchart TB
   A["bài đệ quy<br/>trên cây"] --> B["chỉ cần sửa<br/>từng nút?"]
   B -->|"có"| C["Invert Binary Tree:<br/>đổi hai con"]
   B -->|"không"| D["đáp án chính là<br/>thứ trả lên cha?"]
-  D -->|"có"| E["Maximum Depth:<br/>trả 1 + max(trái, phải)"]
   D -->|"không"| F["cha cần một thứ,<br/>đáp án là thứ khác?"]
+  D -->|"có"| E["Maximum Depth:<br/>trả 1 +<br/>max(trái, phải)"]
   F -->|"có"| G["Diameter:<br/>trả chiều cao,<br/>ghi kỷ lục"]
-  F -->|"không"| H["phải báo 'đã hỏng'<br/>lên trên?"]
-  H -->|"có"| I["Balanced:<br/>trả -1 làm<br/>giá trị canh"]
+  F -->|"không"| H["phải báo<br/>'đã hỏng'<br/>lên trên?"]
   H -->|"không"| J["Same Tree, Subtree:<br/>đi song song<br/>hai cây"]
+  H -->|"có"| I["Balanced:<br/>trả -1 làm<br/>giá trị canh"]
 ```
 
 ## Vấn đề: hỏi cả cây bằng một vòng lặp thì rối

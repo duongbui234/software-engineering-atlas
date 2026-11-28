@@ -50,11 +50,14 @@ Một câu lạc bộ cờ có hàng chục kỳ thủ, trình độ ai cũng kh
 ```mermaid
 flowchart TB
   A["cần gì từ dữ liệu?"] --> B["lấy lặp lại phần tử<br/>ưu tiên nhất?"]
-  B -->|"có"| C["heap chứa cả n phần tử<br/>Last Stone Weight"]
-  B -->|"không"| D["k phần tử lớn nhất<br/>hoặc phần tử thứ k?"]
-  D -->|"dữ liệu đến dần"| E["min-heap k chỗ<br/>Kth Largest in a Stream"]
-  D -->|"mảng có sẵn, hỏi một lần"| F["heap k chỗ<br/>hoặc quickselect"]
-  D -->|"k nhỏ nhất"| G["max-heap k chỗ<br/>K Closest Points"]
+  B -->|"có"| C["heap chứa<br/>cả n phần tử<br/>Last Stone Weight"]
+  B -->|"không"| D["cần k phần tử nhỏ nhất?"]
+  D -->|"có"| G["max-heap k chỗ<br/>K Closest Points"]
+  D -->|"không"| D2["k lớn nhất hoặc thứ k:<br/>dữ liệu đến dần?"]
+  D2 -->|"có"| E["min-heap k chỗ<br/>Kth Largest<br/>in a Stream"]
+  D2 -->|"không"| F["mảng có sẵn,<br/>hỏi một lần:<br/>heap k chỗ<br/>hoặc quickselect"]
+  C ~~~ D
+  G ~~~ D2
 ```
 
 ## Vấn đề: sắp xếp làm thừa việc

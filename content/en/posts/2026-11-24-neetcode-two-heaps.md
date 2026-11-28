@@ -52,11 +52,11 @@ The homeroom teacher has three recurring jobs every day, and each one only needs
 ```mermaid
 flowchart TB
   A["what do you need from<br/>a changing set?"] --> B["the middle element<br/>(median)?"]
-  B -->|"yes"| C["two heaps<br/>Find Median from Data Stream"]
-  B -->|"no"| D["the top-priority element,<br/>but some must wait a while?"]
-  D -->|"yes"| E["heap + queue<br/>Task Scheduler"]
+  B -->|"yes"| C["two heaps<br/>Find Median<br/>from Data Stream"]
+  B -->|"no"| D["the top-priority<br/>element, but some<br/>must wait a while?"]
+  D -->|"yes"| E["heap + queue<br/>Task<br/>Scheduler"]
   D -->|"no"| F["the first m elements<br/>of k sorted lists?"]
-  F -->|"yes"| G["heap holding the head<br/>of each list<br/>Design Twitter"]
+  F -->|"yes"| G["heap holding<br/>the head of<br/>each list<br/>Design Twitter"]
 ```
 
 ## The problem: a heap alone only knows the front

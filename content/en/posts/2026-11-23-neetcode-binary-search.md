@@ -46,13 +46,13 @@ Nobody looks up a word in a paper dictionary starting from page 1. You open near
 flowchart TB
   A["suspect range"] --> B["any cells left?"]
   B -->|"no"| X["no answer"]
-  B -->|"yes"| C["look at the middle cell"]
+  B -->|"yes"| C["look at the<br/>middle cell"]
   C --> D["the problem's<br/>yes/no question"]
-  D -->|"answer is to the left"| E["drop the right half"]
-  D -->|"answer is to the right"| F["drop the left half"]
-  D -->|"it is this cell"| Y["return the result"]
-  E --> A
-  F --> A
+  D -->|"answer is<br/>to the left"| E["drop the<br/>right half"]
+  D -->|"answer is<br/>to the right"| F["drop the<br/>left half"]
+  D -->|"it is<br/>this cell"| Y["return<br/>the result"]
+  E & F --> R["repeat with<br/>the new range"]
+  R --> A
 ```
 
 ## The problem: reading the whole array costs O(n) even when it is ordered

@@ -56,8 +56,8 @@ Mình là người tổ chức một bữa tiệc. Việc đầu tiên là xếp
 ```mermaid
 flowchart TB
   A["Thứ tự có ý nghĩa không?"]
-  B["Không: tập con, tổ hợp<br/>dùng start index (MISC-01)"]
-  C["Có: cần nhớ thứ đang dùng"]
+  B["Không: tập con,<br/>tổ hợp dùng<br/>start index<br/>(MISC-01)"]
+  C["Có: cần nhớ<br/>thứ đang dùng"]
   D["Phần tử trong mảng<br/>mảng used"]
   E["Ô trên lưới<br/>ghi đè rồi khôi phục"]
   F["Vị trí trên chuỗi<br/>điểm cắt tiếp theo"]

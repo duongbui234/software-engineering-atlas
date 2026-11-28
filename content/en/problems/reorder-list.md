@@ -50,12 +50,12 @@ You have a deck ordered 1, 2, 3, …, n from the top and want the order 1, n, 2,
 
 ```mermaid
 flowchart TB
-  A["step 1: tortoise, hare from head<br/>hare stops when 2 steps run out"] --> B["tortoise = end of first half"]
-  B --> C["step 2: second = reverse(tortoise.next)<br/>tortoise.next = null"]
+  A["step 1: tortoise,<br/>hare from head;<br/>hare stops when<br/>2 steps run out"] --> B["tortoise =<br/>end of first half"]
+  B --> C["step 2: second =<br/>reverse(tortoise.next)<br/>tortoise.next = null"]
   C --> D["step 3: first = head"]
   D --> E["second has nodes left?"]
-  E -->|"no"| Z["done: L0, Ln, L1, Ln−1, …"]
-  E -->|"yes"| F["first.next = second<br/>second.next = old first.next"]
+  E -->|"no"| Z["done: L0, Ln,<br/>L1, Ln−1, …"]
+  E -->|"yes"| F["first.next = second<br/>second.next =<br/>old first.next"]
   F --> G["first, second advance<br/>one node each"]
   G --> E
 ```

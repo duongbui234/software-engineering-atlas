@@ -157,6 +157,10 @@ async function atlasRenderMermaid() {
     // Cột bài chỉ ~40rem: thu hẹp ô và khoảng cách giữa các bên tham gia để sequence
     // diagram không bị co nhỏ chữ (mặc định 150px + 50px mỗi bên).
     sequence: { width: 110, actorMargin: 24, boxMargin: 8, noteMargin: 8, messageMargin: 32 },
+    // Flowchart: mặc định nodeSpacing 50, rankSpacing 50, padding 15 làm sơ đồ rộng hơn cột ở 390px.
+    // Thu lại để sơ đồ dạng TB vừa khung mà không phải co chữ.
+    // subGraphTitleMargin: chừa chỗ dưới tiêu đề subgraph, nếu không tiêu đề đè lên node đầu tiên.
+    flowchart: { nodeSpacing: 18, rankSpacing: 34, padding: 8, diagramPadding: 4, subGraphTitleMargin: { top: 4, bottom: 12 } },
   });
   for (var i = 0; i < boxes.length; i++) {
     try {

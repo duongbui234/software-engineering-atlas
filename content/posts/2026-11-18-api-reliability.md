@@ -55,16 +55,13 @@ Ghép lại, một lời gọi từ backend ra cổng thanh toán đi qua các l
 
 ```mermaid
 flowchart TB
-    R([Request checkout]) --> RL{"Rate limit<br/>còn lượt không?"}
-    RL -- hết lượt --> E429["429 + Retry-After"]
-    RL -- còn --> ID{"Idempotency-Key<br/>đã thấy chưa?"}
-    ID -- "rồi, đã xong" --> OLD["trả lại kết quả cũ"]
-    ID -- chưa --> CB{"Circuit breaker<br/>đang mở?"}
-    CB -- mở --> FF["báo lỗi ngay (fail fast)"]
-    CB -- đóng --> T["Gọi MoMo,<br/>tối đa 5 giây (timeout)"]
-    T -- "lỗi tạm thời" --> W["chờ ngẫu nhiên, lâu dần<br/>(backoff + jitter)"]
+    R(["Request checkout"]) --> RL["Rate limit<br/>hết lượt: 429<br/>+ Retry-After"]
+    RL -- còn lượt --> ID["Idempotency-Key<br/>đã thấy, đã xong:<br/>trả kết quả cũ"]
+    ID -- chưa thấy --> CB["Circuit breaker<br/>đang mở: báo lỗi<br/>ngay (fail fast)"]
+    CB -- đóng --> T["Gọi MoMo,<br/>tối đa 5 giây<br/>(timeout)"]
+    T -- "lỗi tạm thời" --> W["chờ ngẫu nhiên,<br/>lâu dần (backoff<br/>+ jitter)"]
     W --> T
-    T -- thành công --> OK["lưu kết quả theo key<br/>và trả về"]
+    T -- thành công --> OK["lưu kết quả<br/>theo key, trả về"]
 ```
 
 ## Vấn đề: mọi thứ đều có thể hỏng giữa chừng
@@ -196,11 +193,12 @@ Retry giúp vượt qua lỗi *thoáng qua*. Khi dependency *sập hẳn*, retry
 
 ```mermaid
 stateDiagram-v2
+    direction TB
     [*] --> CLOSED
-    CLOSED --> OPEN: tỉ lệ lỗi vượt ngưỡng
-    OPEN --> HALF_OPEN: hết thời gian chờ (resetTimeout)
-    HALF_OPEN --> CLOSED: request thử thành công
-    HALF_OPEN --> OPEN: request thử thất bại
+    CLOSED --> OPEN: tỉ lệ lỗi<br/>vượt ngưỡng
+    OPEN --> HALF_OPEN: hết thời gian chờ<br/>(resetTimeout)
+    HALF_OPEN --> CLOSED: request thử<br/>thành công
+    HALF_OPEN --> OPEN: request thử<br/>thất bại
 ```
 
 - **CLOSED**: gọi bình thường, đếm lỗi.

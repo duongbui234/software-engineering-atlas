@@ -198,6 +198,8 @@ body { background: var(--paper-2); font-size: 1.0625rem; line-height: 1.7; }
   border-left: 3px solid var(--contour); background: var(--code-bg);
 }
 .atlas-mermaid svg { max-width: 100%; height: auto; }
+/* màn hẹp: khung tràn qua lề trong của tờ (padding .atlas-inner), vẫn trong nét viền, để sơ đồ có thêm ~40px */
+@media (max-width: 600px) { .atlas-mermaid { margin-inline: calc(-1 * clamp(1rem, 4vw, 3.5rem)); padding: .75rem .25rem; } }
 .atlas-mermaid[data-src]:empty { min-height: 4rem; }
 .standfirst { font-size: 1.1875rem; color: var(--ink-2); max-width: var(--measure); margin: 0 0 1rem; }
 .page[data-frame="atlas"] .center > hr { display: none; }

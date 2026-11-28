@@ -56,10 +56,11 @@ Bàn phân loại ở ga 2 thật ra có bốn kiểu nhân viên, mỗi ngườ
 | Phòng thư thất lạc | [[concepts/alternate-exchange\|Alternate exchange]] |
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
     subgraph D["Direct: khớp nguyên văn"]
         direction LR
-        DX["exchange"] -->|"payment.paid"| DQ1["queue thanh toán"]
+        DX["exchange"] -->|"payment.paid"| DQ1["queue<br/>thanh toán"]
     end
     subgraph F["Fanout: ai cũng nhận"]
         direction LR
@@ -69,9 +70,9 @@ flowchart TB
     end
     subgraph T["Topic: khớp theo mẫu"]
         direction LR
-        TX["exchange"] -->|"*.cancelled"| TQ1["queue hoàn kho"]
-        TX -->|"order.#"| TQ2["queue đơn hàng"]
-        TX -->|"mọi thứ (#)"| TQ3["queue audit"]
+        TX["exchange"] -->|"*.cancelled"| TQ1["queue<br/>hoàn kho"]
+        TX -->|"order.#"| TQ2["queue<br/>đơn hàng"]
+        TX -->|"mọi thứ (#)"| TQ3["queue<br/>audit"]
     end
     D ~~~ F ~~~ T
 ```
@@ -172,13 +173,14 @@ RabbitMQ không công bố thống kê, nên câu trả lời dưới đây dự
 ### Chọn kiểu nào?
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
-    Q1["Gửi tới đúng một hàng đợi<br/>công việc, biết sẵn tên?"] -->|"có"| A1["Default exchange<br/>(sendToQueue)"]
+    Q1["Gửi tới đúng một<br/>hàng đợi công việc,<br/>biết sẵn tên?"] -->|"có"| A1["Default exchange<br/>(sendToQueue)"]
     Q1 -->|"không"| Q2["Mọi bên đang nghe<br/>đều cần mọi tin?"]
     Q2 -->|"có"| A2["Fanout"]
-    Q2 -->|"không, cần lọc"| Q3["Lọc được bằng một<br/>nhãn có cấp (a.b.c)?"]
-    Q3 -->|"có"| A3["Topic<br/>(khóa cố định, ít: direct cũng được)"]
-    Q3 -->|"không, lọc theo<br/>nhiều thuộc tính"| A4["Headers"]
+    Q2 -->|"không, cần lọc"| Q3["Lọc được bằng<br/>một nhãn có cấp<br/>(a.b.c)?"]
+    Q3 -->|"có"| A3["Topic (khóa<br/>cố định, ít:<br/>direct cũng được)"]
+    Q3 -->|"không"| A4["Headers: lọc<br/>theo nhiều<br/>thuộc tính"]
 ```
 
 Nếu phân vân giữa direct và topic, mình chọn **topic**. Hôm nay dùng khóa nguyên văn thì nó chạy y như direct. Mai có một bên muốn nghe "mọi thứ bị hủy", chỉ cần thêm binding `*.cancelled`, không phải đổi kiểu exchange (đổi kiểu buộc phải xóa và tạo lại exchange, vì khai báo lại với kiểu khác sẽ bị lỗi `406`).
@@ -203,11 +205,12 @@ Plugin **delayed message** (`x-delayed-message`) từng rất phổ biến nhưn
 Gửi một tin mà không binding nào khớp, đó là một [[concepts/unroutable-message|unroutable message]]. Có ba khả năng:
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
-    M["Tin không khớp binding nào"] --> A["Exchange có alternate exchange?"]
-    A -->|"có"| AE["Chuyển sang alternate exchange<br/>(vd: queue 'thư thất lạc')"]
-    A -->|"không"| B["Tin gửi với mandatory = true?"]
-    B -->|"có"| R["Broker trả tin về producer<br/>basic.return 312 NO_ROUTE"]
+    M["Tin không khớp<br/>binding nào"] --> A["Exchange có<br/>alternate exchange?"]
+    A -->|"có"| AE["Chuyển sang<br/>alternate exchange<br/>(vd: queue<br/>'thư thất lạc')"]
+    A -->|"không"| B["Tin gửi với<br/>mandatory = true?"]
+    B -->|"có"| R["Broker trả tin<br/>về producer<br/>basic.return<br/>312 NO_ROUTE"]
     B -->|"không"| X["Bị bỏ im lặng<br/>(mặc định)"]
 ```
 

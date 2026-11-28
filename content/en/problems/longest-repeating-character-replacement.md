@@ -46,8 +46,8 @@ A row of chairs is painted in many colors. The painter only has paint left for k
 flowchart TB
   A["right moves one step,<br/>count[s[right]] += 1"] --> B["maxFreq = max(maxFreq,<br/>count[s[right]])"]
   B --> C["length − maxFreq > k?"]
-  C -->|"yes"| D["drop s[left], left += 1<br/>(slide, length unchanged)"]
-  C -->|"no"| E["the window grows by 1"]
+  C -->|"yes"| D["drop s[left],<br/>left += 1<br/>(slide, length<br/>unchanged)"]
+  C -->|"no"| E["the window<br/>grows by 1"]
   D --> F["more characters?"]
   E --> F
   F -->|"yes"| A

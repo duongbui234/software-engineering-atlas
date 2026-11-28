@@ -49,17 +49,17 @@ Two classes stand in two lines, each already sorted from shortest to tallest. Th
 
 ```mermaid
 flowchart TB
-  A["swap so a is shorter<br/>lo = 0, hi = m"] --> B["lo ≤ hi?"]
+  A["swap so a<br/>is shorter<br/>lo = 0, hi = m"] --> B["lo ≤ hi?"]
   B -->|"yes"| C["i = (lo + hi) / 2<br/>j = half − i"]
-  C --> D["read aL, aR, bL, bR<br/>empty side: −∞ or +∞"]
-  D --> E["aL ≤ bR and bL ≤ aR?"]
-  E -->|"yes: right cut"| F["odd total: max(aL, bL)<br/>even total: average of<br/>left max and right min"]
+  C --> D["read aL, aR,<br/>bL, bR<br/>empty side:<br/>−∞ or +∞"]
+  D --> E["aL ≤ bR and<br/>bL ≤ aR?"]
+  E -->|"yes:<br/>right cut"| F["odd total:<br/>max(aL, bL)<br/>even total:<br/>average of<br/>left max and<br/>right min"]
   E -->|"no"| G["aL > bR?"]
-  G -->|"yes: cut in a<br/>too far right"| H["hi = i − 1"]
-  G -->|"no: cut in a<br/>too far left"| I["lo = i + 1"]
+  G -->|"yes:<br/>cut in a<br/>too far right"| H["hi = i − 1"]
+  G -->|"no:<br/>cut in a<br/>too far left"| I["lo = i + 1"]
   H --> B
   I --> B
-  B -->|"no: only happens<br/>if input is unsorted"| X["report an error"]
+  B -->|"no: only<br/>happens if<br/>input is<br/>unsorted"| X["report<br/>an error"]
 ```
 
 ## The problem

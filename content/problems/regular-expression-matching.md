@@ -93,7 +93,7 @@ Lật hướng: `dp[i][j]` là "tiền tố `s[0:i]` có khớp trọn `p[0:j]` 
 ```mermaid
 flowchart TB
   Q["p[j-1] là *?"]
-  N["không: x = p[j-1]<br/>x khớp s[i-1]<br/>và ô chéo dp[i-1][j-1]"]
+  N["không: x = p[j-1]<br/>x khớp s[i-1]<br/>và ô chéo<br/>dp[i-1][j-1]"]
   Z["có: bỏ cả cặp x*<br/>dp[i][j-2] đúng?"]
   T["true"]
   M["x khớp s[i-1]<br/>và dp[i-1][j] đúng?"]

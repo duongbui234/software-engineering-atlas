@@ -53,14 +53,15 @@ Every post office has letters it cannot deliver. A good post office does not thr
 | Express mail placed ahead of the pile of regular letters waiting | [[en/concepts/priority-queue\|Priority queue]] |
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
     W["Carrier delivers letter"] --> R["Delivered?"]
     R -->|"yes"| OK["Signed for (ack)"]
-    R -->|"temporary error"| L["How many tries?"]
-    L -->|"under 3"| K["5-minute shelf<br/>(queue with TTL)"]
-    K -->|"after 5 minutes"| W
-    L -->|"reached 3"| P["Parking lot: human review<br/>(parking queue)"]
-    R -->|"permanent error"| P
+    R -->|"no"| E["Temporary or<br/>permanent error?"]
+    E -->|"permanent"| P["Parking lot:<br/>human review<br/>(parking queue)"]
+    E -->|"temporary"| L["How many tries?"]
+    L -->|"3 tries"| P
+    L -->|"fewer"| K["5-minute shelf<br/>(queue with TTL),<br/>then delivered<br/>again"]
 ```
 
 ## The problem: requeue is not retry

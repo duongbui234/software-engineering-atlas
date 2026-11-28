@@ -52,11 +52,11 @@ Mỗi cặp nút đi qua đúng một thang câu hỏi:
 
 ```mermaid
 flowchart TB
-  S["một cặp nút (p, q)"] --> A["cả hai rỗng?"]
-  A -- "có" --> T1["giống ở nhánh này"]
-  A -- "không" --> B["đúng một bên rỗng?"]
+  S["một cặp nút<br/>(p, q)"] --> A["cả hai rỗng?"]
+  A -- "có" --> T1["giống ở<br/>nhánh này"]
+  A -- "không" --> B["đúng một<br/>bên rỗng?"]
   B -- "có" --> F1["khác"]
-  B -- "không" --> C["p.val khác q.val?"]
+  B -- "không" --> C["p.val khác<br/>q.val?"]
   C -- "có" --> F2["khác"]
   C -- "không" --> D["so cặp con trái,<br/>rồi cặp con phải"]
   D --> E["giống khi cả hai<br/>cặp con đều giống"]
@@ -149,7 +149,7 @@ flowchart TB
     B1["1"] -- "phải" --> B2["2"]
   end
   subgraph C["preorder bỏ null"]
-    direction LR
+    direction TB
     C1["cả hai: 1, 2"]
   end
   subgraph D["preorder ghi null"]

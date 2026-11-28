@@ -53,16 +53,16 @@ And before the kitchen cooks, the order slip passes through a few people, each c
 
 ```mermaid
 flowchart TB
-    K(["Guest hands over the order<br/>(browser sends a request)"]) --> A["Host: writes the slip number"]
-    A --> B["Security: member card?"]
-    B -- yes --> C["Cashier: slip filled in correctly?"]
-    C -- yes --> D["Kitchen: dish still available?"]
-    D -- yes --> E["Server: plates it the standard way"]
-    E --> OK(["Dish arrives at the table<br/>(successful response)"])
-    B -- no --> X["Manager: apologizes with a reason"]
+    K(["Guest hands over<br/>the order (browser<br/>sends a request)"]) --> A["Host: writes<br/>the slip number"]
+    A --> B["Security:<br/>member card?"]
+    B -- yes --> C["Cashier: slip<br/>filled in correctly?"]
+    C -- yes --> D["Kitchen: dish<br/>still available?"]
+    D -- yes --> E["Server: plates it<br/>the standard way"]
+    E --> OK(["Dish arrives<br/>at the table<br/>(successful response)"])
+    B -- no --> X["Manager: apologizes<br/>with a reason"]
     C -- no --> X
     D -- sold out --> X
-    X --> ERR(["Guest gets an explanation<br/>(error response)"])
+    X --> ERR(["Guest gets<br/>an explanation<br/>(error response)"])
 ```
 
 The rest of this post is the "technical" version of exactly this story.
@@ -268,16 +268,19 @@ return err.message // "Request failed with status code 409"
 The backend sends `msg`, the frontend reads `message`. They don't match. Drawing it out shows exactly where the information falls off:
 
 ```mermaid
+%%{init: {"sequence": {"width": 70, "actorMargin": 10}}}%%
 sequenceDiagram
     participant FE as Frontend
-    participant F as Error handler<br/>(filter)
-    participant S as Ordering logic
+    participant F as Error<br/>handler<br/>(filter)
+    participant S as Ordering<br/>logic
     FE->>S: POST /checkout
-    S-->>F: error { code: "FLASH_SALE_<br/>OUT_OF_STOCK", message:<br/>"Rất tiếc, sản phẩm<br/>đã hết hàng" }
-    Note over F: keeps only message,<br/>renames it to msg,<br/>drops code
-    F-->>FE: 409 { success: false,<br/>msg: "Rất tiếc..." }
-    Note over FE: looks for data.message → none<br/>looks for data.code → none
-    FE->>FE: shows "Request failed<br/>with status code 409"
+    S-->>F: error with<br/>code, message
+    Note over F: code:<br/>"FLASH_SALE_<br/>OUT_OF_STOCK"<br/>message:<br/>"Rất tiếc, sản<br/>phẩm đã hết hàng"
+    Note over F: keeps only<br/>message, renames<br/>it to msg,<br/>drops code
+    F-->>FE: 409
+    Note over FE: { success:<br/>false, msg:<br/>"Rất tiếc..." }
+    Note over FE: looks for<br/>data.message<br/>→ none<br/>looks for<br/>data.code<br/>→ none
+    FE->>FE: shows "Request<br/>failed with<br/>status code 409"
 ```
 
 It's like a restaurant where the kitchen says "dish no. 12 is sold out", the manager goes to the table and only says "there's a problem", and the guest, who is listening for the word "dish", understands nothing. I rebuilt exactly this situation in the example below, and the result was what I predicted: every error shows up as axios's default message.

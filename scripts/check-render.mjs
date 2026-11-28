@@ -3,6 +3,7 @@
 //   - trang cuộn ngang (scrollWidth lớn hơn bề rộng màn hình);
 //   - một sơ đồ Mermaid render hỏng (theme thay bằng khối code) hoặc hiện "Unsupported markdown";
 //   - một sơ đồ Mermaid bị co dưới 75% cỡ thật (chữ quá nhỏ để đọc);
+//   - một sơ đồ Mermaid rộng hơn vùng nội dung của khung, tức phải cuộn ngang trong khung (ở 390px khung còn ~353px, nên bề rộng thật phải ≤ ~470px);
 //   - một sơ đồ archify nhúng bị cắt: khung iframe thấp hơn nội dung (viewer đặt overflow:hidden).
 //
 // Chạy local:  npx quartz build && npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
@@ -94,13 +95,20 @@ async function checkPage(page, origin, file, width) {
       const svg = b.querySelector(':scope > svg');
       if (!svg) return { i, broken: b.querySelector(':scope > pre') !== null };
       const vb = svg.viewBox.baseVal;
-      const scale = vb && vb.width ? svg.getBoundingClientRect().width / vb.width : 1;
-      return { i, scale, unsupported: svg.textContent.includes('Unsupported markdown') };
+      const svgWidth = svg.getBoundingClientRect().width;
+      const scale = vb && vb.width ? svgWidth / vb.width : 1;
+      // vùng nội dung của khung = clientWidth trừ padding hai bên
+      const cs = getComputedStyle(b);
+      const inner = b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return { i, scale, svgWidth: Math.round(svgWidth), inner: Math.round(inner),
+        natural: vb && vb.width ? Math.round(vb.width) : 0,
+        unsupported: svg.textContent.includes('Unsupported markdown') };
     }));
     for (const d of diagrams) {
       if (d.broken) problems.push(`Mermaid #${d.i + 1}: lỗi cú pháp, đang hiện khối code thay cho sơ đồ`);
       if (d.unsupported) problems.push(`Mermaid #${d.i + 1}: có nhãn hiện "Unsupported markdown" (nhãn mở đầu bằng #, 1., - …)`);
       if (d.scale !== undefined && d.scale < MIN_SCALE - 0.005) problems.push(`Mermaid #${d.i + 1}: bị co còn ${(d.scale * 100).toFixed(0)}% (tối thiểu ${MIN_SCALE * 100}%)`);
+      if (d.svgWidth !== undefined && d.svgWidth > d.inner + 1) problems.push(`Mermaid #${d.i + 1}: rộng ${d.svgWidth}px, hơn khung ${d.inner}px nên phải cuộn ngang (bề rộng thật ${d.natural}px; cần ≤ ${Math.floor(d.inner / MIN_SCALE)}px)`);
     }
   }
   const archify = await page.locator('iframe[data-archify]').count();

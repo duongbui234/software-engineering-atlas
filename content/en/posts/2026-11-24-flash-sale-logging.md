@@ -212,12 +212,12 @@ The approach that [The Twelve-Factor App](https://12factor.net/logs) recommends,
 ```mermaid
 flowchart TB
     subgraph now["Today: the app ships"]
-    direction LR
+    direction TB
     A1["App"] --> F1["File in the pod<br/>(lost on restart)"]
     A1 --> E1["Elasticsearch<br/>buffer in app RAM"]
     end
     subgraph better["Better: app writes stdout"]
-    direction LR
+    direction TB
     A2["App"] --> S2["stdout"]
     S2 --> G2["Agent on the node<br/>(disk buffer)"]
     G2 --> E2["Elasticsearch"]

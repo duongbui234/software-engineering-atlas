@@ -54,10 +54,10 @@ A professional post office has two pieces of paper: a **receipt** handed to the 
 
 ```mermaid
 flowchart TB
-    P["Sender"] -->|"step 1: send registered letter"| B["Post office<br/>(stores it)"]
-    B -->|"step 2: receipt"| P
-    B -->|"step 3: deliver letter"| W["Delivery clerk<br/>(at most N in the bag)"]
-    W -->|"step 4: signed slip"| B
+    P["Sender"] -->|"step 1: send<br/>registered letter"| B["Post office<br/>(stores it)"]
+    B -->|"step 2:<br/>receipt"| P
+    B -->|"step 3:<br/>deliver letter"| W["Delivery clerk<br/>(at most N<br/>in the bag)"]
+    W -->|"step 4:<br/>signed slip"| B
     B --> D["step 5: only now<br/>is the letter deleted"]
 ```
 

@@ -52,10 +52,10 @@ The library runs fine now. The head librarian needs a **ledger** (how many loans
 ```mermaid
 flowchart TB
     R["Request needs data"] --> T["Ask the cache,<br/>wait at most 50 ms"]
-    T -->|"answers in time"| H["Use the result<br/>(hit or miss)"]
-    T -->|"error or over 50 ms"| C["Count consecutive errors"]
-    C --> B["After 3: trip the breaker,<br/>skip the cache for 5 seconds"]
-    C --> D["Read the database directly"]
+    T -->|"answers<br/>in time"| H["Use the result<br/>(hit or miss)"]
+    T -->|"error or<br/>over 50 ms"| C["Count<br/>consecutive errors"]
+    C --> B["After 3: trip<br/>the breaker, skip the<br/>cache for 5 seconds"]
+    C --> D["Read the<br/>database directly"]
     B --> D
     D --> L["Can the database take<br/>100% of the load?"]
 ```

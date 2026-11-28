@@ -45,11 +45,11 @@ The train leaves at 8, and you want to pedal as gently as possible and still mak
 
 ```mermaid
 flowchart TB
-  A["answer range [lo, hi]<br/>hi surely passes"] --> B["lo = hi?"]
-  B -->|"yes"| X["the answer is lo"]
-  B -->|"no"| C["try mid<br/>with the problem's check"]
+  A["answer range<br/>[lo, hi],<br/>hi surely<br/>passes"] --> B["lo = hi?"]
+  B -->|"yes"| X["the answer<br/>is lo"]
+  B -->|"no"| C["try mid<br/>with the<br/>problem's<br/>check"]
   C --> D["mid passes?"]
-  D -->|"yes"| E["hi = mid<br/>(mid may be the answer)"]
+  D -->|"yes"| E["hi = mid<br/>(mid may be<br/>the answer)"]
   D -->|"no"| F["lo = mid + 1"]
   E --> A
   F --> A

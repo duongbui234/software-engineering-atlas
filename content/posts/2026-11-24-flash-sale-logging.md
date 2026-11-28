@@ -211,12 +211,12 @@ Cách mà [The Twelve-Factor App](https://12factor.net/logs) đề xuất, và K
 ```mermaid
 flowchart TB
     subgraph now["Hiện tại: app tự gửi"]
-    direction LR
+    direction TB
     A1["App"] --> F1["File trong pod<br/>(mất khi restart)"]
     A1 --> E1["Elasticsearch<br/>đệm trong RAM app"]
     end
     subgraph better["Nên làm: app chỉ ghi stdout"]
-    direction LR
+    direction TB
     A2["App"] --> S2["stdout"]
     S2 --> G2["Agent trên node<br/>(đệm trên đĩa)"]
     G2 --> E2["Elasticsearch"]

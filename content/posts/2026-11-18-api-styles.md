@@ -54,18 +54,15 @@ Nếu không có WebSocket, cách duy nhất để biết "đồ xong chưa" là
 
 ```mermaid
 flowchart TB
-    subgraph REST["REST: hỏi một câu, nhận một trả lời"]
-        direction LR
-        c1([Trình duyệt]) -- "GET /products/42" --> s1[(Server)]
+    subgraph REST["REST: hỏi một, đáp một"]
+        c1([Trình duyệt]) -- "GET<br/>/products/42" --> s1[(Server)]
         s1 -- "200 + dữ liệu" --> c1
     end
-    subgraph WS["WebSocket: giữ máy, server nói bất cứ lúc nào"]
-        direction LR
-        c2([Trình duyệt]) <== "kết nối mở suốt" ==> s2[(Server)]
+    subgraph WS["WebSocket: giữ máy"]
+        c2([Trình duyệt]) <== "kết nối<br/>mở suốt" ==> s2[(Server)]
     end
-    subgraph WH["Webhook: bên ngoài gọi vào mình"]
-        direction LR
-        m([MoMo]) -- "POST /webhooks/momo/ipn" --> s3[(Server của mình)]
+    subgraph WH["Webhook: họ gọi mình"]
+        m([MoMo]) -- "POST /webhooks/<br/>momo/ipn" --> s3[(Server<br/>của mình)]
     end
     REST ~~~ WS ~~~ WH
 ```
@@ -193,14 +190,15 @@ Khi người mua trả tiền trên trang MoMo, server của mình không biết
 Trình tự dễ hình dung nhất:
 
 ```mermaid
+%%{init: {"sequence": {"diagramMarginX": 8, "width": 96, "actorMargin": 16}}}%%
 sequenceDiagram
     participant B as Trình duyệt
-    participant S as Server flash-sale
+    participant S as Server<br/>flash-sale
     participant M as MoMo
-    B->>S: Thanh toán đơn ord_1
-    S-->>B: Chuyển sang trang MoMo
-    B->>M: Người mua xác nhận<br/>trả tiền
-    M->>S: Webhook (IPN):<br/>"ord_1 đã trả 1.990.000đ"<br/>+ chữ ký
+    B->>S: Thanh toán<br/>đơn ord_1
+    S-->>B: Chuyển sang<br/>trang MoMo
+    B->>M: Người mua<br/>xác nhận trả tiền
+    M->>S: Webhook (IPN):<br/>"ord_1 đã trả<br/>1.990.000đ"<br/>+ chữ ký
     Note over S: kiểm chữ ký,<br/>kiểm số tiền,<br/>đánh dấu đơn đã trả
     S-->>M: 204 "đã nhận"
     M-->>B: Chuyển về trang<br/>"thanh toán xong"<br/>(chỉ để hiển thị)

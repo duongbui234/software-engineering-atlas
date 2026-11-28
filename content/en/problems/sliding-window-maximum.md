@@ -46,7 +46,7 @@ A line of people walks through a doorway k people wide. At every moment you need
 
 ```mermaid
 flowchart TB
-  A["i moves, x = nums[i]"] --> B["front ≤ i − k?"]
+  A["i moves,<br/>x = nums[i]"] --> B["front ≤ i − k?"]
   B -->|"yes: out of the window"| C["remove the front"]
   B -->|"no"| D["back value ≤ x?"]
   C --> D

@@ -47,11 +47,11 @@ Some old pocket calculators have no parenthesis keys. You type a number and pres
 
 ```mermaid
 flowchart TB
-  A["read token t"] --> B["is t one of + − × ÷ ?"]
-  B -->|"no: a number"| C["push the number"]
+  A["read token t"] --> B["is t one of<br/>+ − × ÷ ?"]
+  B -->|"no:<br/>a number"| C["push<br/>the number"]
   C --> A
-  B -->|"yes"| D["b = pop() (right operand)<br/>a = pop() (left operand)"]
-  D --> E["push a t b<br/>(division: truncate toward 0)"]
+  B -->|"yes"| D["b = pop()<br/>(right operand)<br/>a = pop()<br/>(left operand)"]
+  D --> E["push a t b<br/>(division:<br/>truncate<br/>toward 0)"]
   E --> A
 ```
 

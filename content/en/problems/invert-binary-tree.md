@@ -61,7 +61,7 @@ flowchart TB
     A8 -->|left| A7["7"]
     A8 -->|right| A9["9"]
   end
-  subgraph SAU["after inverting: mirror image"]
+  subgraph SAU["inverted: mirror image"]
     direction TB
     B5["5"] -->|left| B8["8"]
     B5 -->|right| B3["3"]
@@ -117,15 +117,16 @@ This is the template of the whole station: the function takes a tree, trusts tha
 Every node is called exactly once and does O(1) work per call, so O(n) in total. The extra memory is the depth of the chain of unfinished calls, which is the height h: about log₂ n for a balanced tree, n for a tree skewed into a chain.
 
 ```mermaid
+  %%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
   participant G as call on 5
   participant P as call on 8
   participant T as call on 3
-  G->>P: invert right subtree (8)
-  P-->>G: returns 8, its children<br/>are now 9, 7
-  G->>T: invert left subtree (3)
-  T-->>G: returns 3, its children<br/>are now 4, 1
-  Note over G: attach crosswise: left = 8,<br/>right = 3, return 5
+  G->>P: invert right<br/>subtree (8)
+  P-->>G: returns 8,<br/>its children<br/>are now 9, 7
+  G->>T: invert left<br/>subtree (3)
+  T-->>G: returns 3,<br/>its children<br/>are now 4, 1
+  Note over G: attach<br/>crosswise:<br/>left = 8,<br/>right = 3,<br/>return 5
 ```
 
 ### Approach 2: a hand-managed stack

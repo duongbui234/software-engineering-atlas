@@ -55,8 +55,8 @@ Outside market hours, the same trader looks for the longest climb across a field
 ```mermaid
 flowchart TB
   A["Index i alone is not<br/>enough to move on"]
-  B["Missing facts about yesterday?<br/>add a label: hold, sold, rest"]
-  C["Order of computation is not<br/>a single sweep?"]
+  B["Missing facts<br/>about yesterday?<br/>add a label:<br/>hold, sold, rest"]
+  C["Order of<br/>computation is not<br/>a single sweep?"]
   D["State machine:<br/>three numbers per day"]
   E["Memoized DFS<br/>or topological peeling"]
   A --> B --> D

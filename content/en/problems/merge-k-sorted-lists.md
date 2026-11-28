@@ -56,11 +56,13 @@ At the end of the month, k employees each hand in a stack of receipts sorted by 
 flowchart TB
   subgraph V0["round 0: 8 lists"]
     direction LR
-    L1["L1"] ~~~ L2["L2"] ~~~ L3["L3"] ~~~ L4["L4"] ~~~ L5["L5"] ~~~ L6["L6"] ~~~ L7["L7"] ~~~ L8["L8"]
+    L1["L1"] ~~~ L2["L2"] ~~~ L3["L3"] ~~~ L4["L4"]
+    L5["L5"] ~~~ L6["L6"] ~~~ L7["L7"] ~~~ L8["L8"]
   end
   subgraph V1["round 1: merge in pairs"]
     direction LR
-    A["L1+L2"] ~~~ B["L3+L4"] ~~~ C["L5+L6"] ~~~ D["L7+L8"]
+    A["L1+L2"] ~~~ B["L3+L4"]
+    C["L5+L6"] ~~~ D["L7+L8"]
   end
   subgraph V2["round 2"]
     direction LR

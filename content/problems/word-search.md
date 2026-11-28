@@ -78,16 +78,16 @@ Hàm `dfs(r, c, k)` hỏi: có ghép được phần từ bắt đầu ở chữ
 ```mermaid
 flowchart TB
   S["dfs(r, c, k)"]
-  Q1["k bằng độ dài từ?"]
+  Q1["k bằng<br/>độ dài từ?"]
   Y1["có: trả true"]
   Q2["ô ngoài lưới?"]
   Y2["có: trả false"]
-  Q3["ô đã dùng, hoặc chữ khác word[k]?"]
+  Q3["ô đã dùng, hoặc<br/>chữ khác word[k]?"]
   Y3["có: trả false"]
   M["đánh dấu ô"]
-  T["thử dfs ở 4 ô kề với k + 1"]
+  T["thử dfs ở 4 ô kề<br/>với k + 1"]
   U["bỏ đánh dấu ô"]
-  R["trả kết quả của 4 lần thử"]
+  R["trả kết quả<br/>của 4 lần thử"]
   S --> Q1
   Q1 --> Y1
   Q1 -->|"không"| Q2

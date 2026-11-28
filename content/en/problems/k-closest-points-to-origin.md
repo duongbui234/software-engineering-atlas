@@ -52,7 +52,7 @@ flowchart TB
   A["read point p,<br/>d = x² + y²"] --> B["heap holds<br/>fewer than k?"]
   B -->|"yes"| C["push p"]
   B -->|"no"| D["d < d of the top<br/>(farthest held)?"]
-  D -->|"yes"| E["replace the top with p,<br/>sift down"]
+  D -->|"yes"| E["replace the top<br/>with p, sift down"]
   D -->|"no"| F["skip p"]
   C --> G["more points?"]
   E --> G

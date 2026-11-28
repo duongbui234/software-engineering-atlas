@@ -52,11 +52,11 @@ sources:
 
 ```mermaid
 flowchart TB
-    U["Bạn muốn đọc trang sản phẩm 42"] --> B["Trình duyệt: có bản ở nhà<br/>còn hạn không?"]
-    B -->|"còn hạn"| D1["Đọc ngay, 0 request"]
-    B -->|"không có / hết hạn"| C["CDN gần bạn: có bản<br/>dùng chung còn hạn không?"]
-    C -->|"còn hạn"| D2["Trả từ CDN, vài ms"]
-    C -->|"không có / hết hạn"| O["Origin tạo response<br/>kèm Cache-Control, ETag"]
+    U["Bạn muốn đọc<br/>trang sản phẩm 42"] --> B["Trình duyệt: có bản<br/>ở nhà còn hạn không?"]
+    B -->|"còn hạn"| D1["Đọc ngay,<br/>0 request"]
+    B -->|"không có /<br/>hết hạn"| C["CDN gần bạn: có bản<br/>dùng chung còn<br/>hạn không?"]
+    C -->|"còn hạn"| D2["Trả từ CDN,<br/>vài ms"]
+    C -->|"không có /<br/>hết hạn"| O["Origin tạo response<br/>kèm Cache-Control,<br/>ETag"]
     O --> D3["CDN giữ một bản,<br/>trình duyệt giữ một bản"]
 ```
 

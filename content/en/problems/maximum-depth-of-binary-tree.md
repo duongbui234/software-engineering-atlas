@@ -56,14 +56,14 @@ Another way is a roll call by generation: call the first generation out to the y
 
 ```mermaid
 flowchart TB
-  N8["8<br/>returns 1 + max(3, 3) = 4"] -->|left| N3["3<br/>returns 1 + max(1, 2) = 3"]
-  N8 -->|right| N10["10<br/>returns 1 + max(0, 2) = 3"]
-  N3 -->|left| N1["1<br/>leaf: returns 1"]
-  N3 -->|right| N6["6<br/>returns 1 + max(1, 1) = 2"]
-  N10 -->|right| N14["14<br/>returns 1 + max(1, 0) = 2"]
-  N6 -->|left| N4["4<br/>leaf: returns 1"]
-  N6 -->|right| N7["7<br/>leaf: returns 1"]
-  N14 -->|left| N13["13<br/>leaf: returns 1"]
+  N8["8<br/>returns<br/>1 + max(3, 3)<br/>= 4"] -->|left| N3["3<br/>returns<br/>1 + max(1, 2)<br/>= 3"]
+  N8 -->|right| N10["10<br/>returns<br/>1 + max(0, 2)<br/>= 3"]
+  N3 -->|left| N1["1<br/>leaf:<br/>returns 1"]
+  N3 -->|right| N6["6<br/>returns<br/>1 + max(1, 1)<br/>= 2"]
+  N10 -->|right| N14["14<br/>returns<br/>1 + max(1, 0)<br/>= 2"]
+  N6 -->|left| N4["4<br/>leaf:<br/>returns 1"]
+  N6 -->|right| N7["7<br/>leaf:<br/>returns 1"]
+  N14 -->|left| N13["13<br/>leaf:<br/>returns 1"]
 ```
 
 Each box can only be computed after its child boxes have answered. Both branches of the root 8 return 3 (the path 3, 6, 4 and the path 10, 14, 13), so the root returns 1 + 3 = 4.
@@ -160,9 +160,9 @@ Which one to pick:
 
 ```mermaid
 flowchart TB
-  Q1["could the tree be skewed<br/>deeper than a few thousand?"] -->|no| A1["recursion: short, clear, fast"]
+  Q1["could the tree<br/>be skewed deeper<br/>than a few thousand?"] -->|no| A1["recursion:<br/>short, clear, fast"]
   Q1 -->|yes| Q2["writing Go?"]
-  Q2 -->|yes| A2["recursion still works:<br/>goroutine stacks grow"]
+  Q2 -->|yes| A2["recursion<br/>still works:<br/>goroutine<br/>stacks grow"]
   Q2 -->|no| A3["hand-managed stack<br/>or BFS"]
 ```
 

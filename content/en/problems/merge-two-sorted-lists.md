@@ -50,15 +50,15 @@ Two classes are already lined up from shortest to tallest. The teacher wants one
 
 ```mermaid
 flowchart TB
-  A["dummy → (empty)<br/>tail = dummy"] --> B["do a and b both have nodes?"]
+  A["dummy → (empty)<br/>tail = dummy"] --> B["do a and b<br/>both have nodes?"]
   B -->|"yes"| C["a.val ≤ b.val?"]
   C -->|"yes"| D["tail.next = a<br/>a = a.next"]
   C -->|"no"| E["tail.next = b<br/>b = b.next"]
   D --> F["tail = tail.next"]
   E --> F
   F --> B
-  B -->|"no"| G["tail.next = the rest<br/>(a or b, possibly empty)"]
-  G --> H["return dummy.next"]
+  B -->|"no"| G["tail.next =<br/>the rest<br/>(a or b,<br/>possibly<br/>empty)"]
+  G --> H["return<br/>dummy.next"]
 ```
 
 ## The problem

@@ -48,15 +48,16 @@ Thẻ còn 10 nghìn. Cửa hàng có ba kệ, giá 3, 4 và 7 nghìn, món nào
 | Món ở kệ này đã đắt hơn số dư thì các kệ sau cũng vậy | Sắp xếp rồi `break` |
 
 ```mermaid
-flowchart TB
-  R["Thẻ còn 10"]
-  A["lấy 3, còn 7"]
-  B["lấy 4, còn 6"]
-  C["lấy 7, còn 3<br/>kệ còn lại đắt hơn: kẹt"]
+%%{init: {"flowchart": {"nodeSpacing": 10, "rankSpacing": 14}}}%%
+flowchart LR
+  R["Thẻ<br/>còn 10"]
+  A["lấy 3,<br/>còn 7"]
+  B["lấy 4,<br/>còn 6"]
+  C["lấy 7,<br/>còn 3<br/>kệ còn lại<br/>đắt hơn:<br/>kẹt"]
   A1["3, 3: còn 4"]
   A2["3, 4: còn 3<br/>kẹt"]
-  A3["3, 7: còn 0<br/>giỏ thứ nhất"]
-  A11["3, 3, 4: còn 0<br/>giỏ thứ hai"]
+  A3["3, 7: còn 0<br/>giỏ thứ<br/>nhất"]
+  A11["3, 3, 4:<br/>còn 0<br/>giỏ thứ hai"]
   B1["4, 4: còn 2<br/>kẹt"]
   R --> A
   R --> B

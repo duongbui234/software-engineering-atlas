@@ -43,12 +43,12 @@ Một dãy ruộng có bờ cao thấp khác nhau. Mưa đổ xuống, nước �
 
 ```mermaid
 flowchart TB
-  A["i = 0, j = n − 1<br/>leftMax = rightMax = 0"] --> B["i < j?"]
+  A["i = 0, j = n − 1<br/>leftMax = 0<br/>rightMax = 0"] --> B["i < j?"]
   B -->|"không"| R["trả total"]
-  B -->|"có"| C["cập nhật leftMax, rightMax"]
-  C --> D["leftMax < rightMax?"]
-  D -->|"có"| E["total += leftMax − h[i]<br/>i++"] --> B
-  D -->|"không"| F["total += rightMax − h[j]<br/>j−−"] --> B
+  B -->|"có"| C["cập nhật<br/>leftMax,<br/>rightMax"]
+  C --> D["leftMax <<br/>rightMax?"]
+  D -->|"có"| E["total +=<br/>leftMax<br/>− h[i]<br/>i++"] --> B
+  D -->|"không"| F["total +=<br/>rightMax<br/>− h[j]<br/>j−−"] --> B
 ```
 
 ## Vấn đề

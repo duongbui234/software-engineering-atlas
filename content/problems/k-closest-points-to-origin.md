@@ -50,8 +50,8 @@ Bạn có danh bạ một nghìn quán ăn với toạ độ, và muốn ghi ra 
 flowchart TB
   A["đọc điểm p,<br/>d = x² + y²"] --> B["heap chưa đủ k?"]
   B -->|"có"| C["đẩy p vào heap"]
-  B -->|"không"| D["d < d của đỉnh<br/>(điểm xa nhất đang giữ)?"]
-  D -->|"có"| E["thay đỉnh bằng p,<br/>chìm xuống"]
+  B -->|"không"| D["d < d của đỉnh<br/>(điểm xa nhất<br/>đang giữ)?"]
+  D -->|"có"| E["thay đỉnh<br/>bằng p,<br/>chìm xuống"]
   D -->|"không"| F["bỏ qua p"]
   C --> G["còn điểm?"]
   E --> G

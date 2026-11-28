@@ -52,11 +52,11 @@ flowchart TB
   R["[ ]"]
   A["[1]"]
   B["[5]"]
-  X["second 5 at root:<br/>cut, same as sibling"]
+  X["second 5<br/>at root:<br/>cut, same<br/>as sibling"]
   AB["[1, 5]"]
   BB["[5, 5]"]
   ABB["[1, 5, 5]"]
-  Y["second 5 after [1]:<br/>cut, same as sibling"]
+  Y["second 5<br/>after [1]:<br/>cut, same<br/>as sibling"]
   R --> A
   R --> B
   R -.-> X

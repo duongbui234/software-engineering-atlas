@@ -48,17 +48,17 @@ Hai lớp đứng thành hai hàng, mỗi hàng đã xếp từ thấp đến ca
 
 ```mermaid
 flowchart TB
-  A["đổi chỗ để a ngắn hơn<br/>lo = 0, hi = m"] --> B["lo ≤ hi?"]
+  A["đổi chỗ để<br/>a ngắn hơn<br/>lo = 0, hi = m"] --> B["lo ≤ hi?"]
   B -->|"có"| C["i = (lo + hi) / 2<br/>j = half − i"]
-  C --> D["lấy aL, aR, bL, bR<br/>cạnh rỗng: −∞ hoặc +∞"]
-  D --> E["aL ≤ bR và bL ≤ aR?"]
-  E -->|"có: cắt đúng"| F["tổng lẻ: max(aL, bL)<br/>tổng chẵn: trung bình<br/>max trái và min phải"]
+  C --> D["lấy aL, aR, bL, bR<br/>cạnh rỗng:<br/>−∞ hoặc +∞"]
+  D --> E["aL ≤ bR và<br/>bL ≤ aR?"]
+  E -->|"có:<br/>cắt đúng"| F["tổng lẻ:<br/>max(aL, bL)<br/>tổng chẵn:<br/>trung bình<br/>max trái và<br/>min phải"]
   E -->|"không"| G["aL > bR?"]
-  G -->|"có: cắt a quá phải"| H["hi = i − 1"]
-  G -->|"không: cắt a quá trái"| I["lo = i + 1"]
+  G -->|"có: cắt a<br/>quá phải"| H["hi = i − 1"]
+  G -->|"không:<br/>cắt a<br/>quá trái"| I["lo = i + 1"]
   H --> B
   I --> B
-  B -->|"không: chỉ xảy ra<br/>khi mảng chưa sắp xếp"| X["báo lỗi"]
+  B -->|"không:<br/>chỉ xảy ra<br/>khi mảng<br/>chưa sắp xếp"| X["báo lỗi"]
 ```
 
 ## Vấn đề

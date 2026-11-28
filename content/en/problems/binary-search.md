@@ -49,16 +49,16 @@ Someone thinks of a number from 1 to 100; you guess, and they only say "higher" 
 
 ```mermaid
 flowchart TB
-  A["suspect range [lo, hi]"] --> B["range empty?<br/>(lo > hi)"]
-  B -->|"yes"| X["return −1"]
+  A["suspect range<br/>[lo, hi]"] --> B["range empty?<br/>(lo > hi)"]
   B -->|"no"| C["look at nums[mid]"]
+  B -->|"yes"| X["return −1"]
   C --> D["equal to target?"]
   D -->|"yes"| Y["return mid"]
   D -->|"no"| E["less than target?"]
   E -->|"yes"| F["lo = mid + 1"]
   E -->|"no"| G["hi = mid − 1"]
-  F --> A
-  G --> A
+  F & G --> R["repeat with<br/>the new range"]
+  R --> A
 ```
 
 ## The problem

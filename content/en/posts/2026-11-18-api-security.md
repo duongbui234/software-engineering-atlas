@@ -58,9 +58,9 @@ The two most important steps always come in this order:
 ```mermaid
 flowchart TB
     R([Request arrives]) --> A["Valid badge?<br/>(authentication)"]
-    A -- no --> E1["401: I don't know<br/>who you are"]
-    A -- yes --> B["Is this badge allowed<br/>to do this?<br/>(authorization)"]
-    B -- no --> E2["403: I know you, but<br/>you're not allowed"]
+    A -- no --> E1["401: I don't<br/>know who<br/>you are"]
+    A -- yes --> B["Is this badge<br/>allowed to do<br/>this?<br/>(authorization)"]
+    B -- no --> E2["403: I know you,<br/>but you're not<br/>allowed"]
     B -- yes --> C["Handle the request"]
 ```
 
@@ -184,18 +184,18 @@ If one day I need to issue API keys to sellers who automate their orders, here a
 The recommended flow today is **Authorization Code + PKCE**:
 
 ```mermaid
+%%{init: {"sequence": {"width": 90, "actorMargin": 8, "diagramMarginX": 4}}}%%
 sequenceDiagram
-    participant U as User
     participant App as Application<br/>(client)
     participant AS as Authorization<br/>Server
     participant API as Resource<br/>Server
-    App->>App: create a random code_verifier,<br/>code_challenge =<br/>SHA256(verifier)
-    App->>AS: redirect to /authorize<br/>?response_type=code<br/>&scope=...&code_challenge=...
-    U->>AS: logs in and<br/>grants consent
-    AS->>App: redirect back to<br/>redirect_uri?code=abc
-    App->>AS: POST /token<br/>(code + code_verifier)
+    Note over App: create a random<br/>code_verifier,<br/>code_challenge =<br/>SHA256(verifier)
+    App->>AS: redirect to<br/>/authorize<br/>?response_type<br/>=code<br/>&scope=...<br/>&code_challenge=...
+    Note over AS: the user logs in<br/>and grants consent
+    AS->>App: redirect back to<br/>redirect_uri<br/>?code=abc
+    App->>AS: POST /token<br/>(code +<br/>code_verifier)
     AS->>App: access_token<br/>(+ refresh_token)
-    App->>API: Authorization:<br/>Bearer access_token
+    App->>API: Authorization:<br/>Bearer<br/>access_token
 ```
 
 Four roles: the *resource owner* (the user), the *client* (the application), the *authorization server* (where you log in and tokens are issued), and the *resource server* (the API that holds the data). **Scopes** limit what a token can do. **PKCE** stops an attacker who intercepts the `code` on the redirect from trading it for a token: they don't have the `code_verifier`.
@@ -235,15 +235,16 @@ For a "non-simple" request (a method other than GET/POST/HEAD, or a header like 
 Drawing it makes it easy to see *who* is blocking:
 
 ```mermaid
+%%{init: {"sequence": {"width": 90, "actorMargin": 12, "diagramMarginX": 8}}}%%
 sequenceDiagram
-    participant JS as JavaScript on<br/>evil.example
+    participant JS as JavaScript<br/>on<br/>evil.example
     participant BR as Browser
-    participant API as api.example.com
-    JS->>BR: fetch("https://<br/>api.example.com/orders")
-    BR->>API: OPTIONS (preflight):<br/>"may evil.example<br/>read this?"
-    API-->>BR: no Access-Control-<br/>Allow-Origin<br/>for evil.example
-    BR-->>JS: blocked, CORS error
-    Note over BR,API: the server still got the request.<br/>The browser is what blocks it.
+    participant API as api.example<br/>.com
+    JS->>BR: fetch("https://<br/>api.example.com<br/>/orders")
+    BR->>API: OPTIONS<br/>(preflight):<br/>"may<br/>evil.example<br/>read this?"
+    API-->>BR: no Access-<br/>Control-Allow-<br/>Origin for<br/>evil.example
+    BR-->>JS: blocked,<br/>CORS error
+    Note over BR,API: the server still<br/>got the request.<br/>The browser is<br/>what blocks it.
 ```
 
 Three consequences:

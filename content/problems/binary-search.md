@@ -48,16 +48,16 @@ Một người nghĩ một số từ 1 đến 100, bạn đoán, họ chỉ nói
 
 ```mermaid
 flowchart TB
-  A["khoảng còn nghi [lo, hi]"] --> B["khoảng rỗng?<br/>(lo > hi)"]
-  B -->|"có"| X["trả −1"]
+  A["khoảng còn nghi<br/>[lo, hi]"] --> B["khoảng rỗng?<br/>(lo > hi)"]
   B -->|"không"| C["nhìn nums[mid]"]
+  B -->|"có"| X["trả −1"]
   C --> D["bằng target?"]
   D -->|"có"| Y["trả mid"]
   D -->|"không"| E["nhỏ hơn target?"]
   E -->|"có"| F["lo = mid + 1"]
   E -->|"không"| G["hi = mid − 1"]
-  F --> A
-  G --> A
+  F & G --> R["lặp lại với<br/>khoảng mới"]
+  R --> A
 ```
 
 ## Vấn đề

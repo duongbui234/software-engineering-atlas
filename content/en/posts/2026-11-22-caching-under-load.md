@@ -54,11 +54,11 @@ During exam season, a hundred students rush to the desk asking for the very same
 ```mermaid
 flowchart TB
     S["Request misses the cache"] --> Q1["Is someone already<br/>fetching this key?"]
-    Q1 -->|"yes"| W["Wait for their result<br/>(request coalescing)"]
+    Q1 -->|"yes"| W["Wait for<br/>their result<br/>(request<br/>coalescing)"]
     Q1 -->|"no"| Q2["Does the key<br/>surely exist?"]
-    Q2 -->|"Bloom filter: definitely not"| N["Return 'not found' now"]
+    Q2 -->|"Bloom filter:<br/>definitely not"| N["Return<br/>'not found' now"]
     Q2 -->|"might exist"| D["One request<br/>goes to the database"]
-    D --> C["Write the cache, TTL with jitter<br/>(empty: negative cache)"]
+    D --> C["Write the cache,<br/>TTL with jitter<br/>(empty: negative<br/>cache)"]
 ```
 
 ## The problem: the cache leaks right when you need it most

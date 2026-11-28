@@ -46,9 +46,9 @@ A street has houses numbered in increasing order. This year the ward renumbers t
 ```mermaid
 flowchart TB
   A["lo = 0, hi = n − 1"] --> B["lo < hi?"]
-  B -->|"no: one cell left"| F["return nums[lo]"]
-  B -->|"yes"| C["mid = lo + (hi − lo) / 2"]
-  C --> D["nums[mid] > nums[hi]?"]
+  B -->|"no: one<br/>cell left"| F["return nums[lo]"]
+  B -->|"yes"| C["mid = lo +<br/>(hi − lo) / 2"]
+  C --> D["nums[mid] ><br/>nums[hi]?"]
   D -->|"yes: the break<br/>is right of mid"| E1["lo = mid + 1"]
   D -->|"no: [mid, hi]<br/>is increasing"| E2["hi = mid"]
   E1 --> B

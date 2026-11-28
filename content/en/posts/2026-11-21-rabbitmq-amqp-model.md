@@ -182,17 +182,18 @@ The picture of "the producer publishes straight into a queue" comes from here. I
 ### The full journey of a message
 
 ```mermaid
+%%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
     participant P as Producer
     participant X as Exchange
     participant Q as Queue
     participant C as Consumer
-    P->>X: basic.publish<br/>(routing key,<br/>properties, body)
-    X->>Q: match bindings,<br/>copy into matching queue
-    Note over Q: message waits (ready)
-    Q->>C: basic.deliver<br/>(pushed to consumer)
-    Note over C: done processing
-    C->>Q: basic.ack,<br/>message deleted
+    P->>X: basic.<br/>publish<br/>(routing<br/>key,<br/>properties,<br/>body)
+    X->>Q: match<br/>bindings,<br/>copy into<br/>matching<br/>queue
+    Note over Q: message<br/>waits (ready)
+    Q->>C: basic.<br/>deliver<br/>(pushed to<br/>consumer)
+    Note over C: done<br/>processing
+    C->>Q: basic.ack,<br/>message<br/>deleted
 ```
 
 A consumer receives messages by **push**: it subscribes once with `basic.consume`, and the broker pushes messages to it as they arrive. There is also **pull** (`basic.get`, asking for one message at a time), but the RabbitMQ docs advise against it because it is very expensive: each ask is a network round trip, even when the queue is empty. The final `ack` step is the topic of [[en/posts/2026-11-21-rabbitmq-ack-confirm|station 4]].

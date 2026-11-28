@@ -42,17 +42,18 @@ Quầy vé ở ga 1 giờ có hai nhân viên. Sổ ghi "hàng A: còn 1 vé".
 | Hai khách cầm hai vé cho cùng một ghế | [[concepts/oversell\|Oversell]] |
 
 ```mermaid
+%%{init: {"sequence": {"width": 80, "actorMargin": 12}}}%%
 sequenceDiagram
-    participant A as Nhân viên A
+    participant A as Nhân<br/>viên A
     participant S as Cuốn sổ
-    participant B as Nhân viên B
-    A->>S: còn mấy vé?
+    participant B as Nhân<br/>viên B
+    A->>S: còn<br/>mấy vé?
     S-->>A: 1
-    B->>S: còn mấy vé?
+    B->>S: còn<br/>mấy vé?
     S-->>B: 1
-    Note over A,B: cả hai đi bán vé
-    A->>S: ghi "còn 0"
-    B->>S: ghi "còn 0"
+    Note over A,B: cả hai<br/>đi bán vé
+    A->>S: ghi<br/>"còn 0"
+    B->>S: ghi<br/>"còn 0"
     Note over S: 2 vé đã bán,<br/>sổ chỉ trừ 1
 ```
 

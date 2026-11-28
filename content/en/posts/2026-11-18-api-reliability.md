@@ -56,16 +56,13 @@ Put together, a call from the backend to the payment gateway passes through the 
 
 ```mermaid
 flowchart TB
-    R([Checkout request]) --> RL{"Rate limit:<br/>any quota left?"}
-    RL -- none left --> E429["429 + Retry-After"]
-    RL -- yes --> ID{"Idempotency-Key<br/>seen before?"}
-    ID -- "yes, done" --> OLD["return the old result"]
-    ID -- no --> CB{"Circuit breaker<br/>open?"}
-    CB -- open --> FF["fail immediately (fail fast)"]
-    CB -- closed --> T["Call MoMo,<br/>at most 5 seconds (timeout)"]
-    T -- "transient error" --> W["wait randomly, longer each time<br/>(backoff + jitter)"]
+    R(["Checkout request"]) --> RL["Rate limit<br/>none left: 429<br/>+ Retry-After"]
+    RL -- quota left --> ID["Idempotency-Key<br/>seen, done:<br/>return old result"]
+    ID -- not seen --> CB["Circuit breaker<br/>open: fail<br/>immediately (fail fast)"]
+    CB -- closed --> T["Call MoMo,<br/>at most 5 s<br/>(timeout)"]
+    T -- "transient error" --> W["wait randomly,<br/>longer each time<br/>(backoff + jitter)"]
     W --> T
-    T -- success --> OK["store the result by key<br/>and return it"]
+    T -- success --> OK["store the result<br/>by key, return it"]
 ```
 
 ## The problem: anything can fail halfway through
@@ -198,11 +195,12 @@ Retry helps get past *transient* errors. When a dependency is *completely down*,
 
 ```mermaid
 stateDiagram-v2
+    direction TB
     [*] --> CLOSED
-    CLOSED --> OPEN: error rate exceeds threshold
-    OPEN --> HALF_OPEN: wait time over (resetTimeout)
-    HALF_OPEN --> CLOSED: probe request succeeds
-    HALF_OPEN --> OPEN: probe request fails
+    CLOSED --> OPEN: error rate<br/>exceeds threshold
+    OPEN --> HALF_OPEN: wait time over<br/>(resetTimeout)
+    HALF_OPEN --> CLOSED: probe request<br/>succeeds
+    HALF_OPEN --> OPEN: probe request<br/>fails
 ```
 
 - **CLOSED**: call normally, count errors.

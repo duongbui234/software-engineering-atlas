@@ -44,17 +44,18 @@ Hai nhân viên ở quầy vé không còn "liếc sổ rồi quay đi bán" n�
 | Sổ in sẵn ô số không cho viết số âm, ai cố viết thì bị từ chối | [[concepts/check-constraint\|CHECK]] |
 
 ```mermaid
+%%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
     participant A as Nhân viên<br/>A
     participant S as Dòng<br/>"hàng A: 1"
     participant B as Nhân viên<br/>B
     A->>S: gạch 1<br/>nếu còn ≥ 1
-    Note over S: A đặt bút,<br/>số thành 0
+    Note over S: A đặt<br/>bút, số<br/>thành 0
     B->>S: gạch 1<br/>nếu còn ≥ 1
     Note over B: chờ A<br/>nhấc bút
     A->>S: đóng dấu<br/>(COMMIT)
-    S-->>B: tới lượt:<br/>nhìn lại, còn 0
-    Note over B: 0 ≥ 1 sai,<br/>không gạch:<br/>hết hàng
+    S-->>B: tới lượt:<br/>nhìn lại,<br/>còn 0
+    Note over B: 0 ≥ 1 sai,<br/>không<br/>gạch:<br/>hết hàng
 ```
 
 ## Vấn đề: kiểm tra và trừ phải là một

@@ -110,9 +110,9 @@ Vậy chỉ cần đi một đường từ gốc xuống, dừng ở nút đầu
 
 ```mermaid
 flowchart TB
-  A["đứng ở nút x"] --> B["p và q đều nhỏ hơn x?"]
+  A["đứng ở nút x"] --> B["p và q đều<br/>nhỏ hơn x?"]
   B -->|có| L["đi sang con trái,<br/>xét lại từ đầu"]
-  B -->|không| C["p và q đều lớn hơn x?"]
+  B -->|không| C["p và q đều<br/>lớn hơn x?"]
   C -->|có| R["đi sang con phải,<br/>xét lại từ đầu"]
   C -->|không| S["x là điểm tách:<br/>trả về x"]
 ```

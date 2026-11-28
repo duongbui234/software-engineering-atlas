@@ -53,11 +53,11 @@ Mùa thi, cả trăm sinh viên cùng chạy tới quầy hỏi đúng một cu�
 ```mermaid
 flowchart TB
     S["Request trượt cache"] --> Q1["Đã có ai đang<br/>đi lấy key này?"]
-    Q1 -->|"có"| W["Chờ kết quả của người đó<br/>(gom request)"]
+    Q1 -->|"có"| W["Chờ kết quả<br/>của người đó<br/>(gom request)"]
     Q1 -->|"không"| Q2["Key có chắc<br/>tồn tại không?"]
-    Q2 -->|"Bloom filter: chắc chắn không"| N["Trả 'không có' ngay"]
+    Q2 -->|"Bloom filter:<br/>chắc chắn không"| N["Trả 'không có'<br/>ngay"]
     Q2 -->|"có thể có"| D["Một request<br/>xuống database"]
-    D --> C["Ghi cache, TTL có jitter<br/>(rỗng thì negative cache)"]
+    D --> C["Ghi cache,<br/>TTL có jitter<br/>(rỗng thì<br/>negative cache)"]
 ```
 
 ## Vấn đề: cache thủng đúng lúc cần nó nhất

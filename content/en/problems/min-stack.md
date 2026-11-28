@@ -51,6 +51,8 @@ flowchart TB
   D["pop()"] --> E["remove the top level:<br/>its min goes with it"]
   E --> F["the level below already<br/>has the correct min"]
   G["getMin()"] --> H["read the top level's<br/>min: O(1)"]
+  C ~~~ D
+  F ~~~ G
 ```
 
 ## The problem

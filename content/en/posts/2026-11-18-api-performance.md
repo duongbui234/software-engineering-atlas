@@ -51,13 +51,13 @@ The note example also reveals a risk: the note has just been taken down, and 100
 
 ```mermaid
 flowchart TB
-    Q([Search request]) --> C{"Already in the cache?"}
-    C -- yes --> HIT["Return right away (~1ms)"]
-    C -- no --> L{"Got the lock?"}
-    L -- "yes (only 1 request)" --> ES["Ask Elasticsearch (~50ms)"]
-    ES --> W["Write the result to the cache for 60 seconds"]
+    Q([Search request]) --> C{"In the<br/>cache?"}
+    C -- yes --> HIT["Return now<br/>(~1ms)"]
+    C -- no --> L{"Got the<br/>lock?"}
+    L -- "yes<br/>(1 request)" --> ES["Ask<br/>Elasticsearch<br/>(~50ms)"]
+    ES --> W["Write result to<br/>cache for 60 s"]
     W --> RET["Return the result"]
-    L -- "no (the other 99 requests)" --> P["Wait 250ms, then check the cache again"]
+    L -- "no<br/>(other 99)" --> P["Wait 250ms,<br/>check cache again"]
     P --> C
 ```
 
@@ -129,7 +129,7 @@ flowchart LR
         direction TB
         o1["Page 1: p7 p6 p5"] --> o0["new p8 squeezes in at the top"] --> o2["Page 2 = skip the first 3 (p8 p7 p6)<br/>→ p5 p4 p3<br/>p5 repeated"]
     end
-    subgraph CUR["Cursor: 'take the ones older than p5'"]
+    subgraph CUR["Cursor: 'older than p5'"]
         direction TB
         c1["Page 1: p7 p6 p5"] --> c0["new p8 squeezes in at the top"] --> c2["Page 2 = older than p5<br/>→ p4 p3 p2<br/>no repeats"]
     end
@@ -213,7 +213,7 @@ The lesson is still worth keeping, just in a different direction: **dead code th
 One Node.js pod can only handle so much. Just as a crowded supermarket opens more checkout counters, it needs someone at the head of the line pointing customers to a counter:
 
 ```mermaid
-flowchart LR
+flowchart TB
     U1([User]) & U2([User]) & U3([User]) --> LB["Load balancer<br/>(the coordinator)"]
     LB --> P1["Pod 1"]
     LB --> P2["Pod 2"]

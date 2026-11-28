@@ -59,13 +59,13 @@ Picture a company where each person manages at most two direct reports. The CEO 
 flowchart TB
   A["a recursive<br/>tree problem"] --> B["only need to<br/>change each node?"]
   B -->|"yes"| C["Invert Binary Tree:<br/>swap the children"]
-  B -->|"no"| D["is the answer what<br/>goes up to the parent?"]
-  D -->|"yes"| E["Maximum Depth:<br/>return 1 + max(left, right)"]
-  D -->|"no"| F["parent needs one thing,<br/>the answer is another?"]
+  B -->|"no"| D["is the answer<br/>what goes up<br/>to the parent?"]
+  D -->|"no"| F["parent needs<br/>one thing, the<br/>answer is another?"]
+  D -->|"yes"| E["Maximum Depth:<br/>return 1 +<br/>max(left, right)"]
   F -->|"yes"| G["Diameter:<br/>return height,<br/>record best"]
-  F -->|"no"| H["must report 'broken'<br/>upward?"]
-  H -->|"yes"| I["Balanced:<br/>return -1 as<br/>a sentinel"]
+  F -->|"no"| H["must report<br/>'broken' upward?"]
   H -->|"no"| J["Same Tree, Subtree:<br/>walk two trees<br/>side by side"]
+  H -->|"yes"| I["Balanced:<br/>return -1 as<br/>a sentinel"]
 ```
 
 ## The problem: asking about the whole tree with one loop gets messy

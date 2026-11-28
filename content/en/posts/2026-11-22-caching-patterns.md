@@ -58,6 +58,7 @@ flowchart TB
         direction TB
         A1["Cache-aside:<br/>the app handles it"] ~~~ A2["Read-through:<br/>the cache handles it"] ~~~ A3["Refresh-ahead:<br/>refresh before expiry"]
     end
+    W ~~~ R
 ```
 
 ## The problem: two copies of one piece of data
@@ -159,11 +160,11 @@ This is the same idea as `stale-while-revalidate` in [[en/posts/2026-11-22-cachi
 
 ```mermaid
 flowchart TB
-    Q1["Is losing the last few writes<br/>on a crash acceptable?"] -->|"yes"| WB["Write-behind<br/>(counters, approximate stats)"]
-    Q1 -->|"no"| Q2["Is just-written data<br/>read again right away?"]
-    Q2 -->|"yes, and must hit at once"| WT["Write-through"]
-    Q2 -->|"not sure"| Q3["Is it read again<br/>many times?"]
-    Q3 -->|"yes"| CA["Cache-aside:<br/>write DB, then delete cache"]
+    Q1["Is losing the<br/>last few writes<br/>on a crash OK?"] -->|"yes"| WB["Write-behind<br/>(counters,<br/>approximate stats)"]
+    Q1 -->|"no"| Q2["Is just-written<br/>data read again<br/>right away?"]
+    Q2 -->|"not sure"| Q3["Is it read<br/>again often?"]
+    Q2 -->|"yes, and must<br/>hit at once"| WT["Write-through"]
+    Q3 -->|"yes"| CA["Cache-aside:<br/>write DB, then<br/>delete cache"]
     Q3 -->|"rarely"| WA["Write-around<br/>(or no cache)"]
 ```
 

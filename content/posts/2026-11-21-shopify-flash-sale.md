@@ -56,12 +56,12 @@ Một tiệm bánh nổi tiếng thông báo: đúng 9 giờ sáng bán 300 cái
 
 ```mermaid
 flowchart TB
-    A(["2.000 người trước cửa"]) --> B["Bảo vệ phát số thứ tự<br/>(hàng chờ ảo)"]
-    B --> C["Mỗi lượt gọi 50 số nhỏ nhất<br/>(throttling)"]
-    C --> D["Thu ngân giữ bánh cho từng người<br/>(giữ kho)"]
-    D --> E["Trả tiền xong: trừ hẳn khỏi sổ kho"]
-    D --> F["Bỏ về: bánh quay lại đúng kệ giảm giá"]
-    C -. "hết bánh" .-> G["Ra cửa báo cho mọi người còn chờ"]
+    A(["2.000 người<br/>trước cửa"]) --> B["Bảo vệ phát<br/>số thứ tự<br/>(hàng chờ ảo)"]
+    B --> C["Mỗi lượt gọi 50<br/>số nhỏ nhất<br/>(throttling)"]
+    C -. "hết bánh" .-> G["Ra cửa báo<br/>mọi người<br/>còn chờ"]
+    C --> D["Thu ngân giữ<br/>bánh cho từng người<br/>(giữ kho)"]
+    D --> E["Trả tiền xong:<br/>trừ hẳn<br/>khỏi sổ kho"]
+    D --> F["Bỏ về: bánh<br/>quay lại đúng<br/>kệ giảm giá"]
 ```
 
 ## Vấn đề: con số 32 triệu nói gì, và không nói gì
@@ -101,20 +101,21 @@ Phần II kể lại bản sửa:
 3. Ngưỡng được chỉnh liên tục theo **chỗ trống của bucket**: bucket còn trống thì ngưỡng tiến lên hiện tại, bucket đầy thì ngưỡng lùi lại. Bộ điều chỉnh chỉ dùng thành phần tỉ lệ (proportional), sau khi họ thử mô phỏng PID đầy đủ.
 
 ```mermaid
+%%{init: {"sequence": {"width": 76, "actorMargin": 10}}}%%
 sequenceDiagram
     participant K as Khách
-    participant LB as Load balancer<br/>(Nginx + Lua)
+    participant LB as Load<br/>balancer<br/>(Nginx+Lua)
     participant App as Checkout
-    K->>LB: lần đầu vào checkout
-    LB-->>K: cookie ký:<br/>"đến lúc 21:00:03"
-    loop mỗi lần trang chờ hỏi lại
-        K->>LB: gửi kèm cookie
-        Note over LB: ngưỡng hiện tại 21:00:01<br/>(chỉnh theo chỗ trống<br/>của bucket)
-        LB-->>K: chưa tới lượt,<br/>thử lại sau
+    K->>LB: lần đầu vào<br/>checkout
+    LB-->>K: cookie ký:<br/>"đến lúc<br/>21:00:03"
+    loop trang chờ hỏi lại
+        K->>LB: gửi kèm<br/>cookie
+        Note over LB: ngưỡng hiện<br/>tại 21:00:01<br/>(chỉnh theo<br/>chỗ trống<br/>của bucket)
+        LB-->>K: chưa tới<br/>lượt, thử<br/>lại sau
     end
-    Note over LB: bucket còn chỗ,<br/>ngưỡng tiến tới 21:00:05
-    K->>LB: gửi kèm cookie
-    LB->>App: cho qua (giờ đến<br/>sớm hơn ngưỡng)
+    Note over LB: bucket còn<br/>chỗ, ngưỡng<br/>tiến tới<br/>21:00:05
+    K->>LB: gửi kèm<br/>cookie
+    LB->>App: cho qua<br/>(giờ đến<br/>sớm hơn<br/>ngưỡng)
 ```
 
 Cái hay là **không cần trạng thái chung**: hàng chờ nằm trong cookie của từng khách, mỗi load balancer tự quyết định. Cái giá là công bằng chỉ gần đúng, vì các máy có thể tính ra ngưỡng hơi khác nhau.

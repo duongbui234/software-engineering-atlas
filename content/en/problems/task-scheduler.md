@@ -52,15 +52,15 @@ Your evening plan: chest 3 sets, back 3 sets, legs 1 set. The coach's rule: afte
 
 ```mermaid
 flowchart TB
-  A["count each task<br/>push the counts into a max-heap"] --> B["any task in the heap<br/>or the queue?"]
-  B -->|"no"| Z["return interval count t"]
+  A["count each task<br/>push the counts<br/>into a max-heap"] --> B["any task in the heap<br/>or the queue?"]
+  B -->|"no"| Z["return interval<br/>count t"]
   B -->|"yes"| C["t = t + 1"]
   C --> D["heap has a task?"]
-  D -->|"yes"| E["take top c, run it once<br/>if c − 1 > 0, queue it<br/>with interval t + n"]
-  D -->|"no"| F["this interval idles"]
+  D -->|"yes"| E["take top c,<br/>run it once<br/>if c − 1 > 0,<br/>queue it with<br/>interval t + n"]
+  D -->|"no"| F["this interval<br/>idles"]
   E --> G["queue front ready<br/>at exactly t?"]
   F --> G
-  G -->|"yes"| H["move it back to the heap"]
+  G -->|"yes"| H["move it back<br/>to the heap"]
   G -->|"no"| B
   H --> B
 ```

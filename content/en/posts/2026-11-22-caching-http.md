@@ -53,11 +53,11 @@ In station 1, the library had a shelf next to the desk. Now zoom out to the whol
 
 ```mermaid
 flowchart TB
-    U["You want to read product page 42"] --> B["Browser: is the copy at home<br/>still fresh?"]
-    B -->|"fresh"| D1["Read now, 0 requests"]
-    B -->|"none / expired"| C["CDN near you: is the shared<br/>copy still fresh?"]
-    C -->|"fresh"| D2["Served from the CDN, a few ms"]
-    C -->|"none / expired"| O["Origin builds the response<br/>with Cache-Control, ETag"]
+    U["You want to read<br/>product page 42"] --> B["Browser: is the copy<br/>at home still fresh?"]
+    B -->|"fresh"| D1["Read now,<br/>0 requests"]
+    B -->|"none /<br/>expired"| C["CDN near you:<br/>is the shared copy<br/>still fresh?"]
+    C -->|"fresh"| D2["Served from<br/>the CDN, a few ms"]
+    C -->|"none /<br/>expired"| O["Origin builds<br/>the response with<br/>Cache-Control, ETag"]
     O --> D3["The CDN keeps a copy,<br/>the browser keeps a copy"]
 ```
 

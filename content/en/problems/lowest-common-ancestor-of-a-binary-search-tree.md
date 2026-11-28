@@ -111,11 +111,11 @@ So a single path down from the root is enough, stopping at the first node that f
 
 ```mermaid
 flowchart TB
-  A["stand at node x"] --> B["p and q both smaller than x?"]
-  B -->|yes| L["go to the left child,<br/>start over"]
-  B -->|no| C["p and q both larger than x?"]
-  C -->|yes| R["go to the right child,<br/>start over"]
-  C -->|no| S["x is the split point:<br/>return x"]
+  A["stand at node x"] --> B["p and q both<br/>smaller than x?"]
+  B -->|yes| L["go to the<br/>left child,<br/>start over"]
+  B -->|no| C["p and q both<br/>larger than x?"]
+  C -->|yes| R["go to the<br/>right child,<br/>start over"]
+  C -->|no| S["x is the<br/>split point:<br/>return x"]
 ```
 
 Note that both comparisons are **strict**. The case x = p falls through "no", "no" and returns x, exactly as the convention that a node is its own ancestor requires.

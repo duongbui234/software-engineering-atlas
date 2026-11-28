@@ -53,12 +53,12 @@ The shelf next to the desk has only 300 slots. When it is full and a new book ne
 
 ```mermaid
 flowchart TB
-    W["A write arrives,<br/>memory is over maxmemory"] --> P1["Is the policy noeviction?"]
-    P1 -->|"yes"| E["Reject the write: OOM error<br/>(reads still work)"]
-    P1 -->|"no"| P2["A volatile-* policy<br/>and no keys with a TTL left?"]
+    W["A write arrives,<br/>memory is over<br/>maxmemory"] --> P1["Is the policy noeviction?"]
+    P1 -->|"yes"| E["Reject the write:<br/>OOM error<br/>(reads still work)"]
+    P1 -->|"no"| P2["A volatile-* policy<br/>and no keys<br/>with a TTL left?"]
     P2 -->|"yes"| E
-    P2 -->|"no"| S["Sample a few candidate keys<br/>(maxmemory-samples = 5)"]
-    S --> D["Evict the worst key by the rule<br/>(LRU, LFU, nearest TTL, random)"]
+    P2 -->|"no"| S["Sample a few<br/>candidate keys<br/>(maxmemory-samples = 5)"]
+    S --> D["Evict the worst key<br/>by the rule (LRU, LFU,<br/>nearest TTL, random)"]
     D --> R["Still over: repeat,<br/>then run the write"]
 ```
 

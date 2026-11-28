@@ -51,11 +51,11 @@ flowchart TB
   R["[ ]"]
   A["[1]"]
   B["[5]"]
-  X["5 thứ hai ở gốc:<br/>cắt, trùng anh em"]
+  X["5 thứ hai<br/>ở gốc:<br/>cắt, trùng<br/>anh em"]
   AB["[1, 5]"]
   BB["[5, 5]"]
   ABB["[1, 5, 5]"]
-  Y["5 thứ hai sau [1]:<br/>cắt, trùng anh em"]
+  Y["5 thứ hai<br/>sau [1]:<br/>cắt, trùng<br/>anh em"]
   R --> A
   R --> B
   R -.-> X

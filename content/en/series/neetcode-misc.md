@@ -12,6 +12,7 @@ stations:
   - name: "Backtracking: Permutations and Search"
     concepts: ["Used Marker", "Visit-and-Restore", "Conflict Sets"]
   - name: "Greedy on Arrays"
+    concepts: ["Greedy Choice", "Kadane's Algorithm", "Farthest Reach", "Jump Layers", "Restart Argument"]
   - name: "Greedy Grouping"
   - name: "Intervals"
   - name: "Matrices"

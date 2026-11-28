@@ -1,0 +1,131 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Kadane on [2, −5, 4, −1, 3, −7, 2]: drop the negative prefix, keep the record",
+    "output": "content/diagrams/neetcode-greedy-array/kadane.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "walk",
+      "label": "One left-to-right pass"
+    }
+  ],
+  "mainPath": [
+    "start",
+    "neg5",
+    "four",
+    "neg1",
+    "three",
+    "neg7",
+    "two",
+    "done"
+  ],
+  "nodes": [
+    {
+      "id": "start",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Start at 2",
+      "sublabel": "run = 2, best = 2"
+    },
+    {
+      "id": "neg5",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Add −5: running sum −3",
+      "sublabel": "run = −3, best = 2"
+    },
+    {
+      "id": "four",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "At 4: drop the prefix",
+      "sublabel": "−3 drags it down: run = 4, best = 4"
+    },
+    {
+      "id": "neg1",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Add −1: still positive",
+      "sublabel": "run = 3, keep the prefix"
+    },
+    {
+      "id": "three",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Add 3: a new record",
+      "sublabel": "run = 6, best = 6"
+    },
+    {
+      "id": "neg7",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Add −7: running sum −1",
+      "sublabel": "run = −1, best stays 6"
+    },
+    {
+      "id": "two",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "At 2: drop it again",
+      "sublabel": "run = 2, best stays 6"
+    },
+    {
+      "id": "done",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Done: the answer is 6",
+      "sublabel": "segment [4, −1, 3], one O(n) pass"
+    }
+  ],
+  "edges": [
+    {
+      "from": "start",
+      "to": "neg5",
+      "label": "add"
+    },
+    {
+      "from": "neg5",
+      "to": "four",
+      "label": "run < 0"
+    },
+    {
+      "from": "four",
+      "to": "neg1",
+      "label": "add"
+    },
+    {
+      "from": "neg1",
+      "to": "three",
+      "label": "add"
+    },
+    {
+      "from": "three",
+      "to": "neg7",
+      "label": "add"
+    },
+    {
+      "from": "neg7",
+      "to": "two",
+      "label": "run < 0"
+    },
+    {
+      "from": "two",
+      "to": "done",
+      "label": "end of array"
+    }
+  ]
+}

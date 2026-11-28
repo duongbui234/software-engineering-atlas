@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Hand of Straights trên [3, 1, 5, 8, 2, 6, 4, 5, 3], k = 3: luôn mở nhóm ở lá nhỏ nhất",
+    "output": "content/diagrams/neetcode-greedy-grouping/straights.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "walk",
+      "label": "Đi các giá trị theo thứ tự tăng"
+    }
+  ],
+  "mainPath": [
+    "size",
+    "count",
+    "g1",
+    "skip",
+    "g2",
+    "g3",
+    "fail"
+  ],
+  "nodes": [
+    {
+      "id": "size",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Đủ lá để chia nhóm 3 không?",
+      "sublabel": "9 lá, 9 % 3 = 0: đi tiếp"
+    },
+    {
+      "id": "count",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Đếm từng giá trị, sắp tăng dần",
+      "sublabel": "1:1 2:1 3:2 4:1 5:2 6:1 8:1"
+    },
+    {
+      "id": "g1",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Lá nhỏ nhất là 1: buộc mở nhóm",
+      "sublabel": "lấy 1, 2, 3 → còn 3:1 4:1 5:2 6:1 8:1"
+    },
+    {
+      "id": "skip",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Giá trị 2 đã hết: bỏ qua",
+      "sublabel": "đếm bằng 0, không mở nhóm nào"
+    },
+    {
+      "id": "g2",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Lá nhỏ nhất giờ là 3: mở nhóm",
+      "sublabel": "lấy 3, 4, 5 → còn 5:1 6:1 8:1"
+    },
+    {
+      "id": "g3",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Lá nhỏ nhất là 5: cần 5, 6, 7",
+      "sublabel": "lấy 5, 6; tìm lá 7"
+    },
+    {
+      "id": "fail",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Không có lá 7: trả false",
+      "sublabel": "lá 5 không thể nằm ở nhóm nào khác"
+    }
+  ],
+  "edges": [
+    {
+      "from": "size",
+      "to": "count",
+      "label": "chia hết"
+    },
+    {
+      "from": "count",
+      "to": "g1",
+      "label": "giá trị đầu"
+    },
+    {
+      "from": "g1",
+      "to": "skip",
+      "label": "giá trị kế"
+    },
+    {
+      "from": "skip",
+      "to": "g2",
+      "label": "giá trị kế"
+    },
+    {
+      "from": "g2",
+      "to": "g3",
+      "label": "bỏ qua 4 (hết)"
+    },
+    {
+      "from": "g3",
+      "to": "fail",
+      "label": "hở ở 7"
+    }
+  ]
+}

@@ -634,6 +634,17 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | chứng minh đổi chỗ | exchange argument |
 | luôn dẫn trước | stays ahead |
 | đổi tiền | making change |
+| lá (bài), bộ bài | card, hand |
+| dãy liên tiếp, nhóm liên tiếp | straight, consecutive group |
+| lá nhỏ nhất còn lại, mở nhóm | smallest remaining card, open a group |
+| lựa chọn bị ép | forced choice |
+| chỗ hở (thiếu giá trị) | gap |
+| lần xuất hiện cuối, mốc cắt | last occurrence, cut boundary |
+| bộ ba, gộp theo max từng vị trí | triplet, element-wise max merge |
+| vượt (target), ứng viên an toàn | overshoot, safe candidate |
+| khoảng số ngoặc mở, ngoặc mở chưa đóng | open count range, unmatched open bracket |
+| cách đọc (dấu `*`) | reading (of a `*`) |
+| cắt `lo` về 0 | clamp `lo` to 0 |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

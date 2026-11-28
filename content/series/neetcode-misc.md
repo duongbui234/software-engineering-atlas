@@ -13,6 +13,7 @@ stations:
   - name: "Tham lam trên mảng"
     concepts: ["Greedy Choice", "Kadane's Algorithm", "Farthest Reach", "Jump Layers", "Restart Argument"]
   - name: "Tham lam theo nhóm"
+    concepts: ["Smallest-First Grouping", "Last Occurrence Boundary", "Safe Candidate Filter", "Open Count Range"]
   - name: "Khoảng"
   - name: "Ma trận"
   - name: "Số học"

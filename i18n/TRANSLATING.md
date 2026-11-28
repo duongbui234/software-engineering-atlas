@@ -280,6 +280,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | ngăn xếp phụ cho min | auxiliary min stack |
 | ký pháp Ba Lan ngược | reverse Polish notation |
 | quay lui | backtracking |
+| cây lựa chọn, chỉ số bắt đầu | choice tree, start index |
+| chọn, đi sâu, gỡ lựa chọn | choose, go deeper, undo |
+| lấy hoặc bỏ | take or skip |
+| tập con, đa tập | subset, multiset |
+| bỏ trùng cùng tầng, nhánh anh em | skip same-level duplicates, sibling branch |
+| cắt nhánh | pruning |
+| bộ đệm, tích Descartes | buffer, cartesian product |
+| mảng nền (Go) | backing array |
 | làm tròn về 0, làm tròn xuống | truncate toward 0, floor |
 | ngăn xếp gọi hàm | call stack |
 | số Catalan | Catalan number |
@@ -303,6 +311,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | khớp trọn, khớp một đoạn | full match, partial match |
 | neo (^, $) | anchor |
 | quay lui | backtracking |
+| cây lựa chọn, chỉ số bắt đầu | choice tree, start index |
+| chọn, đi sâu, gỡ lựa chọn | choose, go deeper, undo |
+| lấy hoặc bỏ | take or skip |
+| tập con, đa tập | subset, multiset |
+| bỏ trùng cùng tầng, nhánh anh em | skip same-level duplicates, sibling branch |
+| cắt nhánh | pruning |
+| bộ đệm, tích Descartes | buffer, cartesian product |
+| mảng nền (Go) | backing array |
 | vế trái, vế phải (toán hạng) | left, right operand |
 | máy ngăn xếp | stack machine |
 | ngăn xếp đơn điệu (tăng, giảm) | monotonic stack (increasing, decreasing) |
@@ -574,6 +590,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | khớp trọn, khớp một đoạn | full match, partial match |
 | neo (^, $) | anchor |
 | quay lui | backtracking |
+| cây lựa chọn, chỉ số bắt đầu | choice tree, start index |
+| chọn, đi sâu, gỡ lựa chọn | choose, go deeper, undo |
+| lấy hoặc bỏ | take or skip |
+| tập con, đa tập | subset, multiset |
+| bỏ trùng cùng tầng, nhánh anh em | skip same-level duplicates, sibling branch |
+| cắt nhánh | pruning |
+| bộ đệm, tích Descartes | buffer, cartesian product |
+| mảng nền (Go) | backing array |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

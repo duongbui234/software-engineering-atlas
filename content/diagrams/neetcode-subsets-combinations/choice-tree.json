@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Đi qua cây lựa chọn của [2, 5, 9]",
+    "output": "content/diagrams/neetcode-subsets-combinations/choice-tree.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "walk",
+      "label": "Chọn, đi sâu, gỡ lựa chọn"
+    }
+  ],
+  "mainPath": [
+    "root",
+    "two",
+    "five",
+    "nine",
+    "back",
+    "rest",
+    "done"
+  ],
+  "nodes": [
+    {
+      "id": "root",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Gốc: ghi tập rỗng",
+      "sublabel": "path = [], start = 0"
+    },
+    {
+      "id": "two",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Chọn 2, ghi [2]",
+      "sublabel": "push 2, nhánh con từ 5"
+    },
+    {
+      "id": "five",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Chọn 5, ghi [2, 5]",
+      "sublabel": "push 5, nhánh con từ 9"
+    },
+    {
+      "id": "nine",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Chọn 9, ghi [2, 5, 9]",
+      "sublabel": "hết phần tử, quay lên"
+    },
+    {
+      "id": "back",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Gỡ 9, gỡ 5; chọn 9",
+      "sublabel": "ghi [2, 9], rồi gỡ 9 và 2"
+    },
+    {
+      "id": "rest",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Nhánh 5 rồi nhánh 9",
+      "sublabel": "ghi [5], [5, 9], [9]"
+    },
+    {
+      "id": "done",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Xong: 8 tập con",
+      "sublabel": "mỗi nút của cây là một tập"
+    }
+  ],
+  "edges": [
+    {
+      "from": "root",
+      "to": "two",
+      "label": "đi sâu"
+    },
+    {
+      "from": "two",
+      "to": "five",
+      "label": "đi sâu"
+    },
+    {
+      "from": "five",
+      "to": "nine",
+      "label": "đi sâu"
+    },
+    {
+      "from": "nine",
+      "to": "back",
+      "label": "quay lui"
+    },
+    {
+      "from": "back",
+      "to": "rest",
+      "label": "quay lui"
+    },
+    {
+      "from": "rest",
+      "to": "done",
+      "label": "hết nhánh"
+    }
+  ]
+}

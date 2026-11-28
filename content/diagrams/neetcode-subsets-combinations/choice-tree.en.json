@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Walking the choice tree of [2, 5, 9]",
+    "output": "content/diagrams/neetcode-subsets-combinations/choice-tree.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "walk",
+      "label": "Choose, go deeper, undo"
+    }
+  ],
+  "mainPath": [
+    "root",
+    "two",
+    "five",
+    "nine",
+    "back",
+    "rest",
+    "done"
+  ],
+  "nodes": [
+    {
+      "id": "root",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Root: record the empty set",
+      "sublabel": "path = [], start = 0"
+    },
+    {
+      "id": "two",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Choose 2, record [2]",
+      "sublabel": "push 2, children start at 5"
+    },
+    {
+      "id": "five",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Choose 5, record [2, 5]",
+      "sublabel": "push 5, children start at 9"
+    },
+    {
+      "id": "nine",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Choose 9, record [2, 5, 9]",
+      "sublabel": "no elements left, go back up"
+    },
+    {
+      "id": "back",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Undo 9, undo 5; choose 9",
+      "sublabel": "record [2, 9], then undo 9 and 2"
+    },
+    {
+      "id": "rest",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Branch 5, then branch 9",
+      "sublabel": "record [5], [5, 9], [9]"
+    },
+    {
+      "id": "done",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Done: 8 subsets",
+      "sublabel": "each node of the tree is one subset"
+    }
+  ],
+  "edges": [
+    {
+      "from": "root",
+      "to": "two",
+      "label": "go deeper"
+    },
+    {
+      "from": "two",
+      "to": "five",
+      "label": "go deeper"
+    },
+    {
+      "from": "five",
+      "to": "nine",
+      "label": "go deeper"
+    },
+    {
+      "from": "nine",
+      "to": "back",
+      "label": "backtrack"
+    },
+    {
+      "from": "back",
+      "to": "rest",
+      "label": "backtrack"
+    },
+    {
+      "from": "rest",
+      "to": "done",
+      "label": "no branches left"
+    }
+  ]
+}

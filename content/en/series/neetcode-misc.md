@@ -8,6 +8,7 @@ draft: false
 lang: en
 stations:
   - name: "Backtracking: Subsets and Combinations"
+    concepts: ["Backtracking", "Choice Tree", "Start Index", "Duplicate Skipping"]
   - name: "Backtracking: Permutations and Search"
   - name: "Greedy on Arrays"
   - name: "Greedy Grouping"

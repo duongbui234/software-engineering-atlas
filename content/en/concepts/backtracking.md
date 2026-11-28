@@ -12,3 +12,5 @@ The solution being built is a [[en/concepts/stack|stack]] of choices: add a choi
 Read more in [[en/posts/2026-11-23-neetcode-stack|station 6: Stack]].
 
 Read more in [[en/posts/2026-11-26-neetcode-trie|station 7: Tries]], where a missing trie edge cuts off the current board path.
+
+Station [[en/posts/2026-11-28-neetcode-subsets-combinations|MISC-01: Backtracking: Subsets and Combinations]] brings the subset and combination problems into one template: choose, go deeper, undo. They differ only in where an answer is recorded, the start index of the next call, and how duplicates are skipped.

@@ -28,7 +28,8 @@ npm run check                   # tsc + prettier (upstream code)
 
 # Render check (also runs in CI after build): every page at 390px and 1440px.
 # Fails on horizontal page scroll, broken Mermaid, "Unsupported markdown" labels, Mermaid diagrams shrunk below 75%,
-# a Mermaid diagram wider than its box (it would scroll sideways inside it), or an archify iframe shorter than the diagram inside it.
+# a Mermaid diagram wider than its box (it would scroll sideways inside it), a Mermaid subgraph title overlapping a node,
+# or an archify iframe shorter than the diagram inside it.
 npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
 # Only the pages a branch affects (what CI does on a PR):
 node scripts/changed-pages.mjs $(git merge-base main HEAD) HEAD > /tmp/pages.txt && node scripts/check-render.mjs public --pages /tmp/pages.txt

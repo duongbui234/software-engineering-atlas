@@ -4,6 +4,7 @@
 //   - một sơ đồ Mermaid render hỏng (theme thay bằng khối code) hoặc hiện "Unsupported markdown";
 //   - một sơ đồ Mermaid bị co dưới 75% cỡ thật (chữ quá nhỏ để đọc);
 //   - một sơ đồ Mermaid rộng hơn vùng nội dung của khung, tức phải cuộn ngang trong khung (ở 390px khung còn ~353px, nên bề rộng thật phải ≤ ~470px);
+//   - tiêu đề subgraph của một sơ đồ Mermaid đè lên một node (khung g.cluster-label giao khung g.node, chừa 1px);
 //   - một sơ đồ archify nhúng bị cắt: khung iframe thấp hơn nội dung (viewer đặt overflow:hidden).
 //
 // Chạy local:  npx quartz build && npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
@@ -100,14 +101,21 @@ async function checkPage(page, origin, file, width) {
       // vùng nội dung của khung = clientWidth trừ padding hai bên
       const cs = getComputedStyle(b);
       const inner = b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      // tiêu đề subgraph đè node: Mermaid không chừa chỗ cho tiêu đề bị tự xuống dòng hoặc sát nhãn cạnh
+      const hit = (a, c) => a.left < c.right - 1 && c.left < a.right - 1 && a.top < c.bottom - 1 && c.top < a.bottom - 1;
+      const nodes = [...svg.querySelectorAll('g.node')].map((n) => n.getBoundingClientRect());
+      const overlaps = [...svg.querySelectorAll('g.cluster-label')]
+        .filter((l) => { const r = l.getBoundingClientRect(); return r.width > 0 && nodes.some((n) => hit(r, n)); })
+        .map((l) => l.textContent.trim().replace(/\s+/g, ' ').slice(0, 40));
       return { i, scale, svgWidth: Math.round(svgWidth), inner: Math.round(inner),
-        natural: vb && vb.width ? Math.round(vb.width) : 0,
+        natural: vb && vb.width ? Math.round(vb.width) : 0, overlaps,
         unsupported: svg.textContent.includes('Unsupported markdown') };
     }));
     for (const d of diagrams) {
       if (d.broken) problems.push(`Mermaid #${d.i + 1}: lỗi cú pháp, đang hiện khối code thay cho sơ đồ`);
       if (d.unsupported) problems.push(`Mermaid #${d.i + 1}: có nhãn hiện "Unsupported markdown" (nhãn mở đầu bằng #, 1., - …)`);
       if (d.scale !== undefined && d.scale < MIN_SCALE - 0.005) problems.push(`Mermaid #${d.i + 1}: bị co còn ${(d.scale * 100).toFixed(0)}% (tối thiểu ${MIN_SCALE * 100}%)`);
+      if (d.overlaps && d.overlaps.length) problems.push(`Mermaid #${d.i + 1}: tiêu đề subgraph đè lên node (${d.overlaps.map((t) => `"${t}"`).join(', ')}); rút tiêu đề về một dòng ngắn`);
       if (d.svgWidth !== undefined && d.svgWidth > d.inner + 1) problems.push(`Mermaid #${d.i + 1}: rộng ${d.svgWidth}px, hơn khung ${d.inner}px nên phải cuộn ngang (bề rộng thật ${d.natural}px; cần ≤ ${Math.floor(d.inner / MIN_SCALE)}px)`);
     }
   }

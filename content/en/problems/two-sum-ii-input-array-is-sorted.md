@@ -45,12 +45,12 @@ A warehouse stores crates sorted from light to heavy. You need exactly two crate
 
 ```mermaid
 flowchart TB
-  A["i = 0, j = n − 1"] --> B["s = nums[i] + nums[j]"]
+  A["i = 0, j = n − 1"] --> B["s = nums[i]<br/>+ nums[j]"]
   B --> C["s equals target?"]
-  C -->|"yes"| D["return [i + 1, j + 1]"]
-  C -->|"no"| E["s less than target?"]
-  E -->|"yes: drop nums[i]"| F["i++"] --> B
-  E -->|"no: drop nums[j]"| G["j−−"] --> B
+  C -->|"yes"| D["return<br/>[i + 1, j + 1]"]
+  C -->|"no"| E["s less than<br/>target?"]
+  E -->|"yes:<br/>drop nums[i]"| F["i++"] --> B
+  E -->|"no:<br/>drop nums[j]"| G["j−−"] --> B
 ```
 
 ## The problem

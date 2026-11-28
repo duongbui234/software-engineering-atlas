@@ -55,11 +55,11 @@ Cách khác là điểm danh theo đời: gọi hết đời thứ nhất ra sâ
 
 ```mermaid
 flowchart TB
-  N8["8<br/>trả 1 + max(3, 3) = 4"] -->|trái| N3["3<br/>trả 1 + max(1, 2) = 3"]
-  N8 -->|phải| N10["10<br/>trả 1 + max(0, 2) = 3"]
+  N8["8<br/>trả 1 + max(3, 3)<br/>= 4"] -->|trái| N3["3<br/>trả 1 + max(1, 2)<br/>= 3"]
+  N8 -->|phải| N10["10<br/>trả 1 + max(0, 2)<br/>= 3"]
   N3 -->|trái| N1["1<br/>lá: trả 1"]
-  N3 -->|phải| N6["6<br/>trả 1 + max(1, 1) = 2"]
-  N10 -->|phải| N14["14<br/>trả 1 + max(1, 0) = 2"]
+  N3 -->|phải| N6["6<br/>trả 1 + max(1, 1)<br/>= 2"]
+  N10 -->|phải| N14["14<br/>trả 1 + max(1, 0)<br/>= 2"]
   N6 -->|trái| N4["4<br/>lá: trả 1"]
   N6 -->|phải| N7["7<br/>lá: trả 1"]
   N14 -->|trái| N13["13<br/>lá: trả 1"]
@@ -159,9 +159,9 @@ Chọn cách nào:
 
 ```mermaid
 flowchart TB
-  Q1["cây có thể lệch sâu<br/>hơn vài nghìn tầng?"] -->|không| A1["đệ quy: ngắn, rõ, nhanh"]
+  Q1["cây có thể lệch sâu<br/>hơn vài nghìn tầng?"] -->|không| A1["đệ quy:<br/>ngắn, rõ, nhanh"]
   Q1 -->|có| Q2["đang viết Go?"]
-  Q2 -->|có| A2["đệ quy vẫn được:<br/>ngăn xếp goroutine tự nới"]
+  Q2 -->|có| A2["đệ quy vẫn được:<br/>ngăn xếp goroutine<br/>tự nới"]
   Q2 -->|không| A3["ngăn xếp tự quản<br/>hoặc BFS"]
 ```
 

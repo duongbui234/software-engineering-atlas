@@ -41,12 +41,12 @@ A ditch has boards of different heights stuck along its length. You may choose t
 
 ```mermaid
 flowchart TB
-  A["i = 0, j = n − 1, best = 0"] --> B["i < j?"]
+  A["i = 0, j = n − 1,<br/>best = 0"] --> B["i < j?"]
   B -->|"no"| R["return best"]
-  B -->|"yes"| C["best = max(best,<br/>(j − i) · min(h[i], h[j]))"]
+  B -->|"yes"| C["best = max(best,<br/>(j − i) ·<br/>min(h[i], h[j]))"]
   C --> D["h[i] < h[j]?"]
-  D -->|"yes: left wall shorter"| E["i++"] --> B
-  D -->|"no: right wall shorter<br/>or equal"| F["j−−"] --> B
+  D -->|"yes: left<br/>wall shorter"| E["i++"] --> B
+  D -->|"no: right<br/>wall shorter<br/>or equal"| F["j−−"] --> B
 ```
 
 ## The problem

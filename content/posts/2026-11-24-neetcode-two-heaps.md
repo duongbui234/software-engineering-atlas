@@ -51,11 +51,11 @@ Cô chủ nhiệm có ba việc lặp lại mỗi ngày, và việc nào cũng c
 ```mermaid
 flowchart TB
   A["cần gì từ một tập<br/>đang thay đổi?"] --> B["phần tử ở giữa<br/>(trung vị)?"]
-  B -->|"có"| C["hai heap<br/>Find Median from Data Stream"]
-  B -->|"không"| D["phần tử ưu tiên nhất,<br/>nhưng có lúc phải tạm gác?"]
-  D -->|"có"| E["heap + hàng chờ<br/>Task Scheduler"]
-  D -->|"không"| F["m phần tử đầu<br/>của k danh sách đã sắp?"]
-  F -->|"có"| G["heap chứa đầu<br/>mỗi danh sách<br/>Design Twitter"]
+  B -->|"có"| C["hai heap<br/>Find Median<br/>from Data Stream"]
+  B -->|"không"| D["phần tử ưu tiên<br/>nhất, nhưng có lúc<br/>phải tạm gác?"]
+  D -->|"có"| E["heap + hàng chờ<br/>Task<br/>Scheduler"]
+  D -->|"không"| F["m phần tử đầu<br/>của k danh sách<br/>đã sắp?"]
+  F -->|"có"| G["heap chứa đầu<br/>mỗi danh sách<br/>Design<br/>Twitter"]
 ```
 
 ## Vấn đề: heap một mình chỉ biết phần tử đứng đầu

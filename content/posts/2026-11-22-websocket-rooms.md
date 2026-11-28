@@ -49,18 +49,16 @@ Tổng đài ở ga 3 giờ phục vụ một tòa nhà văn phòng.
 | Lễ tân ghi âm 2 phút gần nhất, gọi lại kịp thì được nghe lại | [[concepts/connection-state-recovery\|Connection state recovery]] |
 
 ```mermaid
+%%{init: {"flowchart": {"rankSpacing": 50}}}%%
 flowchart TB
     subgraph CONN["Chung một kết nối"]
-        direction LR
-        NS1["Namespace /flash-sale"]
-        NS2["Namespace /notifications"]
+        NS1["Namespace<br/>/flash-sale"]
+        NS2["Namespace<br/>/notifications"]
     end
     subgraph ROOMS["Room (server giữ)"]
-        direction LR
         R1["user:u1<br/>mọi tab của u1"]
         R2["campaign:c-21h<br/>ai đang xem"]
     end
-    CONN ~~~ ROOMS
     NS1 --> R1
     NS1 --> R2
 ```

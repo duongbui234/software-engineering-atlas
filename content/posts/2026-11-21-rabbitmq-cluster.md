@@ -53,13 +53,13 @@ sources:
 
 ```mermaid
 flowchart TB
-    subgraph C["Một cụm (cùng thành phố, mạng LAN)"]
-        N1["Bưu cục 1"] --- N2["Bưu cục 2"]
-        N2 --- N3["Bưu cục 3"]
+    subgraph C["Một cụm trong mạng LAN"]
+        N1["Bưu<br/>cục 1"] --- N2["Bưu<br/>cục 2"]
+        N2 --- N3["Bưu<br/>cục 3"]
         N1 --- N3
     end
     App["Các dịch vụ"] --> C
-    C -.->|"federation / shovel<br/>qua mạng WAN"| R["Cụm ở thành phố khác"]
+    C -.->|"federation / shovel<br/>qua mạng WAN"| R["Cụm ở<br/>thành phố khác"]
 ```
 
 ## Vấn đề: một node là một điểm chết

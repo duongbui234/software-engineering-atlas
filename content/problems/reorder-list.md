@@ -49,12 +49,12 @@ Bạn có một chồng bài xếp theo thứ tự 1, 2, 3, …, n từ trên xu
 
 ```mermaid
 flowchart TB
-  A["bước 1: rùa, thỏ từ head<br/>thỏ dừng khi hết 2 bước"] --> B["rùa = cuối nửa đầu"]
-  B --> C["bước 2: second = đảo(rùa.next)<br/>rùa.next = null"]
+  A["bước 1: rùa, thỏ<br/>đi từ head; thỏ dừng<br/>khi hết 2 bước"] --> B["rùa = cuối nửa đầu"]
+  B --> C["bước 2: second =<br/>đảo(rùa.next)<br/>rùa.next = null"]
   C --> D["bước 3: first = head"]
   D --> E["second còn nút?"]
-  E -->|"không"| Z["xong: L0, Ln, L1, Ln−1, …"]
-  E -->|"có"| F["first.next = second<br/>second.next = first cũ.next"]
+  E -->|"không"| Z["xong: L0, Ln,<br/>L1, Ln−1, …"]
+  E -->|"có"| F["first.next = second<br/>second.next =<br/>first cũ.next"]
   F --> G["first, second tiến<br/>một nút mỗi bên"]
   G --> E
 ```

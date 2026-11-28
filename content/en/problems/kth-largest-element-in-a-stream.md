@@ -51,9 +51,9 @@ A chess club keeps a team of exactly its three strongest players. When a newcome
 ```mermaid
 flowchart TB
   A["add(val)"] --> B["heap below k?"]
-  B -->|"yes"| C["insert val, sift up"]
+  B -->|"yes"| C["insert val,<br/>sift up"]
   B -->|"no"| D["val > top?"]
-  D -->|"yes"| E["replace the top with val<br/>then sift down"]
+  D -->|"yes"| E["replace the top<br/>with val, then<br/>sift down"]
   D -->|"no"| F["drop val"]
   C --> G["return the top"]
   E --> G

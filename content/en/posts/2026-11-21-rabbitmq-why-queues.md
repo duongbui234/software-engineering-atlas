@@ -53,12 +53,12 @@ The whole line uses one picture: **RabbitMQ is a post office**. This station onl
 ```mermaid
 flowchart TB
     subgraph Call["Phoning (synchronous)"]
-        direction LR
+        direction TB
         A1["Ordering<br/>service"] -->|"call and wait"| B1["Email<br/>service"]
         B1 -->|"answers<br/>after 2 s"| A1
     end
     subgraph Mail["Mailing (asynchronous)"]
-        direction LR
+        direction TB
         A2["Ordering<br/>service"] -->|"drop letter,<br/>move on"| P["Post office<br/>(RabbitMQ)"]
         P -->|"deliver<br/>when free"| B2["Email<br/>service"]
     end

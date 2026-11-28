@@ -49,16 +49,16 @@ A notebook has increasing page numbers, but the binder cut it wrong: the back pa
 ```mermaid
 flowchart TB
   A["lo = 0, hi = n − 1"] --> B["lo <= hi?"]
+  B -->|"yes"| C["mid;<br/>nums[mid] == target?"]
   B -->|"no"| Z["return −1"]
-  B -->|"yes"| C["mid; nums[mid] == target?"]
-  C -->|"yes"| Y["return mid"]
   C -->|"no"| D["nums[lo] <= nums[mid]?<br/>(left half increasing)"]
-  D -->|"yes"| E["nums[lo] <= target < nums[mid]?"]
-  E -->|"yes"| E1["hi = mid − 1"]
-  E -->|"no"| E2["lo = mid + 1"]
-  D -->|"no: right half<br/>increasing"| F["nums[mid] < target <= nums[hi]?"]
-  F -->|"yes"| F1["lo = mid + 1"]
-  F -->|"no"| F2["hi = mid − 1"]
+  C -->|"yes"| Y["return mid"]
+  D -->|"yes"| E["nums[lo] <=<br/>target <<br/>nums[mid]?"]
+  D -->|"no: right half<br/>increasing"| F["nums[mid] <<br/>target <=<br/>nums[hi]?"]
+  E -->|"yes"| H["hi = mid − 1"]
+  E -->|"no"| L["lo = mid + 1"]
+  F -->|"yes"| L
+  F -->|"no"| H
 ```
 
 ## The problem

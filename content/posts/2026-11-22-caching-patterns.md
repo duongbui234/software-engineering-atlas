@@ -57,6 +57,7 @@ flowchart TB
         direction TB
         A1["Cache-aside:<br/>ứng dụng tự lo"] ~~~ A2["Read-through:<br/>cache tự lo"] ~~~ A3["Refresh-ahead:<br/>làm mới trước hạn"]
     end
+    W ~~~ R
 ```
 
 ## Vấn đề: hai bản của một dữ liệu
@@ -158,11 +159,11 @@ Bẫy: nếu mục đó *đã* có trong cache từ trước, cache sẽ trả g
 
 ```mermaid
 flowchart TB
-    Q1["Mất vài lần ghi gần nhất<br/>khi sập có chấp nhận được không?"] -->|"có"| WB["Write-behind<br/>(bộ đếm, thống kê gần đúng)"]
-    Q1 -->|"không"| Q2["Dữ liệu vừa ghi có được<br/>đọc lại ngay không?"]
-    Q2 -->|"có, và cần trúng ngay"| WT["Write-through"]
-    Q2 -->|"không chắc"| Q3["Có được đọc lại<br/>nhiều lần không?"]
-    Q3 -->|"có"| CA["Cache-aside:<br/>ghi DB rồi xóa cache"]
+    Q1["Mất vài lần ghi<br/>gần nhất khi sập<br/>có chấp nhận được?"] -->|"có"| WB["Write-behind<br/>(bộ đếm,<br/>thống kê gần đúng)"]
+    Q1 -->|"không"| Q2["Dữ liệu vừa ghi<br/>có được đọc lại<br/>ngay không?"]
+    Q2 -->|"không chắc"| Q3["Có được đọc<br/>lại nhiều lần?"]
+    Q2 -->|"có, và cần<br/>trúng ngay"| WT["Write-through"]
+    Q3 -->|"có"| CA["Cache-aside:<br/>ghi DB<br/>rồi xóa cache"]
     Q3 -->|"hiếm khi"| WA["Write-around<br/>(hoặc không cache)"]
 ```
 

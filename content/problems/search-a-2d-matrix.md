@@ -47,11 +47,11 @@ Một tủ hồ sơ có m ngăn kéo, mỗi ngăn n tập hồ sơ, đánh số 
 ```mermaid
 flowchart TB
   A["lo = 0, hi = m·n"] --> B["lo < hi ?"]
-  B -->|"không"| Z["không có target"]
-  B -->|"có"| C["mid = ⌊(lo + hi)/2⌋<br/>x = matrix[⌊mid/n⌋][mid mod n]"]
-  C --> D["x == target ?"]
+  B -->|"không"| Z["không có<br/>target"]
+  B -->|"có"| C["mid =<br/>⌊(lo + hi)/2⌋<br/>x = matrix<br/>[⌊mid/n⌋]<br/>[mid mod n]"]
+  C --> D["x ==<br/>target ?"]
   D -->|"có"| Y["tìm thấy"]
-  D -->|"không"| E["x < target ?"]
+  D -->|"không"| E["x <<br/>target ?"]
   E -->|"có"| F["lo = mid + 1"]
   E -->|"không"| G["hi = mid"]
   F --> B

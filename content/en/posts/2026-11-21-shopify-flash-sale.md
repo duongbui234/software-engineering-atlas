@@ -57,12 +57,12 @@ A famous bakery announces: at exactly 9 a.m., 300 cakes at half price. By 8:55, 
 
 ```mermaid
 flowchart TB
-    A(["2,000 people outside"]) --> B["Guard hands out tickets<br/>(virtual queue)"]
-    B --> C["Each turn calls the 50 lowest<br/>(throttling)"]
-    C --> D["Cashier holds a cake for each<br/>(inventory reservation)"]
-    D --> E["Paid: cross off the ledger"]
-    D --> F["Left: cake back on discount shelf"]
-    C -. "sold out" .-> G["Tell everyone still waiting"]
+    A(["2,000 people<br/>outside"]) --> B["Guard hands<br/>out tickets<br/>(virtual queue)"]
+    B --> C["Each turn calls<br/>the 50 lowest<br/>(throttling)"]
+    C -. "sold out" .-> G["Tell everyone<br/>still waiting"]
+    C --> D["Cashier holds<br/>a cake for each<br/>(inventory<br/>reservation)"]
+    D --> E["Paid: cross<br/>off the ledger"]
+    D --> F["Left: cake back<br/>on discount shelf"]
 ```
 
 ## The problem: what the 32 million says, and what it doesn't
@@ -102,20 +102,21 @@ Part II tells the fix:
 3. The threshold is adjusted continuously according to **the bucket's free space**: if the bucket has room, the threshold advances toward the present; if it's full, the threshold moves back. The controller uses only a proportional term, after they tried simulating a full PID.
 
 ```mermaid
+%%{init: {"sequence": {"width": 76, "actorMargin": 10}}}%%
 sequenceDiagram
     participant K as Customer
-    participant LB as Load balancer<br/>(Nginx + Lua)
+    participant LB as Load<br/>balancer<br/>(Nginx+Lua)
     participant App as Checkout
-    K->>LB: first visit to checkout
-    LB-->>K: signed cookie:<br/>"arrived 21:00:03"
-    loop each time the waiting page polls
-        K->>LB: sends the cookie
-        Note over LB: threshold now 21:00:01<br/>(tuned to bucket<br/>free space)
-        LB-->>K: not your turn yet,<br/>try again later
+    K->>LB: first visit<br/>to checkout
+    LB-->>K: signed cookie:<br/>"arrived<br/>21:00:03"
+    loop waiting page polls
+        K->>LB: sends<br/>the cookie
+        Note over LB: threshold<br/>now 21:00:01<br/>(tuned to<br/>bucket free<br/>space)
+        LB-->>K: not your<br/>turn, try<br/>again later
     end
-    Note over LB: bucket has room,<br/>threshold moves to 21:00:05
-    K->>LB: sends the cookie
-    LB->>App: let through (arrived<br/>before the threshold)
+    Note over LB: bucket has<br/>room, threshold<br/>moves to<br/>21:00:05
+    K->>LB: sends<br/>the cookie
+    LB->>App: let through<br/>(arrived<br/>before the<br/>threshold)
 ```
 
 The neat part is that **no shared state is needed**: the queue lives in each customer's cookie, and each load balancer decides for itself. The price is that fairness is only approximate, because the machines may compute slightly different thresholds.

@@ -54,16 +54,16 @@ Ga 1 là một đoàn tàu ở sân ga. Ga 2 là **bãi dồn toa**, nơi ngư�
 ```mermaid
 flowchart TB
   A["bài danh sách<br/>nâng cao"] --> B["tra theo key và<br/>giữ thứ tự dùng?"]
-  B -->|"có"| C["bảng băm + danh sách hai chiều<br/>LRU Cache"]
+  B -->|"có"| C["bảng băm +<br/>danh sách hai chiều<br/>LRU Cache"]
   B -->|"không"| D["chép nút có<br/>con trỏ thứ hai?"]
-  D -->|"có"| E["bản sao đan xen sau bản gốc<br/>Copy List with Random Pointer"]
   D -->|"không"| F["cộng hai số<br/>theo từng chữ số?"]
+  D -->|"có"| E["bản sao đan xen<br/>sau bản gốc<br/>Copy List with<br/>Random Pointer"]
   F -->|"có"| G["nút giả + số nhớ<br/>Add Two Numbers"]
-  F -->|"không"| H["mảng có giá trị<br/>dùng được làm chỉ số?"]
-  H -->|"có"| I["chậm và nhanh trên i → nums[i]<br/>Find the Duplicate Number"]
+  F -->|"không"| H["mảng có giá trị<br/>dùng được<br/>làm chỉ số?"]
   H -->|"không"| J["gộp k danh sách<br/>đã sắp?"]
-  J -->|"có"| K["heap, hoặc trộn từng cặp<br/>Merge k Sorted Lists"]
-  J -->|"không"| L["lật từng khúc k nút<br/>Reverse Nodes in k-Group"]
+  H -->|"có"| I["chậm và nhanh<br/>trên i → nums[i]<br/>Find the<br/>Duplicate Number"]
+  J -->|"có"| K["heap, hoặc<br/>trộn từng cặp<br/>Merge k<br/>Sorted Lists"]
+  J -->|"không"| L["lật từng khúc k nút<br/>Reverse Nodes<br/>in k-Group"]
 ```
 
 ## Vấn đề: một cấu trúc không đủ

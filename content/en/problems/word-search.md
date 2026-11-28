@@ -79,16 +79,16 @@ The function `dfs(r, c, k)` asks: can the rest of the word, starting at letter k
 ```mermaid
 flowchart TB
   S["dfs(r, c, k)"]
-  Q1["k equals the word length?"]
-  Y1["yes: return true"]
-  Q2["cell outside the grid?"]
-  Y2["yes: return false"]
-  Q3["cell in use, or a letter other than word[k]?"]
-  Y3["yes: return false"]
+  Q1["k equals the<br/>word length?"]
+  Y1["yes:<br/>return true"]
+  Q2["cell outside<br/>the grid?"]
+  Y2["yes:<br/>return false"]
+  Q3["cell in use,<br/>or a letter other<br/>than word[k]?"]
+  Y3["yes:<br/>return false"]
   M["mark the cell"]
-  T["try dfs on the 4 neighbours with k + 1"]
+  T["try dfs on the<br/>4 neighbours<br/>with k + 1"]
   U["unmark the cell"]
-  R["return the result of the 4 tries"]
+  R["return the result<br/>of the 4 tries"]
   S --> Q1
   Q1 --> Y1
   Q1 -->|"no"| Q2

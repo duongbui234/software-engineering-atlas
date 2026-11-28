@@ -45,17 +45,18 @@ The two clerks at the ticket counter no longer "glance at the ledger, then turn 
 | The ledger's printed number box doesn't allow negative numbers; anyone trying to write one is refused | [[en/concepts/check-constraint\|CHECK]] |
 
 ```mermaid
+%%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
     participant A as Clerk<br/>A
     participant S as Line<br/>"row A: 1"
     participant B as Clerk<br/>B
     A->>S: cross out 1<br/>if ≥ 1 left
-    Note over S: A's pen down,<br/>number is 0
+    Note over S: A's pen<br/>down,<br/>number<br/>is 0
     B->>S: cross out 1<br/>if ≥ 1 left
-    Note over B: wait for A<br/>to lift the pen
+    Note over B: wait for<br/>A to lift<br/>the pen
     A->>S: stamp it<br/>(COMMIT)
-    S-->>B: your turn:<br/>look again, 0 left
-    Note over B: 0 ≥ 1 is false,<br/>no cross-out:<br/>sold out
+    S-->>B: your turn:<br/>look again,<br/>0 left
+    Note over B: 0 ≥ 1<br/>is false,<br/>no cross-<br/>out: sold<br/>out
 ```
 
 ## The problem: the check and the decrement must be one

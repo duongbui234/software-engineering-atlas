@@ -55,9 +55,9 @@ A row of face-down cards lies end to end on a table. The rule: every k adjacent 
 flowchart TB
   S["groupPrev = dummy"] --> C["walk k steps ahead<br/>from groupPrev to find kth"]
   C --> Q["is kth null?"]
-  Q -->|"yes"| E["stop: last chunk stays<br/>return dummy.next"]
+  Q -->|"yes"| E["stop: last<br/>chunk stays<br/>return dummy.next"]
   Q -->|"no"| N["groupNext = kth.next"]
-  N --> R["reverse the group:<br/>prev = groupNext, cur = groupPrev.next<br/>until cur == groupNext"]
+  N --> R["reverse the group:<br/>prev = groupNext,<br/>cur = groupPrev.next<br/>until cur == groupNext"]
   R --> J["oldFirst = groupPrev.next<br/>groupPrev.next = kth"]
   J --> M["groupPrev = oldFirst"]
   M --> C

@@ -54,9 +54,9 @@ Một hàng bài úp nối đuôi nhau trên bàn. Luật: cứ k lá liền nha
 flowchart TB
   S["groupPrev = dummy"] --> C["đi trước k bước<br/>từ groupPrev tìm kth"]
   C --> Q["kth là null?"]
-  Q -->|"có"| E["dừng: khúc cuối giữ nguyên<br/>trả dummy.next"]
+  Q -->|"có"| E["dừng: khúc cuối<br/>giữ nguyên<br/>trả dummy.next"]
   Q -->|"không"| N["groupNext = kth.next"]
-  N --> R["đảo nhóm:<br/>prev = groupNext, cur = groupPrev.next<br/>tới khi cur == groupNext"]
+  N --> R["đảo nhóm:<br/>prev = groupNext,<br/>cur = groupPrev.next<br/>tới khi cur == groupNext"]
   R --> J["oldFirst = groupPrev.next<br/>groupPrev.next = kth"]
   J --> M["groupPrev = oldFirst"]
   M --> C

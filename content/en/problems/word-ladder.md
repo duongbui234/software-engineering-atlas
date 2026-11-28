@@ -167,14 +167,14 @@ Back to the pond: throw **two** stones, one at `beginWord` and one at `endWord`,
 
 ```mermaid
 flowchart TB
-  A["front = [begin], back = [end]"] --> B["Which side has fewer words?<br/>Swap so front is the small side"]
+  A["front = [begin]<br/>back = [end]"] --> B["Which side has<br/>fewer words? Swap<br/>so front is the<br/>small side"]
   B --> C["Generate neighbors<br/>for every word in front"]
   C --> D["Is a candidate in back?"]
-  D -- "yes" --> E["The rings met:<br/>return the word count"]
-  D -- "no" --> F["Cross out the new words,<br/>they become the new front"]
+  D -- "yes" --> E["The rings met:<br/>return the<br/>word count"]
+  D -- "no" --> F["Cross out the<br/>new words, they<br/>become the new front"]
   F --> G["Is front or back empty?"]
   G -- "no" --> B
-  G -- "yes" --> H["No path: return 0"]
+  G -- "yes" --> H["No path:<br/>return 0"]
 ```
 
 Counting words needs care here. `words` starts at 2, because if `begin` generates `end` directly the chain has 2 words. Each expanded level makes the chain joining both sides one word longer. The worst case is still the same as Approach 2, but on real data it usually touches far fewer words.

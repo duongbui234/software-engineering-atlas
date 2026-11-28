@@ -116,15 +116,16 @@ function invertRecursive(root: TreeNode | null): TreeNode | null {
 Mỗi nút được gọi đúng một lần, mỗi lần làm O(1) việc, nên tổng O(n). Bộ nhớ thêm là độ sâu của chuỗi lời gọi đang dở, tức chiều cao h: khoảng log₂ n với cây cân đối, n với cây lệch thành chuỗi.
 
 ```mermaid
+  %%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
   participant G as gọi trên 5
   participant P as gọi trên 8
   participant T as gọi trên 3
-  G->>P: đảo cây con phải (8)
-  P-->>G: trả 8, hai con<br/>đã thành 9, 7
-  G->>T: đảo cây con trái (3)
-  T-->>G: trả 3, hai con<br/>đã thành 4, 1
-  Note over G: gắn chéo: left = 8,<br/>right = 3, trả về 5
+  G->>P: đảo cây con<br/>phải (8)
+  P-->>G: trả 8,<br/>hai con đã<br/>thành 9, 7
+  G->>T: đảo cây con<br/>trái (3)
+  T-->>G: trả 3,<br/>hai con đã<br/>thành 4, 1
+  Note over G: gắn chéo:<br/>left = 8,<br/>right = 3,<br/>trả về 5
 ```
 
 ### Cách 2: ngăn xếp tự quản

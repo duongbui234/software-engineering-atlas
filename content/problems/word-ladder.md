@@ -166,14 +166,14 @@ Quay lại hình ảnh mặt hồ: ném **hai** hòn đá, một ở `beginWord`
 
 ```mermaid
 flowchart TB
-  A["front = [begin], back = [end]"] --> B["Phía nào ít từ hơn?<br/>Đổi chỗ để front là phía nhỏ"]
+  A["front = [begin]<br/>back = [end]"] --> B["Phía nào ít từ hơn?<br/>Đổi chỗ để front<br/>là phía nhỏ"]
   B --> C["Sinh hàng xóm<br/>cho mọi từ trong front"]
-  C --> D["Có ứng viên nằm trong back?"]
-  D -- "có" --> E["Hai sóng gặp nhau:<br/>trả số từ"]
-  D -- "không" --> F["Gạch các từ mới,<br/>chúng thành front mới"]
+  C --> D["Có ứng viên<br/>nằm trong back?"]
+  D -- "có" --> E["Hai sóng<br/>gặp nhau:<br/>trả số từ"]
+  D -- "không" --> F["Gạch các từ mới,<br/>chúng thành<br/>front mới"]
   F --> G["front hoặc back rỗng?"]
   G -- "không" --> B
-  G -- "có" --> H["Không có đường: trả 0"]
+  G -- "có" --> H["Không có đường:<br/>trả 0"]
 ```
 
 Đếm từ ở đây cần cẩn thận. `words` bắt đầu bằng 2, vì nếu `begin` sinh ra ngay `end` thì chuỗi có 2 từ. Mỗi lần nới một tầng, chuỗi nối hai phía dài thêm một từ. Thời gian xấu nhất vẫn như Cách 2, nhưng trên dữ liệu thật nó thường chạm ít từ hơn nhiều.

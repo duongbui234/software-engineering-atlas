@@ -53,12 +53,14 @@ Một đoàn tàu gồm nhiều toa móc nối nhau. Người điều độ ch�
 ```mermaid
 flowchart TB
   A["bài danh sách liên kết"] --> B["phải đổi chiều<br/>một khúc?"]
-  B -->|"có"| C["lật con trỏ: prev, cur, next<br/>Reverse Linked List"]
+  B -->|"có"| C["lật con trỏ:<br/>prev, cur, next<br/>Reverse Linked List"]
   B -->|"không"| D["nút đầu có thể bị<br/>xóa hay thay?"]
-  D -->|"có"| E["nút giả trước head<br/>Merge Two Lists, Remove Nth"]
-  D -->|"không"| F["cần vòng, nút giữa,<br/>hay vị trí từ cuối?"]
-  F -->|"vòng, giữa"| G["chậm 1 bước, nhanh 2 bước<br/>Linked List Cycle"]
-  F -->|"thứ n từ cuối"| H["hai con trỏ cách n bước<br/>Remove Nth Node"]
+  D -->|"có"| E["nút giả trước head<br/>Merge Two Lists,<br/>Remove Nth"]
+  D -->|"không"| F["cần vòng,<br/>nút giữa, hay<br/>vị trí từ cuối?"]
+  F -->|"vòng,<br/>giữa"| G["chậm 1 bước,<br/>nhanh 2 bước<br/>Linked List Cycle"]
+  F -->|"thứ n<br/>từ cuối"| H["hai con trỏ<br/>cách n bước<br/>Remove Nth Node"]
+  C ~~~ D
+  E ~~~ F
 ```
 
 Reorder List dùng ba trong bốn cách cùng lúc: tìm giữa bằng chậm và nhanh, lật nửa sau, rồi đan hai nửa.

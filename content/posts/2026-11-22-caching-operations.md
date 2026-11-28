@@ -50,9 +50,9 @@ Thư viện chạy ổn rồi. Giờ thủ thư trưởng cần **sổ thống k
 
 ```mermaid
 flowchart TB
-    R["Request cần dữ liệu"] --> T["Hỏi cache,<br/>chờ tối đa 50 ms"]
+    R["Request<br/>cần dữ liệu"] --> T["Hỏi cache,<br/>chờ tối đa 50 ms"]
     T -->|"trả lời kịp"| H["Dùng kết quả<br/>(trúng hoặc trượt)"]
-    T -->|"lỗi hoặc quá 50 ms"| C["Đếm lỗi liên tiếp"]
+    T -->|"lỗi hoặc<br/>quá 50 ms"| C["Đếm lỗi<br/>liên tiếp"]
     C --> B["Đủ 3 lần: ngắt cầu dao,<br/>bỏ qua cache 5 giây"]
     C --> D["Đọc thẳng database"]
     B --> D

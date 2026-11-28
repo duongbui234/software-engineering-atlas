@@ -54,13 +54,13 @@ sources:
 
 ```mermaid
 flowchart TB
-    subgraph C["One cluster (same city, LAN)"]
-        N1["Post office 1"] --- N2["Post office 2"]
-        N2 --- N3["Post office 3"]
+    subgraph C["One cluster on a LAN"]
+        N1["Post<br/>office 1"] --- N2["Post<br/>office 2"]
+        N2 --- N3["Post<br/>office 3"]
         N1 --- N3
     end
     App["Services"] --> C
-    C -.->|"federation / shovel<br/>over WAN"| R["Cluster in another city"]
+    C -.->|"federation /<br/>shovel over WAN"| R["Cluster in<br/>another city"]
 ```
 
 ## The problem: one node is a single point of failure

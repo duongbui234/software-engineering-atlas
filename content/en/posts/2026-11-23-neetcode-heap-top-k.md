@@ -51,11 +51,14 @@ A chess club has dozens of players, all at different levels. The organizers have
 ```mermaid
 flowchart TB
   A["what do you need<br/>from the data?"] --> B["repeatedly take the<br/>highest-priority element?"]
-  B -->|"yes"| C["heap holding all n<br/>Last Stone Weight"]
-  B -->|"no"| D["the k largest<br/>or the k-th element?"]
-  D -->|"data arrives over time"| E["k-slot min-heap<br/>Kth Largest in a Stream"]
-  D -->|"array given, asked once"| F["k-slot heap<br/>or quickselect"]
-  D -->|"the k smallest"| G["k-slot max-heap<br/>K Closest Points"]
+  B -->|"yes"| C["heap holding<br/>all n<br/>Last Stone Weight"]
+  B -->|"no"| D["need the k smallest?"]
+  D -->|"yes"| G["k-slot max-heap<br/>K Closest Points"]
+  D -->|"no"| D2["the k largest or k-th:<br/>data arrives<br/>over time?"]
+  D2 -->|"yes"| E["k-slot min-heap<br/>Kth Largest<br/>in a Stream"]
+  D2 -->|"no"| F["array given,<br/>asked once:<br/>k-slot heap<br/>or quickselect"]
+  C ~~~ D
+  G ~~~ D2
 ```
 
 ## The problem: sorting does too much

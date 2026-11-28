@@ -44,12 +44,12 @@ A row of fields has banks of different heights. When rain falls, the water in ea
 
 ```mermaid
 flowchart TB
-  A["i = 0, j = n − 1<br/>leftMax = rightMax = 0"] --> B["i < j?"]
-  B -->|"no"| R["return total"]
-  B -->|"yes"| C["update leftMax, rightMax"]
-  C --> D["leftMax < rightMax?"]
-  D -->|"yes"| E["total += leftMax − h[i]<br/>i++"] --> B
-  D -->|"no"| F["total += rightMax − h[j]<br/>j−−"] --> B
+  A["i = 0, j = n − 1<br/>leftMax = 0<br/>rightMax = 0"] --> B["i < j?"]
+  B -->|"no"| R["return<br/>total"]
+  B -->|"yes"| C["update<br/>leftMax,<br/>rightMax"]
+  C --> D["leftMax <<br/>rightMax?"]
+  D -->|"yes"| E["total +=<br/>leftMax<br/>− h[i]<br/>i++"] --> B
+  D -->|"no"| F["total +=<br/>rightMax<br/>− h[j]<br/>j−−"] --> B
 ```
 
 ## The problem

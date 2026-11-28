@@ -181,15 +181,16 @@ Hình ảnh "producer gửi thẳng vào queue" ra đời từ đây. Nó tiện
 ### Đường đi trọn vẹn của một tin
 
 ```mermaid
+%%{init: {"sequence": {"width": 60, "actorMargin": 6, "diagramMarginX": 4}}}%%
 sequenceDiagram
     participant P as Producer
     participant X as Exchange
     participant Q as Queue
     participant C as Consumer
-    P->>X: basic.publish<br/>(routing key,<br/>properties, body)
-    X->>Q: so binding,<br/>chép vào queue khớp
-    Note over Q: tin nằm chờ (ready)
-    Q->>C: basic.deliver<br/>(đẩy tới consumer)
+    P->>X: basic.<br/>publish<br/>(routing<br/>key,<br/>properties,<br/>body)
+    X->>Q: so binding,<br/>chép vào<br/>queue<br/>khớp
+    Note over Q: tin nằm<br/>chờ (ready)
+    Q->>C: basic.<br/>deliver<br/>(đẩy tới<br/>consumer)
     Note over C: xử lý xong
     C->>Q: basic.ack,<br/>tin bị xóa
 ```

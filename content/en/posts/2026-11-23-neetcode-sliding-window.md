@@ -43,10 +43,10 @@ Goods run past on a conveyor belt. You hold a photo frame over the belt and may 
 
 ```mermaid
 flowchart TB
-  A["right moves: add s[right]<br/>to what the window remembers"] --> B["does the window still<br/>satisfy the invariant?"]
-  B -->|"no"| C["left moves: remove s[left]<br/>from what the window remembers"]
+  A["right moves:<br/>add s[right] to<br/>what the window<br/>remembers"] --> B["does the window<br/>still satisfy<br/>the invariant?"]
+  B -->|"no"| C["left moves:<br/>remove s[left]<br/>from what the<br/>window remembers"]
   C --> B
-  B -->|"yes"| D["update the answer<br/>from the current window"]
+  B -->|"yes"| D["update the answer<br/>from the current<br/>window"]
   D --> E["more elements?"]
   E -->|"yes"| A
   E -->|"no"| F["return the answer"]

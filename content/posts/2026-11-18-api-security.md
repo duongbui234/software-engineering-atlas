@@ -57,9 +57,9 @@ Hai bước quan trọng nhất luôn đi theo thứ tự này:
 ```mermaid
 flowchart TB
     R([Request tới]) --> A["Có thẻ hợp lệ không?<br/>(authentication)"]
-    A -- không --> E1["401: tôi không biết<br/>bạn là ai"]
-    A -- có --> B["Thẻ này được làm<br/>việc này không?<br/>(authorization)"]
-    B -- không --> E2["403: tôi biết bạn, nhưng<br/>bạn không được phép"]
+    A -- không --> E1["401: tôi không<br/>biết bạn là ai"]
+    A -- có --> B["Thẻ này được<br/>làm việc này<br/>không?<br/>(authorization)"]
+    B -- không --> E2["403: tôi biết bạn,<br/>nhưng bạn không<br/>được phép"]
     B -- có --> C["Xử lý request"]
 ```
 
@@ -183,18 +183,18 @@ Nếu một ngày cần cấp API key cho seller tự động hóa đơn hàng, 
 Luồng nên dùng hiện nay là **Authorization Code + PKCE**:
 
 ```mermaid
+%%{init: {"sequence": {"width": 90, "actorMargin": 8, "diagramMarginX": 4}}}%%
 sequenceDiagram
-    participant U as Người dùng
     participant App as Ứng dụng<br/>(client)
     participant AS as Authorization<br/>Server
     participant API as Resource<br/>Server
-    App->>App: tạo code_verifier ngẫu nhiên,<br/>code_challenge =<br/>SHA256(verifier)
-    App->>AS: chuyển hướng /authorize<br/>?response_type=code<br/>&scope=...&code_challenge=...
-    U->>AS: đăng nhập và<br/>đồng ý cấp quyền
-    AS->>App: chuyển hướng về<br/>redirect_uri?code=abc
-    App->>AS: POST /token<br/>(code + code_verifier)
+    Note over App: tạo code_verifier<br/>ngẫu nhiên,<br/>code_challenge =<br/>SHA256(verifier)
+    App->>AS: chuyển hướng<br/>/authorize<br/>?response_type<br/>=code<br/>&scope=...<br/>&code_challenge=...
+    Note over AS: người dùng đăng nhập<br/>và đồng ý cấp quyền
+    AS->>App: chuyển hướng về<br/>redirect_uri<br/>?code=abc
+    App->>AS: POST /token<br/>(code +<br/>code_verifier)
     AS->>App: access_token<br/>(+ refresh_token)
-    App->>API: Authorization:<br/>Bearer access_token
+    App->>API: Authorization:<br/>Bearer<br/>access_token
 ```
 
 Bốn vai: *resource owner* (người dùng), *client* (ứng dụng), *authorization server* (nơi đăng nhập và cấp token), *resource server* (API giữ dữ liệu). **Scope** giới hạn token làm được gì. **PKCE** chống việc kẻ gian chặn được `code` trên đường chuyển hướng rồi đổi lấy token: họ không có `code_verifier`.
@@ -234,15 +234,16 @@ Với request "không đơn giản" (method khác GET/POST/HEAD, hoặc có head
 Vẽ ra cho dễ thấy *ai* đang chặn:
 
 ```mermaid
+%%{init: {"sequence": {"width": 90, "actorMargin": 12, "diagramMarginX": 8}}}%%
 sequenceDiagram
-    participant JS as JavaScript trên<br/>evil.example
+    participant JS as JavaScript<br/>trên<br/>evil.example
     participant BR as Trình duyệt
-    participant API as api.example.com
-    JS->>BR: fetch("https://<br/>api.example.com/orders")
-    BR->>API: OPTIONS (preflight):<br/>"evil.example<br/>được đọc không?"
-    API-->>BR: không có Access-Control-<br/>Allow-Origin<br/>cho evil.example
-    BR-->>JS: chặn, báo lỗi CORS
-    Note over BR,API: server vẫn nhận được request.<br/>Người chặn là trình duyệt.
+    participant API as api.example<br/>.com
+    JS->>BR: fetch("https://<br/>api.example.com<br/>/orders")
+    BR->>API: OPTIONS<br/>(preflight):<br/>"evil.example<br/>được đọc<br/>không?"
+    API-->>BR: không có<br/>Access-<br/>Control-Allow-<br/>Origin cho<br/>evil.example
+    BR-->>JS: chặn, báo<br/>lỗi CORS
+    Note over BR,API: server vẫn nhận<br/>được request.<br/>Người chặn là<br/>trình duyệt.
 ```
 
 Ba hệ quả:

@@ -49,12 +49,12 @@ Bàn của bạn chỉ để được vài tập hồ sơ, xếp thành một ch
 
 ```mermaid
 flowchart TB
-  A["get(key) hoặc put(key, value)"] --> B["key có trong map?"]
+  A["get(key) hoặc<br/>put(key, value)"] --> B["key có trong map?"]
   B -->|"có"| C["lấy nút từ map<br/>(put: sửa giá trị)"]
-  C --> E["gỡ nút, gắn lại sau head"]
-  B -->|"không"| F["get: trả −1<br/>put: cache đã đầy?"]
-  F -->|"put, đầy"| H["gỡ tail.prev,<br/>xóa key của nó khỏi map"]
-  F -->|"put, chưa đầy"| I["tạo nút mới"]
+  C --> E["gỡ nút, gắn lại<br/>sau head"]
+  B -->|"không"| F["get: trả −1<br/>put: cache<br/>đã đầy?"]
+  F -->|"put, đầy"| H["gỡ tail.prev,<br/>xóa key của nó<br/>khỏi map"]
+  F -->|"put,<br/>chưa đầy"| I["tạo nút mới"]
   H --> I
   I --> J["thêm vào map,<br/>gắn sau head"]
 ```

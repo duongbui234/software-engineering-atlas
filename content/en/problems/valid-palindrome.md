@@ -47,13 +47,16 @@ Two people hold a strip of letters, one at each end, and read toward the middle 
 flowchart TB
   A["i = 0, j = n − 1"] --> B["i < j?"]
   B -->|"no"| T["palindrome"]
-  B -->|"yes"| C["s[i] not alphanumeric?"]
+  B -->|"yes"| C["s[i] not<br/>alphanumeric?"]
   C -->|"true"| C1["i++"] --> B
-  C -->|"false"| D["s[j] not alphanumeric?"]
+  C -->|"false"| D["s[j] not<br/>alphanumeric?"]
   D -->|"true"| D1["j−−"] --> B
   D -->|"false"| E["lowercase s[i] differs<br/>from s[j]?"]
-  E -->|"differs"| F["not a palindrome"]
+  E -->|"differs"| F["not a<br/>palindrome"]
   E -->|"same"| G["i++, j−−"] --> B
+  T ~~~ C
+  C1 ~~~ D
+  D1 ~~~ E
 ```
 
 ## The problem

@@ -96,12 +96,12 @@ Three boolean arrays play the role of the [[en/concepts/conflict-sets|conflict s
 flowchart TB
   P["place(r)"]
   Q["is r equal to n?"]
-  W["yes: build n strings, record the board"]
-  L["no: try column c from 0 to n − 1"]
-  X["column c, r − c or r + c taken?"]
+  W["yes: build<br/>n strings,<br/>record the board"]
+  L["no: try column c<br/>from 0 to n − 1"]
+  X["column c, r − c<br/>or r + c taken?"]
   S["yes: skip c"]
-  M["no: set three marks, call place(r + 1)"]
-  U["on return: clear all three marks"]
+  M["no: set three<br/>marks, call<br/>place(r + 1)"]
+  U["on return:<br/>clear all<br/>three marks"]
   P --> Q
   Q --> W
   Q --> L --> X

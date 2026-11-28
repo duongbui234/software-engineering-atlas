@@ -94,10 +94,10 @@ Flip the direction: `dp[i][j]` means "does the prefix `s[0:i]` fully match `p[0:
 ```mermaid
 flowchart TB
   Q["is p[j-1] a *?"]
-  N["no: x = p[j-1]<br/>x matches s[i-1]<br/>and diagonal dp[i-1][j-1]"]
-  Z["yes: drop the pair x*<br/>is dp[i][j-2] true?"]
+  N["no: x = p[j-1]<br/>x matches s[i-1]<br/>and diagonal<br/>dp[i-1][j-1]"]
+  Z["yes: drop<br/>the pair x*<br/>is dp[i][j-2] true?"]
   T["true"]
-  M["x matches s[i-1]<br/>and dp[i-1][j] true?"]
+  M["x matches s[i-1]<br/>and dp[i-1][j]<br/>true?"]
   F["otherwise: false"]
   Q -->|no| N
   Q -->|yes| Z

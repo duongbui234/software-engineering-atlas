@@ -55,11 +55,11 @@ Bưu điện nào cũng có những lá thư không phát được. Bưu điện
 flowchart TB
     W["Bưu tá phát thư"] --> R["Phát được?"]
     R -->|"được"| OK["Ký nhận (ack)"]
-    R -->|"lỗi tạm thời"| L["Đã thử mấy lần?"]
-    L -->|"dưới 3"| K["Kệ chờ 5 phút<br/>(queue có TTL)"]
-    K -->|"hết 5 phút"| W
-    L -->|"đủ 3"| P["Bãi đỗ: người xem lại<br/>(parking queue)"]
-    R -->|"lỗi vĩnh viễn"| P
+    R -->|"không"| E["Lỗi tạm thời<br/>hay vĩnh viễn?"]
+    E -->|"vĩnh viễn"| P["Bãi đỗ: người<br/>xem lại<br/>(parking queue)"]
+    E -->|"tạm thời"| L["Đã thử mấy lần?"]
+    L -->|"đủ 3"| P
+    L -->|"dưới 3"| K["Kệ chờ 5 phút<br/>(queue có TTL),<br/>hết giờ thì<br/>bưu tá phát lại"]
 ```
 
 ## Vấn đề: requeue không phải là retry

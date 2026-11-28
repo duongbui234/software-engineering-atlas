@@ -43,17 +43,18 @@ The ticket counter from station 1 now has two clerks. The ledger says "row A: 1 
 | Two customers holding two tickets for the same seat | [[en/concepts/oversell\|Oversell]] |
 
 ```mermaid
+%%{init: {"sequence": {"width": 80, "actorMargin": 12}}}%%
 sequenceDiagram
     participant A as Clerk A
     participant S as Ledger
     participant B as Clerk B
-    A->>S: how many left?
+    A->>S: how<br/>many left?
     S-->>A: 1
-    B->>S: how many left?
+    B->>S: how<br/>many left?
     S-->>B: 1
-    Note over A,B: both go sell a ticket
-    A->>S: write "0 left"
-    B->>S: write "0 left"
+    Note over A,B: both go<br/>sell a ticket
+    A->>S: write<br/>"0 left"
+    B->>S: write<br/>"0 left"
     Note over S: 2 tickets sold,<br/>ledger drops by 1
 ```
 

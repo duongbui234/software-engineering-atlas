@@ -95,12 +95,12 @@ Ba mảng boolean đóng vai [[concepts/conflict-sets|tập xung đột]]. `r �
 flowchart TB
   P["place(r)"]
   Q["r bằng n?"]
-  W["có: dựng n chuỗi, ghi bàn"]
-  L["không: thử cột c từ 0 tới n − 1"]
-  X["cột c, r − c hoặc r + c đã bị chiếm?"]
+  W["có: dựng n chuỗi,<br/>ghi bàn"]
+  L["không: thử cột c<br/>từ 0 tới n − 1"]
+  X["cột c, r − c<br/>hoặc r + c<br/>đã bị chiếm?"]
   S["có: bỏ qua c"]
-  M["không: bật ba dấu, gọi place(r + 1)"]
-  U["quay về: tắt cả ba dấu"]
+  M["không: bật ba dấu,<br/>gọi place(r + 1)"]
+  U["quay về:<br/>tắt cả ba dấu"]
   P --> Q
   Q --> W
   Q --> L --> X

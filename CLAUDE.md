@@ -28,7 +28,7 @@ npm run check                   # tsc + prettier (upstream code)
 
 # Render check (also runs in CI after build): every page at 390px and 1440px.
 # Fails on horizontal page scroll, broken Mermaid, "Unsupported markdown" labels, Mermaid diagrams shrunk below 75%,
-# or an archify iframe shorter than the diagram inside it.
+# a Mermaid diagram wider than its box (it would scroll sideways inside it), or an archify iframe shorter than the diagram inside it.
 npm i --no-save playwright-core@1.49.1 && node scripts/check-render.mjs
 # Only the pages a branch affects (what CI does on a PR):
 node scripts/changed-pages.mjs $(git merge-base main HEAD) HEAD > /tmp/pages.txt && node scripts/check-render.mjs public --pages /tmp/pages.txt
@@ -103,9 +103,9 @@ A local Quartz plugin written as plain ESM in `dist/`. There is no build step: `
   - **Từ điển nhanh** (`> [!abstract]- Từ điển nhanh cho bài này (bấm để mở)`, collapsed): one plain-Vietnamese line per tool or term the post uses without explaining (Redis, pod, hash, decorator…). Link to an earlier station instead of redefining its terms.
   - **Hình dung trước** (an `##` section): one everyday analogy carried through the whole post (gọi món ở nhà hàng, ra vào tòa nhà, đặt bánh qua điện thoại…). Map each concept of the post to a row in a table `Đời thường | Khái niệm`, then add a Mermaid diagram of the analogy or the flow. Refer back to the analogy when a later section gets dense.
 - In the body, name each component by its **role in plain words first**, then the framework class in parentheses or code (`bảo vệ (JwtAuthGuard)`). Explain a framework term on first use (decorator, interceptor, controller). Turn dense step-by-step passages into a step table or a Mermaid `sequenceDiagram`.
-- Mermaid diagrams render client-side into a ~40rem column. Author them **tall, not wide**. The render check (see Commands) fails a diagram that would shrink below 75%:
+- Mermaid diagrams render client-side into a ~40rem column. Author them **tall, not wide**. A diagram may shrink to 75% and no further, so at 390px (where the box bleeds into the sheet margin, about 353px inside) its natural width must stay at or below about **470px**; the render check (see Commands) fails a wider one, because it would scroll sideways inside its box:
   - **Flowcharts:** use `flowchart TB` over a wide `LR` chain, rectangles over `{}` diamonds, and keep each chart acyclic where possible. A decision with several outcomes is a ladder (question → "có" answer, "không" → next question), not one node fanning out to four branches.
-  - **Subgraphs:** unlinked subgraphs sit side by side. Stack them with invisible links (`A ~~~ B ~~~ C`) and put `direction LR` inside each one.
+  - **Subgraphs:** unlinked subgraphs sit side by side. Stack them with invisible links (`A ~~~ B ~~~ C`) and put `direction LR` inside each one. Keep a subgraph title to one short line (no `<br/>`): Mermaid wraps a title wider than its box, and a wrapped title overlaps the nodes and edge labels below it.
   - **Labels:** a label that starts with `#`, `1.` or `- ` renders as "Unsupported markdown" (heading or list). Reword it (`"mọi thứ (#)"`, `"bước 1: …"`). Break long node labels with `<br/>`.
   - **Sequence diagrams:** keep each message to about 30 characters per line and wrap with `<br/>`, in both messages and participant aliases. Put detail in a `Note`.
   - Screenshot every post that gains a Mermaid block.

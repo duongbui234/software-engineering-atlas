@@ -49,11 +49,11 @@ I have vouchers worth 1, 1 and 2 thousand and want a discount of exactly 3 thous
 ```mermaid
 flowchart TB
   R["Need 3 off<br/>vouchers: 1, 1, 2"]
-  A["first 1, 2 left"]
-  S["second 1<br/>same level: skip"]
-  B["the 2, 1 left<br/>no vouchers left: stuck"]
-  A1["add second 1, 1 left<br/>the 2 is larger: stuck"]
-  A2["add the 2, 0 left<br/>way 1 + 2"]
+  A["first 1,<br/>2 left"]
+  S["second 1<br/>same level:<br/>skip"]
+  B["the 2,<br/>1 left<br/>no vouchers<br/>left: stuck"]
+  A1["add second 1,<br/>1 left<br/>the 2 is larger:<br/>stuck"]
+  A2["add the 2,<br/>0 left<br/>way 1 + 2"]
   R --> A
   R -.-> S
   R --> B
@@ -90,10 +90,10 @@ The condition has to be `i > start`. When `i == start`, the element `i - 1` (if 
 ```mermaid
 flowchart TB
   Q1["i > start and nums[i]<br/>equals nums[i - 1]?"]
-  Y1["yes: skip i<br/>this level tried this value"]
-  Q2["no: is nums[i] larger<br/>than what remains?"]
+  Y1["yes: skip i<br/>this level tried<br/>this value"]
+  Q2["no: is nums[i]<br/>larger than<br/>what remains?"]
   Y2["yes: stop the loop"]
-  N2["no: add it to path,<br/>call dfs(i + 1, ...)"]
+  N2["no: add it<br/>to path, call<br/>dfs(i + 1, ...)"]
   Q1 --> Y1
   Q1 --> Q2
   Q2 --> Y2

@@ -46,9 +46,9 @@ Bạn mở một món quà: hộp to, trong có hộp vừa, trong nữa có h�
 ```mermaid
 flowchart TB
   A["đọc ký tự c"] --> B["c là ngoặc mở?"]
-  B -->|"có"| C["đẩy c vào ngăn xếp"]
+  B -->|"có"| C["đẩy c vào<br/>ngăn xếp"]
   C --> A
-  B -->|"không"| D["ngăn xếp rỗng, hoặc đỉnh<br/>không cùng loại với c?"]
+  B -->|"không"| D["ngăn xếp rỗng,<br/>hoặc đỉnh không<br/>cùng loại với c?"]
   D -->|"đúng"| E["không hợp lệ"]
   D -->|"không"| F["lấy đỉnh ra"]
   F --> A

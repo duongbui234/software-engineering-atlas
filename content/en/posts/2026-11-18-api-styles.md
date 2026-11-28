@@ -55,18 +55,15 @@ Without WebSocket, the only way to know "is my order ready?" is to run to the co
 
 ```mermaid
 flowchart TB
-    subgraph REST["REST: ask once, get one answer"]
-        direction LR
-        c1([Browser]) -- "GET /products/42" --> s1[(Server)]
+    subgraph REST["REST: one ask, one answer"]
+        c1([Browser]) -- "GET<br/>/products/42" --> s1[(Server)]
         s1 -- "200 + data" --> c1
     end
-    subgraph WS["WebSocket: stay on the line, server talks any time"]
-        direction LR
-        c2([Browser]) <== "connection stays open" ==> s2[(Server)]
+    subgraph WS["WebSocket: hold the line"]
+        c2([Browser]) <== "connection<br/>stays open" ==> s2[(Server)]
     end
-    subgraph WH["Webhook: the outside calls in"]
-        direction LR
-        m([MoMo]) -- "POST /webhooks/momo/ipn" --> s3[(My server)]
+    subgraph WH["Webhook: they call you"]
+        m([MoMo]) -- "POST /webhooks/<br/>momo/ipn" --> s3[(My<br/>server)]
     end
     REST ~~~ WS ~~~ WH
 ```
@@ -194,14 +191,15 @@ When a buyer pays on the MoMo page, my server doesn't know when it's done. A [[e
 The easiest sequence to picture:
 
 ```mermaid
+%%{init: {"sequence": {"diagramMarginX": 8, "width": 96, "actorMargin": 16}}}%%
 sequenceDiagram
     participant B as Browser
-    participant S as Flash-sale server
+    participant S as Flash-sale<br/>server
     participant M as MoMo
-    B->>S: Pay for order ord_1
-    S-->>B: Redirect to the MoMo page
+    B->>S: Pay for<br/>order ord_1
+    S-->>B: Redirect to<br/>the MoMo page
     B->>M: Buyer confirms<br/>the payment
-    M->>S: Webhook (IPN):<br/>"ord_1 paid 1,990,000 VND"<br/>+ signature
+    M->>S: Webhook (IPN):<br/>"ord_1 paid<br/>1,990,000 VND"<br/>+ signature
     Note over S: check signature,<br/>check amount,<br/>mark order paid
     S-->>M: 204 "received"
     M-->>B: Redirect to the<br/>"payment done" page<br/>(display only)

@@ -49,15 +49,16 @@ The card has 10 thousand left. The shop has three shelves, priced 3, 4 and 7 tho
 | This shelf's item already costs more than the balance, so later shelves do too | Sort, then `break` |
 
 ```mermaid
-flowchart TB
-  R["Card has 10"]
-  A["take 3, 7 left"]
-  B["take 4, 6 left"]
-  C["take 7, 3 left<br/>remaining shelves cost more: stuck"]
+%%{init: {"flowchart": {"nodeSpacing": 10, "rankSpacing": 14}}}%%
+flowchart LR
+  R["Card<br/>has 10"]
+  A["take 3,<br/>7 left"]
+  B["take 4,<br/>6 left"]
+  C["take 7,<br/>3 left<br/>remaining<br/>shelves cost<br/>more: stuck"]
   A1["3, 3: 4 left"]
   A2["3, 4: 3 left<br/>stuck"]
-  A3["3, 7: 0 left<br/>first basket"]
-  A11["3, 3, 4: 0 left<br/>second basket"]
+  A3["3, 7: 0 left<br/>first<br/>basket"]
+  A11["3, 3, 4:<br/>0 left<br/>second<br/>basket"]
   B1["4, 4: 2 left<br/>stuck"]
   R --> A
   R --> B

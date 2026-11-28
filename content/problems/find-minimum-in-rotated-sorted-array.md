@@ -45,9 +45,9 @@ Một con phố có các nhà đánh số tăng dần. Năm nay phường đánh
 ```mermaid
 flowchart TB
   A["lo = 0, hi = n − 1"] --> B["lo < hi?"]
-  B -->|"không: còn một ô"| F["trả nums[lo]"]
-  B -->|"có"| C["mid = lo + (hi − lo) / 2"]
-  C --> D["nums[mid] > nums[hi]?"]
+  B -->|"không:<br/>còn một ô"| F["trả nums[lo]"]
+  B -->|"có"| C["mid = lo +<br/>(hi − lo) / 2"]
+  C --> D["nums[mid] ><br/>nums[hi]?"]
   D -->|"có: chỗ gãy<br/>ở bên phải mid"| E1["lo = mid + 1"]
   D -->|"không: [mid, hi]<br/>tăng dần"| E2["hi = mid"]
   E1 --> B

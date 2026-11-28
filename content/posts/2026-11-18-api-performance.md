@@ -50,13 +50,13 @@ Ví dụ tờ giấy còn cho thấy một rủi ro: tờ giấy vừa bị gỡ
 
 ```mermaid
 flowchart TB
-    Q([Request tìm kiếm]) --> C{"Có sẵn trong cache?"}
-    C -- có --> HIT["Trả ngay (~1ms)"]
-    C -- không --> L{"Giành được khóa?"}
-    L -- "được (chỉ 1 request)" --> ES["Hỏi Elasticsearch (~50ms)"]
-    ES --> W["Ghi kết quả vào cache 60 giây"]
+    Q([Request tìm kiếm]) --> C{"Có sẵn<br/>trong cache?"}
+    C -- có --> HIT["Trả ngay<br/>(~1ms)"]
+    C -- không --> L{"Giành được<br/>khóa?"}
+    L -- "được<br/>(chỉ 1 request)" --> ES["Hỏi Elasticsearch<br/>(~50ms)"]
+    ES --> W["Ghi kết quả vào<br/>cache 60 giây"]
     W --> RET["Trả kết quả"]
-    L -- "không (99 request còn lại)" --> P["Chờ 250ms rồi xem lại cache"]
+    L -- "không<br/>(99 request còn lại)" --> P["Chờ 250ms rồi<br/>xem lại cache"]
     P --> C
 ```
 
@@ -128,7 +128,7 @@ flowchart LR
         direction TB
         o1["Trang 1: p7 p6 p5"] --> o0["p8 mới chen vào đầu"] --> o2["Trang 2 = bỏ 3 cái đầu (p8 p7 p6)<br/>→ p5 p4 p3<br/>p5 bị lặp"]
     end
-    subgraph CUR["Cursor: 'lấy những cái cũ hơn p5'"]
+    subgraph CUR["Cursor: 'cũ hơn p5'"]
         direction TB
         c1["Trang 1: p7 p6 p5"] --> c0["p8 mới chen vào đầu"] --> c2["Trang 2 = cũ hơn p5<br/>→ p4 p3 p2<br/>không lặp"]
     end
@@ -212,7 +212,7 @@ Bài học vẫn đáng giữ, chỉ là theo hướng khác: **code chết mà 
 Một pod Node.js xử lý được có hạn. Giống siêu thị đông khách thì mở thêm quầy thu ngân, và cần một người đứng đầu hàng chỉ khách vào quầy nào:
 
 ```mermaid
-flowchart LR
+flowchart TB
     U1([Người dùng]) & U2([Người dùng]) & U3([Người dùng]) --> LB["Load balancer<br/>(người điều phối)"]
     LB --> P1["Pod 1"]
     LB --> P2["Pod 2"]

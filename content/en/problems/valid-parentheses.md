@@ -47,9 +47,9 @@ You open a present: a big box, a medium box inside it, a small box inside that. 
 ```mermaid
 flowchart TB
   A["read character c"] --> B["is c an opener?"]
-  B -->|"yes"| C["push c onto the stack"]
+  B -->|"yes"| C["push c onto<br/>the stack"]
   C --> A
-  B -->|"no"| D["stack empty, or top<br/>not the same kind as c?"]
+  B -->|"no"| D["stack empty,<br/>or top not the<br/>same kind as c?"]
   D -->|"yes"| E["invalid"]
   D -->|"no"| F["pop the top"]
   F --> A

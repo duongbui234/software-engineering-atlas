@@ -51,13 +51,13 @@ Bạn có danh sách bài tập cho buổi tối: ngực 3 hiệp, lưng 3 hiệ
 
 ```mermaid
 flowchart TB
-  A["đếm số lần mỗi việc<br/>đẩy các số đếm vào max-heap"] --> B["còn việc trong heap<br/>hoặc hàng chờ?"]
+  A["đếm số lần mỗi việc<br/>đẩy các số đếm<br/>vào max-heap"] --> B["còn việc trong heap<br/>hoặc hàng chờ?"]
   B -->|"không"| Z["trả số nhịp t"]
   B -->|"có"| C["t = t + 1"]
   C --> D["heap có việc?"]
-  D -->|"có"| E["lấy đỉnh c, chạy một lần<br/>c − 1 > 0 thì vào hàng chờ<br/>với nhịp t + n"]
+  D -->|"có"| E["lấy đỉnh c,<br/>chạy một lần<br/>c − 1 > 0 thì<br/>vào hàng chờ<br/>với nhịp t + n"]
   D -->|"không"| F["nhịp này nghỉ"]
-  E --> G["đầu hàng chờ hết nguội<br/>đúng nhịp t?"]
+  E --> G["đầu hàng chờ<br/>hết nguội<br/>đúng nhịp t?"]
   F --> G
   G -->|"có"| H["đưa nó về heap"]
   G -->|"không"| B

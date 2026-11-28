@@ -54,12 +54,14 @@ A train is a chain of coupled cars. The dispatcher knows only where the first ca
 ```mermaid
 flowchart TB
   A["a linked list problem"] --> B["must a segment<br/>change direction?"]
-  B -->|"yes"| C["pointer reversal: prev, cur, next<br/>Reverse Linked List"]
+  B -->|"yes"| C["pointer reversal:<br/>prev, cur, next<br/>Reverse Linked List"]
   B -->|"no"| D["can the head be<br/>removed or replaced?"]
-  D -->|"yes"| E["dummy node before head<br/>Merge Two Lists, Remove Nth"]
-  D -->|"no"| F["need a cycle, the middle,<br/>or a position from the end?"]
-  F -->|"cycle, middle"| G["slow 1 step, fast 2 steps<br/>Linked List Cycle"]
-  F -->|"nth from the end"| H["two pointers n steps apart<br/>Remove Nth Node"]
+  D -->|"yes"| E["dummy node<br/>before head<br/>Merge Two Lists,<br/>Remove Nth"]
+  D -->|"no"| F["need a cycle,<br/>the middle, or<br/>a position<br/>from the end?"]
+  F -->|"cycle,<br/>middle"| G["slow 1 step,<br/>fast 2 steps<br/>Linked List Cycle"]
+  F -->|"nth from<br/>the end"| H["two pointers<br/>n steps apart<br/>Remove Nth Node"]
+  C ~~~ D
+  E ~~~ F
 ```
 
 Reorder List uses three of the four at once: find the middle with slow and fast, reverse the second half, then weave the two halves.

@@ -44,11 +44,11 @@ Tàu chạy lúc 8 giờ, bạn muốn đạp xe nhẹ nhất mà vẫn kịp. K
 
 ```mermaid
 flowchart TB
-  A["khoảng đáp án [lo, hi]<br/>hi chắc chắn đúng"] --> B["lo = hi?"]
+  A["khoảng đáp án<br/>[lo, hi], hi<br/>chắc chắn đúng"] --> B["lo = hi?"]
   B -->|"có"| X["đáp án là lo"]
-  B -->|"không"| C["thử mid<br/>bằng phép thử của bài"]
+  B -->|"không"| C["thử mid<br/>bằng phép thử<br/>của bài"]
   C --> D["mid thỏa?"]
-  D -->|"có"| E["hi = mid<br/>(mid có thể là đáp án)"]
+  D -->|"có"| E["hi = mid<br/>(mid có thể<br/>là đáp án)"]
   D -->|"không"| F["lo = mid + 1"]
   E --> A
   F --> A

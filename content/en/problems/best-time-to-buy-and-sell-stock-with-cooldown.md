@@ -95,16 +95,16 @@ The iterative version splits "not holding" into two situations so the rest day s
 
 ```mermaid
 flowchart TB
-  H0["Yesterday: holding"]
-  S0["Yesterday: just sold"]
-  R0["Yesterday: empty-handed"]
-  H1["Today: holding"]
-  S1["Today: just sold"]
-  R1["Today: empty-handed"]
-  H0 -->|"keep holding"| H1
-  R0 -->|"buy: minus price"| H1
-  H0 -->|"sell: plus price"| S1
-  S0 -->|"stall closed"| R1
+  H0["Yesterday:<br/>holding"]
+  S0["Yesterday:<br/>just sold"]
+  R0["Yesterday:<br/>empty-<br/>handed"]
+  H1["Today:<br/>holding"]
+  S1["Today:<br/>just sold"]
+  R1["Today:<br/>empty-<br/>handed"]
+  H0 -->|"keep<br/>holding"| H1
+  R0 -->|"buy:<br/>minus<br/>price"| H1
+  H0 -->|"sell:<br/>plus<br/>price"| S1
+  S0 -->|"stall<br/>closed"| R1
   R0 -->|"wait"| R1
 ```
 

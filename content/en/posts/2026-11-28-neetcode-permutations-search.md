@@ -57,8 +57,8 @@ I am organising a party. The first job is seating guests along a row of chairs: 
 ```mermaid
 flowchart TB
   A["Does order matter?"]
-  B["No: subsets, combinations<br/>use a start index (MISC-01)"]
-  C["Yes: remember what is in use"]
+  B["No: subsets,<br/>combinations<br/>use a start index<br/>(MISC-01)"]
+  C["Yes: remember<br/>what is in use"]
   D["An element of the array<br/>a used array"]
   E["A cell of the grid<br/>overwrite, then restore"]
   F["A position in the string<br/>the next cut point"]

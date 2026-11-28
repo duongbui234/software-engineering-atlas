@@ -52,12 +52,12 @@ Cả tuyến dùng một hình ảnh: **RabbitMQ là một bưu điện**. Ga n�
 ```mermaid
 flowchart TB
     subgraph Call["Gọi điện (đồng bộ)"]
-        direction LR
+        direction TB
         A1["Dịch vụ<br/>đặt hàng"] -->|"gọi và chờ"| B1["Dịch vụ<br/>email"]
         B1 -->|"trả lời<br/>sau 2 giây"| A1
     end
     subgraph Mail["Gửi thư (bất đồng bộ)"]
-        direction LR
+        direction TB
         A2["Dịch vụ<br/>đặt hàng"] -->|"bỏ thư,<br/>đi tiếp"| P["Bưu điện<br/>(RabbitMQ)"]
         P -->|"phát thư<br/>khi rảnh"| B2["Dịch vụ<br/>email"]
     end

@@ -44,12 +44,12 @@ Một kho có các thùng hàng xếp theo cân nặng từ nhẹ đến nặng.
 
 ```mermaid
 flowchart TB
-  A["i = 0, j = n − 1"] --> B["s = nums[i] + nums[j]"]
+  A["i = 0, j = n − 1"] --> B["s = nums[i]<br/>+ nums[j]"]
   B --> C["s bằng target?"]
-  C -->|"có"| D["trả [i + 1, j + 1]"]
-  C -->|"không"| E["s nhỏ hơn target?"]
-  E -->|"có: bỏ nums[i]"| F["i++"] --> B
-  E -->|"không: bỏ nums[j]"| G["j−−"] --> B
+  C -->|"có"| D["trả<br/>[i + 1, j + 1]"]
+  C -->|"không"| E["s nhỏ hơn<br/>target?"]
+  E -->|"có:<br/>bỏ nums[i]"| F["i++"] --> B
+  E -->|"không:<br/>bỏ nums[j]"| G["j−−"] --> B
 ```
 
 ## Vấn đề

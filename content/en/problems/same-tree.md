@@ -53,14 +53,14 @@ Every pair of nodes goes down one ladder of questions:
 
 ```mermaid
 flowchart TB
-  S["a node pair (p, q)"] --> A["both empty?"]
-  A -- "yes" --> T1["equal on this branch"]
-  A -- "no" --> B["exactly one empty?"]
+  S["a node pair<br/>(p, q)"] --> A["both empty?"]
+  A -- "yes" --> T1["equal on<br/>this branch"]
+  A -- "no" --> B["exactly one<br/>empty?"]
   B -- "yes" --> F1["different"]
-  B -- "no" --> C["p.val differs from q.val?"]
+  B -- "no" --> C["p.val differs<br/>from q.val?"]
   C -- "yes" --> F2["different"]
-  C -- "no" --> D["compare the left pair,<br/>then the right pair"]
-  D --> E["equal when both<br/>child pairs are equal"]
+  C -- "no" --> D["compare the<br/>left pair, then<br/>the right pair"]
+  D --> E["equal when<br/>both child pairs<br/>are equal"]
 ```
 
 ## The problem
@@ -150,7 +150,7 @@ flowchart TB
     B1["1"] -- "right" --> B2["2"]
   end
   subgraph C["preorder without null"]
-    direction LR
+    direction TB
     C1["both: 1, 2"]
   end
   subgraph D["preorder with null"]

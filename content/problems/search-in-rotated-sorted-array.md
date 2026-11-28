@@ -48,16 +48,16 @@ Một cuốn sổ đánh số trang tăng dần, nhưng thợ đóng gáy cắt 
 ```mermaid
 flowchart TB
   A["lo = 0, hi = n − 1"] --> B["lo <= hi?"]
+  B -->|"có"| C["mid;<br/>nums[mid] == target?"]
   B -->|"không"| Z["trả −1"]
-  B -->|"có"| C["mid; nums[mid] == target?"]
-  C -->|"có"| Y["trả mid"]
   C -->|"không"| D["nums[lo] <= nums[mid]?<br/>(nửa trái tăng dần)"]
-  D -->|"có"| E["nums[lo] <= target < nums[mid]?"]
-  E -->|"có"| E1["hi = mid − 1"]
-  E -->|"không"| E2["lo = mid + 1"]
-  D -->|"không: nửa phải<br/>tăng dần"| F["nums[mid] < target <= nums[hi]?"]
-  F -->|"có"| F1["lo = mid + 1"]
-  F -->|"không"| F2["hi = mid − 1"]
+  C -->|"có"| Y["trả mid"]
+  D -->|"có"| E["nums[lo] <=<br/>target <<br/>nums[mid]?"]
+  D -->|"không: nửa phải<br/>tăng dần"| F["nums[mid] <<br/>target <=<br/>nums[hi]?"]
+  E -->|"có"| H["hi = mid − 1"]
+  E -->|"không"| L["lo = mid + 1"]
+  F -->|"có"| L
+  F -->|"không"| H
 ```
 
 ## Vấn đề

@@ -55,11 +55,11 @@ Picture a library where the aisle splits in two at every fork. Each fork has a s
 ```mermaid
 flowchart TB
   A["a BST problem"] --> B["asks where one<br/>or two values sit?"]
-  B -->|"yes"| C["walk one path from the root:<br/>search, insert, common ancestor"]
-  B -->|"no"| D["asks whether the tree<br/>follows the rule?"]
-  D -->|"yes"| E["carry the range (lo, hi)<br/>down from the root"]
-  D -->|"no"| F["asks by rank:<br/>k-th smallest, predecessor?"]
-  F -->|"yes"| G["in-order traversal,<br/>stop at the k-th node"]
+  B -->|"yes"| C["walk one path<br/>from the root:<br/>search, insert,<br/>common ancestor"]
+  B -->|"no"| D["asks whether<br/>the tree follows<br/>the rule?"]
+  D -->|"yes"| E["carry the<br/>range (lo, hi)<br/>down from<br/>the root"]
+  D -->|"no"| F["asks by rank:<br/>k-th smallest,<br/>predecessor?"]
+  F -->|"yes"| G["in-order<br/>traversal, stop<br/>at the k-th node"]
 ```
 
 ## The problem: reading the ordering rule without the word "whole"

@@ -46,13 +46,16 @@ Hai người cầm một dải băng chữ, mỗi người đứng ở một đ�
 flowchart TB
   A["i = 0, j = n − 1"] --> B["i < j?"]
   B -->|"không"| T["palindrome"]
-  B -->|"có"| C["s[i] không phải chữ-số?"]
+  B -->|"có"| C["s[i] không phải<br/>chữ-số?"]
   C -->|"đúng"| C1["i++"] --> B
-  C -->|"sai"| D["s[j] không phải chữ-số?"]
+  C -->|"sai"| D["s[j] không phải<br/>chữ-số?"]
   D -->|"đúng"| D1["j−−"] --> B
-  D -->|"sai"| E["chữ thường s[i] khác s[j]?"]
-  E -->|"khác"| F["không phải palindrome"]
+  D -->|"sai"| E["chữ thường s[i]<br/>khác s[j]?"]
+  E -->|"khác"| F["không phải<br/>palindrome"]
   E -->|"giống"| G["i++, j−−"] --> B
+  T ~~~ C
+  C1 ~~~ D
+  D1 ~~~ E
 ```
 
 ## Vấn đề

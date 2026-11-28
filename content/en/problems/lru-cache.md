@@ -50,12 +50,12 @@ Your desk only has room for a few folders, kept in one stack. The folder you jus
 
 ```mermaid
 flowchart TB
-  A["get(key) or put(key, value)"] --> B["key in the map?"]
-  B -->|"yes"| C["take the node from the map<br/>(put: update the value)"]
+  A["get(key) or<br/>put(key, value)"] --> B["key in the map?"]
+  B -->|"yes"| C["take the node<br/>from the map<br/>(put: update<br/>the value)"]
   C --> E["unlink the node,<br/>relink it after head"]
-  B -->|"no"| F["get: return −1<br/>put: is the cache full?"]
-  F -->|"put, full"| H["unlink tail.prev,<br/>delete its key from the map"]
-  F -->|"put, not full"| I["create a new node"]
+  B -->|"no"| F["get: return −1<br/>put: is the<br/>cache full?"]
+  F -->|"put, full"| H["unlink tail.prev,<br/>delete its key<br/>from the map"]
+  F -->|"put,<br/>not full"| I["create a new node"]
   H --> I
   I --> J["add to the map,<br/>link after head"]
 ```

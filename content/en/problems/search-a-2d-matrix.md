@@ -48,11 +48,11 @@ A filing cabinet has m drawers, each holding n folders, numbered in increasing o
 ```mermaid
 flowchart TB
   A["lo = 0, hi = m·n"] --> B["lo < hi ?"]
-  B -->|"no"| Z["target absent"]
-  B -->|"yes"| C["mid = ⌊(lo + hi)/2⌋<br/>x = matrix[⌊mid/n⌋][mid mod n]"]
-  C --> D["x == target ?"]
+  B -->|"no"| Z["target<br/>absent"]
+  B -->|"yes"| C["mid =<br/>⌊(lo + hi)/2⌋<br/>x = matrix<br/>[⌊mid/n⌋]<br/>[mid mod n]"]
+  C --> D["x ==<br/>target ?"]
   D -->|"yes"| Y["found"]
-  D -->|"no"| E["x < target ?"]
+  D -->|"no"| E["x <<br/>target ?"]
   E -->|"yes"| F["lo = mid + 1"]
   E -->|"no"| G["hi = mid"]
   F --> B

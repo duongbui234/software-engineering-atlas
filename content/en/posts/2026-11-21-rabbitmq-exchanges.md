@@ -57,10 +57,11 @@ The sorting desk from station 2 actually has four kinds of clerk, each following
 | The lost mail room | [[en/concepts/alternate-exchange\|Alternate exchange]] |
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
     subgraph D["Direct: exact match"]
         direction LR
-        DX["exchange"] -->|"payment.paid"| DQ1["payments queue"]
+        DX["exchange"] -->|"payment.paid"| DQ1["payments<br/>queue"]
     end
     subgraph F["Fanout: everyone gets it"]
         direction LR
@@ -70,9 +71,9 @@ flowchart TB
     end
     subgraph T["Topic: pattern match"]
         direction LR
-        TX["exchange"] -->|"*.cancelled"| TQ1["restock queue"]
-        TX -->|"order.#"| TQ2["orders queue"]
-        TX -->|"everything (#)"| TQ3["audit queue"]
+        TX["exchange"] -->|"*.cancelled"| TQ1["restock<br/>queue"]
+        TX -->|"order.#"| TQ2["orders<br/>queue"]
+        TX -->|"everything (#)"| TQ3["audit<br/>queue"]
     end
     D ~~~ F ~~~ T
 ```
@@ -173,13 +174,14 @@ RabbitMQ doesn't publish statistics, so the answer below is based on the default
 ### Which one to choose?
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
-    Q1["Sending to exactly one work<br/>queue, name known up front?"] -->|"yes"| A1["Default exchange<br/>(sendToQueue)"]
+    Q1["Sending to exactly<br/>one work queue,<br/>name known up front?"] -->|"yes"| A1["Default exchange<br/>(sendToQueue)"]
     Q1 -->|"no"| Q2["Does every listener<br/>need every message?"]
     Q2 -->|"yes"| A2["Fanout"]
-    Q2 -->|"no, need filtering"| Q3["Can you filter with one<br/>hierarchical label (a.b.c)?"]
-    Q3 -->|"yes"| A3["Topic<br/>(few fixed keys: direct works too)"]
-    Q3 -->|"no, filter on<br/>many attributes"| A4["Headers"]
+    Q2 -->|"no, need filtering"| Q3["Can you filter<br/>with one hierarchical<br/>label (a.b.c)?"]
+    Q3 -->|"yes"| A3["Topic (few<br/>fixed keys:<br/>direct works too)"]
+    Q3 -->|"no"| A4["Headers: filter<br/>on many<br/>attributes"]
 ```
 
 If I'm torn between direct and topic, I choose **topic**. Today, with exact keys, it behaves just like direct. Tomorrow, when someone wants to hear "everything canceled", you only add a `*.cancelled` binding, without changing the exchange type (changing the type forces you to delete and recreate the exchange, because redeclaring it with a different type fails with `406`).
@@ -204,11 +206,12 @@ The **delayed message** plugin (`x-delayed-message`) used to be very popular but
 Publish a message that matches no binding and you have an [[en/concepts/unroutable-message|unroutable message]]. There are three possibilities:
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
-    M["Message matches no binding"] --> A["Does the exchange have<br/>an alternate exchange?"]
-    A -->|"yes"| AE["Forward to the alternate exchange<br/>(e.g. a 'lost mail' queue)"]
-    A -->|"no"| B["Published with mandatory = true?"]
-    B -->|"yes"| R["Broker returns it to the producer<br/>basic.return 312 NO_ROUTE"]
+    M["Message matches<br/>no binding"] --> A["Does the exchange<br/>have an alternate<br/>exchange?"]
+    A -->|"yes"| AE["Forward to the<br/>alternate exchange<br/>(e.g. a 'lost mail'<br/>queue)"]
+    A -->|"no"| B["Published with<br/>mandatory = true?"]
+    B -->|"yes"| R["Broker returns it<br/>to the producer<br/>basic.return<br/>312 NO_ROUTE"]
     B -->|"no"| X["Silently dropped<br/>(default)"]
 ```
 

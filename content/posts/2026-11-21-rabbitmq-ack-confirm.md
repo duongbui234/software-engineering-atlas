@@ -53,10 +53,10 @@ Bưu điện chuyên nghiệp có hai tờ giấy: **biên nhận** đưa cho ng
 
 ```mermaid
 flowchart TB
-    P["Người gửi"] -->|"bước 1: gửi thư bảo đảm"| B["Bưu điện<br/>(cất vào kho)"]
-    B -->|"bước 2: biên nhận"| P
-    B -->|"bước 3: giao thư"| W["Nhân viên phát<br/>(tối đa N lá trong túi)"]
-    W -->|"bước 4: phiếu ký nhận"| B
+    P["Người gửi"] -->|"bước 1: gửi<br/>thư bảo đảm"| B["Bưu điện<br/>(cất vào kho)"]
+    B -->|"bước 2:<br/>biên nhận"| P
+    B -->|"bước 3:<br/>giao thư"| W["Nhân viên phát<br/>(tối đa N lá<br/>trong túi)"]
+    W -->|"bước 4:<br/>phiếu ký nhận"| B
     B --> D["bước 5: chỉ lúc này<br/>thư mới bị xóa"]
 ```
 

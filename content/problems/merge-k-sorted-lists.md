@@ -55,11 +55,13 @@ Cuối tháng, k nhân viên mỗi người nộp một xấp hóa đơn đã x�
 flowchart TB
   subgraph V0["vòng 0: 8 danh sách"]
     direction LR
-    L1["L1"] ~~~ L2["L2"] ~~~ L3["L3"] ~~~ L4["L4"] ~~~ L5["L5"] ~~~ L6["L6"] ~~~ L7["L7"] ~~~ L8["L8"]
+    L1["L1"] ~~~ L2["L2"] ~~~ L3["L3"] ~~~ L4["L4"]
+    L5["L5"] ~~~ L6["L6"] ~~~ L7["L7"] ~~~ L8["L8"]
   end
   subgraph V1["vòng 1: trộn từng cặp"]
     direction LR
-    A["L1+L2"] ~~~ B["L3+L4"] ~~~ C["L5+L6"] ~~~ D["L7+L8"]
+    A["L1+L2"] ~~~ B["L3+L4"]
+    C["L5+L6"] ~~~ D["L7+L8"]
   end
   subgraph V2["vòng 2"]
     direction LR

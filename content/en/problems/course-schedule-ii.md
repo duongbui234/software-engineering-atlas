@@ -171,14 +171,14 @@ Each course joins the queue at most once and each edge is decremented at most on
 
 ```mermaid
 flowchart TB
-  A["Count every course's in-degree"] --> B["Put every course with<br/>in-degree 0 in the queue"]
-  B --> C["Queue still has a course?"]
-  C -- "yes" --> D["Take one, append it to the order"]
-  D --> E["Decrement the courses it unlocks;<br/>any that reach 0 join the queue"]
+  A["Count every<br/>course's in-degree"] --> B["Put every course<br/>with in-degree 0<br/>in the queue"]
+  B --> C["Queue still<br/>has a course?"]
+  C -- "yes" --> D["Take one,<br/>append it<br/>to the order"]
+  D --> E["Decrement the<br/>courses it<br/>unlocks; any<br/>that reach 0<br/>join the queue"]
   E --> C
-  C -- "no" --> F["Recorded all numCourses courses?"]
-  F -- "yes" --> G["Return the order"]
-  F -- "no" --> H["Cycle: return an empty array"]
+  C -- "no" --> F["Recorded all<br/>numCourses<br/>courses?"]
+  F -- "yes" --> G["Return<br/>the order"]
+  F -- "no" --> H["Cycle:<br/>return an<br/>empty array"]
 ```
 
 ### Approach 3: three-color DFS, reversed finishing order, O(V+E)
@@ -218,11 +218,11 @@ But 0 is **finished** (black), not on the current path (gray). Reaching a finish
 
 ```mermaid
 flowchart TB
-  A["Walking from course x, reach course y"] --> B["Is y white?"]
+  A["Walking from<br/>course x,<br/>reach course y"] --> B["Is y white?"]
   B -- "yes" --> C["Walk into y"]
   B -- "no" --> D["Is y gray?"]
-  D -- "yes" --> E["y is on the current path:<br/>cycle, return an empty array"]
-  D -- "no" --> F["y is black: finished, skip it"]
+  D -- "yes" --> E["y is on the<br/>current path:<br/>cycle, return<br/>an empty array"]
+  D -- "no" --> F["y is black:<br/>finished, skip it"]
 ```
 
 ### The order is not unique: check each edge

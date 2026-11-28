@@ -54,11 +54,11 @@ Hình dung một thư viện mà lối đi chia đôi ở mỗi ngã ba. Mỗi n
 ```mermaid
 flowchart TB
   A["bài trên BST"] --> B["hỏi vị trí của<br/>một hay hai giá trị?"]
-  B -->|"có"| C["đi một đường từ gốc:<br/>tìm, chèn, tổ tiên chung"]
+  B -->|"có"| C["đi một đường<br/>từ gốc: tìm, chèn,<br/>tổ tiên chung"]
   B -->|"không"| D["hỏi cây có<br/>đúng luật không?"]
-  D -->|"có"| E["mang khoảng (lo, hi)<br/>từ gốc xuống"]
-  D -->|"không"| F["hỏi theo thứ hạng:<br/>nhỏ thứ k, liền trước?"]
-  F -->|"có"| G["duyệt trung thứ tự,<br/>dừng ở nút thứ k"]
+  D -->|"có"| E["mang khoảng<br/>(lo, hi)<br/>từ gốc xuống"]
+  D -->|"không"| F["hỏi theo<br/>thứ hạng: nhỏ<br/>thứ k, liền trước?"]
+  F -->|"có"| G["duyệt trung<br/>thứ tự, dừng<br/>ở nút thứ k"]
 ```
 
 ## Vấn đề: luật thứ tự đọc thiếu chữ "cả"

@@ -46,11 +46,11 @@ Một số máy tính bỏ túi đời cũ không có phím ngoặc. Bạn gõ s
 
 ```mermaid
 flowchart TB
-  A["đọc token t"] --> B["t là một trong + − × ÷ ?"]
-  B -->|"không: là số"| C["đẩy số vào ngăn xếp"]
+  A["đọc token t"] --> B["t là một trong<br/>+ − × ÷ ?"]
+  B -->|"không:<br/>là số"| C["đẩy số<br/>vào ngăn xếp"]
   C --> A
-  B -->|"có"| D["b = pop() (vế phải)<br/>a = pop() (vế trái)"]
-  D --> E["đẩy a t b vào ngăn xếp<br/>(chia: làm tròn về 0)"]
+  B -->|"có"| D["b = pop()<br/>(vế phải)<br/>a = pop()<br/>(vế trái)"]
+  D --> E["đẩy a t b<br/>vào ngăn xếp<br/>(chia: làm<br/>tròn về 0)"]
   E --> A
 ```
 

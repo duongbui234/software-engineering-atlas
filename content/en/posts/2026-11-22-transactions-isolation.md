@@ -48,10 +48,10 @@ The ticket counter from station 2 still has two clerks and one ledger. The quest
 
 ```mermaid
 flowchart TB
-    RC["Read Committed<br/>(default):<br/>new snapshot per statement"] -->|"raise"| RR["Repeatable Read:<br/>one snapshot for<br/>the whole transaction"]
-    RC --> L["Lets through: lost update,<br/>oversell (station 2)"]
+    RC["Read Committed<br/>(default):<br/>new snapshot<br/>per statement"] -->|"raise"| RR["Repeatable Read:<br/>one snapshot<br/>for the whole<br/>transaction"]
+    RC --> L["Lets through:<br/>lost update,<br/>oversell (station 2)"]
     RR -->|"raise"| SR["Serializable:<br/>a referee tracks<br/>reads and writes"]
-    RR --> RR2["Stops lost update<br/>(abort: 40001).<br/>Lets through: write skew"]
+    RR --> RR2["Stops lost update<br/>(abort: 40001).<br/>Lets through:<br/>write skew"]
     SR --> SR2["Stops write skew<br/>(abort: 40001).<br/>App must retry"]
 ```
 

@@ -94,16 +94,16 @@ Bản lặp tách "không cầm" thành hai tình huống để ngày nghỉ hi�
 
 ```mermaid
 flowchart TB
-  H0["Hôm qua: cầm"]
-  S0["Hôm qua: vừa bán"]
-  R0["Hôm qua: tay không"]
-  H1["Hôm nay: cầm"]
-  S1["Hôm nay: vừa bán"]
-  R1["Hôm nay: tay không"]
-  H0 -->|"giữ tiếp"| H1
-  R0 -->|"mua: trừ giá"| H1
-  H0 -->|"bán: cộng giá"| S1
-  S0 -->|"đóng sạp"| R1
+  H0["Hôm qua:<br/>cầm"]
+  S0["Hôm qua:<br/>vừa bán"]
+  R0["Hôm qua:<br/>tay không"]
+  H1["Hôm nay:<br/>cầm"]
+  S1["Hôm nay:<br/>vừa bán"]
+  R1["Hôm nay:<br/>tay không"]
+  H0 -->|"giữ<br/>tiếp"| H1
+  R0 -->|"mua:<br/>trừ giá"| H1
+  H0 -->|"bán:<br/>cộng giá"| S1
+  S0 -->|"đóng<br/>sạp"| R1
   R0 -->|"chờ"| R1
 ```
 

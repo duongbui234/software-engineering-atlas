@@ -47,11 +47,11 @@ flowchart TB
   B -->|"không"| X["không có đáp án"]
   B -->|"có"| C["nhìn ô giữa"]
   C --> D["câu hỏi có/không<br/>của bài"]
-  D -->|"đáp án bên trái"| E["bỏ nửa phải"]
-  D -->|"đáp án bên phải"| F["bỏ nửa trái"]
-  D -->|"chính là ô này"| Y["trả kết quả"]
-  E --> A
-  F --> A
+  D -->|"đáp án<br/>bên trái"| E["bỏ<br/>nửa phải"]
+  D -->|"đáp án<br/>bên phải"| F["bỏ<br/>nửa trái"]
+  D -->|"chính là<br/>ô này"| Y["trả<br/>kết quả"]
+  E & F --> R["lặp lại với<br/>khoảng mới"]
+  R --> A
 ```
 
 ## Vấn đề: đọc hết mảng tốn O(n) dù mảng đã có thứ tự

@@ -57,15 +57,16 @@ I walk along a row of shelves in one direction and never go back to a shelf I ha
 The choice tree of `[2, 5, 9]` when listing every subset:
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 28, "padding": 6}}}%%
 flowchart TB
   R["[ ]"]
   A["[2]"]
   B["[5]"]
   C["[9]"]
-  D["[2, 5]"]
-  E["[2, 9]"]
-  F["[5, 9]"]
-  G["[2, 5, 9]"]
+  D["[2,5]"]
+  E["[2,9]"]
+  F["[5,9]"]
+  G["[2,5,9]"]
   R --> A
   R --> B
   R --> C

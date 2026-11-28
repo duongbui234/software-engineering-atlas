@@ -1,0 +1,131 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Marking and unmarking while permuting [1, 2, 3]",
+    "output": "content/diagrams/neetcode-permutations-search/used-marker.en.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "walk",
+      "label": "Mark, go deeper, unmark"
+    }
+  ],
+  "mainPath": [
+    "root",
+    "one",
+    "two",
+    "three",
+    "undo",
+    "again",
+    "rest",
+    "done"
+  ],
+  "nodes": [
+    {
+      "id": "root",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Root: nothing used",
+      "sublabel": "path = [], used = [ , , ]"
+    },
+    {
+      "id": "one",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Mark 1, choose 1",
+      "sublabel": "path = [1]"
+    },
+    {
+      "id": "two",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Mark 2, choose 2",
+      "sublabel": "path = [1, 2]"
+    },
+    {
+      "id": "three",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Mark 3, record [1, 2, 3]",
+      "sublabel": "all three: record a copy"
+    },
+    {
+      "id": "undo",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Unmark 3, 2; mark 3",
+      "sublabel": "path = [1, 3], 2 is free again"
+    },
+    {
+      "id": "again",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Mark 2, record [1, 3, 2]",
+      "sublabel": "another order, another answer"
+    },
+    {
+      "id": "rest",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Undo all, try 2 then 3",
+      "sublabel": "4 more permutations"
+    },
+    {
+      "id": "done",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Done: 6 permutations",
+      "sublabel": "16 calls, 3! = 6 leaves"
+    }
+  ],
+  "edges": [
+    {
+      "from": "root",
+      "to": "one",
+      "label": "go deeper"
+    },
+    {
+      "from": "one",
+      "to": "two",
+      "label": "go deeper"
+    },
+    {
+      "from": "two",
+      "to": "three",
+      "label": "go deeper"
+    },
+    {
+      "from": "three",
+      "to": "undo",
+      "label": "backtrack"
+    },
+    {
+      "from": "undo",
+      "to": "again",
+      "label": "go deeper"
+    },
+    {
+      "from": "again",
+      "to": "rest",
+      "label": "backtrack"
+    },
+    {
+      "from": "rest",
+      "to": "done",
+      "label": "no branches left"
+    }
+  ]
+}

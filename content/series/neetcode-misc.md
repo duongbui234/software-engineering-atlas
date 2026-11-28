@@ -9,6 +9,7 @@ stations:
   - name: "Quay lui: tập con và tổ hợp"
     concepts: ["Backtracking", "Choice Tree", "Start Index", "Duplicate Skipping"]
   - name: "Quay lui: hoán vị và tìm kiếm"
+    concepts: ["Used Marker", "Visit-and-Restore", "Conflict Sets"]
   - name: "Tham lam trên mảng"
   - name: "Tham lam theo nhóm"
   - name: "Khoảng"

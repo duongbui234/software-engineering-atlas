@@ -288,6 +288,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | cắt nhánh | pruning |
 | bộ đệm, tích Descartes | buffer, cartesian product |
 | mảng nền (Go) | backing array |
+| hoán vị, mảng used, đánh dấu / gỡ dấu | permutation, used array, mark / unmark |
+| đánh dấu rồi trả lại, ký tự đánh dấu | visit-and-restore, marker character |
+| đổi chỗ tại chỗ | swap in place |
+| tiền tố đối xứng, vết cắt, cách chia | palindromic prefix, cut, partition |
+| quân hậu, bị chiếu | queen, attacked |
+| chéo chính, chéo phụ | main diagonal, anti-diagonal |
+| tập xung đột | conflict set |
+| đường đi đơn, ô kề cạnh | simple path, edge-adjacent cell |
 | làm tròn về 0, làm tròn xuống | truncate toward 0, floor |
 | ngăn xếp gọi hàm | call stack |
 | số Catalan | Catalan number |
@@ -319,6 +327,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | cắt nhánh | pruning |
 | bộ đệm, tích Descartes | buffer, cartesian product |
 | mảng nền (Go) | backing array |
+| hoán vị, mảng used, đánh dấu / gỡ dấu | permutation, used array, mark / unmark |
+| đánh dấu rồi trả lại, ký tự đánh dấu | visit-and-restore, marker character |
+| đổi chỗ tại chỗ | swap in place |
+| tiền tố đối xứng, vết cắt, cách chia | palindromic prefix, cut, partition |
+| quân hậu, bị chiếu | queen, attacked |
+| chéo chính, chéo phụ | main diagonal, anti-diagonal |
+| tập xung đột | conflict set |
+| đường đi đơn, ô kề cạnh | simple path, edge-adjacent cell |
 | vế trái, vế phải (toán hạng) | left, right operand |
 | máy ngăn xếp | stack machine |
 | ngăn xếp đơn điệu (tăng, giảm) | monotonic stack (increasing, decreasing) |
@@ -598,6 +614,14 @@ Use the term the official documentation uses: PostgreSQL docs, RabbitMQ docs, Re
 | cắt nhánh | pruning |
 | bộ đệm, tích Descartes | buffer, cartesian product |
 | mảng nền (Go) | backing array |
+| hoán vị, mảng used, đánh dấu / gỡ dấu | permutation, used array, mark / unmark |
+| đánh dấu rồi trả lại, ký tự đánh dấu | visit-and-restore, marker character |
+| đổi chỗ tại chỗ | swap in place |
+| tiền tố đối xứng, vết cắt, cách chia | palindromic prefix, cut, partition |
+| quân hậu, bị chiếu | queen, attacked |
+| chéo chính, chéo phụ | main diagonal, anti-diagonal |
+| tập xung đột | conflict set |
+| đường đi đơn, ô kề cạnh | simple path, edge-adjacent cell |
 
 Program strings and printed output stay in Vietnamese (code is never changed); where the prose first mentions such a string, give its meaning in parentheses: `'Hết hàng'` ("sold out").
 

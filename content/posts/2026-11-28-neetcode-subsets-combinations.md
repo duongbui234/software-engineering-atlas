@@ -56,15 +56,16 @@ Mình đi dọc một dãy kệ hàng theo một chiều, không bao giờ quay 
 Cây lựa chọn của `[2, 5, 9]` khi tìm mọi tập con:
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 8, "rankSpacing": 28, "padding": 6}}}%%
 flowchart TB
   R["[ ]"]
   A["[2]"]
   B["[5]"]
   C["[9]"]
-  D["[2, 5]"]
-  E["[2, 9]"]
-  F["[5, 9]"]
-  G["[2, 5, 9]"]
+  D["[2,5]"]
+  E["[2,9]"]
+  F["[5,9]"]
+  G["[2,5,9]"]
   R --> A
   R --> B
   R --> C

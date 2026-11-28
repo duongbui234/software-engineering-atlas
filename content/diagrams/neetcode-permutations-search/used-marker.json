@@ -1,0 +1,131 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Đánh dấu và gỡ dấu khi sinh hoán vị của [1, 2, 3]",
+    "output": "content/diagrams/neetcode-permutations-search/used-marker.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "walk",
+      "label": "Đánh dấu, đi sâu, gỡ dấu"
+    }
+  ],
+  "mainPath": [
+    "root",
+    "one",
+    "two",
+    "three",
+    "undo",
+    "again",
+    "rest",
+    "done"
+  ],
+  "nodes": [
+    {
+      "id": "root",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Gốc: chưa dùng số nào",
+      "sublabel": "path = [], used = [ , , ]"
+    },
+    {
+      "id": "one",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Đánh dấu 1, chọn 1",
+      "sublabel": "path = [1]"
+    },
+    {
+      "id": "two",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Đánh dấu 2, chọn 2",
+      "sublabel": "path = [1, 2]"
+    },
+    {
+      "id": "three",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Đánh dấu 3, ghi [1, 2, 3]",
+      "sublabel": "đủ ba số: ghi bản chép"
+    },
+    {
+      "id": "undo",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Gỡ 3, gỡ 2; đánh dấu 3",
+      "sublabel": "path = [1, 3], số 2 lại trống"
+    },
+    {
+      "id": "again",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Đánh dấu 2, ghi [1, 3, 2]",
+      "sublabel": "thứ tự khác là đáp án khác"
+    },
+    {
+      "id": "rest",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Gỡ hết, thử 2 rồi 3 ở gốc",
+      "sublabel": "thêm 4 hoán vị nữa"
+    },
+    {
+      "id": "done",
+      "lane": "walk",
+      "col": 0,
+      "type": "backend",
+      "label": "Xong: 6 hoán vị",
+      "sublabel": "16 lần gọi, 3! = 6 lá"
+    }
+  ],
+  "edges": [
+    {
+      "from": "root",
+      "to": "one",
+      "label": "đi sâu"
+    },
+    {
+      "from": "one",
+      "to": "two",
+      "label": "đi sâu"
+    },
+    {
+      "from": "two",
+      "to": "three",
+      "label": "đi sâu"
+    },
+    {
+      "from": "three",
+      "to": "undo",
+      "label": "quay lui"
+    },
+    {
+      "from": "undo",
+      "to": "again",
+      "label": "đi sâu"
+    },
+    {
+      "from": "again",
+      "to": "rest",
+      "label": "quay lui"
+    },
+    {
+      "from": "rest",
+      "to": "done",
+      "label": "hết nhánh"
+    }
+  ]
+}

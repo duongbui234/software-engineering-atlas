@@ -10,6 +10,7 @@ stations:
   - name: "Backtracking: Subsets and Combinations"
     concepts: ["Backtracking", "Choice Tree", "Start Index", "Duplicate Skipping"]
   - name: "Backtracking: Permutations and Search"
+    concepts: ["Used Marker", "Visit-and-Restore", "Conflict Sets"]
   - name: "Greedy on Arrays"
   - name: "Greedy Grouping"
   - name: "Intervals"
